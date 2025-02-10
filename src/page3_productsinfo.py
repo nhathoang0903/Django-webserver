@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
-                           QGridLayout, QApplication, QFrame, QHBoxLayout)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
+                           QGridLayout, QApplication, QFrame, QHBoxLayout, QProgressBar,
+                           QGraphicsColorizeEffect)
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie
 import os
 import requests
@@ -13,7 +14,7 @@ class LoadProductsThread(QThread):
 
     def run(self):
         try:
-            response = requests.get('http://127.0.0.1:8000/products')
+            response = requests.get('http://192.168.1.79:8000/products')
             products = response.json()
             self.finished.emit(products)
         except Exception as e:
@@ -34,6 +35,7 @@ class ProductPage(QWidget):
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
 
     def init_ui(self):
         self.setWindowTitle('Product Information - Smart Shopping Cart')
@@ -43,8 +45,8 @@ class ProductPage(QWidget):
 
         # Main layout
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(30, 8, 30, 20)
-        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(30, 8, 30, 8)  # Reduced bottom margin
+        main_layout.setSpacing(25)  # Increased spacing
 
         # Top section with logo and header
         top_layout = QHBoxLayout()
@@ -61,7 +63,7 @@ class ProductPage(QWidget):
 
         # Header
         header_label = QLabel("Product Information")
-        header_label.setFont(QFont("Inria Sans", 24, QFont.Bold))
+        header_label.setFont(QFont("Inria Sans", 30, QFont.Bold))
         header_label.setStyleSheet("color: #3D6F4A;")
         header_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         top_layout.addWidget(header_label)
@@ -74,6 +76,7 @@ class ProductPage(QWidget):
         # Scroll Area for products
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
+        scroll_area.setFixedHeight(330)  
         scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none;
@@ -81,12 +84,14 @@ class ProductPage(QWidget):
             }
             QScrollBar:vertical {
                 border: none;
-                background: #EEF5F0;
-                width: 10px;
+                background: white;
+                border-radius: 5px;
+                width: 20px;
                 margin: 0px;
+                height: 290px;
             }
             QScrollBar::handle:vertical {
-                background: #507849;
+                background: #D9D9D9;
                 border-radius: 5px;
                 min-height: 20px;
             }
@@ -107,9 +112,79 @@ class ProductPage(QWidget):
         scroll_area.setWidget(self.container)
         main_layout.addWidget(scroll_area)
 
+        # Create a horizontal layout for the button content
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(10)  # Space between icon and text
+        button_layout.setAlignment(Qt.AlignCenter)
+        
+        # Create a container widget for the button
+        button_container = QWidget()
+        button_container.setFixedSize(160, 40)
+        button_container.setStyleSheet("""
+            QWidget {
+                background-color: #3D6F4A;
+                border-radius: 20px;
+            }
+        """)
+        
+        # Add scan icon with both normal and hover states
+        scan_icon = QLabel()
+        scan_icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'scanbutton.png')
+        scan_hover_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'scanbutton_hover.png')
+        self.normal_pixmap = QPixmap(scan_icon_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.hover_pixmap = QPixmap(scan_hover_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        scan_icon.setPixmap(self.normal_pixmap)
+        scan_icon.setStyleSheet("padding-left: 20px;")
+        
+        # Add SCAN text
+        scan_text = QLabel("SCAN")
+        scan_text.setFont(QFont("Inter", 10, QFont.Bold))
+        scan_text.setStyleSheet("""
+            QLabel {
+                color: white;
+            }
+        """)
+        
+        # Add widgets to button layout
+        button_layout.addWidget(scan_icon)
+        button_layout.addWidget(scan_text)
+        button_layout.addStretch()  # Push content to the left
+        button_container.setLayout(button_layout)
+        
+        # Create event filters for hover effect
+        class HoverEventFilter(QObject):
+            def __init__(self, parent=None):
+                super().__init__(parent)
+                self.normal_pixmap = self.parent().normal_pixmap
+                self.hover_pixmap = self.parent().hover_pixmap
+
+            def eventFilter(self, obj, event):
+                if event.type() == QEvent.Enter:
+                    scan_text.setStyleSheet("color: #FFFF00;")
+                    scan_icon.setPixmap(self.hover_pixmap)
+                    return True
+                elif event.type() == QEvent.Leave:
+                    scan_text.setStyleSheet("color: white;")
+                    scan_icon.setPixmap(self.normal_pixmap)
+                    return True
+                return False
+
+        # Install event filter
+        button_container.installEventFilter(HoverEventFilter(self))
+        
+        # Add spacer before button
+        main_layout.addSpacing(5)
+        main_layout.addWidget(button_container, alignment=Qt.AlignCenter)
+
     def setup_loading_indicator(self):
         self.loading_widget = QWidget(self)
         loading_layout = QVBoxLayout(self.loading_widget)
+        
+        # Create loading text
+        loading_text = QLabel("Loading products...")
+        loading_text.setFont(QFont("Poppins", 11))
+        loading_text.setStyleSheet("color: #3D6F4A;")
+        loading_text.setAlignment(Qt.AlignCenter)
         
         # Create loading spinner
         self.loading_label = QLabel()
@@ -118,14 +193,8 @@ class ProductPage(QWidget):
         self.loading_label.setMovie(self.movie)
         self.movie.start()
         
-        # Create loading text
-        loading_text = QLabel("Loading products...")
-        loading_text.setFont(QFont("Poppins", 12))
-        loading_text.setStyleSheet("color: #3D6F4A;")
-        loading_text.setAlignment(Qt.AlignCenter)
-        
-        loading_layout.addWidget(self.loading_label, alignment=Qt.AlignCenter)
         loading_layout.addWidget(loading_text, alignment=Qt.AlignCenter)
+        loading_layout.addWidget(self.loading_label, alignment=Qt.AlignCenter)
         
         # Position the loading widget in the center of the page
         self.loading_widget.setGeometry(300, 150, 200, 200)
@@ -156,19 +225,19 @@ class ProductPage(QWidget):
     def create_product_card(self, product):
         # Create product card frame
         card = QFrame()
-        card.setFixedSize(160, 200)
+        card.setFixedSize(160, 170)  
         card.setStyleSheet("""
             QFrame {
                 background-color: white;
                 border-radius: 10px;
-                padding: 10px;
+                padding: 5px;
             }
         """)
-        
+
         # Card layout
         card_layout = QVBoxLayout(card)
-        card_layout.setContentsMargins(10, 10, 10, 10)
-        card_layout.setSpacing(5)
+        card_layout.setContentsMargins(5, 5, 5, 5)  
+        card_layout.setSpacing(2) 
 
         # Product image
         image_label = QLabel()
@@ -176,29 +245,46 @@ class ProductPage(QWidget):
             image_data = urlopen(product['image_url']).read()
             pixmap = QPixmap()
             pixmap.loadFromData(image_data)
-            image_label.setPixmap(pixmap.scaled(120, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            scaled_pixmap = pixmap.scaled(75, 75, Qt.KeepAspectRatio, Qt.SmoothTransformation)  # Resize mà không cắt ảnh
+            image_label.setPixmap(scaled_pixmap)
         except:
             # Use placeholder if image loading fails
-            image_label.setText("Image Not Available")
+            image_label.setText("Image\nN/A")
+            image_label.setStyleSheet("color: #3D6F4A; text-align: center;")
         image_label.setAlignment(Qt.AlignCenter)
         card_layout.addWidget(image_label)
 
-        # Product name
-        name_label = QLabel(product['name'])
-        name_label.setFont(QFont("Poppins", 10))
+        # Reformat product name
+        formatted_name = product['name'].replace('_', ' ')
+        name_container = QWidget()
+        name_container.setFixedHeight(45)  # Fixed height for name section
+        name_layout = QVBoxLayout(name_container)
+        name_layout.setContentsMargins(2, 0, 2, 0)  # Minimal horizontal margins
+        name_layout.setSpacing(0)
+        
+        name_label = QLabel(formatted_name)
+        name_label.setFont(QFont("Josefin Sans", 9))
         name_label.setWordWrap(True)
-        name_label.setAlignment(Qt.AlignCenter)
-        name_label.setStyleSheet("color: #3D6F4A;")
-        card_layout.addWidget(name_label)
+        name_label.setAlignment(Qt.AlignHCenter | Qt.AlignTop)  # Align to top
+        name_label.setStyleSheet("""
+            color: #000000;
+            padding: 0px;
+            margin: 0px;
+        """)
+        
+        name_layout.addWidget(name_label)
+        card_layout.addWidget(name_container)
 
         # Product price
-        price_label = QLabel(f"{float(product['price']):,.0f} vnd")
-        price_label.setFont(QFont("Poppins", 10, QFont.Bold))
+        price_str = "{:.0f}".format(float(product['price']))
+        price_label = QLabel(f"{price_str} vnd")
+        price_label.setFont(QFont("Josefin Sans", 8, QFont.Bold))
         price_label.setAlignment(Qt.AlignCenter)
         price_label.setStyleSheet("color: #E72225;")
         card_layout.addWidget(price_label)
 
         return card
+
 
 if __name__ == '__main__':
     import sys
