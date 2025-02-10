@@ -7,6 +7,7 @@ import os
 import requests
 from urllib.request import urlopen
 import json
+from page4_shopping import ShoppingPage  # Add this import
 
 class LoadProductsThread(QThread):
     finished = pyqtSignal(list)
@@ -119,6 +120,7 @@ class ProductPage(QWidget):
         
         # Create a container widget for the button
         button_container = QWidget()
+        button_container.setCursor(Qt.PointingHandCursor)  # Add cursor
         button_container.setFixedSize(160, 40)
         button_container.setStyleSheet("""
             QWidget {
@@ -157,6 +159,7 @@ class ProductPage(QWidget):
                 super().__init__(parent)
                 self.normal_pixmap = self.parent().normal_pixmap
                 self.hover_pixmap = self.parent().hover_pixmap
+                self.shopping_page = None
 
             def eventFilter(self, obj, event):
                 if event.type() == QEvent.Enter:
@@ -166,6 +169,12 @@ class ProductPage(QWidget):
                 elif event.type() == QEvent.Leave:
                     scan_text.setStyleSheet("color: white;")
                     scan_icon.setPixmap(self.normal_pixmap)
+                    return True
+                elif event.type() == QEvent.MouseButtonPress:
+                    if not self.shopping_page:
+                        self.shopping_page = ShoppingPage()
+                    self.shopping_page.show()
+                    obj.window().hide()  # Hide current window
                     return True
                 return False
 
