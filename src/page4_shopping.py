@@ -1,15 +1,21 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
                            QPushButton, QApplication, QFrame, QGridLayout)
-from PyQt5.QtCore import Qt, QObject, QEvent
-from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon  # Add QIcon import
+from PyQt5.QtCore import Qt, QObject, QEvent, QTimer
+from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
 import os
+import cv2
 
 class ShoppingPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.cart_items = []  # List to store cart items
-        self.load_fonts()  # Add this line
+        self.cart_items = []
+        self.camera = None
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_frame)
+        self.camera_active = False
+        self.load_fonts()
         self.init_ui()
+        
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
@@ -60,6 +66,7 @@ class ShoppingPage(QWidget):
 
         # Scan Button
         scan_button = self.create_button("SCAN", icon_path="camera.png")
+        scan_button.clicked.connect(self.toggle_camera)
         buttons_layout.addWidget(scan_button)
 
         # Product Info Button
@@ -70,48 +77,53 @@ class ShoppingPage(QWidget):
         left_layout.addWidget(buttons_container, 1, 0, 1, 2)  # row 1, col 0, rowspan 1, colspan 2
 
         # Camera View Area - Row 2
-        camera_frame = QFrame()
-        camera_frame.setStyleSheet("""
+        self.camera_frame = QFrame()
+        self.camera_frame.setStyleSheet("""
             QFrame {
                 background-color: #F0F6F1;
                 border: 1.5px dashed #000000;
                 border-radius: 9px;
             }
         """)
-        camera_frame.setFixedSize(271, 299)
+        self.camera_frame.setFixedSize(271, 299)
+
+        # Create a label for camera feed
+        self.camera_label = QLabel(self.camera_frame)
+        self.camera_label.setFixedSize(271, 299)
+        self.camera_label.setAlignment(Qt.AlignCenter)
 
         # Create inner frame for scan area
-        scan_area = QFrame(camera_frame)
-        scan_area.setStyleSheet("""
+        self.scan_area = QFrame(self.camera_frame)
+        self.scan_area.setStyleSheet("""
             QFrame {
                 background: transparent;
                 border: none;
             }
         """)
         # Make inner frame slightly smaller than outer frame
-        scan_area.setFixedSize(231, 263)
-        scan_area.move(20, 20)  # Add some padding from outer frame
+        self.scan_area.setFixedSize(231, 263)
+        self.scan_area.move(20, 20)  # Add some padding from outer frame
 
         # Create corner borders for inner frame
         corner_size = 20
         line_width = 2
 
         # Add scan area icon
-        camera_icon = QLabel(scan_area)
+        self.camera_icon = QLabel(self.scan_area)
         scan_icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
                                     'assets', 'scanarea.png')
-        camera_icon.setPixmap(QPixmap(scan_icon_path)
+        self.camera_icon.setPixmap(QPixmap(scan_icon_path)
                             .scaled(97, 97, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        camera_icon.setAlignment(Qt.AlignCenter)
+        self.camera_icon.setAlignment(Qt.AlignCenter)
         
         # Center the icon in the inner frame
-        camera_icon.setGeometry(
-            (scan_area.width() - 97) // 2,
-            (scan_area.height() - 97) // 2,
+        self.camera_icon.setGeometry(
+            (self.scan_area.width() - 97) // 2,
+            (self.scan_area.height() - 97) // 2,
             97, 97
         )
 
-        left_layout.addWidget(camera_frame, 2, 0, 1, 2, Qt.AlignCenter)
+        left_layout.addWidget(self.camera_frame, 2, 0, 1, 2, Qt.AlignCenter)
 
         # Set vertical spacing between rows
         left_layout.setVerticalSpacing(5)  # Reduce space between rows
@@ -291,6 +303,54 @@ class ShoppingPage(QWidget):
         # product_page.show()
         print("Product Page")
         self.hide()
+
+    def toggle_camera(self):
+        if self.camera_active:
+            self.stop_camera()
+        else:
+            self.start_camera()
+
+    def start_camera(self):
+        if self.camera is None:
+            self.camera = cv2.VideoCapture(0)
+            if not self.camera.isOpened():
+                print("Error: Could not open camera")
+                return
+        self.camera_active = True
+        self.timer.start(30)  # Update every 30ms
+
+    def stop_camera(self):
+        self.camera_active = False
+        self.timer.stop()
+        if self.camera is not None:
+            self.camera.release()
+            self.camera = None
+        # Clear the camera display
+        self.camera_label.clear()
+
+    def update_frame(self):
+        if self.camera is not None and self.camera_active:
+            ret, frame = self.camera.read()
+            if ret:
+                # Convert frame to RGB format
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                # Scale the frame to fit the camera view area while maintaining aspect ratio
+                h, w, ch = frame.shape
+                scale = min(271/w, 299/h)
+                new_w, new_h = int(w * scale), int(h * scale)
+                frame = cv2.resize(frame, (new_w, new_h))
+                
+                # Convert to QImage
+                bytes_per_line = ch * new_w
+                qt_image = QImage(frame.data, new_w, new_h, bytes_per_line, QImage.Format_RGB888)
+                
+                # Convert to QPixmap and display
+                pixmap = QPixmap.fromImage(qt_image)
+                self.camera_label.setPixmap(pixmap)
+
+    def closeEvent(self, event):
+        self.stop_camera()
+        super().closeEvent(event)
 
 if __name__ == '__main__':
     import sys
