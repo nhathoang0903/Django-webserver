@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel,
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
 import os
-from page3_productsinfo import ProductPage  # Add this import
+from page3_productsinfo import ProductPage  
 
 class InstructionPage(QWidget):
     def __init__(self):
@@ -12,7 +12,7 @@ class InstructionPage(QWidget):
         self.total_slides = 5
         self.slide_timer = QTimer()
         self.slide_timer.timeout.connect(self.next_slide)
-        self.slide_timer.start(2000)  # 2 seconds
+        self.slide_timer.start(2000)  # 2 seconds for changing slides
 
         # For slide 5's animation
         self.slide5_index = 0
@@ -150,7 +150,8 @@ class InstructionPage(QWidget):
         self.instruction_text.setStyleSheet("""
             color: #E72225;
             margin: 0;
-            padding: 0;
+            padding-right: 10px;
+            margin-right: 3px;
         """)
         self.instruction_text.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.instruction_text.setWordWrap(True)

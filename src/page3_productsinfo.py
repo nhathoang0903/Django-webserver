@@ -7,7 +7,7 @@ import os
 import requests
 from urllib.request import urlopen
 import json
-from page4_shopping import ShoppingPage  # Add this import
+
 
 class LoadProductsThread(QThread):
     finished = pyqtSignal(list)
@@ -15,7 +15,7 @@ class LoadProductsThread(QThread):
 
     def run(self):
         try:
-            response = requests.get('http://192.168.1.79:8000/products')
+            response = requests.get('http://127.0.0.1:8000/products')
             products = response.json()
             self.finished.emit(products)
         except Exception as e:
@@ -124,7 +124,7 @@ class ProductPage(QWidget):
         button_container.setFixedSize(160, 40)
         button_container.setStyleSheet("""
             QWidget {
-                background-color: #3D6F4A;
+                background-color: #507849;
                 border-radius: 20px;
             }
         """)
@@ -159,7 +159,6 @@ class ProductPage(QWidget):
                 super().__init__(parent)
                 self.normal_pixmap = self.parent().normal_pixmap
                 self.hover_pixmap = self.parent().hover_pixmap
-                self.shopping_page = None
 
             def eventFilter(self, obj, event):
                 if event.type() == QEvent.Enter:
@@ -171,10 +170,10 @@ class ProductPage(QWidget):
                     scan_icon.setPixmap(self.normal_pixmap)
                     return True
                 elif event.type() == QEvent.MouseButtonPress:
-                    if not self.shopping_page:
-                        self.shopping_page = ShoppingPage()
-                    self.shopping_page.show()
-                    obj.window().hide()  # Hide current window
+                    from import_module import ImportModule
+                    shopping_page = ImportModule.get_shopping_page()
+                    shopping_page.show()
+                    obj.window().hide()
                     return True
                 return False
 
