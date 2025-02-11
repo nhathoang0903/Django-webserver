@@ -5,7 +5,7 @@ import os
 
 class ProductDetector:
     def __init__(self):
-        model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'model25n.pt')
+        model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'model25nv2.pt')
         self.model = YOLO(model_path)
         self.load_product_data()
     
@@ -28,9 +28,10 @@ class ProductDetector:
         if confidence < 0.5:  # Minimum confidence threshold
             return None
             
-        # Match with product data
+        # Trả về product data với image_url gốc từ JSON
         for product in self.products:
             if product['product_id'] == class_id:
+                # Không thêm đường dẫn folder vào image_url
                 return product
                 
         return None

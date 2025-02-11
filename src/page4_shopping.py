@@ -16,14 +16,17 @@ class ShoppingPage(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.camera_active = False
+        self.product_detected = False  # Move initialization here
         self.load_fonts()
+        self.right_section = None  # Add this line
         self.init_ui()
         self.detector = ProductDetector()
-        self.product_modal = ProductModal()  # Remove camera_frame as parent
+        camera_height = 299  # Camera frame height
+        self.product_modal = ProductModal(camera_height=camera_height//2)  # Pass 50% of camera height
         self.product_modal.setGeometry(0, 0, 271, 299)  # Match camera frame size
         self.product_modal.add_to_cart.connect(self.add_to_cart)
         self.product_modal.hide()
-        self.product_detected = False  # Add new flag
+        self.product_modal.cancel_clicked.connect(self.resume_camera)  # Connect new signal
         
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -149,25 +152,42 @@ class ShoppingPage(QWidget):
         left_layout.setRowStretch(3, 1)  # Make row 3 (empty row) stretch
 
         # Right Section (Cart)
-        right_section = QWidget()
-        right_section.setFixedWidth(400)
-        right_section.setStyleSheet("background-color: white;")
-        self.right_layout = QVBoxLayout(right_section)
-        self.right_layout.setContentsMargins(20, 35, 20, 20) 
-        # Cart Header
-        cart_header = QLabel("Your Cart")
-        cart_header.setFont(QFont("Baloo", 24))
-        cart_header.setStyleSheet("""
-            color: black;
-            padding-top: 10px;  
-        """)
-        self.right_layout.addWidget(cart_header)
+        self.right_section = QWidget()
+        self.right_section.setFixedWidth(400)
+        self.right_section.setStyleSheet("background-color: white;")
 
-        # Cart Content Area
+        # Main right layout
+        self.right_layout = QVBoxLayout(self.right_section)
+        self.right_layout.setContentsMargins(20, 35, 20, 20)
+        self.right_layout.setSpacing(0)
+
+        # Fixed header container
+        self.header_widget = QWidget()
+        self.header_widget.setFixedHeight(60)
+        self.header_widget.setStyleSheet("background-color: transparent;")
+        header_layout = QVBoxLayout(self.header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Cart Header (fixed position)
+        self.cart_header = QLabel("Your Cart")
+        self.cart_header.setFont(QFont("Baloo", 24))
+        self.cart_header.setStyleSheet("color: black; padding-top: 10px;")
+        header_layout.addWidget(self.cart_header)
+        
+        # Add fixed header to main layout
+        self.right_layout.addWidget(self.header_widget)
+
+        # Content area (scrollable)
+        self.content_widget = QFrame()
+        self.content_layout = QVBoxLayout(self.content_widget)
+        self.content_layout.setContentsMargins(0, 20, 0, 0)
+        self.right_layout.addWidget(self.content_widget)
+
+        # Initialize cart display
         self.update_cart_display()
 
         main_layout.addWidget(left_section)
-        main_layout.addWidget(right_section)
+        main_layout.addWidget(self.right_section)  # Use stored reference
 
     def create_button(self, text, icon_path):
             button = QPushButton()
@@ -228,39 +248,36 @@ class ShoppingPage(QWidget):
             return button
 
     def update_cart_display(self):
-        # Clear existing cart display
-        for i in reversed(range(self.right_layout.count())):
-            widget = self.right_layout.itemAt(i).widget()
+        # Clear only the content area
+        for i in reversed(range(self.content_layout.count())):
+            widget = self.content_layout.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
 
-        # Add cart header
-        cart_header = QLabel("Your Cart")
-        cart_header.setFont(QFont("Baloo", 24))
-        cart_header.setStyleSheet("color: black;")
-        self.right_layout.addWidget(cart_header)
-
-        # Cart content
-        cart_content = QFrame()
-        cart_content.setStyleSheet("background-color: white;")
-        cart_layout = QVBoxLayout(cart_content)
-        cart_layout.setContentsMargins(0, 50, 0, 30)  # Increase top padding to 50
+        # Update background color based on cart state
+        self.right_section.setStyleSheet(
+            f"background-color: {'#F3F3F3' if self.cart_items else 'white'};"
+        )
+        
+        # Keep header transparent
+        self.header_widget.setStyleSheet("background-color: transparent;")
 
         if not self.cart_items:
-            # Add top stretch to push content down
-            cart_layout.addStretch(3)  # Increase top stretch ratio
-
-            # Empty cart text
+            # Empty cart display
+            empty_container = QWidget()
+            empty_layout = QVBoxLayout(empty_container)
+            empty_layout.setContentsMargins(0, 50, 0, 0)
+            
+            empty_layout.addStretch(3)
+            
             empty_text = QLabel("Empty")
             empty_text.setFont(QFont("Inria Sans", 30))
             empty_text.setStyleSheet("color: #F68003;")
             empty_text.setAlignment(Qt.AlignCenter)
-            cart_layout.addWidget(empty_text)
-
-            # Add spacing between text and icon
-            cart_layout.addSpacing(20)  # Increase spacing between text and icon
-
-            # Empty cart icon
+            empty_layout.addWidget(empty_text)
+            
+            empty_layout.addSpacing(20)
+            
             empty_cart_label = QLabel()
             empty_cart_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
                                          'assets', 'emptycart.png')
@@ -269,42 +286,42 @@ class ShoppingPage(QWidget):
                 empty_cart_label.setPixmap(empty_cart_pixmap.scaled(100, 100, 
                                          Qt.KeepAspectRatio, Qt.SmoothTransformation))
             empty_cart_label.setAlignment(Qt.AlignCenter)
-            cart_layout.addWidget(empty_cart_label)
-
-            # Add bottom stretch with smaller ratio
-            cart_layout.addStretch(2)  # Decrease bottom stretch ratio
-
-        if self.cart_items:
-            cart_content = QFrame()
-            cart_content.setStyleSheet("background-color: #F3F3F3;")
-            cart_layout = QVBoxLayout(cart_content)
+            empty_layout.addWidget(empty_cart_label)
             
-            total_amount = 0
+            empty_layout.addStretch(2)
+            
+            self.content_layout.addWidget(empty_container)
+        else:
+            # Cart items display
+            items_container = QWidget()
+            items_layout = QVBoxLayout(items_container)
+            items_layout.setSpacing(10)
+            
             for product, quantity in self.cart_items:
                 item_widget = CartItemWidget(product, quantity)
-                cart_layout.addWidget(item_widget)
-                total_amount += product['price'] * quantity
+                item_widget.setStyleSheet("""
+                    background-color: white;
+                    border-radius: 8px;
+                    margin: 5px 0px;
+                """)
+                items_layout.addWidget(item_widget)
             
-            self.right_layout.addWidget(cart_content)
-            
-            # Update total
-            total_label.setText(f"Total {total_amount} vnđ")
+            self.content_layout.addWidget(items_container)
 
-        self.right_layout.addWidget(cart_content)
+        self.content_layout.addStretch()
         
-        # Use stretching to push total/payment to bottom
-        self.right_layout.addStretch(1)  # This will push the following widgets to the bottom
-        
-        # Add total and payment button
+        # Calculate total amount
+        total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_items) if self.cart_items else 0
+        formatted_total = "{:,.0f}".format(total_amount).replace(',', '.')
+
+        # Add single total and payment section
         total_container = QWidget()
         total_layout = QHBoxLayout(total_container)
-        total_layout.setContentsMargins(0, 0, 0, 10)  # Add bottom margin
-        
-        # Add stretch to push total text towards payment button
+        total_layout.setContentsMargins(0, 0, 0, 10)
         total_layout.addStretch()
         
-        # Add total with right margin
-        total_label = QLabel("Total 0 vnđ")
+        # Update total label with actual amount
+        total_label = QLabel(f"Total {formatted_total} vnđ")
         total_label.setStyleSheet("""
             margin-right: 15px;
             font-family: Inter;
@@ -327,7 +344,9 @@ class ShoppingPage(QWidget):
             }
         """)
         total_layout.addWidget(payment_button)
-        self.right_layout.addWidget(total_container)
+        
+        # Add to content layout instead of right layout
+        self.content_layout.addWidget(total_container)
 
     def show_product_page(self):
         from import_module import ImportModule
@@ -377,10 +396,14 @@ class ShoppingPage(QWidget):
                     self.product_modal.setParent(self)  # Set parent to main window
                     # Position modal at same location as camera frame
                     camera_pos = self.camera_frame.pos()
+                    # Add left offset of 20 pixels
+                    modal_x = camera_pos.x() - 20  # Move modal left by 20px
+                    modal_y = camera_pos.y() + (self.camera_frame.height() - self.product_modal.height()) // 2
                     self.product_modal.setGeometry(
-                        camera_pos.x(), 
-                        camera_pos.y(), 
-                        271, 299
+                        modal_x,  # Use adjusted x position
+                        modal_y,
+                        271,  # Width same as camera frame
+                        270  # Match new modal height
                     )
                     self.product_modal.show()
                     self.product_modal.raise_()
@@ -389,9 +412,9 @@ class ShoppingPage(QWidget):
                     self.stop_camera()  # Stop camera when product is detected
                 
                 # Update camera view (behind modal)
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  
                 h, w, ch = frame.shape
-                scale = min(1,1)
+                scale = min(0.8,0.8)
                 new_w, new_h = int(w * scale), int(h * scale)
                 frame = cv2.resize(frame, (new_w, new_h))
                 
@@ -403,6 +426,11 @@ class ShoppingPage(QWidget):
     def add_to_cart(self, product, quantity):
         self.cart_items.append((product, quantity))
         self.update_cart_display()
+
+    def resume_camera(self):
+        self.product_detected = False
+        self.camera_frame.show()
+        self.start_camera()
 
     def closeEvent(self, event):
         self.stop_camera()
