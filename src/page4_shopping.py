@@ -4,6 +4,9 @@ from PyQt5.QtCore import Qt, QObject, QEvent, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
 import os
 import cv2
+from product_detector import ProductDetector
+from product_modal import ProductModal
+from cart_item_widget import CartItemWidget
 
 class ShoppingPage(QWidget):
     def __init__(self):
@@ -15,6 +18,12 @@ class ShoppingPage(QWidget):
         self.camera_active = False
         self.load_fonts()
         self.init_ui()
+        self.detector = ProductDetector()
+        self.product_modal = ProductModal()  # Remove camera_frame as parent
+        self.product_modal.setGeometry(0, 0, 271, 299)  # Match camera frame size
+        self.product_modal.add_to_cart.connect(self.add_to_cart)
+        self.product_modal.hide()
+        self.product_detected = False  # Add new flag
         
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -47,8 +56,8 @@ class ShoppingPage(QWidget):
         
         # Change to QGridLayout with adjusted spacing
         left_layout = QGridLayout(left_section)
-        left_layout.setContentsMargins(20, 20, 20, 20)
-        left_layout.setSpacing(0)  # Reduce overall grid spacing
+        left_layout.setContentsMargins(20, 10, 20, 20)  # Reduced top margin from 20 to 10
+        left_layout.setSpacing(0)
 
         # Top section with logo - Row 0
         logo_label = QLabel()
@@ -56,6 +65,7 @@ class ShoppingPage(QWidget):
         logo_pixmap = QPixmap(logo_path)
         if not logo_pixmap.isNull():
             logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setContentsMargins(0, 0, 0, 15)  # Add bottom margin to logo
         left_layout.addWidget(logo_label, 0, 0, 1, 2)  # row 0, col 0, rowspan 1, colspan 2
 
         # Buttons Container - Row 1 with adjusted margins
@@ -85,12 +95,19 @@ class ShoppingPage(QWidget):
                 border-radius: 9px;
             }
         """)
-        self.camera_frame.setFixedSize(271, 299)
+        self.camera_frame.setFixedSize(271, 299)  
 
         # Create a label for camera feed
         self.camera_label = QLabel(self.camera_frame)
-        self.camera_label.setFixedSize(271, 299)
+        self.camera_label.setFixedSize(self.camera_frame.size())
         self.camera_label.setAlignment(Qt.AlignCenter)
+        self.camera_label.setStyleSheet("""
+            QLabel {
+                background-color: #F0F6F1;  
+                border: 1.5px dashed #000000;
+                border-radius: 9px;
+            }
+        """)
 
         # Create inner frame for scan area
         self.scan_area = QFrame(self.camera_frame)
@@ -101,8 +118,8 @@ class ShoppingPage(QWidget):
             }
         """)
         # Make inner frame slightly smaller than outer frame
-        self.scan_area.setFixedSize(231, 263)
-        self.scan_area.move(20, 20)  # Add some padding from outer frame
+        self.scan_area.setFixedSize(231, 314)  
+        self.scan_area.move(20, 20)  
 
         # Create corner borders for inner frame
         corner_size = 20
@@ -136,14 +153,13 @@ class ShoppingPage(QWidget):
         right_section.setFixedWidth(400)
         right_section.setStyleSheet("background-color: white;")
         self.right_layout = QVBoxLayout(right_section)
-        self.right_layout.setContentsMargins(20, 35, 20, 20)  # Increase top margin to 35px
-
+        self.right_layout.setContentsMargins(20, 35, 20, 20) 
         # Cart Header
         cart_header = QLabel("Your Cart")
         cart_header.setFont(QFont("Baloo", 24))
         cart_header.setStyleSheet("""
             color: black;
-            padding-top: 10px;  /* Add padding to move text down */
+            padding-top: 10px;  
         """)
         self.right_layout.addWidget(cart_header)
 
@@ -258,6 +274,22 @@ class ShoppingPage(QWidget):
             # Add bottom stretch with smaller ratio
             cart_layout.addStretch(2)  # Decrease bottom stretch ratio
 
+        if self.cart_items:
+            cart_content = QFrame()
+            cart_content.setStyleSheet("background-color: #F3F3F3;")
+            cart_layout = QVBoxLayout(cart_content)
+            
+            total_amount = 0
+            for product, quantity in self.cart_items:
+                item_widget = CartItemWidget(product, quantity)
+                cart_layout.addWidget(item_widget)
+                total_amount += product['price'] * quantity
+            
+            self.right_layout.addWidget(cart_content)
+            
+            # Update total
+            total_label.setText(f"Total {total_amount} vnđ")
+
         self.right_layout.addWidget(cart_content)
         
         # Use stretching to push total/payment to bottom
@@ -298,9 +330,9 @@ class ShoppingPage(QWidget):
         self.right_layout.addWidget(total_container)
 
     def show_product_page(self):
-        # from import_module import ImportModule
-        # product_page = ImportModule.get_product_page()
-        # product_page.show()
+        from import_module import ImportModule
+        product_page = ImportModule.get_product_page()
+        product_page.show()
         print("Product Page")
         self.hide()
 
@@ -309,6 +341,10 @@ class ShoppingPage(QWidget):
             self.stop_camera()
         else:
             self.start_camera()
+            # Reset view when starting camera
+            self.product_detected = False
+            self.product_modal.hide()
+            self.camera_frame.show()
 
     def start_camera(self):
         if self.camera is None:
@@ -325,28 +361,48 @@ class ShoppingPage(QWidget):
         if self.camera is not None:
             self.camera.release()
             self.camera = None
-        # Clear the camera display
-        self.camera_label.clear()
+        if not self.product_detected:  # Only clear if no product is detected
+            self.camera_label.clear()
 
     def update_frame(self):
-        if self.camera is not None and self.camera_active:
+        if self.camera is not None and self.camera_active and not self.product_detected:
             ret, frame = self.camera.read()
             if ret:
-                # Convert frame to RGB format
+                # Detect products
+                product = self.detector.detect_product(frame)
+                
+                if product:
+                    # Remove camera frame and replace with modal
+                    self.camera_frame.hide()
+                    self.product_modal.setParent(self)  # Set parent to main window
+                    # Position modal at same location as camera frame
+                    camera_pos = self.camera_frame.pos()
+                    self.product_modal.setGeometry(
+                        camera_pos.x(), 
+                        camera_pos.y(), 
+                        271, 299
+                    )
+                    self.product_modal.show()
+                    self.product_modal.raise_()
+                    self.product_modal.update_product(product)
+                    self.product_detected = True  # Set flag when product detected
+                    self.stop_camera()  # Stop camera when product is detected
+                
+                # Update camera view (behind modal)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                # Scale the frame to fit the camera view area while maintaining aspect ratio
                 h, w, ch = frame.shape
-                scale = min(271/w, 299/h)
+                scale = min(1,1)
                 new_w, new_h = int(w * scale), int(h * scale)
                 frame = cv2.resize(frame, (new_w, new_h))
                 
-                # Convert to QImage
                 bytes_per_line = ch * new_w
                 qt_image = QImage(frame.data, new_w, new_h, bytes_per_line, QImage.Format_RGB888)
-                
-                # Convert to QPixmap and display
                 pixmap = QPixmap.fromImage(qt_image)
                 self.camera_label.setPixmap(pixmap)
+
+    def add_to_cart(self, product, quantity):
+        self.cart_items.append((product, quantity))
+        self.update_cart_display()
 
     def closeEvent(self, event):
         self.stop_camera()

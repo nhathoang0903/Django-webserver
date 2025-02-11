@@ -1,0 +1,218 @@
+[
+    {
+        "product_id": 1,
+        "name": "Canned_Strawberry_Sting",
+        "quantity": 1,
+        "price": "12000",
+        "description": "Nước ngọt Sting dâu lon 320ml",
+        "category": "Thức uống",
+        "image_url": "https://storage.googleapis.com/sc_pcm_product/prod/2024/6/25/423355-8934588232114.jpg"
+    },
+    {
+        "product_id": 2,
+        "name": "Canned_Yellow_Sting",
+        "quantity": 1,
+        "price": "10000",
+        "description": "Nước ngọt Sting vàng lon 320ml",
+        "category": "Thức uống",
+        "image_url": "https://product.hstatic.net/200000452921/product/nuoc-tang-luc-sting-vang-lon-cao-330ml-1511201815591_1cca4eff1e1c4028bd83d5cd6180e968_master.jpg"
+    },
+    {
+        "product_id": 3,
+        "name": "Good_Mood_Yogurt_Flavor",
+        "quantity": 1,
+        "price": "10000",
+        "description": "Goodmood vị sữa chua chai 320ml",
+        "category": "Thức uống",
+        "image_url": "https://cdn.tgdd.vn/Products/Images/2563/200778/bhx/nuoc-uong-good-mood-vi-sua-chua-455ml-202407111335443811.jpg"
+    },
+    {
+        "product_id": 4,
+        "name": "Hao_Hao_Cup_Noodles",
+        "quantity": 1,
+        "price": "8000",
+        "description": "Mì ly Hảo Hảo Handy",
+        "category": "Thức ăn",
+        "image_url": "https://pvmarthanoi.com.vn/wp-content/uploads/2023/02/mi-handy-hao-hao-tom-chua-cay-ly-67g-201912051400437161.jfif_-500x600.png"
+    },
+    {
+        "product_id": 5,
+        "name": "Hao_Hao_Noodles",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Mì gói Hảo Hảo vị tôm chua cay",
+        "category": "Thức ăn",
+        "image_url": "https://product.hstatic.net/200000459373/product/mi-hao-hao-vi-tom-chua-cay-goi-75g-202110110919568290_eb7b81d74d5c4aa3b999d39ea0920724.jpg"
+    },
+    {
+        "product_id": 6,
+        "name": "Highland_Milk_Coffee",
+        "quantity": 1,
+        "price": "9000",
+        "description": "Cà phê sữa Highland lon 250ml",
+        "category": "Thức uống",
+        "image_url": "https://www.highlandscoffee.com.vn/vnt_upload/product/06_2023/CA_PHE_SUA_185ml_v3.jpg"
+    },
+    {
+        "product_id": 7,
+        "name": "Oishi_Crabme",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Snack vị cua Crabme",
+        "category": "Đồ ăn vặt",
+        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvnegiFA4assVzcxf3daYrwCFGtxwZXnnEZw&s"
+    },
+    {
+        "product_id": 8,
+        "name": "Oishi_Flutes",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Snack vị khoai tây Flutes",
+        "category": "Đồ ăn vặt",
+        "image_url": "https://cdn.tgdd.vn/Products/Images//3364/79731/bhx/files/1.jpg"
+    },
+    {
+        "product_id": 9,
+        "name": "Oishi_Matys_Vegetarian",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Snack Matys vị heo quay chay",
+        "category": "Đồ ăn vặt",
+        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcRmvKn-zdFjxQmGCPgsLm_ivy8QwRDq4W_Sy3gmffo66J1l2VQ5yt3JIN4tRC6IgTOLY&usqp=CAU"
+    },
+    {
+        "product_id": 10,
+        "name": "Oishi_Special_Shrimp",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Snack tôm cay đặc biệt",
+        "category": "Đồ ăn vặt",
+        "image_url": "https://cdn.tgdd.vn/Products/Images//3364/79795/bhx/files/snack-tom-cay-dac-biet-oishi-goi-39g-202203281412438889.jpg"
+    },
+    {
+        "product_id": 11,
+        "name": "Oishi_Spicy_Shrimp",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Snack tôm cay",
+        "category": "Đồ ăn vặt",
+        "image_url": "https://storage.googleapis.com/mm-online-bucket/ecommerce-website/uploads/media/200562.jpg"
+    },
+    {
+        "product_id": 12,
+        "name": "Oishi_Sweet_Corn",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Snack bắp ngọt",
+        "category": "Đồ ăn vặt",
+        "image_url": "https://cdn.tgdd.vn/Products/Images/3364/79710/snack-oishi-bap-ngot-35g-1.jpg"
+    },
+    {
+        "product_id": 13,
+        "name": "Oishi_Tater_Thins",
+        "quantity": 1,
+        "price": "5000",
+        "description": "Snack Tater thins vị dưa leo",
+        "category": "Đồ ăn vặt",
+        "image_url": "https://product.hstatic.net/1000281508/product/cc61a6e52f7249fbaf48c1d4c8b05c41_7ea93ca3e623426fbb58261180871b30_grande.png"
+    },
+    {
+        "product_id": 14,
+        "name": "Oolong_Tea_Plus",
+        "quantity": 1,
+        "price": "7000",
+        "description": "Trà Ô Long Tea Plus chai 320ml",
+        "category": "Thức uống",
+        "image_url": "https://product.hstatic.net/1000075554/product/tra-o-long-tea-plus-455ml-84wz6_f511fad334ba4e8cb3f391b0f1c8a658_c170bfd57c624c748348178733258fb5_grande.jpeg"
+    },
+    {
+        "product_id": 15,
+        "name": "Orange_Juice_Mirinda",
+        "quantity": 1,
+        "price": "9000",
+        "description": "Mirinda Cam chai 320ml",
+        "category": "Thức uống",
+        "image_url": "https://cdn.tgdd.vn/Products/Images/2443/79138/bhx/nuoc-ngot-mirinda-huong-cam-chai-390ml-202310311346499855.jpg"
+    },
+    {
+        "product_id": 16,
+        "name": "Pepsi_Zero_Sugar",
+        "quantity": 1,
+        "price": "10000",
+        "description": "Pepsi không đường",
+        "category": "Thức uống",
+        "image_url": "https://www.lottemart.vn/media/catalog/product/cache/0x0/8/9/8934588660115-2.jpg.webp"
+    },
+    {
+        "product_id": 17,
+        "name": "Pork_Hot_Dog",
+        "quantity": 1,
+        "price": "10000",
+        "description": "Xúc xích CP red, gói 5 cây, 40g",
+        "category": "Thức ăn",
+        "image_url": "https://cdn.tgdd.vn/Products/Images/3507/89851/bhx/xuc-xich-heo-tiet-trung-cp-goi-200g-202208220808364009.jpg"
+    },
+    {
+        "product_id": 18,
+        "name": "Red_Bull",
+        "quantity": 1,
+        "price": "11000",
+        "description": "Nước tăng lực Red Bull.",
+        "category": "Thức uống",
+        "image_url": "https://satrafoods.com.vn/uploads/Images/san-pham/thuc-pham-cong-nghe/nuoc-giai-khat/8935112200005.jpg"
+    },
+    {
+        "product_id": 19,
+        "name": "Revive_Original",
+        "quantity": 1,
+        "price": "9000",
+        "description": "Revive nguyên bản muối khoáng chai 420ml",
+        "category": "Thức uống",
+        "image_url": "https://web.hn.ss.bfcplatform.vn/mkmart/product/202204/0704669250-1674133889-m.jpg"
+    },
+    {
+        "product_id": 20,
+        "name": "Revive_Salted_Lemon",
+        "quantity": 1,
+        "price": "7000",
+        "description": "Revive chanh muối chai 320ml",
+        "category": "Thức uống",
+        "image_url": "https://sieuthitt.com/images/stories/virtuemart/product/revive%20chanh%20muoi.jpg"
+    },
+    {
+        "product_id": 21,
+        "name": "Rock_Star",
+        "quantity": 1,
+        "price": "12000",
+        "description": "Nước tăng lực Rock Star.",
+        "category": "Thức uống",
+        "image_url": "https://famima.vn/wp-content/uploads/2023/11/Nuoc-tang-luc-Rockstar-lon-250ml-01-1.jpg"
+    },
+    {
+        "product_id": 22,
+        "name": "Seven_Up",
+        "quantity": 1,
+        "price": "7000",
+        "description": "Nước ngọt Seven Up",
+        "category": "Thức uống",
+        "image_url": "https://product.hstatic.net/1000288770/product/nuoc_ngot_7_up_vi_chanh_chai_390ml_3f9024fa2f1c4b689abad5dae18c934f_master.jpg"
+    },
+    {
+        "product_id": 23,
+        "name": "Susu_Milk_Box",
+        "quantity": 1,
+        "price": "8000",
+        "description": "Sữa hộp Susu vị việt quất chuối",
+        "category": "Thức uống",
+        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIToEF7QfXMSE8row_Sc2YDPiPKnaUQQHasQ&s"
+    },
+    {
+        "product_id": 24,
+        "name": "Twister_Orange_Juice",
+        "quantity": 1,
+        "price": "9000",
+        "description": "Nước cam ép Tropicana Twister chai 320ml",
+        "category": "Thức uống",
+        "image_url": "https://cdn.tgdd.vn/Products/Images/3265/79132/bhx/nuoc-cam-ep-twister-tropicana-455ml-202407111018584375.jpg"
+    }
+]

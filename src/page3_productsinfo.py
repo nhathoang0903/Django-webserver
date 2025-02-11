@@ -15,7 +15,8 @@ class LoadProductsThread(QThread):
 
     def run(self):
         try:
-            response = requests.get('http://127.0.0.1:8000/products')
+            # Changed URL to include trailing slash
+            response = requests.get('http://127.0.0.1:8000/products/')
             products = response.json()
             self.finished.emit(products)
         except Exception as e:
@@ -32,7 +33,7 @@ class ProductPage(QWidget):
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
@@ -64,7 +65,7 @@ class ProductPage(QWidget):
 
         # Header
         header_label = QLabel("Product Information")
-        header_label.setFont(QFont("Inria Sans", 30, QFont.Bold))
+        header_label.setFont(QFont("Inria Sans", 28))
         header_label.setStyleSheet("color: #3D6F4A;")
         header_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         top_layout.addWidget(header_label)
@@ -82,6 +83,7 @@ class ProductPage(QWidget):
             QScrollArea {
                 border: none;
                 background-color: transparent;
+                margin-right: -20px;  
             }
             QScrollBar:vertical {
                 border: none;
@@ -108,7 +110,7 @@ class ProductPage(QWidget):
         # Grid layout for products
         self.grid_layout = QGridLayout(self.container)
         self.grid_layout.setSpacing(20)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.grid_layout.setContentsMargins(0, 0, 15, 0)  # Add right margin to create space before scrollbar
 
         scroll_area.setWidget(self.container)
         main_layout.addWidget(scroll_area)
@@ -239,6 +241,8 @@ class ProductPage(QWidget):
                 background-color: white;
                 border-radius: 10px;
                 padding: 5px;
+                margin-top: -8px;  /* Move up slightly */
+                margin-bottom: 8px; /* Increase bottom space */
             }
         """)
 
@@ -283,8 +287,8 @@ class ProductPage(QWidget):
         name_layout.addWidget(name_label)
         card_layout.addWidget(name_container)
 
-        # Product price
-        price_str = "{:.0f}".format(float(product['price']))
+        # Product price - modified format
+        price_str = "{:,.0f}".format(float(product['price'])).replace(',', '.')
         price_label = QLabel(f"{price_str} vnd")
         price_label.setFont(QFont("Josefin Sans", 8, QFont.Bold))
         price_label.setAlignment(Qt.AlignCenter)
