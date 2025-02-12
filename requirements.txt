@@ -1,0 +1,5 @@
+PyQt5
+ultralytics
+requests
+json
+pygame

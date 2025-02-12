@@ -7,10 +7,12 @@ import cv2
 from product_detector import ProductDetector
 from product_modal import ProductModal
 from cart_item_widget import CartItemWidget
+from cart_state import CartState
 
 class ShoppingPage(QWidget):
     def __init__(self):
         super().__init__()
+        self.cart_state = CartState()  # Thêm dòng này
         self.cart_items = []
         self.camera = None
         self.timer = QTimer()
@@ -120,15 +122,14 @@ class ShoppingPage(QWidget):
                 border: none;
             }
         """)
-        # Make inner frame slightly smaller than outer frame
-        self.scan_area.setFixedSize(231, 314)  
-        self.scan_area.move(20, 20)  
+        # Make scan area fixed size and center it in camera frame
+        self.scan_area.setFixedSize(231, 231)  # Make it square
+        self.scan_area.move(
+            (self.camera_frame.width() - self.scan_area.width()) // 2,
+            (self.camera_frame.height() - self.scan_area.height()) // 2
+        )
 
-        # Create corner borders for inner frame
-        corner_size = 20
-        line_width = 2
-
-        # Add scan area icon
+        # Add scan area icon (keep existing icon setup)
         self.camera_icon = QLabel(self.scan_area)
         scan_icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
                                     'assets', 'scanarea.png')
@@ -136,7 +137,7 @@ class ShoppingPage(QWidget):
                             .scaled(97, 97, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.camera_icon.setAlignment(Qt.AlignCenter)
         
-        # Center the icon in the inner frame
+        # Center the icon in scan_area
         self.camera_icon.setGeometry(
             (self.scan_area.width() - 97) // 2,
             (self.scan_area.height() - 97) // 2,
@@ -256,13 +257,13 @@ class ShoppingPage(QWidget):
 
         # Update background color based on cart state
         self.right_section.setStyleSheet(
-            f"background-color: {'#F3F3F3' if self.cart_items else 'white'};"
+            f"background-color: {'#F3F3F3' if self.cart_state.cart_items else 'white'};"
         )
         
         # Keep header transparent
         self.header_widget.setStyleSheet("background-color: transparent;")
 
-        if not self.cart_items:
+        if not self.cart_state.cart_items:
             # Empty cart display
             empty_container = QWidget()
             empty_layout = QVBoxLayout(empty_container)
@@ -292,7 +293,7 @@ class ShoppingPage(QWidget):
             
             self.content_layout.addWidget(empty_container)
         else:
-            # Create a scrollable area for cart items
+            # Create a scrollable area for cart items with adjusted style
             scroll_area = QScrollArea()
             scroll_area.setWidgetResizable(True)
             scroll_area.setStyleSheet("""
@@ -303,13 +304,12 @@ class ShoppingPage(QWidget):
                 QScrollBar:vertical {
                     border: none;
                     background: white;
-                    border-radius: 5px;
-                    width: 20px;
+                    width: 15px;  /* Increased from 10px */
                     margin: 0px;
+                    margin-left: 5px;  /* Push scrollbar right */
                 }
                 QScrollBar::handle:vertical {
                     background: #D9D9D9;
-                    border-radius: 5px;
                     min-height: 20px;
                 }
                 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
@@ -320,17 +320,45 @@ class ShoppingPage(QWidget):
             # Container for cart items
             items_container = QWidget()
             items_layout = QVBoxLayout(items_container)
-            items_layout.setSpacing(10)
-            items_layout.setContentsMargins(0, 0, 15, 0)  # Right margin for scrollbar
+            items_layout.setSpacing(30)
+            items_layout.setContentsMargins(0, 0, 20, 0)  # Increased right margin
 
-            # Add cart items
-            for product, quantity in self.cart_items:
+            # Add cart items in reverse order (newest first)
+            for i, (product, quantity) in enumerate(reversed(self.cart_state.cart_items)):
                 item_widget = CartItemWidget(product, quantity)
+                item_widget.quantityChanged.connect(
+                    lambda q, idx=len(self.cart_state.cart_items)-1-i: self.update_item_quantity(idx, q)
+                )
+                item_widget.itemRemoved.connect(
+                    lambda idx=len(self.cart_state.cart_items)-1-i: self.remove_cart_item(idx)
+                )
                 items_layout.addWidget(item_widget)
+
+            # Adjust scrollbar positioning
+            items_layout.setContentsMargins(0, 0, 0, 0)  # Remove right margin
+            scroll_area.setStyleSheet("""
+                QScrollArea {
+                    border: none;
+                    background-color: transparent;
+                }
+                QScrollBar:vertical {
+                    border: none;
+                    background: white;
+                    width: 10px;
+                    margin: 0px;
+                }
+                QScrollBar::handle:vertical {
+                    background: #D9D9D9;
+                    min-height: 20px;
+                }
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                    height: 0px;
+                }
+            """)
 
             # Only show scrollbar if there's more than one item
             scroll_area.setVerticalScrollBarPolicy(
-                Qt.ScrollBarAsNeeded if len(self.cart_items) > 1 else Qt.ScrollBarAlwaysOff
+                Qt.ScrollBarAsNeeded if len(self.cart_state.cart_items) > 1 else Qt.ScrollBarAlwaysOff
             )
 
             # Add stretch at the end to push items to the top
@@ -343,7 +371,7 @@ class ShoppingPage(QWidget):
             self.content_layout.addWidget(scroll_area)
 
         # Calculate total amount
-        total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_items) if self.cart_items else 0
+        total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_state.cart_items) if self.cart_state.cart_items else 0
         formatted_total = "{:,.0f}".format(total_amount).replace(',', '.')
 
         # Add single total and payment section
@@ -375,10 +403,25 @@ class ShoppingPage(QWidget):
                 background-color: #2C513F;
             }
         """)
+        payment_button.clicked.connect(self.show_payment_page)  # Thêm connection
         total_layout.addWidget(payment_button)
         
         # Add to content layout instead of right layout
         self.content_layout.addWidget(total_container)
+
+    def show_payment_page(self):
+        from page5_qrcode import QRCodePage
+        self.payment_page = QRCodePage()
+        self.payment_page.show()
+        self.hide()
+
+    def update_item_quantity(self, index, quantity):
+        self.cart_state.update_quantity(index, quantity)
+        self.update_cart_display()
+
+    def remove_cart_item(self, index):
+        self.cart_state.remove_item(index)
+        QTimer.singleShot(300, self.update_cart_display)  # 300ms = animation duration
 
     def show_product_page(self):
         from import_module import ImportModule
@@ -419,29 +462,20 @@ class ShoppingPage(QWidget):
         if self.camera is not None and self.camera_active and not self.product_detected:
             ret, frame = self.camera.read()
             if ret:
-                # Detect products
                 product = self.detector.detect_product(frame)
                 
                 if product:
-                    # Remove camera frame and replace with modal
                     self.camera_frame.hide()
-                    self.product_modal.setParent(self)  # Set parent to main window
-                    # Position modal at same location as camera frame
+                    self.product_modal.setParent(self)
                     camera_pos = self.camera_frame.pos()
-                    # Add left offset of 20 pixels
-                    modal_x = camera_pos.x() - 20  # Move modal left by 20px
+                    modal_x = camera_pos.x() - 20
                     modal_y = camera_pos.y() + (self.camera_frame.height() - self.product_modal.height()) // 2
-                    self.product_modal.setGeometry(
-                        modal_x,  # Use adjusted x position
-                        modal_y,
-                        271,  # Width same as camera frame
-                        270  # Match new modal height
-                    )
+                    self.product_modal.setGeometry(modal_x, modal_y, 271, 270)
                     self.product_modal.show()
                     self.product_modal.raise_()
                     self.product_modal.update_product(product)
-                    self.product_detected = True  # Set flag when product detected
-                    self.stop_camera()  # Stop camera when product is detected
+                    self.product_detected = True
+                    self.stop_camera()
                 
                 # Update camera view (behind modal)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  
@@ -456,8 +490,10 @@ class ShoppingPage(QWidget):
                 self.camera_label.setPixmap(pixmap)
 
     def add_to_cart(self, product, quantity):
-        self.cart_items.append((product, quantity))
+        # Sử dụng cart_state thay vì xử lý trực tiếp
+        self.cart_state.add_item(product, quantity)
         self.update_cart_display()
+        return False
 
     def resume_camera(self):
         self.product_detected = False

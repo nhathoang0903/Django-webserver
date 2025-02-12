@@ -13,7 +13,7 @@ class ProductModal(QFrame):
         self.quantity = 1
         self.current_product = None
         self.setFixedWidth(300) 
-        self.setFixedHeight(200)
+        self.setFixedHeight(260)  
         self.setStyleSheet("""
             QFrame {
                 background-color: #FFFFFF;
@@ -21,7 +21,8 @@ class ProductModal(QFrame):
                 border: none;
             }
         """)
-        self.init_ui()
+        self.init_ui()  # Remove warning_widget
+
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
@@ -40,7 +41,8 @@ class ProductModal(QFrame):
 
         # Left section - Image
         self.image_label = QLabel()
-        self.image_label.setFixedSize(70, 70)
+        # Default size, will be updated in update_product
+        self.image_label.setFixedSize(75, 75)
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setStyleSheet("""
             QLabel {
@@ -52,23 +54,25 @@ class ProductModal(QFrame):
 
         # Right section
         right_widget = QWidget()
-        right_layout = QVBoxLayout(right_widget)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(5)
+        self.right_layout = QVBoxLayout(right_widget)
+        self.right_layout.setContentsMargins(0, 0, 0, 0)
+        self.right_layout.setSpacing(5)
 
         # Product name
         self.name_label = QLabel()
         self.name_label.setFont(QFont("Inria Sans", 12, QFont.Bold))
         self.name_label.setWordWrap(True)
-        self.name_label.setAlignment(Qt.AlignCenter)  # Add center alignment
+        self.name_label.setMinimumHeight(40)  # Reduced from 50
         self.name_label.setStyleSheet("""
             QLabel {
                 qproperty-alignment: AlignCenter;
+                padding: 0 10px;  /* Add horizontal padding */
             }
         """)
-        right_layout.addWidget(self.name_label)
+        self.right_layout.addWidget(self.name_label)
 
-        # Price
+        # Price with more space above
+        self.right_layout.addSpacing(10)  # Reduced from 15
         self.price_label = QLabel()
         self.price_label.setFont(QFont("Inria Sans", 8, QFont.Bold))
         self.price_label.setStyleSheet("""
@@ -79,13 +83,13 @@ class ProductModal(QFrame):
             }
         """)
         self.price_label.setAlignment(Qt.AlignCenter)  # Add center alignment
-        right_layout.addWidget(self.price_label)
+        self.right_layout.addWidget(self.price_label)
         
-        right_layout.addSpacing(10)  # Add extra space after price label
+        self.right_layout.addSpacing(15)  # Reduced from 25
 
         # Quantity controls in horizontal layout
-        quantity_widget = QWidget()
-        quantity_layout = QHBoxLayout(quantity_widget)
+        self.quantity_widget = QWidget()
+        quantity_layout = QHBoxLayout(self.quantity_widget)
         quantity_layout.setContentsMargins(0, 0, 0, 0)
         quantity_layout.setSpacing(0)  
 
@@ -105,8 +109,8 @@ class ProductModal(QFrame):
         self.minus_btn.setStyleSheet("""
             QPushButton {
                 background-color: white;
-                color: black;
-                border: 1px solid #CCCCCC;
+                color: #000000;
+                border: 1px solid #000000;
                 border-top-left-radius: 8px;
                 border-bottom-left-radius: 8px;
                 border-right: none;
@@ -122,8 +126,8 @@ class ProductModal(QFrame):
         self.quantity_label.setStyleSheet("""
             QLabel {
                 background-color: white;
-                color: black;
-                border: 1px solid #CCCCCC;
+                color: #000000;
+                border: 1px solid #000000;
                 font-size: 14px;
                 font-weight: bold;
                 qproperty-alignment: AlignCenter;
@@ -134,8 +138,8 @@ class ProductModal(QFrame):
         self.plus_btn.setStyleSheet("""
             QPushButton {
                 background-color: white;
-                color: black;
-                border: 1px solid #CCCCCC;
+                color: #000000;
+                border: 1px solid #000000;
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
                 border-left: none;
@@ -157,25 +161,31 @@ class ProductModal(QFrame):
         # Center the quantity controls
         quantity_container = QHBoxLayout()
         quantity_container.addStretch()
-        quantity_container.addWidget(quantity_widget)
+        quantity_container.addWidget(self.quantity_widget)
         quantity_container.addStretch()
-        right_layout.addLayout(quantity_container)
+        self.right_layout.addLayout(quantity_container)
+
+        # Center the quantity controls with more spacing
+        self.right_layout.addSpacing(25)  # Increased spacing before quantity controls
 
         # Before buttons section, add more vertical space
-        right_layout.addStretch(1)  # Add stretch to push content up
+        self.right_layout.addStretch(1)  # Add stretch to push content up
         
-        # Buttons in horizontal layout
-        btn_widget = QWidget()
-        btn_layout = QHBoxLayout(btn_widget)
-        btn_layout.setContentsMargins(0, 15, 0, 0)  # Add top margin to buttons
-        btn_layout.setSpacing(15)  # Keep spacing between buttons
+        # Điều chỉnh spacing trước buttons
+        self.right_layout.addSpacing(10)  # Giảm spacing trước buttons
+
+        # Buttons section 
+        self.buttons_widget = QWidget()
+        btn_layout = QHBoxLayout(self.buttons_widget)
+        btn_layout.setContentsMargins(0, 0, 0, 10) 
+        btn_layout.setSpacing(5)
         
-        # Add more vertical space before buttons
-        right_layout.addStretch(3)  
+        # Center the buttons
+        btn_layout.setAlignment(Qt.AlignCenter)  # Căn giữa các buttons
 
         # Cancel button
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setFixedSize(90, 26)
+        cancel_btn.setFixedSize(95, 32)
         cancel_btn.setFont(QFont("Inria Sans", 8, QFont.Bold))
         cancel_btn.setStyleSheet("""
             QPushButton {
@@ -193,7 +203,7 @@ class ProductModal(QFrame):
 
         # Add to cart button
         add_btn = QPushButton("Add to cart")
-        add_btn.setFixedSize(90, 26)
+        add_btn.setFixedSize(95, 32)
         add_btn.setFont(QFont("Inria Sans", 8, QFont.Bold))
         add_btn.setStyleSheet("""
             QPushButton {
@@ -211,12 +221,20 @@ class ProductModal(QFrame):
 
         btn_layout.addWidget(cancel_btn)
         btn_layout.addWidget(add_btn)
-        right_layout.addWidget(btn_widget)
-        right_layout.addSpacing(15)  # Add bottom padding
+
+        # Đảm bảo buttons được căn giữa trong container
+        btn_container = QHBoxLayout()
+        btn_container.addStretch()
+        btn_container.addWidget(self.buttons_widget)
+        btn_container.addStretch()
+        self.right_layout.addLayout(btn_container)
+
+        # Thêm spacing cuối cùng
+        self.right_layout.addSpacing(10)
 
         main_layout.addWidget(right_widget)
 
-    def update_product(self, product):
+    def update_product(self, product):  # Remove is_existing parameter
         self.current_product = product
         self.quantity = 1
         self.quantity_label.setText(str(self.quantity))
@@ -246,12 +264,34 @@ class ProductModal(QFrame):
             print("Warning: No image URL provided")
             return
 
+        # Update image size based on category
+        category = product.get('category', '')
+        if category == "Đồ ăn vặt":
+            image_size = (75, 120)
+        elif category == "Thức uống":
+            image_size = (75, 140)
+        elif category == "Thức ăn":
+            image_size = (75, 125)
+        else:
+            image_size = (75, 75)  # Default size
+            
+        self.image_label.setFixedSize(*image_size)
+
         # Create QPixmap from URL
         pixmap = QPixmap()
         from urllib.request import urlopen
         try:
             data = urlopen(image_url).read()
             pixmap.loadFromData(data)
+            
+            # Scale according to category size
+            scaled_pixmap = pixmap.scaled(
+                image_size[0], 
+                image_size[1],
+                Qt.KeepAspectRatio, 
+                Qt.SmoothTransformation
+            )
+            self.image_label.setPixmap(scaled_pixmap)
         except Exception as e:
             print(f"Error loading image: {e}")
             # Load default image if URL fails
