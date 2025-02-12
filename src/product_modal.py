@@ -7,6 +7,7 @@ class ProductModal(QFrame):
     add_to_cart = pyqtSignal(dict, int)  
     cancel_clicked = pyqtSignal()  # Add new signal for cancel button
 
+
     def __init__(self, parent=None, camera_height=None, camera_width=None):
         super().__init__(parent)
         self.quantity = 1
