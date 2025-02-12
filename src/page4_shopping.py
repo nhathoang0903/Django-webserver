@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
-                           QPushButton, QApplication, QFrame, QGridLayout)
+                           QPushButton, QApplication, QFrame, QGridLayout, QScrollArea)
 from PyQt5.QtCore import Qt, QObject, QEvent, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
 import os
@@ -292,24 +292,56 @@ class ShoppingPage(QWidget):
             
             self.content_layout.addWidget(empty_container)
         else:
-            # Cart items display
+            # Create a scrollable area for cart items
+            scroll_area = QScrollArea()
+            scroll_area.setWidgetResizable(True)
+            scroll_area.setStyleSheet("""
+                QScrollArea {
+                    border: none;
+                    background-color: transparent;
+                }
+                QScrollBar:vertical {
+                    border: none;
+                    background: white;
+                    border-radius: 5px;
+                    width: 20px;
+                    margin: 0px;
+                }
+                QScrollBar::handle:vertical {
+                    background: #D9D9D9;
+                    border-radius: 5px;
+                    min-height: 20px;
+                }
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                    height: 0px;
+                }
+            """)
+
+            # Container for cart items
             items_container = QWidget()
             items_layout = QVBoxLayout(items_container)
             items_layout.setSpacing(10)
-            
+            items_layout.setContentsMargins(0, 0, 15, 0)  # Right margin for scrollbar
+
+            # Add cart items
             for product, quantity in self.cart_items:
                 item_widget = CartItemWidget(product, quantity)
-                item_widget.setStyleSheet("""
-                    background-color: white;
-                    border-radius: 8px;
-                    margin: 5px 0px;
-                """)
                 items_layout.addWidget(item_widget)
-            
-            self.content_layout.addWidget(items_container)
 
-        self.content_layout.addStretch()
-        
+            # Only show scrollbar if there's more than one item
+            scroll_area.setVerticalScrollBarPolicy(
+                Qt.ScrollBarAsNeeded if len(self.cart_items) > 1 else Qt.ScrollBarAlwaysOff
+            )
+
+            # Add stretch at the end to push items to the top
+            items_layout.addStretch()
+            
+            # Set the container as the scroll area widget
+            scroll_area.setWidget(items_container)
+            
+            # Add scroll area to content layout with margins to avoid header/footer
+            self.content_layout.addWidget(scroll_area)
+
         # Calculate total amount
         total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_items) if self.cart_items else 0
         formatted_total = "{:,.0f}".format(total_amount).replace(',', '.')
