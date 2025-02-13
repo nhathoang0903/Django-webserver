@@ -327,6 +327,8 @@ class ProductModal(QFrame):
     def add_item_to_cart(self):
         if self.current_product:
             self.add_to_cart.emit(self.current_product, self.quantity)
+            self.hide()  # Hide the modal
+            self.cancel_clicked.emit()  # Use existing signal to resume camera
 
     def handle_cancel(self):
         self.cancel_clicked.emit()  # Emit signal when cancel is clicked

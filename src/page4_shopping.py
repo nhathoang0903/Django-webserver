@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
-                           QPushButton, QApplication, QFrame, QGridLayout, QScrollArea)
-from PyQt5.QtCore import Qt, QObject, QEvent, QTimer
+                           QPushButton, QApplication, QFrame, QGridLayout, QScrollArea, QDialog, QGraphicsBlurEffect, QGraphicsOpacityEffect)
+from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
 import os
 import cv2
@@ -8,11 +8,14 @@ from product_detector import ProductDetector
 from product_modal import ProductModal
 from cart_item_widget import CartItemWidget
 from cart_state import CartState
+from cancelshopping_modal import CancelShoppingModal
 
 class ShoppingPage(QWidget):
     def __init__(self):
         super().__init__()
+        self.home_page = None  # Add this line
         self.cart_state = CartState()  # Thêm dòng này
+        self.cart_state.save_to_json()  # Initialize cart by saving empty state
         self.cart_items = []
         self.camera = None
         self.timer = QTimer()
@@ -29,6 +32,11 @@ class ShoppingPage(QWidget):
         self.product_modal.add_to_cart.connect(self.add_to_cart)
         self.product_modal.hide()
         self.product_modal.cancel_clicked.connect(self.resume_camera)  # Connect new signal
+        self.warning_animation = None
+        self.blur_effect = QGraphicsBlurEffect()
+        self.blur_effect.setBlurRadius(0)
+        self.opacity_effect = QGraphicsOpacityEffect()
+        self.opacity_effect.setOpacity(1)
         
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -162,19 +170,40 @@ class ShoppingPage(QWidget):
         self.right_layout.setContentsMargins(20, 35, 20, 20)
         self.right_layout.setSpacing(0)
 
-        # Fixed header container
+        # Fixed header container with horizontal layout
         self.header_widget = QWidget()
         self.header_widget.setFixedHeight(60)
         self.header_widget.setStyleSheet("background-color: transparent;")
-        header_layout = QVBoxLayout(self.header_widget)
+        header_layout = QHBoxLayout(self.header_widget)
         header_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Cart Header (fixed position)
+        # Cart Header (left aligned)
         self.cart_header = QLabel("Your Cart")
         self.cart_header.setFont(QFont("Baloo", 24))
         self.cart_header.setStyleSheet("color: black; padding-top: 10px;")
         header_layout.addWidget(self.cart_header)
-        
+
+        # Cancel Shopping button (right aligned)
+        self.cancel_shopping_btn = QPushButton("Cancel shopping")
+        self.cancel_shopping_btn.setFixedSize(120, 35)
+        self.cancel_shopping_btn.setStyleSheet("""
+            QPushButton {
+                background-color: white;
+                border: 1px solid #D32F2F;
+                border-radius: 17px;
+                color: #D32F2F;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #D32F2F;
+                color: white;
+            }
+        """)
+        self.cancel_shopping_btn.clicked.connect(self.show_cancel_dialog)
+        self.cancel_shopping_btn.hide()  # Initially hidden
+        header_layout.addWidget(self.cancel_shopping_btn, alignment=Qt.AlignRight | Qt.AlignVCenter)
+
         # Add fixed header to main layout
         self.right_layout.addWidget(self.header_widget)
 
@@ -370,6 +399,9 @@ class ShoppingPage(QWidget):
             # Add scroll area to content layout with margins to avoid header/footer
             self.content_layout.addWidget(scroll_area)
 
+        # Show/hide cancel shopping button based on cart state
+        self.cancel_shopping_btn.setVisible(bool(self.cart_state.cart_items))
+
         # Calculate total amount
         total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_state.cart_items) if self.cart_state.cart_items else 0
         formatted_total = "{:,.0f}".format(total_amount).replace(',', '.')
@@ -380,8 +412,11 @@ class ShoppingPage(QWidget):
         total_layout.setContentsMargins(0, 0, 0, 10)
         total_layout.addStretch()
         
-        # Update total label with actual amount
-        total_label = QLabel(f"Total {formatted_total} vnđ")
+        # Update total label with different colors
+        total_label = QLabel()
+        total_label.setText(f'<span style="color: #000000;">Total </span>'
+                          f'<span style="color: #D30E11;">{formatted_total} vnđ</span>')
+        total_label.setTextFormat(Qt.RichText)
         total_label.setStyleSheet("""
             margin-right: 15px;
             font-family: Inter;
@@ -410,6 +445,63 @@ class ShoppingPage(QWidget):
         self.content_layout.addWidget(total_container)
 
     def show_payment_page(self):
+        total_amount = sum(float(product['price']) * quantity 
+                         for product, quantity in self.cart_state.cart_items)
+        if total_amount == 0:
+            # Create warning animation effect
+            from PyQt5.QtCore import QPropertyAnimation, QEasingCurve
+            button = self.sender()  # Get the payment button that was clicked
+            
+            # Create scale animation
+            self.warning_animation = QPropertyAnimation(button, b"geometry")
+            self.warning_animation.setDuration(500)  # 500ms for zoom
+            
+            # Get current geometry
+            current_geo = button.geometry()
+            center = current_geo.center()
+            
+            # Set keyframes
+            self.warning_animation.setKeyValueAt(0, current_geo)  # Start normal
+            
+            # Calculate zoomed geometry (10% larger)
+            zoomed = current_geo.adjusted(-5, -2, 5, 2)
+            zoomed.moveCenter(center)
+            self.warning_animation.setKeyValueAt(0.5, zoomed)  # Middle zoomed
+            
+            self.warning_animation.setKeyValueAt(1, current_geo)  # End normal
+            
+            # Use easing curve for smooth animation
+            self.warning_animation.setEasingCurve(QEasingCurve.OutElastic)
+            
+            # Change button color to yellow during animation
+            button.setStyleSheet("""
+                QPushButton {
+                    background-color: #FF9966;
+                    color: black;
+                    border-radius: 20px;
+                    font-weight: bold;
+                }
+            """)
+            
+            # Reset button style after animation
+            def reset_style():
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #4E8F5F;
+                        color: white;
+                        border-radius: 20px;
+                        font-weight: bold;
+                    }
+                    QPushButton:hover {
+                        background-color: #2C513F;
+                    }
+                """)
+            
+            self.warning_animation.finished.connect(reset_style)
+            self.warning_animation.start()
+            return
+            
+        # Only proceed if cart has items
         from page5_qrcode import QRCodePage
         self.payment_page = QRCodePage()
         self.payment_page.show()
@@ -490,18 +582,73 @@ class ShoppingPage(QWidget):
                 self.camera_label.setPixmap(pixmap)
 
     def add_to_cart(self, product, quantity):
-        # Sử dụng cart_state thay vì xử lý trực tiếp
-        self.cart_state.add_item(product, quantity)
+        is_existing = self.cart_state.add_item(product, quantity)
         self.update_cart_display()
-        return False
+        self.resume_camera()  # Add this line to resume camera after adding to cart
+        return is_existing
 
     def resume_camera(self):
         self.product_detected = False
         self.camera_frame.show()
         self.start_camera()
 
+    def show_cancel_dialog(self):
+        # Stop camera if running
+        if self.camera_active:
+            self.stop_camera()
+
+        # Create container for blurred background
+        blur_container = QWidget(self)
+        blur_container.setGeometry(0, 0, self.width(), self.height())
+        blur_container.setStyleSheet("background-color: rgba(255, 255, 255, 0.5);")
+        
+        # Apply blur effect
+        self.blur_effect.setBlurRadius(0)
+        blur_container.setGraphicsEffect(self.blur_effect)
+        
+        # Show dialog
+        dialog = CancelShoppingModal(self)
+        dialog.timer = self.timer
+        
+        # Center dialog
+        dialog_x = (self.width() - dialog.width()) // 2
+        dialog_y = (self.height() - dialog.height()) // 2
+        dialog.move(dialog_x, dialog_y)
+        
+        # Setup animations
+        blur_anim = QPropertyAnimation(self.blur_effect, b"blurRadius")
+        blur_anim.setDuration(200)
+
+        # Show and animate in
+        blur_container.show()
+        blur_container.raise_()
+        dialog.raise_()
+        
+        blur_anim.setStartValue(0)
+        blur_anim.setEndValue(15)
+        blur_anim.start()
+        
+        result = dialog.exec_()
+
+        # Animate out and cleanup
+        unblur_anim = QPropertyAnimation(self.blur_effect, b"blurRadius")
+        unblur_anim.setDuration(200)
+        unblur_anim.setStartValue(15)
+        unblur_anim.setEndValue(0)
+        
+        def finish_cleanup():
+            blur_container.deleteLater()
+            # Resume camera only if Not Now was clicked
+            if result == QDialog.Rejected and not dialog.home_page:
+                self.resume_camera()
+                
+        unblur_anim.finished.connect(finish_cleanup)
+        unblur_anim.start()
+
     def closeEvent(self, event):
         self.stop_camera()
+        if hasattr(self, 'home_page') and self.home_page:
+            self.home_page.show()
         super().closeEvent(event)
 
 if __name__ == '__main__':

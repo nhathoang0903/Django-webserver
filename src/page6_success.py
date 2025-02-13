@@ -3,16 +3,26 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton,
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QFontDatabase
 import os
+import json
+import random
+import datetime
+import requests
+from cart_state import CartState
 
 class SuccessPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.load_fonts()  # Thêm load fonts
+        self.cart_state = CartState()
+        self.load_fonts()
         self.init_ui()
-        # Auto redirect after 5 seconds
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.go_home)
-        self.timer.start(5000)
+        # Try to send data to API first
+        if self.send_to_history_api():
+            # Only clear cart and start timer if data was sent successfully
+            self.cart_state.clear_cart()
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.go_home)
+            self.timer.start(5000)
+
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
@@ -22,6 +32,47 @@ class SuccessPage(QWidget):
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
+
+    def send_to_history_api(self):
+        """Return True if data was sent successfully"""
+        try:
+            # Read shopping process data
+            with open(CartState.JSON_PATH, 'r') as f:
+                shopping_data = json.load(f)
+
+            # Prepare product list
+            product_list = []
+            for product in shopping_data["detected_products"]:
+                product_list.append({
+                    "name": product["product_name"],
+                    "quantity": product["quantity"],
+                    "price": product["price"] / product["quantity"]  # Price per unit
+                })
+
+            # Prepare payload
+            payload = {
+                "purchase_id": random.randint(1, 100),
+                "random_id": str(random.randint(10000, 99999)),
+                "timestamp": datetime.datetime.now().isoformat(),
+                "total_amount": str(shopping_data["total_bill"]),
+                "product": json.dumps(product_list)
+            }
+
+            # Send POST request
+            response = requests.post(
+                'http://127.0.0.1:8000/history/',
+                json=payload
+            )
+
+            if response.status_code == 201:
+                print("Successfully sent purchase history to API")
+                print(f"Response: {response.json()}")
+                return True
+            return False
+
+        except Exception as e:
+            print(f"Error sending data to history API: {e}")
+            return False
 
     def init_ui(self):
         self.setWindowTitle('Payment Success')
@@ -122,8 +173,8 @@ class SuccessPage(QWidget):
 
     def go_home(self):
         self.timer.stop()
-        from page1_welcome import WelcomePage  # Import page1 thay vì page3
-        self.home_page = WelcomePage()  # Tạo instance của WelcomePage
+        from page1_welcome import WelcomePage  # Import page1
+        self.home_page = WelcomePage()  # create instance for WelcomePage
         self.home_page.show()
         self.close()
 

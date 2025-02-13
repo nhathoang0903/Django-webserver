@@ -1,0 +1,10 @@
+{
+    "detected_products": [
+        {
+            "product_name": "Hao_Hao_Cup_Noodles",
+            "quantity": 1,
+            "price": 8000.0
+        }
+    ],
+    "total_bill": 8000.0
+}

@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
                            QFrame, QApplication)
-from PyQt5.QtCore import Qt, QTimer, QDateTime
+from PyQt5.QtCore import Qt, QTimer, QDateTime, pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QImage, QColor, QBitmap, QFontDatabase
 import os
 import requests
@@ -16,9 +16,28 @@ from cart_state import CartState
 from threading import Thread
 
 class QRCodePage(QWidget):
+    switch_to_success = pyqtSignal()  # Add signal for page switching
+    
     def __init__(self):
         super().__init__()
         self.cart_state = CartState()
+        # Calculate total first
+        raw_total = sum(float(product['price']) * quantity 
+                       for product, quantity in self.cart_state.cart_items)
+        self.total_amount = int(raw_total)
+        
+        # Check if total is zero
+        if self.total_amount == 0:
+            from PyQt5.QtWidgets import QMessageBox
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Invalid total amount")
+            msg.setInformativeText("Cannot generate QR code for zero amount.")
+            msg.setWindowTitle("Error")
+            msg.exec_()
+            self.close()
+            return
+            
         pygame.mixer.init()  # Initialize pygame for sound
         self.qr_start_time = None  # Add start time tracking
         self.processed_transaction_ids = set()  # Thêm set để lưu các ID đã xử lý
@@ -37,6 +56,8 @@ class QRCodePage(QWidget):
         self.load_qr_code()
         # Start transaction check after QR is loaded
         self.start_transaction_check()
+        self.switch_to_success.connect(self.handle_success)  # Connect signal to handler
+
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
@@ -51,7 +72,7 @@ class QRCodePage(QWidget):
         self.setWindowTitle('QR Code Payment')
         self.setGeometry(100, 100, 800, 480)
         self.setFixedSize(800, 480)
-        self.setStyleSheet("background-color: #F0F6F1;")
+        self.setStyleSheet("background-color: #F5F9F7;")
 
         # Set window icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
@@ -303,11 +324,8 @@ class QRCodePage(QWidget):
                                 pygame.mixer.music.play()
                                 pygame.time.wait(1000)
                                 
-                                # Chuyển sang success page
-                                from page6_success import SuccessPage
-                                self.success_page = SuccessPage()
-                                self.success_page.show()
-                                self.close()
+                                # Emit signal instead of directly switching pages
+                                self.switch_to_success.emit()
                                 break
 
                 time.sleep(0.2)
@@ -315,6 +333,15 @@ class QRCodePage(QWidget):
             except Exception as e:
                 print(f"Error checking transaction: {e}")
                 time.sleep(0.2)
+
+    def handle_success(self):
+        """Handle successful transaction in main thread"""
+        self.countdown_timer.stop()
+        # Don't clear cart here anymore - let page6 handle it
+        from page6_success import SuccessPage
+        self.success_page = SuccessPage()
+        self.success_page.show()
+        self.close()
 
     def closeEvent(self, event):
         self.countdown_timer.stop()

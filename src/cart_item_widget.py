@@ -20,6 +20,10 @@ class CartItemWidget(QFrame):
         self.quantity = quantity
         self.product = product
         
+        # Add instance variables for price
+        self.unit_price = float(product['price'])
+        self.current_price = self.unit_price * quantity
+        
         self.setFixedHeight(100)  # Reduced from 110 to 100
         self.setFixedWidth(350)   # Increased width from 320 to 350
         
@@ -206,16 +210,16 @@ class CartItemWidget(QFrame):
         right_layout.setContentsMargins(10, 3, 0, 0)  # Reduced top margin
         right_layout.setSpacing(5)  # Reduced from 8
         
-        # Price
-        price_str = "{:,.0f}".format(float(product['price'])).replace(',', '.')
-        price_label = QLabel(f"{price_str} vnd")
-        price_label.setFont(QFont("Istok Web", 9, QFont.Bold))
-        price_label.setStyleSheet("""
+        # Modify price label to show total price
+        self.price_label = QLabel()
+        self.price_label.setFont(QFont("Istok Web", 9, QFont.Bold))
+        self.price_label.setStyleSheet("""
             background-color: white;
             color: #FF0000;
         """)
-        price_label.setAlignment(Qt.AlignRight)  # Align price to the right
-        right_layout.addWidget(price_label)
+        self.price_label.setAlignment(Qt.AlignRight)
+        self.update_price_display()  # Update initial price display
+        right_layout.addWidget(self.price_label)
         
         # Remove button with larger icon but same button size
         remove_btn = QPushButton()
@@ -256,14 +260,23 @@ class CartItemWidget(QFrame):
         self.slide_animation.setEasingCurve(QEasingCurve.InOutQuad)
         self.slide_animation.finished.connect(self._on_animation_finished)
         
+    def update_price_display(self):
+        """Update the price display based on current quantity"""
+        self.current_price = self.unit_price * self.quantity
+        price_str = "{:,.0f}".format(self.current_price).replace(',', '.')
+        self.price_label.setText(f"{price_str} vnđ")
+
     def increase_quantity(self):
         self.quantity += 1
         self.quantity_label.setText(str(self.quantity))
+        self.update_price_display()  # Update price when quantity changes
         self.quantityChanged.emit(self.quantity)
         
     def decrease_quantity(self):
         if self.quantity > 1:
             self.quantity -= 1
+            self.quantity_label.setText(str(self.quantity))
+            self.update_price_display()  # Update price when quantity changes
             self.quantityChanged.emit(self.quantity)
         else:
             self.remove_item()
