@@ -33,10 +33,11 @@ class ShoppingPage(QWidget):
         self.product_modal.hide()
         self.product_modal.cancel_clicked.connect(self.resume_camera)  # Connect new signal
         self.warning_animation = None
-        self.blur_effect = QGraphicsBlurEffect()
-        self.blur_effect.setBlurRadius(0)
-        self.opacity_effect = QGraphicsOpacityEffect()
-        self.opacity_effect.setOpacity(1)
+        self.blur_effect = None
+        self.opacity_effect = None
+        self.cancel_modal = CancelShoppingModal(self)
+        self.cancel_modal.cancelled.connect(self.go_home)
+        self.cancel_modal.hide()
         
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -188,10 +189,10 @@ class ShoppingPage(QWidget):
         self.cancel_shopping_btn.setFixedSize(120, 35)
         self.cancel_shopping_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
-                border: 1px solid #D32F2F;
+                background-color: #F3F3F3;
+                border: 1px solid #D30E11;
                 border-radius: 17px;
-                color: #D32F2F;
+                color: #D30E11;
                 font-weight: bold;
                 font-size: 12px;
             }
@@ -572,7 +573,7 @@ class ShoppingPage(QWidget):
                 # Update camera view (behind modal)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  
                 h, w, ch = frame.shape
-                scale = min(0.8,0.8)
+                scale = min(1,1)
                 new_w, new_h = int(w * scale), int(h * scale)
                 frame = cv2.resize(frame, (new_w, new_h))
                 
@@ -593,57 +594,113 @@ class ShoppingPage(QWidget):
         self.start_camera()
 
     def show_cancel_dialog(self):
-        # Stop camera if running
         if self.camera_active:
             self.stop_camera()
 
-        # Create container for blurred background
-        blur_container = QWidget(self)
-        blur_container.setGeometry(0, 0, self.width(), self.height())
-        blur_container.setStyleSheet("background-color: rgba(255, 255, 255, 0.5);")
-        
-        # Apply blur effect
+        # Create new effects each time
+        self.blur_effect = QGraphicsBlurEffect()
         self.blur_effect.setBlurRadius(0)
-        blur_container.setGraphicsEffect(self.blur_effect)
+        self.opacity_effect = QGraphicsOpacityEffect()
+        self.opacity_effect.setOpacity(1)
+
+        # Create blur container
+        self.blur_container = QWidget(self)
+        self.blur_container.setGeometry(0, 0, self.width(), self.height())
+        self.blur_container.setStyleSheet("background-color: rgba(255, 255, 255, 0.5);")
+        self.blur_container.setGraphicsEffect(self.blur_effect)
         
-        # Show dialog
-        dialog = CancelShoppingModal(self)
-        dialog.timer = self.timer
+        def finish_cleanup():
+            if self.blur_effect:
+                self.blur_effect.setBlurRadius(0)
+            if self.opacity_effect:
+                self.opacity_effect.setOpacity(1)
+            if self.blur_container:
+                self.blur_container.hide()
+                self.blur_container.deleteLater()
+            self.blur_container = None
+            self.blur_effect = None
+            self.opacity_effect = None
+            self.resume_camera()
         
-        # Center dialog
-        dialog_x = (self.width() - dialog.width()) // 2
-        dialog_y = (self.height() - dialog.height()) // 2
-        dialog.move(dialog_x, dialog_y)
+        # Kết nối signal not_now với hàm cleanup
+        self.cancel_modal.not_now.connect(finish_cleanup)
         
-        # Setup animations
+        # Position modal in center
+        modal_x = (self.width() - self.cancel_modal.width()) // 2
+        modal_y = (self.height() - self.cancel_modal.height()) // 2 
+        self.cancel_modal.move(modal_x, modal_y)
+        
+        # Show and animate
+        self.blur_container.show()
+        self.blur_container.raise_()
+        self.cancel_modal.show()
+        self.cancel_modal.raise_()
+        
+        # Animate blur
         blur_anim = QPropertyAnimation(self.blur_effect, b"blurRadius")
         blur_anim.setDuration(200)
-
-        # Show and animate in
-        blur_container.show()
-        blur_container.raise_()
-        dialog.raise_()
-        
         blur_anim.setStartValue(0)
         blur_anim.setEndValue(15)
         blur_anim.start()
-        
-        result = dialog.exec_()
 
-        # Animate out and cleanup
-        unblur_anim = QPropertyAnimation(self.blur_effect, b"blurRadius")
-        unblur_anim.setDuration(200)
-        unblur_anim.setStartValue(15)
-        unblur_anim.setEndValue(0)
+        # Update button style when modal shows
+        self.cancel_shopping_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FED87B;
+                border: 1px solid #FED87B;
+                border-radius: 17px;
+                color: #D30E11;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #B71C1C;
+                color: white;
+            }
+        """)
         
-        def finish_cleanup():
-            blur_container.deleteLater()
-            # Resume camera only if Not Now was clicked
-            if result == QDialog.Rejected and not dialog.home_page:
-                self.resume_camera()
-                
-        unblur_anim.finished.connect(finish_cleanup)
-        unblur_anim.start()
+        # Show modal
+        self.blur_container.show()
+        self.blur_container.raise_()
+        self.cancel_modal.show()
+        self.cancel_modal.raise_()
+        
+        def cleanup():
+            # Reset button style when modal hides
+            self.cancel_shopping_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #F3F3F3;
+                    border: 1px solid #D30E11;
+                    border-radius: 17px;
+                    color: #D30E11;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                QPushButton:hover {
+                    background-color: #D32F2F;
+                    color: white;
+                }
+            """)
+            if self.blur_effect:
+                self.blur_effect.setBlurRadius(0)
+            if self.opacity_effect:
+                self.opacity_effect.setOpacity(1)
+            if self.blur_container:
+                self.blur_container.hide()
+                self.blur_container.deleteLater()
+            self.blur_container = None
+            self.blur_effect = None
+            self.opacity_effect = None
+            self.resume_camera()
+
+        self.cancel_modal.not_now.connect(cleanup)
+
+    def go_home(self):
+        from page1_welcome import WelcomePage
+        self.cart_state.clear_cart()
+        self.home_page = WelcomePage()
+        self.home_page.show()
+        self.close()
 
     def closeEvent(self, event):
         self.stop_camera()

@@ -62,5 +62,7 @@ class CartState:
             if os.path.exists(self.JSON_PATH):
                 os.remove(self.JSON_PATH)
                 print("Cart data file removed successfully")
+            # Re-initialize with empty cart
+            self.save_to_json()  # Add this line to create new empty cart file
         except Exception as e:
             print(f"Error removing cart data file: {e}")

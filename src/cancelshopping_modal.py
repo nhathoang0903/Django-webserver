@@ -1,108 +1,154 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QFontDatabase
+import os
 
-class CancelShoppingModal(QDialog):
+class CancelShoppingModal(QFrame):
+    cancelled = pyqtSignal()
+    not_now = pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(400, 200)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, False)  # Change this line
+        self.setFixedSize(350, 250)  
         self.setStyleSheet("""
-            QDialog {
+            QFrame {
                 background-color: white;
-                border-radius: 20px;
-                border: 1px solid #CCCCCC;
+                border: 1px solid #000000;
             }
         """)
-        
+
         self.init_ui()
-        self.parent = parent  # Store parent reference
-        self.home_page = None  # Add this line to store reference to home page
+    def load_fonts(self):
+        font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
     def init_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setContentsMargins(0, 0, 0, 25)
 
-        # Header with text and X button
-        header_layout = QHBoxLayout()
+        # Header with adjusted X button position
+        header_container = QFrame()
+        header_container.setFixedHeight(45)
+        header_container.setStyleSheet("background-color: #F5F75C;")  
+        header_container_layout = QHBoxLayout(header_container)
+        header_container_layout.setContentsMargins(15, 0, 0, 0)  # Remove right margin
+
         title = QLabel("Are you sure you want to cancel?")
-        title.setStyleSheet("font-family: Inter; font-size: 16px; font-weight: bold;")
-        header_layout.addWidget(title)
-        
-        close_btn = QPushButton("×")
-        close_btn.setFixedSize(20, 20)
+        title.setStyleSheet("""
+            font-family: Inria Sans;
+            font-size: 16px;
+            font-weight: bold;
+            background: transparent;
+            border: none;
+        """)
+
+        close_btn = QPushButton("X")
+        close_btn.setFixedSize(45, 45)  # Make square
         close_btn.setStyleSheet("""
             QPushButton {
-                border: none;
-                font-size: 16px;
+                font-family: Inria Sans;
+                border-left: 1px solid #000000;
+                color: #F50A0A;
+                font-size: 20px;
                 font-weight: bold;
+                background: white;
+                margin: 0px;
+                padding: 0px;
+            }
+            QPushButton:hover {
                 color: #666666;
             }
-            QPushButton:hover {
-                color: #000000;
-            }
         """)
-        close_btn.clicked.connect(self.reject)
-        header_layout.addWidget(close_btn, alignment=Qt.AlignRight)
-        layout.addLayout(header_layout)
+        close_btn.clicked.connect(self.handle_not_now)
 
-        # Message
-        message = QLabel("Any items you have added to the cart will be removed,\nand your current progress will be lost.")
-        message.setStyleSheet("font-family: Inter; font-size: 14px; color: #666666;")
-        message.setWordWrap(True)
-        layout.addWidget(message)
+        header_container_layout.addWidget(title)
+        header_container_layout.addStretch()
+        header_container_layout.addWidget(close_btn, 0, Qt.AlignRight)
+        layout.addWidget(header_container)
 
-        # Add stretch to push buttons to bottom
-        layout.addStretch()
+        # Message container with proper margins
+        message_container = QWidget()
+        message_layout = QVBoxLayout(message_container)
+        message_layout.setContentsMargins(20, 30, 20, 30)
 
-        # Buttons
-        button_layout = QHBoxLayout()
-        button_layout.setSpacing(10)
+        message = QLabel("Any items you have added to the cart will be\nremoved, and your current progress will be lost.")
+        message.setStyleSheet("""
+            font-family: Inria Sans;
+            font-size: 13px;
+            color: #000000;
+            font-weight: bold;
+            background: transparent;
+            border: none;
+            padding: 10px;
+        """)
+        message.setAlignment(Qt.AlignLeft)
+        message_layout.addWidget(message)
+        layout.addWidget(message_container)
+
+        # Add spacing before buttons
+        layout.addSpacing(20)
+
+        # Buttons container
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setSpacing(20)
 
         not_now_btn = QPushButton("Not now")
-        not_now_btn.setFixedSize(120, 40)
+        not_now_btn.setFixedSize(120, 35)
         not_now_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
-                border: 1px solid #507849;
-                border-radius: 20px;
-                color: #507849;
+                background-color: #D9D9D9;
+                border: none;
+                border-radius: 14px;
+                color: black;
+                font-size: 12px;
                 font-weight: bold;
             }
-            QPushButton:hover {
-                background-color: #F0F6F1;
-            }
+            # QPushButton:hover {
+            #     background-color: #d0d0d0;
+            # }
         """)
-        not_now_btn.clicked.connect(self.reject)
-        
-        cancel_btn = QPushButton("Cancel shopping")
-        cancel_btn.setFixedSize(120, 40)
+        not_now_btn.clicked.connect(self.handle_not_now)
+
+        cancel_btn = QPushButton("Cancel payment")
+        cancel_btn.setFixedSize(120, 35)
         cancel_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
-                border: 1px solid #D32F2F;
-                border-radius: 20px;
-                color: #D32F2F;
+                background-color: #FB595C;
+                border: none;
+                border-radius: 14px;
+                color: #000000;
+                font-size: 12px;
                 font-weight: bold;
             }
-            QPushButton:hover {
-                background-color: #D32F2F;
-                color: white;
-            }
+            # QPushButton:hover {
+            #     background-color: #ff3333;
+            # }
         """)
-        cancel_btn.clicked.connect(self.go_home)  
-        
+        cancel_btn.clicked.connect(self.handle_cancel)
+
+        button_layout.addStretch()
         button_layout.addWidget(not_now_btn)
         button_layout.addWidget(cancel_btn)
-        layout.addLayout(button_layout)
+        button_layout.addStretch()
+        
+        layout.addWidget(button_container)
+        layout.addStretch(1)  # Giữ buttons ở vị trí thấp hơn
 
-    def go_home(self):
-        from page1_welcome import WelcomePage
-        self.home_page = WelcomePage()  # Store as instance variable
-        if self.parent:
-            self.parent.home_page = self.home_page  # Also store in parent
-            self.parent.close()  # Close shopping page
-        self.home_page.show()
-        self.accept()  # Close modal
+    def handle_not_now(self):
+        if self.parent and hasattr(self.parent, 'blur_container'):
+            self.parent.blur_effect.setBlurRadius(0)
+            self.parent.opacity_effect.setOpacity(1)
+        self.not_now.emit()
+        self.hide()
+
+    def handle_cancel(self):
+        self.cancelled.emit()
+        self.hide()

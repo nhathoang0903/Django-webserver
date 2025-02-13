@@ -4,10 +4,14 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
 from page2_instruction import InstructionPage  
 import os
+from cart_state import CartState  # Add this import
 
 class WelcomePage(QWidget):
     def __init__(self):
         super().__init__()
+        # Clear any existing cart data when welcome page opens
+        cart_state = CartState()
+        cart_state.clear_cart()
         self.load_fonts()
         self.init_ui()
 
