@@ -4,10 +4,28 @@ import json
 import os
 
 class ProductDetector:
+    _instance = None
+    _is_initialized = False
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ProductDetector, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self):
-        model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'model25nv2.pt')
-        self.model = YOLO(model_path)
-        self.load_product_data()
+        if not ProductDetector._is_initialized:
+            self.model = None
+            self.products = None
+            self.load_product_data()
+            ProductDetector._is_initialized = True
+    
+    @classmethod
+    def preload_model(cls):
+        """Call this method early in the application to start loading the model"""
+        instance = cls()
+        if instance.model is None:
+            model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'model25nv2_openvino_model/')
+            instance.model = YOLO(model_path)
     
     def load_product_data(self):
         json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'products.json')
@@ -15,6 +33,9 @@ class ProductDetector:
             self.products = json.load(f)
     
     def detect_product(self, frame):
+        if self.model is None:
+            self.preload_model()
+        
         results = self.model(frame)
         
         if not results or len(results[0].boxes) == 0:
