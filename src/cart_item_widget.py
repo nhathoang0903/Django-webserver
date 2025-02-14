@@ -4,6 +4,9 @@ from PyQt5.QtGui import QPixmap, QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint, QTimer
 import os
 from urllib.request import urlopen
+from rembg import remove
+from PIL import Image
+from io import BytesIO
 
 class CartItemWidget(QFrame):
     quantityChanged = pyqtSignal(int)  # Signal for quantity changes
@@ -57,19 +60,34 @@ class CartItemWidget(QFrame):
         image_label.setFixedSize(*image_size)
         image_label.setStyleSheet("""
             QLabel {
-                background-color: white;
+                background-color: transparent;
                 border: none;
             }
         """)
         
         try:
+            # Tải ảnh từ URL
             image_data = urlopen(product['image_url']).read()
+            
+            # Chuyển đổi sang PIL Image và remove background
+            input_image = Image.open(BytesIO(image_data))
+            output_image = remove(input_image)
+            
+            # Chuyển đổi lại thành QPixmap với transparency
+            byte_array = BytesIO()
+            output_image.save(byte_array, format='PNG')
+            image_bytes = byte_array.getvalue()
+            
             pixmap = QPixmap()
-            pixmap.loadFromData(image_data)
-            scaled_pixmap = pixmap.scaled(image_size[0], image_size[1], 
+            pixmap.loadFromData(image_bytes)
+            
+            # Scale theo kích thước category
+            scaled_pixmap = pixmap.scaled(image_size[0], image_size[1],
                                         Qt.KeepAspectRatio, Qt.SmoothTransformation)
             image_label.setPixmap(scaled_pixmap)
-        except:
+            
+        except Exception as e:
+            print(f"Error loading/processing image: {e}")
             image_label.setText("N/A")
         
         image_label.setAlignment(Qt.AlignCenter)
@@ -105,7 +123,7 @@ class CartItemWidget(QFrame):
         name_label.setStyleSheet("""
             QLabel {
                 color: #000000; 
-                background-color: white;
+                background-color: transparent;
                 qproperty-alignment: AlignCenter;
                 margin: 0px;
                 padding: 0px;
@@ -232,7 +250,7 @@ class CartItemWidget(QFrame):
         remove_btn.setStyleSheet("""
             QPushButton {
                 border: none;
-                background-color: white;
+                background-color: transparent;
                 padding: 0px;
             }
             QPushButton:hover {
@@ -293,3 +311,33 @@ class CartItemWidget(QFrame):
     def _on_animation_finished(self):
         self.hide()  # Hide widget after animation
         self.itemRemoved.emit()  # Emit signal to trigger removal
+
+    def highlight(self):
+        """Highlight the widget with animation"""
+        # Set style trực tiếp trước
+        self.setStyleSheet("""
+            QFrame {
+                background-color: #F8FFAA;
+                border-radius: 15px;
+                padding: 5px;
+            }
+        """)
+        
+        # Set style cho tất cả widget con
+        for widget in self.findChildren(QWidget):
+            current_style = widget.styleSheet()
+            widget.setStyleSheet(current_style + "background-color: #F8FFAA;")
+        
+        # Tạo animation để chuyển về màu trắng sau 5s
+        def reset_styles():
+            self.setStyleSheet("""
+                QFrame {
+                    background-color: white;
+                    border-radius: 15px;
+                    padding: 5px;
+                }
+            """)
+            for widget in self.findChildren(QWidget):
+                widget.setStyleSheet(widget.styleSheet().replace("background-color: #F8FFAA;", "background-color: white;"))
+        
+        QTimer.singleShot(5000, reset_styles)

@@ -27,11 +27,14 @@ class ProductDetector:
         
         if confidence < 0.5:  # Minimum confidence threshold
             return None
-            
-        # Trả về product data với image_url gốc từ JSON
+
+        # Lấy tên sản phẩm từ kết quả detect
+        detected_name = results[0].names[class_id]
+        
+        # Tìm sản phẩm trong json dựa vào tên chính xác
         for product in self.products:
-            if product['product_id'] == class_id:
-                # Không thêm đường dẫn folder vào image_url
+            if product['name'] == detected_name:
                 return product
                 
+        print(f"Warning: Detected {detected_name} but no matching product in JSON")
         return None

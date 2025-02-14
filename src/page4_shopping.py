@@ -1,3 +1,5 @@
+import weakref
+from functools import lru_cache
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
                            QPushButton, QApplication, QFrame, QGridLayout, QScrollArea, QDialog, QGraphicsBlurEffect, QGraphicsOpacityEffect)
 from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation
@@ -11,33 +13,61 @@ from cart_state import CartState
 from cancelshopping_modal import CancelShoppingModal
 
 class ShoppingPage(QWidget):
+    # Class level attributes for critical components
+    _current_frame = None
+    _processing = False
+    _widgets_cache = None
+    _image_cache = None
+    _cleanup_tasks = None
+    _detector = None
+    _product_modal = None
+    _cancel_modal = None
+
     def __init__(self):
         super().__init__()
-        self.home_page = None  # Add this line
-        self.cart_state = CartState()  # Thêm dòng này
-        self.cart_state.save_to_json()  # Initialize cart by saving empty state
-        self.cart_items = []
+        
+        # Initialize memory management attributes first
+        ShoppingPage._current_frame = None  # Ensure class attribute is initialized
+        self._processing = False
+        self._widgets_cache = weakref.WeakValueDictionary()
+        self._image_cache = {}
+        self._cleanup_tasks = []
+        self.frame_count = 0
+        
+        # Initialize camera related attributes
         self.camera = None
+        self.camera_active = False
+        self.product_detected = False
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
-        self.camera_active = False
-        self.product_detected = False  # Move initialization here
-        self.load_fonts()
-        self.right_section = None  # Add this line
-        self.init_ui()
-        self.detector = ProductDetector()
-        camera_height = 299  # Camera frame height
-        self.product_modal = ProductModal(camera_height=camera_height//2)  # Pass 50% of camera height
-        self.product_modal.setGeometry(0, 0, 271, 299)  # Match camera frame size
-        self.product_modal.add_to_cart.connect(self.add_to_cart)
-        self.product_modal.hide()
-        self.product_modal.cancel_clicked.connect(self.resume_camera)  # Connect new signal
-        self.warning_animation = None
+
+        # Initialize other components
+        self.home_page = None
+        self.cart_state = CartState()
+        self.cart_state.save_to_json()
+        self.cart_items = []
+        self.right_section = None
         self.blur_effect = None
         self.opacity_effect = None
+        self.warning_animation = None
+
+        # Initialize UI 
+        self.load_fonts()
+        self.init_ui()
+        
+        # Initialize modals
+        camera_height = 299
+        self.product_modal = self.get_product_modal()
         self.cancel_modal = CancelShoppingModal(self)
         self.cancel_modal.cancelled.connect(self.go_home)
         self.cancel_modal.hide()
+        
+    @lru_cache(maxsize=32)
+    def load_cached_image(self, path):
+        """Cache image loading to reduce memory usage"""
+        if path not in self._image_cache:
+            self._image_cache[path] = QPixmap(path)
+        return self._image_cache[path]
         
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -76,7 +106,7 @@ class ShoppingPage(QWidget):
         # Top section with logo - Row 0
         logo_label = QLabel()
         logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'logo.png')
-        logo_pixmap = QPixmap(logo_path)
+        logo_pixmap = self.load_cached_image(logo_path)
         if not logo_pixmap.isNull():
             logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setContentsMargins(0, 0, 0, 15)  # Add bottom margin to logo
@@ -279,12 +309,10 @@ class ShoppingPage(QWidget):
             return button
 
     def update_cart_display(self):
-        # Clear only the content area
-        for i in reversed(range(self.content_layout.count())):
-            widget = self.content_layout.itemAt(i).widget()
-            if widget is not None:
-                widget.deleteLater()
-
+        """Memory-optimized cart display"""
+        # Clear widgets properly
+        self.clear_layout(self.content_layout)
+        
         # Update background color based on cart state
         self.right_section.setStyleSheet(
             f"background-color: {'#F3F3F3' if self.cart_state.cart_items else 'white'};"
@@ -353,7 +381,8 @@ class ShoppingPage(QWidget):
             items_layout.setSpacing(30)
             items_layout.setContentsMargins(0, 0, 20, 0)  # Increased right margin
 
-            # Add cart items in reverse order (newest first)
+            # Add cart items in reverse order (newest first) 
+            highlighted_name = getattr(self, '_highlight_product_name', None)  # Lấy tên sản phẩm cần highlight
             for i, (product, quantity) in enumerate(reversed(self.cart_state.cart_items)):
                 item_widget = CartItemWidget(product, quantity)
                 item_widget.quantityChanged.connect(
@@ -362,6 +391,12 @@ class ShoppingPage(QWidget):
                 item_widget.itemRemoved.connect(
                     lambda idx=len(self.cart_state.cart_items)-1-i: self.remove_cart_item(idx)
                 )
+                
+                # Fix: Check product name against highlighted name and highlight immediately
+                if highlighted_name and product['name'] == highlighted_name:
+                    item_widget.highlight()
+                    self._highlight_product_name = None  # Reset sau khi đã highlight
+                    
                 items_layout.addWidget(item_widget)
 
             # Adjust scrollbar positioning
@@ -449,58 +484,12 @@ class ShoppingPage(QWidget):
         total_amount = sum(float(product['price']) * quantity 
                          for product, quantity in self.cart_state.cart_items)
         if total_amount == 0:
-            # Create warning animation effect
-            from PyQt5.QtCore import QPropertyAnimation, QEasingCurve
-            button = self.sender()  # Get the payment button that was clicked
-            
-            # Create scale animation
-            self.warning_animation = QPropertyAnimation(button, b"geometry")
-            self.warning_animation.setDuration(500)  # 500ms for zoom
-            
-            # Get current geometry
-            current_geo = button.geometry()
-            center = current_geo.center()
-            
-            # Set keyframes
-            self.warning_animation.setKeyValueAt(0, current_geo)  # Start normal
-            
-            # Calculate zoomed geometry (10% larger)
-            zoomed = current_geo.adjusted(-5, -2, 5, 2)
-            zoomed.moveCenter(center)
-            self.warning_animation.setKeyValueAt(0.5, zoomed)  # Middle zoomed
-            
-            self.warning_animation.setKeyValueAt(1, current_geo)  # End normal
-            
-            # Use easing curve for smooth animation
-            self.warning_animation.setEasingCurve(QEasingCurve.OutElastic)
-            
-            # Change button color to yellow during animation
-            button.setStyleSheet("""
-                QPushButton {
-                    background-color: #FF9966;
-                    color: black;
-                    border-radius: 20px;
-                    font-weight: bold;
-                }
-            """)
-            
-            # Reset button style after animation
-            def reset_style():
-                button.setStyleSheet("""
-                    QPushButton {
-                        background-color: #4E8F5F;
-                        color: white;
-                        border-radius: 20px;
-                        font-weight: bold;
-                    }
-                    QPushButton:hover {
-                        background-color: #2C513F;
-                    }
-                """)
-            
-            self.warning_animation.finished.connect(reset_style)
-            self.warning_animation.start()
+            # Just return if cart is empty - no animation
             return
+            
+        # Stop camera before switching to payment page
+        if self.camera_active:
+            self.stop_camera()
             
         # Only proceed if cart has items
         from page5_qrcode import QRCodePage
@@ -518,9 +507,12 @@ class ShoppingPage(QWidget):
 
     def show_product_page(self):
         from import_module import ImportModule
+        # Stop camera before switching page
+        if self.camera_active:
+            self.stop_camera()
+            
         product_page = ImportModule.get_product_page()
         product_page.show()
-        print("Product Page")
         self.hide()
 
     def toggle_camera(self):
@@ -534,53 +526,83 @@ class ShoppingPage(QWidget):
             self.camera_frame.show()
 
     def start_camera(self):
+        """Optimized camera initialization"""
         if self.camera is None:
-            self.camera = cv2.VideoCapture(0)
+            self.camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Direct Show for Windows
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Reduce resolution
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.camera.set(cv2.CAP_PROP_FPS, 30)
             if not self.camera.isOpened():
                 print("Error: Could not open camera")
                 return
         self.camera_active = True
-        self.timer.start(30)  # Update every 30ms
+        self.timer.start(33)  # ~30 FPS
 
     def stop_camera(self):
+        """Enhanced camera cleanup"""
         self.camera_active = False
         self.timer.stop()
+        
         if self.camera is not None:
             self.camera.release()
             self.camera = None
-        if not self.product_detected:  # Only clear if no product is detected
+            
+        # Safely handle _current_frame
+        if hasattr(self, '_current_frame') and self._current_frame is not None:
+            del self._current_frame
+            self._current_frame = None
+            
+        if not self.product_detected:
             self.camera_label.clear()
+        
+        self._processing = False
 
     def update_frame(self):
-        if self.camera is not None and self.camera_active and not self.product_detected:
-            ret, frame = self.camera.read()
-            if ret:
-                product = self.detector.detect_product(frame)
+        """Optimized frame processing with memory management"""
+        if not (self.camera and self.camera_active and not self.product_detected) or self._processing:
+            return
+
+        self._processing = True
+        ret, frame = self.camera.read()
+        if not ret:
+            self._processing = False
+            return
+
+        # Safely handle _current_frame
+        try:
+            if self._current_frame is not None:
+                del self._current_frame
+                self._current_frame = None
+                
+            # Only process every 3rd frame for detection
+            if self.frame_count % 3 == 0:
+                # Create copy only if needed for detection
+                detect_frame = frame.copy()
+                product = self.get_detector().detect_product(detect_frame)
+                del detect_frame  # Clean up detection frame
                 
                 if product:
-                    self.camera_frame.hide()
-                    self.product_modal.setParent(self)
-                    camera_pos = self.camera_frame.pos()
-                    modal_x = camera_pos.x() - 20
-                    modal_y = camera_pos.y() + (self.camera_frame.height() - self.product_modal.height()) // 2
-                    self.product_modal.setGeometry(modal_x, modal_y, 271, 270)
-                    self.product_modal.show()
-                    self.product_modal.raise_()
-                    self.product_modal.update_product(product)
-                    self.product_detected = True
-                    self.stop_camera()
-                
-                # Update camera view (behind modal)
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  
-                h, w, ch = frame.shape
-                scale = min(1,1)
-                new_w, new_h = int(w * scale), int(h * scale)
-                frame = cv2.resize(frame, (new_w, new_h))
-                
-                bytes_per_line = ch * new_w
-                qt_image = QImage(frame.data, new_w, new_h, bytes_per_line, QImage.Format_RGB888)
-                pixmap = QPixmap.fromImage(qt_image)
-                self.camera_label.setPixmap(pixmap)
+                    self.handle_product_detection(product)
+                    self._processing = False
+                    return
+
+            # Optimize image conversion
+            if frame.shape[0] > 480:
+                frame = cv2.resize(frame, (640, 480))
+
+            # Convert only the region we need
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            h, w, ch = frame.shape
+            
+            # Use direct numpy array for QImage to avoid extra copy
+            self._current_frame = QImage(frame.data, w, h, w * ch, QImage.Format_RGB888)
+            self.camera_label.setPixmap(QPixmap.fromImage(self._current_frame))
+            
+        except Exception as e:
+            print(f"Error in frame processing: {e}")
+        finally:
+            self.frame_count += 1
+            self._processing = False
 
     def add_to_cart(self, product, quantity):
         is_existing = self.cart_state.add_item(product, quantity)
@@ -589,6 +611,10 @@ class ShoppingPage(QWidget):
         return is_existing
 
     def resume_camera(self):
+        # Kiểm tra xem product modal có đang hiển thị không
+        if self.product_modal.isVisible():
+            return  # Không khởi động camera nếu modal đang hiển thị
+        
         self.product_detected = False
         self.camera_frame.show()
         self.start_camera()
@@ -620,8 +646,11 @@ class ShoppingPage(QWidget):
             self.blur_container = None
             self.blur_effect = None
             self.opacity_effect = None
-            self.resume_camera()
-        
+            
+            # Chỉ resume camera nếu không có modal nào đang hiển thị
+            if not self.product_modal.isVisible():
+                self.resume_camera()
+
         # Kết nối signal not_now với hàm cleanup
         self.cancel_modal.not_now.connect(finish_cleanup)
         
@@ -703,10 +732,123 @@ class ShoppingPage(QWidget):
         self.close()
 
     def closeEvent(self, event):
-        self.stop_camera()
+        self.cleanup_resources()
         if hasattr(self, 'home_page') and self.home_page:
             self.home_page.show()
         super().closeEvent(event)
+        
+    def cleanup_resources(self):
+        """Enhanced resource cleanup"""
+        # Clear all caches
+        self._image_cache.clear()
+        self._widgets_cache.clear()
+        
+        if self._current_frame:
+            del self._current_frame
+            
+        # Stop camera and release resources
+        if self.camera:
+            self.stop_camera()
+            
+        # Clean up detector
+        if self._detector:
+            self._detector = None
+
+        # Clean up modals
+        for modal in [self._product_modal, self._cancel_modal]:
+            if modal:
+                modal.deleteLater()
+                modal = None
+
+        # Clean up effects and animations
+        for effect in [self.blur_effect, self.opacity_effect]:
+            if effect:
+                effect.deleteLater()
+                effect = None
+
+        # Remove the warning animation cleanup since we removed the animation
+        if hasattr(self, 'warning_animation') and self.warning_animation:
+            self.warning_animation = None
+
+        # Force garbage collection
+        import gc
+        gc.collect()
+
+    def lazy_init_modals(self):
+        """Lazy initialization of modals"""
+        if not hasattr(self, '_product_modal'):
+            camera_height = 299
+            self._product_modal = ProductModal(camera_height=camera_height//2)
+            self._product_modal.add_to_cart.connect(self.add_to_cart)
+            self._product_modal.cancel_clicked.connect(self.resume_camera)
+            self._product_modal.hide()
+
+        if not hasattr(self, '_cancel_modal'):
+            self._cancel_modal = CancelShoppingModal(self)
+            self._cancel_modal.cancelled.connect(self.go_home)
+            self._cancel_modal.hide()
+
+    def get_product_modal(self):
+        """Lazy load product modal"""
+        if self._product_modal is None:
+            camera_height = 299
+            self._product_modal = ProductModal(camera_height=camera_height//2)
+            self._product_modal.add_to_cart.connect(self.add_to_cart)
+            self._product_modal.cancel_clicked.connect(self.resume_camera)
+            self._product_modal.hide()
+        return self._product_modal
+
+    def get_detector(self):
+        """Lazy load product detector"""
+        if self._detector is None:
+            self._detector = ProductDetector()
+        return self._detector
+
+    def clear_layout(self, layout):
+        """Properly clear layout and widgets"""
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+                else:
+                    self.clear_layout(item.layout())
+
+    def handle_product_detection(self, product):
+        """Handle detected product and show product modal"""
+        self.product_detected = True
+        self.camera_frame.hide()
+        
+        # Check if product already exists in cart
+        existing_quantity = None
+        for cart_product, quantity in self.cart_state.cart_items:
+            if cart_product['name'] == product['name']:
+                existing_quantity = quantity
+                # Move the existing product to top of the cart
+                self.cart_state.move_to_top(product['name'])
+                # Update the display with highlighting
+                self._highlight_product_name = product['name']  # Store name for highlighting
+                self.update_cart_display()
+                break
+                
+        # Get product modal using lazy loading
+        product_modal = self.get_product_modal()
+        product_modal.setParent(self)
+        
+        # Position modal
+        camera_pos = self.camera_frame.pos()
+        modal_x = camera_pos.x() - 20
+        modal_y = camera_pos.y() + (self.camera_frame.height() - product_modal.height()) // 2
+        product_modal.setGeometry(modal_x, modal_y, 271, 270)
+        
+        # Update and show modal
+        product_modal.update_product(product, existing_quantity)
+        product_modal.show()
+        product_modal.raise_()
+        
+        # Stop camera processing
+        self._processing = False
 
 if __name__ == '__main__':
     import sys

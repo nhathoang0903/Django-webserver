@@ -13,7 +13,7 @@ class ProductModal(QFrame):
         self.quantity = 1
         self.current_product = None
         self.setFixedWidth(300) 
-        self.setFixedHeight(260)  
+        self.setFixedHeight(260)  # Keep fixed height same for all cases 
         self.setStyleSheet("""
             QFrame {
                 background-color: #FFFFFF;
@@ -21,6 +21,8 @@ class ProductModal(QFrame):
                 border: none;
             }
         """)
+        self.existing_message = None  # Add this line
+        self.controls_container = None  # Add this line
         self.init_ui()  # Remove warning_widget
 
     def load_fonts(self):
@@ -71,6 +73,24 @@ class ProductModal(QFrame):
         """)
         self.right_layout.addWidget(self.name_label)
 
+        self.warning_label = QLabel()
+        self.warning_label.setStyleSheet("""
+            QLabel {
+                color: #D32F2F;
+                font-size: 11px;
+                font-weight: bold;
+                background-color: #FFEBEE;
+                border: 1px solid #FFCDD2;
+                border-radius: 4px;
+                padding: 4px;
+            }
+        """)
+        self.warning_label.setAlignment(Qt.AlignCenter)
+        self.warning_label.hide()
+        
+        # Add warning label to right_layout after name_label
+        self.right_layout.insertWidget(1, self.warning_label)
+
         # Price with more space above
         self.right_layout.addSpacing(10)  # Reduced from 15
         self.price_label = QLabel()
@@ -85,9 +105,16 @@ class ProductModal(QFrame):
         self.price_label.setAlignment(Qt.AlignCenter)  # Add center alignment
         self.right_layout.addWidget(self.price_label)
         
-        self.right_layout.addSpacing(15)  # Reduced from 25
+        self.right_layout.addSpacing(15)  
 
-        # Quantity controls in horizontal layout
+        # Create controls container to hold quantity and buttons
+        self.controls_container = QWidget()
+        controls_layout = QVBoxLayout(self.controls_container)
+        controls_layout.setContentsMargins(0, 0, 0, 0)
+        controls_layout.setSpacing(5)
+
+        # Move quantity controls and buttons into controls_container
+        # Quantity controls
         self.quantity_widget = QWidget()
         quantity_layout = QHBoxLayout(self.quantity_widget)
         quantity_layout.setContentsMargins(0, 0, 0, 0)
@@ -163,10 +190,10 @@ class ProductModal(QFrame):
         quantity_container.addStretch()
         quantity_container.addWidget(self.quantity_widget)
         quantity_container.addStretch()
-        self.right_layout.addLayout(quantity_container)
+        controls_layout.addLayout(quantity_container)
 
         # Center the quantity controls with more spacing
-        self.right_layout.addSpacing(25)  # Increased spacing before quantity controls
+        controls_layout.addSpacing(25)  # Increased spacing before quantity controls
 
         # Before buttons section, add more vertical space
         self.right_layout.addStretch(1)  # Add stretch to push content up
@@ -227,14 +254,51 @@ class ProductModal(QFrame):
         btn_container.addStretch()
         btn_container.addWidget(self.buttons_widget)
         btn_container.addStretch()
-        self.right_layout.addLayout(btn_container)
+        controls_layout.addLayout(btn_container)
 
-        # Thêm spacing cuối cùng
-        self.right_layout.addSpacing(10)
+        # Add controls container to right layout
+        self.right_layout.addWidget(self.controls_container)
+
+        # Create existing product message as child of modal
+        self.existing_message = QWidget(self)  # Change parent to self (modal)
+        message_layout = QHBoxLayout(self.existing_message)
+        message_layout.setContentsMargins(3, 5, 15, 5)
+        message_layout.setSpacing(0)  # Remove spacing between icon and text
+        message_layout.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+
+        warning_icon = QLabel()
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'warning.png')
+        warning_pixmap = QPixmap(icon_path).scaled(35, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        warning_icon.setPixmap(warning_pixmap)
+        warning_icon.setFixedSize(40, 40)
+        warning_icon.setAlignment(Qt.AlignCenter)
+        message_layout.addWidget(warning_icon)
+
+        warning_text = QLabel("THE PRODUCT IS ALREADY IN THE CART")
+        warning_text.setFont(QFont("Inria Sans", 4, QFont.Bold))
+        warning_text.setStyleSheet("color: black; background: transparent;")
+        warning_text.setContentsMargins(-30, 0, 0, 0)  # Add negative left margin to overlap with icon
+        warning_text.setMinimumWidth(200)
+        warning_text.setFixedWidth(200)
+        warning_text.setAlignment(Qt.AlignVCenter)
+        message_layout.addWidget(warning_text)
+
+        message_layout.addStretch()
+
+        self.existing_message.setStyleSheet("""
+            QWidget {
+                background-color: #F68003;
+                border: none;
+                border-radius: 13px;
+            }
+        """)
+        self.existing_message.setFixedSize(205, 43)  # Set fixed size for message
+        self.existing_message.hide()
+        
 
         main_layout.addWidget(right_widget)
 
-    def update_product(self, product):  # Remove is_existing parameter
+    def update_product(self, product, existing_quantity=None):
         self.current_product = product
         self.quantity = 1
         self.quantity_label.setText(str(self.quantity))
@@ -314,6 +378,28 @@ class ProductModal(QFrame):
         )
         
         self.image_label.setPixmap(scaled_pixmap)
+
+        # Toggle visibility and maintain layout
+        if existing_quantity is not None:
+            self.controls_container.hide()
+            self.warning_label.hide()
+            
+            # Calculate position to show message on the right side
+            # Leave space for image (75px + 10px margin) from the left
+            left_margin = 85  # image width + spacing
+            available_width = self.width() - left_margin - 10  # 10px right margin
+            
+            # Calculate x position to align message on the right while avoiding image
+            msg_x = left_margin + (available_width - self.existing_message.width()) // 2
+            msg_y = (self.height() - self.existing_message.height()) // 2
+            
+            self.existing_message.move(msg_x, msg_y)
+            self.existing_message.show()
+            self.existing_message.raise_()
+        else:
+            self.controls_container.show()
+            self.warning_label.hide()
+            self.existing_message.hide()
 
     def increase_quantity(self):
         self.quantity += 1

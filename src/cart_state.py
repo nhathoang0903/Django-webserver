@@ -66,3 +66,12 @@ class CartState:
             self.save_to_json()  # Add this line to create new empty cart file
         except Exception as e:
             print(f"Error removing cart data file: {e}")
+
+    def move_to_top(self, product_name):
+        """Move an item to the top of the cart list"""
+        for i, (product, quantity) in enumerate(self.cart_items):
+            if product['name'] == product_name:
+                item = self.cart_items.pop(i)
+                self.cart_items.append(item)
+                self.save_to_json()
+                break
