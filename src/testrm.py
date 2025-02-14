@@ -2,8 +2,8 @@ from rembg import remove
 from PIL import Image
 
 # Mở ảnh đầu vào
-input_path = "../assets/left-arrow.jpg"
-output_path = "output.png"
+input_path = "../model/test1.jpeg"
+output_path = "../model/test1rm.png"
 
 # Xử lý ảnh
 with Image.open(input_path) as img:

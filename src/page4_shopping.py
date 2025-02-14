@@ -6,6 +6,8 @@ from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
 import os
 import cv2
+import numpy as np
+import time
 from product_detector import ProductDetector
 from product_modal import ProductModal
 from cart_item_widget import CartItemWidget
@@ -33,6 +35,11 @@ class ShoppingPage(QWidget):
         self._image_cache = {}
         self._cleanup_tasks = []
         self.frame_count = 0
+        self.detection_start_time = None  # Add this line
+        self.temp_image_counter = 0  # Counter for temp images
+        self.setup_temp_folder()
+        self.frame_buffer = []  # Buffer to store frames for quality check
+        self.last_detect_time = 0  # Track last detection time
         
         # Initialize camera related attributes
         self.camera = None
@@ -519,24 +526,41 @@ class ShoppingPage(QWidget):
         if self.camera_active:
             self.stop_camera()
         else:
-            self.start_camera()
-            # Reset view when starting camera
+            # Start camera immediately with detection delayed
             self.product_detected = False
             self.product_modal.hide()
+            self.start_camera(delay_detection=True)
             self.camera_frame.show()
 
-    def start_camera(self):
-        """Optimized camera initialization"""
+    def start_camera(self, delay_detection=False):
+        """Start camera with optional detection delay"""
         if self.camera is None:
-            self.camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Direct Show for Windows
-            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Reduce resolution
+            self.camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
             self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
             self.camera.set(cv2.CAP_PROP_FPS, 30)
+            
             if not self.camera.isOpened():
                 print("Error: Could not open camera")
                 return
+                
+        # Reset states and start showing frames immediately
         self.camera_active = True
-        self.timer.start(33)  # ~30 FPS
+        self._processing = False
+        self.camera_frame.show()
+        self.camera_label.show()
+        self.timer.start(33)  # Start camera feed immediately
+        
+        # Set detection delay if needed
+        if delay_detection:
+            self.detection_start_time = True  # Block detection initially
+            QTimer.singleShot(5000, self.enable_detection)  # Enable detection after 5s
+        else:
+            self.detection_start_time = None  # No delay, enable detection immediately
+
+    def enable_detection(self):
+        """Callback to enable detection after delay"""
+        self.detection_start_time = None  # Clear flag to enable detection
 
     def stop_camera(self):
         """Enhanced camera cleanup"""
@@ -558,7 +582,6 @@ class ShoppingPage(QWidget):
         self._processing = False
 
     def update_frame(self):
-        """Optimized frame processing with memory management"""
         if not (self.camera and self.camera_active and not self.product_detected) or self._processing:
             return
 
@@ -568,56 +591,135 @@ class ShoppingPage(QWidget):
             self._processing = False
             return
 
-        # Safely handle _current_frame
         try:
             if self._current_frame is not None:
                 del self._current_frame
                 self._current_frame = None
-                
-            # Only process every 3rd frame for detection
-            if self.frame_count % 3 == 0:
-                # Create copy only if needed for detection
-                detect_frame = frame.copy()
-                product = self.get_detector().detect_product(detect_frame)
-                del detect_frame  # Clean up detection frame
-                
-                if product:
-                    self.handle_product_detection(product)
-                    self._processing = False
-                    return
 
-            # Optimize image conversion
-            if frame.shape[0] > 480:
-                frame = cv2.resize(frame, (640, 480))
-
-            # Convert only the region we need
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            h, w, ch = frame.shape
-            
-            # Use direct numpy array for QImage to avoid extra copy
-            self._current_frame = QImage(frame.data, w, h, w * ch, QImage.Format_RGB888)
+            # Process frame for display
+            display_frame = frame.copy()
+            display_frame = cv2.cvtColor(display_frame, cv2.COLOR_BGR2RGB)
+            h, w, ch = display_frame.shape
+            self._current_frame = QImage(display_frame.data, w, h, w * ch, QImage.Format_RGB888)
             self.camera_label.setPixmap(QPixmap.fromImage(self._current_frame))
-            
+
+            # Only run detection if conditions are met
+            current_time = time.time()
+            if (self.frame_count % 10 == 0 and  # Reduced from 3 to 10 frames
+                not self.detection_start_time and 
+                current_time - self.last_detect_time > 0.5):  # Min 0.5s between detections
+                
+                # Check frame quality
+                if self.is_frame_stable(frame):
+                    # Process frame for detection
+                    detect_frame = frame.copy()
+                    detect_frame = cv2.cvtColor(detect_frame, cv2.COLOR_BGR2RGB)
+                    detect_frame = cv2.convertScaleAbs(detect_frame, alpha=1.2, beta=10)
+
+                    # Save detection frame
+                    if self.temp_image_counter >= 5:
+                        self.temp_image_counter = 0
+                    temp_path = os.path.join(self.temp_folder, f'detect_{self.temp_image_counter}.jpg')
+                    cv2.imwrite(temp_path, cv2.cvtColor(detect_frame, cv2.COLOR_RGB2BGR))
+                    self.temp_image_counter += 1
+
+                    product = self.get_detector().detect_product(detect_frame)
+                    del detect_frame
+
+                    if product:
+                        self.last_detect_time = current_time
+                        self.handle_product_detection(product)
+                        self._processing = False
+                        return
+
         except Exception as e:
             print(f"Error in frame processing: {e}")
         finally:
             self.frame_count += 1
             self._processing = False
 
+    def is_frame_stable(self, frame, threshold=100):
+        """Check if frame is stable enough for detection"""
+        # Convert to grayscale for blur detection
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # Calculate Laplacian variance (blur detection)
+        blur_value = cv2.Laplacian(gray, cv2.CV_64F).var()
+        
+        # Calculate frame brightness
+        brightness = np.mean(gray)
+        
+        # Check if frame meets quality criteria
+        is_stable = (blur_value > threshold and  # Not too blurry
+                    brightness > 30 and          # Not too dark
+                    brightness < 220)            # Not too bright
+                    
+        return is_stable
+
     def add_to_cart(self, product, quantity):
         is_existing = self.cart_state.add_item(product, quantity)
         self.update_cart_display()
-        self.resume_camera()  # Add this line to resume camera after adding to cart
+        # Show camera immediately but delay detection
+        self.product_detected = False
+        self.camera_frame.show()
+        self.camera_label.show()
+        self.start_camera(delay_detection=True)  # Start with 5s delay for detection
         return is_existing
 
     def resume_camera(self):
-        # Kiểm tra xem product modal có đang hiển thị không
         if self.product_modal.isVisible():
-            return  # Không khởi động camera nếu modal đang hiển thị
+            return
         
         self.product_detected = False
         self.camera_frame.show()
-        self.start_camera()
+        self.camera_label.show()
+        self.start_camera(delay_detection=True)  # Start with 5s delay for detection
+
+    def handle_product_detection(self, product):
+        """Handle detected product and show product modal"""
+        self.product_detected = True
+        self.camera_frame.hide()
+        
+        # Stop camera when showing modal
+        self.stop_camera()
+        
+        # Check if product already exists in cart
+        existing_quantity = None
+        for cart_product, quantity in self.cart_state.cart_items:
+            if cart_product['name'] == product['name']:
+                existing_quantity = quantity
+                # Move the existing product to top of the cart
+                self.cart_state.move_to_top(product['name'])
+                # Update the display with highlighting
+                self._highlight_product_name = product['name']  # Store name for highlighting
+                self.update_cart_display()
+                break
+                
+        # Get product modal using lazy loading
+        product_modal = self.get_product_modal()
+        product_modal.setParent(self)
+        
+        # Position modal
+        camera_pos = self.camera_frame.pos()
+        modal_x = camera_pos.x() - 20
+        modal_y = camera_pos.y() + (self.camera_frame.height() - product_modal.height()) // 2
+        product_modal.setGeometry(modal_x, modal_y, 271, 270)
+        
+        # Update and show modal
+        product_modal.update_product(product, existing_quantity)
+        product_modal.show()
+        product_modal.raise_()
+        
+        # Stop camera processing
+        self._processing = False
+
+    def handle_cancel(self):
+        """Handle cancel button click from product modal"""
+        self.product_modal.hide()
+        self.camera_frame.show()
+        self.product_detected = False
+        self.start_camera(delay_detection=True)  # Start with 5s delay for detection
+        self.camera_label.show()
 
     def show_cancel_dialog(self):
         if self.camera_active:
@@ -770,6 +872,15 @@ class ShoppingPage(QWidget):
         if hasattr(self, 'warning_animation') and self.warning_animation:
             self.warning_animation = None
 
+        # Clean up temp files
+        if hasattr(self, 'temp_folder') and os.path.exists(self.temp_folder):
+            for file in os.listdir(self.temp_folder):
+                if file.startswith('detect_'):
+                    try:
+                        os.remove(os.path.join(self.temp_folder, file))
+                    except:
+                        pass
+
         # Force garbage collection
         import gc
         gc.collect()
@@ -794,7 +905,7 @@ class ShoppingPage(QWidget):
             camera_height = 299
             self._product_modal = ProductModal(camera_height=camera_height//2)
             self._product_modal.add_to_cart.connect(self.add_to_cart)
-            self._product_modal.cancel_clicked.connect(self.resume_camera)
+            self._product_modal.cancel_clicked.connect(self.handle_cancel)  # Kết nối với handle_cancel
             self._product_modal.hide()
         return self._product_modal
 
@@ -815,40 +926,16 @@ class ShoppingPage(QWidget):
                 else:
                     self.clear_layout(item.layout())
 
-    def handle_product_detection(self, product):
-        """Handle detected product and show product modal"""
-        self.product_detected = True
-        self.camera_frame.hide()
-        
-        # Check if product already exists in cart
-        existing_quantity = None
-        for cart_product, quantity in self.cart_state.cart_items:
-            if cart_product['name'] == product['name']:
-                existing_quantity = quantity
-                # Move the existing product to top of the cart
-                self.cart_state.move_to_top(product['name'])
-                # Update the display with highlighting
-                self._highlight_product_name = product['name']  # Store name for highlighting
-                self.update_cart_display()
-                break
-                
-        # Get product modal using lazy loading
-        product_modal = self.get_product_modal()
-        product_modal.setParent(self)
-        
-        # Position modal
-        camera_pos = self.camera_frame.pos()
-        modal_x = camera_pos.x() - 20
-        modal_y = camera_pos.y() + (self.camera_frame.height() - product_modal.height()) // 2
-        product_modal.setGeometry(modal_x, modal_y, 271, 270)
-        
-        # Update and show modal
-        product_modal.update_product(product, existing_quantity)
-        product_modal.show()
-        product_modal.raise_()
-        
-        # Stop camera processing
-        self._processing = False
+    def setup_temp_folder(self):
+        """Setup temp folder for storing detection images"""
+        self.temp_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'temp')
+        if not os.path.exists(self.temp_folder):
+            os.makedirs(self.temp_folder)
+        else:
+            # Clean up old temp files
+            for file in os.listdir(self.temp_folder):
+                if file.startswith('detect_'):
+                    os.remove(os.path.join(self.temp_folder, file))
 
 if __name__ == '__main__':
     import sys

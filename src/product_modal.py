@@ -226,7 +226,7 @@ class ProductModal(QFrame):
                 color: white;
             }
         """)
-        cancel_btn.clicked.connect(self.handle_cancel)  # Change to new handler
+        cancel_btn.clicked.connect(self.handle_cancel)  # Update connect
 
         # Add to cart button
         add_btn = QPushButton("Add to cart")
@@ -417,5 +417,6 @@ class ProductModal(QFrame):
             self.cancel_clicked.emit()  # Use existing signal to resume camera
 
     def handle_cancel(self):
-        self.cancel_clicked.emit()  # Emit signal when cancel is clicked
+        """Handle cancel button click"""
+        self.cancel_clicked.emit()  # Emit signal for parent to handle
         self.hide()
