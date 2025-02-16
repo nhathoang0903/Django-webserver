@@ -298,6 +298,10 @@ class ProductModal(QFrame):
 
         main_layout.addWidget(right_widget)
 
+    def reset_warning_state(self):
+        """Reset warning state has been removed since we're recreating the modal instead"""
+        pass  # This method is no longer needed
+
     def update_product(self, product, existing_quantity=None):
         self.current_product = product
         self.quantity = 1
@@ -411,10 +415,9 @@ class ProductModal(QFrame):
             self.quantity_label.setText(str(self.quantity))
 
     def add_item_to_cart(self):
-        if self.current_product:
+        """Add item to cart with safety checks"""
+        if self.current_product and not self.isHidden():
             self.add_to_cart.emit(self.current_product, self.quantity)
-            self.hide()  # Hide the modal
-            self.cancel_clicked.emit()  # Use existing signal to resume camera
 
     def handle_cancel(self):
         """Handle cancel button click"""

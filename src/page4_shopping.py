@@ -509,8 +509,62 @@ class ShoppingPage(QWidget):
         self.update_cart_display()
 
     def remove_cart_item(self, index):
-        self.cart_state.remove_item(index)
-        QTimer.singleShot(300, self.update_cart_display)  # 300ms = animation duration
+        """Handle cart item removal with improved safety"""
+        try:
+            # Lấy thông tin trước khi xóa
+            removed_product = self.cart_state.cart_items[index][0].copy()  # Tạo bản sao của product
+            
+            # Thực hiện xóa item
+            self.cart_state.remove_item(index)
+            
+            # Update cart display trước
+            self.update_cart_display()
+            
+            # Kiểm tra và cập nhật product modal
+            if (self.product_modal and 
+                self.product_modal.isVisible() and 
+                self.product_modal.current_product and 
+                self.product_modal.current_product['name'] == removed_product['name']):
+                
+                # Tạo product modal mới với sản phẩm đã xóa
+                self.recreate_product_modal(removed_product)
+            
+        except Exception as e:
+            print(f"Error removing cart item: {e}")
+
+    def recreate_product_modal(self, product):
+        """Recreate product modal safely after item removal"""
+        try:
+            # Lưu vị trí cũ
+            old_pos = self.product_modal.pos()
+            
+            # Tạo modal mới
+            camera_height = 299
+            new_modal = ProductModal(camera_height=camera_height//2)
+            new_modal.setParent(self)
+            new_modal.add_to_cart.connect(self.add_to_cart)
+            new_modal.cancel_clicked.connect(self.handle_cancel)
+            
+            # Di chuyển đến vị trí cũ
+            new_modal.move(old_pos)
+            
+            # Cập nhật sản phẩm 
+            new_modal.update_product(product)
+            
+            # Xóa modal cũ
+            if self.product_modal:
+                self.product_modal.hide()
+                self.product_modal.deleteLater()
+            
+            # Cập nhật reference
+            self.product_modal = new_modal
+            
+            # Hiển thị modal mới
+            self.product_modal.show()
+            self.product_modal.raise_()
+            
+        except Exception as e:
+            print(f"Error recreating product modal: {e}")
 
     def show_product_page(self):
         from import_module import ImportModule
@@ -616,21 +670,29 @@ class ShoppingPage(QWidget):
                     detect_frame = cv2.cvtColor(detect_frame, cv2.COLOR_BGR2RGB)
                     detect_frame = cv2.convertScaleAbs(detect_frame, alpha=1.2, beta=10)
 
-                    # Save detection frame
-                    if self.temp_image_counter >= 5:
-                        self.temp_image_counter = 0
-                    temp_path = os.path.join(self.temp_folder, f'detect_{self.temp_image_counter}.jpg')
-                    cv2.imwrite(temp_path, cv2.cvtColor(detect_frame, cv2.COLOR_RGB2BGR))
-                    self.temp_image_counter += 1
+                    # Save frame to detect
+                    frame_name = f'frame_{int(time.time()*1000)}.jpg'
+                    to_detect_path = os.path.join(self.temp_detect_folder, frame_name)
+                    cv2.imwrite(to_detect_path, cv2.cvtColor(detect_frame, cv2.COLOR_RGB2BGR))
 
                     product = self.get_detector().detect_product(detect_frame)
-                    del detect_frame
 
                     if product:
+                        # Save detected frame
+                        detected_path = os.path.join(self.temp_detected_folder, frame_name)
+                        cv2.imwrite(detected_path, cv2.cvtColor(detect_frame, cv2.COLOR_RGB2BGR))
+                        # Delete the to_detect frame since detection succeeded
+                        try:
+                            os.remove(to_detect_path)
+                        except:
+                            pass
+                        
                         self.last_detect_time = current_time
                         self.handle_product_detection(product)
                         self._processing = False
                         return
+
+                    del detect_frame
 
         except Exception as e:
             print(f"Error in frame processing: {e}")
@@ -657,14 +719,34 @@ class ShoppingPage(QWidget):
         return is_stable
 
     def add_to_cart(self, product, quantity):
-        is_existing = self.cart_state.add_item(product, quantity)
-        self.update_cart_display()
-        # Show camera immediately but delay detection
-        self.product_detected = False
-        self.camera_frame.show()
-        self.camera_label.show()
-        self.start_camera(delay_detection=True)  # Start with 5s delay for detection
-        return is_existing
+        """Enhanced add to cart with safety checks"""
+        try:
+            # Add item
+            is_existing = self.cart_state.add_item(product, quantity)
+            
+            # Update UI safely
+            if self.product_modal and not self.product_modal.isHidden():
+                self.product_modal.hide()
+            
+            self.update_cart_display()
+            
+            # Reset camera view
+            self.product_detected = False
+            self.camera_frame.show()
+            self.camera_label.show()
+            
+            # Start camera with delay
+            QTimer.singleShot(100, lambda: self.start_camera(delay_detection=True))
+            
+            return is_existing
+            
+        except Exception as e:
+            print(f"Error adding to cart: {e}")
+            return False
+
+    def resume_camera_after_add(self):
+        """This method is no longer needed"""
+        pass
 
     def resume_camera(self):
         if self.product_modal.isVisible():
@@ -873,13 +955,14 @@ class ShoppingPage(QWidget):
             self.warning_animation = None
 
         # Clean up temp files
-        if hasattr(self, 'temp_folder') and os.path.exists(self.temp_folder):
-            for file in os.listdir(self.temp_folder):
-                if file.startswith('detect_'):
-                    try:
-                        os.remove(os.path.join(self.temp_folder, file))
-                    except:
-                        pass
+        for folder in [self.temp_detect_folder, self.temp_detected_folder]:
+            if os.path.exists(folder):
+                for file in os.listdir(folder):
+                    if file.endswith('.jpg'):
+                        try:
+                            os.remove(os.path.join(folder, file))
+                        except:
+                            pass
 
         # Force garbage collection
         import gc
@@ -927,15 +1010,23 @@ class ShoppingPage(QWidget):
                     self.clear_layout(item.layout())
 
     def setup_temp_folder(self):
-        """Setup temp folder for storing detection images"""
-        self.temp_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'temp')
-        if not os.path.exists(self.temp_folder):
-            os.makedirs(self.temp_folder)
-        else:
-            # Clean up old temp files
-            for file in os.listdir(self.temp_folder):
-                if file.startswith('detect_'):
-                    os.remove(os.path.join(self.temp_folder, file))
+        """Setup temp folders for storing detection images"""
+        self.temp_base_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'temp')
+        self.temp_detect_folder = os.path.join(self.temp_base_folder, 'to_detect')
+        self.temp_detected_folder = os.path.join(self.temp_base_folder, 'detected')
+        
+        # Create folders if they don't exist
+        for folder in [self.temp_base_folder, self.temp_detect_folder, self.temp_detected_folder]:
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            else:
+                # Clean up old temp files in each folder
+                for file in os.listdir(folder):
+                    if file.endswith('.jpg'):
+                        try:
+                            os.remove(os.path.join(folder, file))
+                        except:
+                            pass
 
 if __name__ == '__main__':
     import sys
