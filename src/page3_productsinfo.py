@@ -4,8 +4,6 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea,
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie
 import os
-import requests
-from urllib.request import urlopen
 import json
 
 
@@ -15,9 +13,10 @@ class LoadProductsThread(QThread):
 
     def run(self):
         try:
-            # Changed URL to include trailing slash
-            response = requests.get('http://127.0.0.1:8000/products/')
-            products = response.json()
+            # Read from local JSON file
+            json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'products.json')
+            with open(json_path, 'r', encoding='utf-8') as file:
+                products = json.load(file)
             self.finished.emit(products)
         except Exception as e:
             self.error.emit(str(e))
