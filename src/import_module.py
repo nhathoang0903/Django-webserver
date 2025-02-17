@@ -8,6 +8,7 @@ class ImportModule:
         if not cls.product_page:
             from page3_productsinfo import ProductPage
             cls.product_page = ProductPage()
+            print("Product page opened")
         return cls.product_page
 
     @classmethod
@@ -15,4 +16,5 @@ class ImportModule:
         if not cls.shopping_page:
             from page4_shopping import ShoppingPage
             cls.shopping_page = ShoppingPage()
+            print("Shopping page opened")
         return cls.shopping_page

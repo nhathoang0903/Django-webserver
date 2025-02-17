@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, 
-                           QPushButton, QApplication, QHBoxLayout)
+                           QPushButton, QApplication, QHBoxLayout, QSizePolicy)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
 import os
@@ -134,32 +134,33 @@ class InstructionPage(QWidget):
         content_layout = QVBoxLayout(content_container)
         content_layout.setSpacing(20) 
         content_layout.setContentsMargins(0, 0, 0, 0)  # Reset margins
+        content_layout.setAlignment(Qt.AlignCenter)  # Center align all content
 
         # Instruction text container
         text_container = QWidget()
-        text_container.setFixedSize(300, 70)  # Reduced width to 300px
+        text_container.setFixedSize(550, 80) 
         text_layout = QVBoxLayout(text_container)
-        text_layout.setContentsMargins(20, 0, 0, 0)  # Only left padding
-        text_layout.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        text_layout.setContentsMargins(-60, 5, 80, 5)  # Tăng left margin âm và right margin
+        text_layout.setAlignment(Qt.AlignLeft)  # Căn lề trái
 
         # Instruction text label
         self.instruction_text = QLabel()
-        self.instruction_text.setFixedWidth(280)  # Match container width minus padding
-        self.instruction_text.setMinimumHeight(60)
-        self.instruction_text.setFont(QFont("Poppins", 12))
+        self.instruction_text.setFixedWidth(520)  # Tăng width tương ứng
+        self.instruction_text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)  # Thay đổi policy
+        self.instruction_text.setFont(QFont("Poppins", 9))
         self.instruction_text.setStyleSheet("""
             color: #E72225;
-            margin: 0;
-            padding-right: 10px;
-            margin-right: 3px;
+            padding: 5px 35px 10px 50px;
+            margin-left: -100px;  
+            margin-right: 30px; 
         """)
         self.instruction_text.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.instruction_text.setWordWrap(True)
         text_layout.addWidget(self.instruction_text)
         
-        # Add text container to main content layout
+        # Add text container to main content layout with left alignment
         content_layout.addSpacing(20)
-        content_layout.addWidget(text_container, 0, Qt.AlignLeft)  # Align left instead of center
+        content_layout.addWidget(text_container, 0, Qt.AlignLeft)  # Đảm bảo căn lề trái
         content_layout.addSpacing(20)
 
         # Slide image container to ensure consistent positioning
@@ -230,6 +231,7 @@ class InstructionPage(QWidget):
     def next_page(self):
         self.product_page = ProductPage()
         self.product_page.show()
+        print("Product page opened")
         self.hide()
 
     def navigate_instructions(self, direction):
@@ -241,11 +243,11 @@ class InstructionPage(QWidget):
     def load_slides(self):
         self.slides = []
         self.instruction_texts = [
-            "Take your favorite shopping cart and start your shopping",
-            "Select the product you want to buy",
-            "Put the product in front of the camera and wait for a second",
-            "Make changes directly on the dashboard or in your cart",
-            "Use the QR code for payment and wait for the transaction confirmation."
+            "Take your favorite shopping cart\nand start your shopping",
+            "Select the product you want to buy\n",  
+            "Put the product in front of the\ncamera and wait for a second",
+            "Make changes directly on the\ndashboard or in your cart", 
+            "Use the QR code for payment and\nwait for the transaction verify"
         ]
         
         slides_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets')

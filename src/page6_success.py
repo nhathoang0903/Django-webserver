@@ -176,6 +176,7 @@ class SuccessPage(QWidget):
         from page1_welcome import WelcomePage  # Import page1
         self.home_page = WelcomePage()  # create instance for WelcomePage
         self.home_page.show()
+        print("Redirected to home page")
         self.close()
 
 if __name__ == '__main__': 

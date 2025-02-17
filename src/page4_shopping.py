@@ -1,8 +1,8 @@
 import weakref
 from functools import lru_cache
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
-                           QPushButton, QApplication, QFrame, QGridLayout, QScrollArea, QDialog, QGraphicsBlurEffect, QGraphicsOpacityEffect)
-from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation
+                           QPushButton, QApplication, QFrame, QGridLayout, QScrollArea, QDialog, QGraphicsBlurEffect, QGraphicsOpacityEffect, QGraphicsDropShadowEffect)
+from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation, QRect, QParallelAnimationGroup
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
 import os
 import cv2
@@ -69,6 +69,9 @@ class ShoppingPage(QWidget):
         self.cancel_modal.cancelled.connect(self.go_home)
         self.cancel_modal.hide()
         
+        # Add toast notification attribute
+        self.toast_label = None
+        
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
         """Cache image loading to reduce memory usage"""
@@ -133,6 +136,7 @@ class ShoppingPage(QWidget):
         # Product Info Button
         product_info_button = self.create_button("PRODUCT INFO", icon_path="info.png")
         product_info_button.clicked.connect(self.show_product_page)
+        # print("Open product info page")
         buttons_layout.addWidget(product_info_button)
 
         left_layout.addWidget(buttons_container, 1, 0, 1, 2)  # row 1, col 0, rowspan 1, colspan 2
@@ -332,9 +336,9 @@ class ShoppingPage(QWidget):
             # Empty cart display
             empty_container = QWidget()
             empty_layout = QVBoxLayout(empty_container)
-            empty_layout.setContentsMargins(0, 50, 0, 0)
+            empty_layout.setContentsMargins(0, 20, 0, 0)  # Reduced top margin from 50 to 20
             
-            empty_layout.addStretch(3)
+            empty_layout.addStretch(2)  # Reduced stretch from 3 to 2
             
             empty_text = QLabel("Empty")
             empty_text.setFont(QFont("Inria Sans", 30))
@@ -354,13 +358,19 @@ class ShoppingPage(QWidget):
             empty_cart_label.setAlignment(Qt.AlignCenter)
             empty_layout.addWidget(empty_cart_label)
             
-            empty_layout.addStretch(2)
+            empty_layout.addStretch(3)  # Increased stretch from 2 to 3
             
             self.content_layout.addWidget(empty_container)
         else:
-            # Create a scrollable area for cart items with adjusted style
+            # Container for cart items
+            scroll_container = QWidget()
+            scroll_layout = QVBoxLayout(scroll_container)
+            scroll_layout.setContentsMargins(0, 0, 0, 0)
+            
+            # Create scroll area for items
             scroll_area = QScrollArea()
             scroll_area.setWidgetResizable(True)
+            scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Disable horizontal scrollbar
             scroll_area.setStyleSheet("""
                 QScrollArea {
                     border: none;
@@ -369,9 +379,9 @@ class ShoppingPage(QWidget):
                 QScrollBar:vertical {
                     border: none;
                     background: white;
-                    width: 15px;  /* Increased from 10px */
+                    width: 15px;
                     margin: 0px;
-                    margin-left: 5px;  /* Push scrollbar right */
+                    margin-left: 5px;
                 }
                 QScrollBar::handle:vertical {
                     background: #D9D9D9;
@@ -380,16 +390,20 @@ class ShoppingPage(QWidget):
                 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                     height: 0px;
                 }
+                QScrollBar:horizontal {
+                    height: 0px;
+                    background: transparent;
+                }
             """)
-
-            # Container for cart items
+            
+            # Items container
             items_container = QWidget()
             items_layout = QVBoxLayout(items_container)
             items_layout.setSpacing(30)
-            items_layout.setContentsMargins(0, 0, 20, 0)  # Increased right margin
+            items_layout.setContentsMargins(0, 0, 0, 0)  # Remove right margin
 
-            # Add cart items in reverse order (newest first) 
-            highlighted_name = getattr(self, '_highlight_product_name', None)  # Lấy tên sản phẩm cần highlight
+            # Add cart items
+            highlighted_name = getattr(self, '_highlight_product_name', None)
             for i, (product, quantity) in enumerate(reversed(self.cart_state.cart_items)):
                 item_widget = CartItemWidget(product, quantity)
                 item_widget.quantityChanged.connect(
@@ -399,48 +413,21 @@ class ShoppingPage(QWidget):
                     lambda idx=len(self.cart_state.cart_items)-1-i: self.remove_cart_item(idx)
                 )
                 
-                # Fix: Check product name against highlighted name and highlight immediately
                 if highlighted_name and product['name'] == highlighted_name:
                     item_widget.highlight()
-                    self._highlight_product_name = None  # Reset sau khi đã highlight
+                    self._highlight_product_name = None
                     
                 items_layout.addWidget(item_widget)
 
-            # Adjust scrollbar positioning
-            items_layout.setContentsMargins(0, 0, 0, 0)  # Remove right margin
-            scroll_area.setStyleSheet("""
-                QScrollArea {
-                    border: none;
-                    background-color: transparent;
-                }
-                QScrollBar:vertical {
-                    border: none;
-                    background: white;
-                    width: 10px;
-                    margin: 0px;
-                }
-                QScrollBar::handle:vertical {
-                    background: #D9D9D9;
-                    min-height: 20px;
-                }
-                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                    height: 0px;
-                }
-            """)
-
-            # Only show scrollbar if there's more than one item
-            scroll_area.setVerticalScrollBarPolicy(
-                Qt.ScrollBarAsNeeded if len(self.cart_state.cart_items) > 1 else Qt.ScrollBarAlwaysOff
-            )
-
-            # Add stretch at the end to push items to the top
+            # Add stretch to push items up
             items_layout.addStretch()
             
-            # Set the container as the scroll area widget
+            # Set items container to scroll area
             scroll_area.setWidget(items_container)
+            scroll_layout.addWidget(scroll_area)
             
-            # Add scroll area to content layout with margins to avoid header/footer
-            self.content_layout.addWidget(scroll_area)
+            # Add scroll container to main content
+            self.content_layout.addWidget(scroll_container, stretch=1)  # Add stretch=1 here
 
         # Show/hide cancel shopping button based on cart state
         self.cancel_shopping_btn.setVisible(bool(self.cart_state.cart_items))
@@ -449,26 +436,29 @@ class ShoppingPage(QWidget):
         total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_state.cart_items) if self.cart_state.cart_items else 0
         formatted_total = "{:,.0f}".format(total_amount).replace(',', '.')
 
-        # Add single total and payment section
-        total_container = QWidget()
-        total_layout = QHBoxLayout(total_container)
-        total_layout.setContentsMargins(0, 0, 0, 10)
-        total_layout.addStretch()
+        # Create footer container for total and payment
+        footer_container = QWidget()
+        footer_container.setStyleSheet("background-color: transparent;")
+        footer_layout = QHBoxLayout(footer_container)
+        footer_layout.setContentsMargins(0, 10, 0, 10)  # Add padding
+        footer_layout.addStretch()
         
-        # Update total label with different colors
+        # Total label
         total_label = QLabel()
         total_label.setText(f'<span style="color: #000000;">Total </span>'
                           f'<span style="color: #D30E11;">{formatted_total} vnđ</span>')
         total_label.setTextFormat(Qt.RichText)
         total_label.setStyleSheet("""
-            margin-right: 15px;
+            margin-right: 30px;  /* Tăng từ 15px lên 30px */
             font-family: Inter;
             font-weight: bold;
             font-size: 14px;
         """)
-        total_layout.addWidget(total_label)
+        footer_layout.addWidget(total_label)
         
+        # Payment button
         payment_button = QPushButton("PAYMENT")
+        payment_button.setObjectName("payment_button")  # Set object name for finding later
         payment_button.setFixedSize(120, 40)
         payment_button.setStyleSheet("""
             QPushButton {
@@ -481,17 +471,19 @@ class ShoppingPage(QWidget):
                 background-color: #2C513F;
             }
         """)
-        payment_button.clicked.connect(self.show_payment_page)  # Thêm connection
-        total_layout.addWidget(payment_button)
+        payment_button.clicked.connect(self.show_payment_page)
+        footer_layout.addWidget(payment_button)
         
-        # Add to content layout instead of right layout
-        self.content_layout.addWidget(total_container)
+        # Add footer to main layout at the bottom
+        self.content_layout.addStretch()  # Push everything up
+        self.content_layout.addWidget(footer_container, alignment=Qt.AlignBottom)  # Align to bottom
 
     def show_payment_page(self):
         total_amount = sum(float(product['price']) * quantity 
                          for product, quantity in self.cart_state.cart_items)
         if total_amount == 0:
-            # Just return if cart is empty - no animation
+            # Animate payment button
+            self.animate_disabled_payment()
             return
             
         # Stop camera before switching to payment page
@@ -503,6 +495,100 @@ class ShoppingPage(QWidget):
         self.payment_page = QRCodePage()
         self.payment_page.show()
         self.hide()
+
+    def animate_disabled_payment(self):
+        """Animate payment button when cart is empty"""
+        payment_button = self.findChild(QPushButton, "payment_button")  
+        if not payment_button:
+            return
+            
+        # Save original style
+        original_style = payment_button.styleSheet()
+        
+        # Create all animations at once
+        button_anim = QParallelAnimationGroup()
+        
+        # Scale animation
+        scale_anim = QPropertyAnimation(payment_button, b"geometry")
+        scale_anim.setDuration(1000)
+        
+        # Get original geometry
+        orig_geom = payment_button.geometry()
+        center = orig_geom.center()
+        
+        # Calculate scaled geometries
+        scaled_width = int(orig_geom.width() * 1.8)
+        scaled_height = int(orig_geom.height() * 1.8)
+        scaled_x = int(center.x() - scaled_width/2)
+        scaled_y = int(center.y() - scaled_height/2)
+        scaled_geom = QRect(scaled_x, scaled_y, scaled_width, scaled_height)
+        
+        # Set keyframes for scale animation
+        scale_anim.setKeyValueAt(0, orig_geom)
+        scale_anim.setKeyValueAt(0.25, scaled_geom)
+        scale_anim.setKeyValueAt(0.75, scaled_geom)
+        scale_anim.setKeyValueAt(1, orig_geom)
+        
+        button_anim.addAnimation(scale_anim)
+        
+        # Show toast with same duration as button animation
+        if self.toast_label:
+            self.toast_label.hide()
+        self.show_synchronized_toast("Cart is empty! Please add items to proceed.")
+        
+        # Change button color
+        payment_button.setStyleSheet("""
+            QPushButton {
+                background-color: #F4A261;
+                color: black;
+                border-radius: 20px;
+                font-weight: bold;
+            }
+        """)
+        
+        # Create a single timer for both animations
+        def reset_all():
+            payment_button.setStyleSheet(original_style)
+            if self.toast_label:
+                self.toast_label.hide()
+                
+        # Start animations and set timer
+        button_anim.start()
+        QTimer.singleShot(1000, reset_all)
+
+    def show_synchronized_toast(self, message):
+        """Show toast message without its own timer"""
+        if not self.toast_label:
+            self.toast_label = QLabel(self)
+            self.toast_label.setStyleSheet("""
+                QLabel {
+                    background-color: #264653;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-family: Baloo;
+                    font-size: 13px;
+                    border: 1px solid white;
+                    margin: 10px;
+                }
+            """)
+                
+        self.toast_label.setText(message)
+        self.toast_label.adjustSize()
+        
+        # Position toast
+        x = (self.width() - self.toast_label.width()) // 2
+        self.toast_label.setGeometry(x, 20, self.toast_label.width(), self.toast_label.height())
+        
+        # Add drop shadow
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setColor(Qt.black)
+        shadow.setOffset(0, 2)
+        self.toast_label.setGraphicsEffect(shadow)
+        
+        # Show immediately
+        self.toast_label.show()
 
     def update_item_quantity(self, index, quantity):
         self.cart_state.update_quantity(index, quantity)
@@ -1027,6 +1113,63 @@ class ShoppingPage(QWidget):
                             os.remove(os.path.join(folder, file))
                         except:
                             pass
+
+    def show_toast(self, message, duration=1000):
+        """Show temporary toast message"""
+        if not self.toast_label:
+            self.toast_label = QLabel(self)
+            self.toast_label.setStyleSheet("""
+                QLabel {
+                    background-color: #264653;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-family: Baloo;
+                    font-size: 13px;
+                    # font-weight: bold;
+                    border: 1px solid white;
+                    margin: 10px;
+                }
+            """)
+            self.toast_label.hide()
+
+        self.toast_label.setText(message)
+        self.toast_label.adjustSize()
+        
+        # Position toast at top center with some margin from top
+        x = (self.width() - self.toast_label.width()) // 2
+        self.toast_label.setGeometry(x, 20, self.toast_label.width(), self.toast_label.height())
+        
+        # Add drop shadow effect
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setColor(Qt.black)
+        shadow.setOffset(0, 2)
+        self.toast_label.setGraphicsEffect(shadow)
+        
+        # Show with fade in animation
+        opacity_effect = QGraphicsOpacityEffect()
+        self.toast_label.setGraphicsEffect(opacity_effect)
+        
+        fade_in = QPropertyAnimation(opacity_effect, b"opacity")
+        fade_in.setDuration(200)
+        fade_in.setStartValue(0)
+        fade_in.setEndValue(1)
+        
+        # Show and start animation
+        self.toast_label.show()
+        fade_in.start()
+        
+        # Hide after duration with fade out
+        def hide_toast():
+            fade_out = QPropertyAnimation(opacity_effect, b"opacity")
+            fade_out.setDuration(200)
+            fade_out.setStartValue(1)
+            fade_out.setEndValue(0)
+            fade_out.finished.connect(self.toast_label.hide)
+            fade_out.start()
+            
+        QTimer.singleShot(duration, hide_toast)
 
 if __name__ == '__main__':
     import sys

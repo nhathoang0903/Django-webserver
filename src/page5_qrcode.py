@@ -57,6 +57,7 @@ class QRCodePage(QWidget):
         # Start transaction check after QR is loaded
         self.start_transaction_check()
         self.switch_to_success.connect(self.handle_success)  # Connect signal to handler
+        self.shopping_page = None  # Add reference to shopping page
 
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -258,6 +259,24 @@ class QRCodePage(QWidget):
         else:
             self.countdown_timer.stop()
             self.countdown_label.setText("Expired")
+            # Return to shopping page after 1 second
+            QTimer.singleShot(1000, self.return_to_shopping)
+
+    def return_to_shopping(self):
+        """Return to shopping page when QR expires"""
+        from page4_shopping import ShoppingPage
+        self.shopping_page = ShoppingPage()
+        self.shopping_page.show()
+        # Clean up and close current page
+        self.cleanup_resources()
+        self.close()
+
+    def cleanup_resources(self):
+        """Clean up resources before closing"""
+        if self.countdown_timer:
+            self.countdown_timer.stop()
+        # Stop any ongoing transaction checks
+        # Clean up any other resources
 
     def start_transaction_check(self):
         check_thread = Thread(
@@ -341,10 +360,11 @@ class QRCodePage(QWidget):
         from page6_success import SuccessPage
         self.success_page = SuccessPage()
         self.success_page.show()
+        print("Switched to success page")
         self.close()
 
     def closeEvent(self, event):
-        self.countdown_timer.stop()
+        self.cleanup_resources()
         event.accept()
 
 if __name__ == '__main__':

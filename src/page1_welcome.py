@@ -133,6 +133,7 @@ class WelcomePage(QWidget):
     def start_shopping(self):
         self.instruction_page = InstructionPage()
         self.instruction_page.show()
+        print("Instruction page opened")
         self.hide()  # Hide the welcome page
 
 if __name__ == '__main__':
