@@ -7,6 +7,8 @@ from urllib.request import urlopen
 from rembg import remove
 from PIL import Image
 from io import BytesIO
+import requests
+import threading
 
 class CartItemWidget(QFrame):
     quantityChanged = pyqtSignal(int)  # Signal for quantity changes
@@ -19,6 +21,8 @@ class CartItemWidget(QFrame):
 
     def __init__(self, product, quantity, parent=None):
         super().__init__(parent)
+        from cart_state import CartState
+        self.cart_state = CartState()  # Get singleton instance
         self.load_fonts()
         self.quantity = quantity
         self.product = product
@@ -278,6 +282,42 @@ class CartItemWidget(QFrame):
         self.slide_animation.setEasingCurve(QEasingCurve.InOutQuad)
         self.slide_animation.finished.connect(self._on_animation_finished)
         
+        self.image_loaded = False
+        self._load_image_async(product.get('image_url'))
+
+    def _load_image_async(self, image_url):
+        """Load image asynchronously with improved caching"""
+        if not image_url:
+            return
+            
+        def load():
+            try:
+                # Check global image cache first
+                if image_url in self.cart_state._image_cache:
+                    print(f"Using cached image for {image_url}")
+                    img = self.cart_state._image_cache[image_url]
+                else:
+                    # Load and process image
+                    print(f"Processing new image for {image_url}")
+                    response = requests.get(image_url, timeout=5)
+                    img = Image.open(BytesIO(response.content))
+                    img = remove(img)  # Remove background
+                    
+                    # Cache the processed image
+                    self.cart_state._image_cache[image_url] = img
+                    
+                # Convert to pixmap and display
+                pixmap = self._convert_to_pixmap(img)
+                if pixmap:
+                    self.image_label.setPixmap(pixmap)
+                    
+            except Exception as e:
+                print(f"Error loading image: {e}")
+                
+        thread = threading.Thread(target=load)
+        thread.daemon = True
+        thread.start()
+
     def update_price_display(self):
         """Update the price display based on current quantity"""
         self.current_price = self.unit_price * self.quantity

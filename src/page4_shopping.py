@@ -13,6 +13,7 @@ from product_modal import ProductModal
 from cart_item_widget import CartItemWidget
 from cart_state import CartState
 from cancelshopping_modal import CancelShoppingModal
+from PyQt5 import sip
 
 class ShoppingPage(QWidget):
     # Class level attributes for critical components
@@ -40,6 +41,7 @@ class ShoppingPage(QWidget):
         self.setup_temp_folder()
         self.frame_buffer = []  # Buffer to store frames for quality check
         self.last_detect_time = 0  # Track last detection time
+        self.add_cart_start_time = None  # Add new timing variable
         
         # Initialize camera related attributes
         self.camera = None
@@ -72,6 +74,9 @@ class ShoppingPage(QWidget):
         # Add toast notification attribute
         self.toast_label = None
         
+        # Thêm flag để theo dõi trạng thái thanh toán
+        self.payment_completed = False 
+
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
         """Cache image loading to reduce memory usage"""
@@ -493,8 +498,22 @@ class ShoppingPage(QWidget):
         # Only proceed if cart has items
         from page5_qrcode import QRCodePage
         self.payment_page = QRCodePage()
+        # Kết nối signal từ page5 để theo dõi trạng thái thanh toán  
+        self.payment_page.payment_completed.connect(self.handle_payment_completed)
         self.payment_page.show()
         self.hide()
+
+    def handle_payment_completed(self, success):
+        """Xử lý khi thanh toán hoàn tất"""
+        self.payment_completed = success
+        if success:
+            # Tạm thời chỉ đánh dấu flag, chưa clear cart ngay
+            # Để page6 có thể lấy dữ liệu gửi server trước
+            # Cart sẽ được clear khi page này được show lại
+            self.payment_completed = True
+            # KHÔNG clear cart ở đây nữa
+            # self.cart_state.clear_cart()
+            # self.cart_state.save_to_json()
 
     def animate_disabled_payment(self):
         """Animate payment button when cart is empty"""
@@ -668,7 +687,14 @@ class ShoppingPage(QWidget):
         else:
             # Start camera immediately with detection delayed
             self.product_detected = False
-            self.product_modal.hide()
+            
+            # Kiểm tra và chỉ hide nếu modal tồn tại và chưa bị xóa
+            if hasattr(self, 'product_modal') and self.product_modal and not sip.isdeleted(self.product_modal):
+                self.product_modal.hide()
+            else:
+                # Tạo mới modal nếu không tồn tại hoặc đã bị xóa
+                self.product_modal = self.get_product_modal()
+                
             self.start_camera(delay_detection=True)
             self.camera_frame.show()
 
@@ -807,6 +833,10 @@ class ShoppingPage(QWidget):
     def add_to_cart(self, product, quantity):
         """Enhanced add to cart with safety checks"""
         try:
+            # Start timing
+            self.add_cart_start_time = time.time()
+            print(f"Starting add to cart for {product['name']} at {self.add_cart_start_time}")
+            
             # Add item
             is_existing = self.cart_state.add_item(product, quantity)
             
@@ -814,7 +844,17 @@ class ShoppingPage(QWidget):
             if self.product_modal and not self.product_modal.isHidden():
                 self.product_modal.hide()
             
+            # Cập nhật giỏ hàng không đồng bộ
+            QTimer.singleShot(50, self.update_cart_display)
+            
             self.update_cart_display()
+            # Log timing after update
+            end_time = time.time()
+            duration = (end_time - self.add_cart_start_time)  # Convert to milliseconds
+            print(f"✓ Added {product['name']} to cart - Time taken: {duration:.4f}s")
+            
+            # Reset timer
+            self.add_cart_start_time = None
             
             # Reset camera view
             self.product_detected = False
@@ -994,65 +1034,104 @@ class ShoppingPage(QWidget):
 
         self.cancel_modal.not_now.connect(cleanup)
 
+        # Chỉnh sửa handler cho cancel modal
+        def handle_cancel_payment():
+            # Cleanup effects và blur container
+            if self.blur_effect:
+                self.blur_effect.setBlurRadius(0)
+            if self.opacity_effect:
+                self.opacity_effect.setOpacity(1)
+            if self.blur_container:
+                self.blur_container.hide()
+                self.blur_container.deleteLater()
+                
+            self.blur_container = None
+            self.blur_effect = None
+            self.opacity_effect = None
+
+            # Set payment_completed flag để trigger reset
+            self.payment_completed = True
+            
+            # Chuyển về home page
+            self.go_home()
+
+        # Kết nối cancel signal với handler mới
+        self.cancel_modal.cancelled.connect(handle_cancel_payment)
+
     def go_home(self):
+        """Handle going back to home page"""
         from page1_welcome import WelcomePage
-        self.cart_state.clear_cart()
+        
+        # Clear cart và reset UI nếu cancel payment hoặc thanh toán thành công
+        if (self.sender() == self.cancel_modal) or self.payment_completed:
+            self.cart_state.clear_cart()
+            self.cart_state.save_to_json()
+            self.reset_page()
+            
         self.home_page = WelcomePage()
         self.home_page.show()
         self.close()
 
     def closeEvent(self, event):
         self.cleanup_resources()
+        self.reset_page()  # Reset state when closing
         if hasattr(self, 'home_page') and self.home_page:
             self.home_page.show()
         super().closeEvent(event)
         
     def cleanup_resources(self):
         """Enhanced resource cleanup"""
-        # Clear all caches
-        self._image_cache.clear()
-        self._widgets_cache.clear()
-        
-        if self._current_frame:
-            del self._current_frame
+        try:
+            # Clear all caches
+            self._image_cache.clear()
+            self._widgets_cache.clear()
             
-        # Stop camera and release resources
-        if self.camera:
-            self.stop_camera()
+            if self._current_frame:
+                del self._current_frame
+                
+            # Stop camera and release resources
+            if self.camera:
+                self.stop_camera()
+                
+            # Clean up detector
+            if self._detector:
+                self._detector = None
+
+            # Clean up modals with safety check
+            if hasattr(self, '_product_modal') and self._product_modal and not sip.isdeleted(self._product_modal):
+                self._product_modal.deleteLater()
+            if hasattr(self, '_cancel_modal') and self._cancel_modal and not sip.isdeleted(self._cancel_modal):
+                self._cancel_modal.deleteLater()
+                
+            self._product_modal = None
+            self._cancel_modal = None
+
+            # Clean up effects and animations
+            for effect in [self.blur_effect, self.opacity_effect]:
+                if effect:
+                    effect.deleteLater()
+                    effect = None
+
+            # Remove the warning animation cleanup since we removed the animation
+            if hasattr(self, 'warning_animation') and self.warning_animation:
+                self.warning_animation = None
+
+            # Clean up temp files
+            for folder in [self.temp_detect_folder, self.temp_detected_folder]:
+                if os.path.exists(folder):
+                    for file in os.listdir(folder):
+                        if file.endswith('.jpg'):
+                            try:
+                                os.remove(os.path.join(folder, file))
+                            except:
+                                pass
+
+            # Force garbage collection
+            import gc
+            gc.collect()
             
-        # Clean up detector
-        if self._detector:
-            self._detector = None
-
-        # Clean up modals
-        for modal in [self._product_modal, self._cancel_modal]:
-            if modal:
-                modal.deleteLater()
-                modal = None
-
-        # Clean up effects and animations
-        for effect in [self.blur_effect, self.opacity_effect]:
-            if effect:
-                effect.deleteLater()
-                effect = None
-
-        # Remove the warning animation cleanup since we removed the animation
-        if hasattr(self, 'warning_animation') and self.warning_animation:
-            self.warning_animation = None
-
-        # Clean up temp files
-        for folder in [self.temp_detect_folder, self.temp_detected_folder]:
-            if os.path.exists(folder):
-                for file in os.listdir(folder):
-                    if file.endswith('.jpg'):
-                        try:
-                            os.remove(os.path.join(folder, file))
-                        except:
-                            pass
-
-        # Force garbage collection
-        import gc
-        gc.collect()
+        except Exception as e:
+            print(f"Error in cleanup_resources: {e}")
 
     def lazy_init_modals(self):
         """Lazy initialization of modals"""
@@ -1170,6 +1249,82 @@ class ShoppingPage(QWidget):
             fade_out.start()
             
         QTimer.singleShot(duration, hide_toast)
+
+    def reset_page(self):
+        """Reset page state to initial conditions"""
+        # Reset camera state
+        self.camera_active = False 
+        self._processing = False
+        self.product_detected = False
+        
+        # Cleanup effects and widgets in correct order
+        try:
+            # 1. Reset camera view first
+            if hasattr(self, 'camera_label'):
+                self.camera_label.clear()
+            if hasattr(self, 'camera_frame'):
+                self.camera_frame.show()
+                
+            # 2. Hide and cleanup modals safely
+            if hasattr(self, 'product_modal') and self.product_modal and not sip.isdeleted(self.product_modal):
+                self.product_modal.hide()
+                
+            if hasattr(self, 'cancel_modal') and self.cancel_modal and not sip.isdeleted(self.cancel_modal):
+                self.cancel_modal.hide()
+                
+            # 3. Cleanup blur effects safely
+            if hasattr(self, 'blur_container') and self.blur_container and not sip.isdeleted(self.blur_container):
+                self.blur_container.hide()
+                self.blur_container.deleteLater()
+                
+            if hasattr(self, 'blur_effect') and self.blur_effect and not sip.isdeleted(self.blur_effect):
+                self.blur_effect.deleteLater()
+                
+            if hasattr(self, 'opacity_effect') and self.opacity_effect and not sip.isdeleted(self.opacity_effect):
+                self.opacity_effect.deleteLater()
+                
+            # 4. Reset references
+            self.blur_container = None
+            self.blur_effect = None 
+            self.opacity_effect = None
+            
+            # 5. Reset cart state
+            self.cart_state.clear_cart()
+            self.cart_items = []
+            self.update_cart_display()
+            
+            # 6. Stop camera if active
+            if hasattr(self, 'camera') and self.camera:
+                self.stop_camera()
+                
+            # Reset cancel shopping button style
+            if hasattr(self, 'cancel_shopping_btn'):
+                self.cancel_shopping_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #F3F3F3;
+                        border: 1px solid #D30E11;
+                        border-radius: 17px;
+                        color: #D30E11;
+                        font-weight: bold;
+                        font-size: 12px;
+                    }
+                    QPushButton:hover {
+                        background-color: #D32F2F;
+                        color: white;
+                    }
+                """)
+                self.cancel_shopping_btn.hide()  # Hide the button
+                
+        except Exception as e:
+            print(f"Error in reset_page: {e}")
+
+    def showEvent(self, event):
+        """Called when widget is shown"""
+        super().showEvent(event)
+        # Chỉ reset page khi thanh toán đã hoàn tất hoặc bị hủy
+        if self.payment_completed:
+            self.reset_page()
+            self.payment_completed = False  # Reset flag
 
 if __name__ == '__main__':
     import sys

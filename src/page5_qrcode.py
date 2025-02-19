@@ -17,6 +17,7 @@ from threading import Thread
 
 class QRCodePage(QWidget):
     switch_to_success = pyqtSignal()  # Add signal for page switching
+    payment_completed = pyqtSignal(bool)  # Signal cho trạng thái thanh toán
     
     def __init__(self):
         super().__init__()
@@ -356,9 +357,15 @@ class QRCodePage(QWidget):
     def handle_success(self):
         """Handle successful transaction in main thread"""
         self.countdown_timer.stop()
-        # Don't clear cart here anymore - let page6 handle it
         from page6_success import SuccessPage
+        
+        # Tạo page6 trước để nó có thể lấy dữ liệu từ cart_state
         self.success_page = SuccessPage()
+        
+        # Sau khi page6 được tạo, mới emit signal để page4 xử lý reset
+        self.payment_completed.emit(True)
+        
+        # Show page6 và đóng page hiện tại
         self.success_page.show()
         print("Switched to success page")
         self.close()

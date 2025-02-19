@@ -1,5 +1,12 @@
+from typing import Dict, List, Tuple
 import json
 import os
+from PIL import Image
+import requests
+from io import BytesIO
+import threading
+from functools import lru_cache
+import time
 
 class CartState:
     _instance = None
@@ -9,8 +16,33 @@ class CartState:
         if cls._instance is None:
             cls._instance = super(CartState, cls).__new__(cls)
             cls._instance.cart_items = []
-            # No need to create folder since json folder already exists
+            cls._instance._image_cache = {}  # Add image cache at instance creation
         return cls._instance
+
+    def __init__(self):
+        if not hasattr(self, '_initialized'):
+            self._image_lock = threading.Lock()
+            self._initialized = True
+
+    @lru_cache(maxsize=32)
+    def _fetch_and_process_image(self, image_url: str) -> Image:
+        """Fetch và xử lý ảnh với cache"""
+        with self._image_lock:
+            if image_url in self._image_cache:
+                return self._image_cache[image_url]
+            
+            start = time.time()
+            try:
+                response = requests.get(image_url, timeout=5)
+                img = Image.open(BytesIO(response.content))
+                # Thực hiện xử lý ảnh (resize, remove bg, etc)
+                # ...
+                self._image_cache[image_url] = img
+                print(f"Image processing took {time.time() - start:.2f}s")
+                return img
+            except Exception as e:
+                print(f"Error processing image: {e}")
+                return None
 
     def save_to_json(self):
         """Save cart state to JSON file in json folder"""
@@ -33,16 +65,33 @@ class CartState:
         except Exception as e:
             print(f"Error saving cart data: {e}")
 
-    def add_item(self, product, quantity):
-        for i, (existing_product, existing_quantity) in enumerate(self.cart_items):
+    def add_item(self, product: Dict, quantity: int) -> bool:
+        """Add item with optimized image handling"""
+        start = time.time()
+        
+        # Pre-fetch image in background if not in cache
+        if 'image_url' in product and product['image_url'] not in self._image_cache:
+            thread = threading.Thread(
+                target=self._fetch_and_process_image,
+                args=(product['image_url'],)
+            )
+            thread.daemon = True
+            thread.start()
+        
+        # Cart operations
+        updated = False
+        for idx, (existing_product, existing_quantity) in enumerate(self.cart_items):
             if existing_product['name'] == product['name']:
-                updated_quantity = existing_quantity + quantity
-                self.cart_items[i] = (existing_product, updated_quantity)
-                self.save_to_json()
-                return True
-        self.cart_items.append((product, quantity))
+                self.cart_items[idx] = (existing_product, existing_quantity + quantity)
+                updated = True
+                break
+                
+        if not updated:
+            self.cart_items.append((product, quantity))
+            
         self.save_to_json()
-        return False
+        print(f"Cart operation took {time.time() - start:.2f}s")
+        return updated
 
     def remove_item(self, index):
         if 0 <= index < len(self.cart_items):
