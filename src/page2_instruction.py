@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, 
                            QPushButton, QApplication, QHBoxLayout, QSizePolicy)
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
+from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon
 import os
 from page3_productsinfo import ProductPage  
 from page_timing import PageTiming
+from components.PageTransitionOverlay import PageTransitionOverlay
 
 class InstructionPage(QWidget):
     def __init__(self):
@@ -23,6 +24,11 @@ class InstructionPage(QWidget):
         self.load_fonts()
         self.init_ui()
         self.load_slides()
+        self.transition_overlay = PageTransitionOverlay(self)
+
+        # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
+        self.setWindowIcon(QIcon(icon_path))
 
     def load_fonts(self):
         # Same font loading as page1
@@ -230,11 +236,18 @@ class InstructionPage(QWidget):
         self.setLayout(layout)
 
     def next_page(self):
-        start_time = PageTiming.start_timing()
-        self.product_page = ProductPage()
-        self.product_page.show()
-        PageTiming.end_timing(start_time, "InstructionPage", "ProductPage")
-        self.hide()
+        def switch_page():
+            start_time = PageTiming.start_timing()
+            self.product_page = ProductPage()
+            
+            def show_new_page():
+                self.product_page.show()
+                self.transition_overlay.fadeOut(lambda: self.hide())
+                PageTiming.end_timing(start_time, "InstructionPage", "ProductPage")
+                
+            self.transition_overlay.fadeIn(show_new_page)
+            
+        switch_page()
 
     def navigate_instructions(self, direction):
         if direction == 'prev':

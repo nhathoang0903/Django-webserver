@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget, QDialog
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFontDatabase, QFont
 import os
+from components.PageTransitionOverlay import PageTransitionOverlay
 
 class CancelShoppingModal(QFrame):
     cancelled = pyqtSignal()
@@ -18,6 +19,8 @@ class CancelShoppingModal(QFrame):
         """)
 
         self.init_ui()
+        self.transition_overlay = PageTransitionOverlay(self)
+
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
@@ -44,7 +47,7 @@ class CancelShoppingModal(QFrame):
 
         # Fix title styling
         title = QLabel("Are you sure you want to cancel?")
-        title.setFont(QFont("Inria Sans", 10, QFont.Bold))
+        title.setFont(QFont("Inria Sans", 12, QFont.Bold))
         title.setStyleSheet("""
             QLabel {
                 color: #000000;
@@ -97,9 +100,9 @@ class CancelShoppingModal(QFrame):
 
         # Update message font
         message = QLabel()
-        message.setText("Any items you have added to the cart will be\nremoved, and your current progress will be lost.")
-        message.setFont(QFont("Inria Sans", 7, QFont.Bold))
-        # message.setWordWrap(True)  # Enable word wrap
+        message.setText("Any items you have added to the cart will be removed, and your current progress will be lost.")
+        message.setFont(QFont("Inria Sans", 8, QFont.Bold))
+        message.setWordWrap(True)  # Enable word wrap
         message.setStyleSheet("""
             QLabel {
                 color: #000000;
@@ -172,3 +175,20 @@ class CancelShoppingModal(QFrame):
         self.cancelled.emit()
         self.hide()
         # Don't handle cart clearing here - let page4 handle it
+
+    def accept(self):
+        """Handle Yes button click"""
+        def handle_transition():
+            # Emit cancelled signal after overlay appears
+            def emit_signal():
+                self.cancelled.emit()
+                self.close()
+                
+            self.transition_overlay.fadeIn(emit_signal)
+            
+        handle_transition()
+
+    def reject(self):
+        """Handle No button click"""
+        self.not_now.emit()
+        self.close()

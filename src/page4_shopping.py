@@ -15,6 +15,8 @@ from cart_state import CartState
 from cancelshopping_modal import CancelShoppingModal
 from PyQt5 import sip
 from countdown_overlay import CountdownOverlay
+from page_timing import PageTiming
+from components.PageTransitionOverlay import PageTransitionOverlay
 
 class ShoppingPage(QWidget):
     # Class level attributes for critical components
@@ -78,6 +80,7 @@ class ShoppingPage(QWidget):
         # Thêm flag để theo dõi trạng thái thanh toán
         self.payment_completed = False 
         self.countdown_overlay = None
+        self.transition_overlay = PageTransitionOverlay(self)
 
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
@@ -493,16 +496,13 @@ class ShoppingPage(QWidget):
             self.animate_disabled_payment()
             return
             
-        # Stop camera before switching to payment page
-        if self.camera_active:
-            self.stop_camera()
-            
-        # Only proceed if cart has items
+        start_time = PageTiming.start_timing()
         from page5_qrcode import QRCodePage
         self.payment_page = QRCodePage()
         # Kết nối signal từ page5 để theo dõi trạng thái thanh toán  
         self.payment_page.payment_completed.connect(self.handle_payment_completed)
         self.payment_page.show()
+        PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
         self.hide()
 
     def handle_payment_completed(self, success):
@@ -556,6 +556,7 @@ class ShoppingPage(QWidget):
         if self.toast_label:
             self.toast_label.hide()
         self.show_synchronized_toast("Cart is empty! Please add items to proceed.")
+        print("Cart is empty! Please add items to proceed.")
         
         # Change button color
         payment_button.setStyleSheet("""
@@ -1073,40 +1074,57 @@ class ShoppingPage(QWidget):
 
     def handle_cancel_payment(self):
         """Single handler for cancel payment"""
-        # Cleanup effects and blur container
-        if self.blur_effect:
-            self.blur_effect.setBlurRadius(0)
-        if self.opacity_effect:
-            self.opacity_effect.setOpacity(1)
-        if self.blur_container:
-            self.blur_container.hide()
-            self.blur_container.deleteLater()
-            
-        self.blur_container = None
-        self.blur_effect = None
-        self.opacity_effect = None
+        def switch_to_home():
+            # Cleanup effects and blur container first
+            if self.blur_effect:
+                self.blur_effect.setBlurRadius(0)
+            if self.opacity_effect:
+                self.opacity_effect.setOpacity(1)
+            if self.blur_container:
+                self.blur_container.hide()
+                self.blur_container.deleteLater()
+                
+            self.blur_container = None
+            self.blur_effect = None
+            self.opacity_effect = None
 
-        # Set payment_completed flag to trigger reset only once
-        self.payment_completed = True
-        
-        # Clear cart data only once before going home
-        self.cart_state.clear_cart()
-        self.cart_state.save_to_json()
-        
-        # Go to home page
-        self.go_home()
+            # Clear cart data
+            self.cart_state.clear_cart()
+            self.cart_state.save_to_json()
+            
+            # Show transition overlay
+            def transition_complete():
+                from page1_welcome import WelcomePage
+                self.home_page = WelcomePage()
+                # Show new page before hiding overlay
+                self.home_page.show()
+                # Hide overlay after new page is ready
+                self.transition_overlay.fadeOut(lambda: self.close())
+                
+            # Start transition with callback
+            self.transition_overlay.fadeIn(transition_complete)
+
+        # Execute transition
+        switch_to_home()
 
     def go_home(self):
-        """Handle going back to home page"""
-        from page1_welcome import WelcomePage
-        
-        # Remove duplicate cart clearing - now handled in handle_cancel_payment
+        """Enhanced going back to home page with transition"""
+        def switch_to_home():
+            start_time = PageTiming.start_timing()
+            from page1_welcome import WelcomePage
+            
+            def show_new_page():
+                self.home_page = WelcomePage()
+                self.home_page.show()
+                self.transition_overlay.fadeOut(lambda: self.close())
+                PageTiming.end_timing(start_time, "ShoppingPage", "WelcomePage")
+                
+            self.transition_overlay.fadeIn(show_new_page)
+            
+        # Only reset page if payment was completed
         if self.payment_completed:
             self.reset_page()
-            
-        self.home_page = WelcomePage()
-        self.home_page.show()
-        self.close()
+        switch_to_home()
 
     def closeEvent(self, event):
         self.cleanup_resources()

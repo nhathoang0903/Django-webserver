@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, 
                            QPushButton, QApplication, QMessageBox, QHBoxLayout)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
+from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon
 from page2_instruction import InstructionPage  
 import os
-from cart_state import CartState  # Add this import
+from cart_state import CartState  
 from page_timing import PageTiming
+from components.PageTransitionOverlay import PageTransitionOverlay
 
 class WelcomePage(QWidget):
     def __init__(self):
@@ -15,6 +16,10 @@ class WelcomePage(QWidget):
         cart_state.clear_cart()
         self.load_fonts()
         self.init_ui()
+        self.transition_overlay = PageTransitionOverlay(self)
+        # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
+        self.setWindowIcon(QIcon(icon_path))
 
     def load_fonts(self):
         # Load custom fonts from font-family directory
@@ -132,11 +137,18 @@ class WelcomePage(QWidget):
         self.setLayout(layout)
 
     def start_shopping(self):
-        start_time = PageTiming.start_timing()
-        self.instruction_page = InstructionPage()
-        self.instruction_page.show()
-        PageTiming.end_timing(start_time, "WelcomePage", "InstructionPage")
-        self.hide()  # Hide the welcome page
+        def switch_page():
+            start_time = PageTiming.start_timing()
+            self.instruction_page = InstructionPage()
+            
+            def show_new_page():
+                self.instruction_page.show()
+                self.transition_overlay.fadeOut(lambda: self.hide())
+                PageTiming.end_timing(start_time, "WelcomePage", "InstructionPage")
+                
+            self.transition_overlay.fadeIn(show_new_page)
+            
+        switch_page()
 
 if __name__ == '__main__':
     import sys

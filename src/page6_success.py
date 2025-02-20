@@ -9,6 +9,7 @@ import datetime
 import requests
 from cart_state import CartState
 from page_timing import PageTiming
+from components.PageTransitionOverlay import PageTransitionOverlay  # Add this import
 
 class SuccessPage(QWidget):
     def __init__(self):
@@ -16,13 +17,15 @@ class SuccessPage(QWidget):
         self.cart_state = CartState()
         self.load_fonts()
         self.init_ui()
-        # Try to send data to API first
-        if self.send_to_history_api():
-            # Only clear cart and start timer if data was sent successfully
-            self.cart_state.clear_cart()
-            self.timer = QTimer()
-            self.timer.timeout.connect(self.go_home)
-            self.timer.start(5000)
+        # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
+        self.setWindowIcon(QIcon(icon_path))
+        # Send data to API
+        self.send_to_history_api()
+        # Clear cart only once at initialization
+        self.cart_state.clear_cart()
+        # Initialize transition overlay
+        self.transition_overlay = PageTransitionOverlay(self)
 
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -172,13 +175,31 @@ class SuccessPage(QWidget):
 
         main_layout.addWidget(center_widget)
 
+        # Initialize timer
+        self.timer = QTimer(self)
+        self.timer.setSingleShot(True)  # Timer will only fire once
+        self.timer.timeout.connect(self.go_home)
+        self.timer.start(5000)  # 5 seconds
+
     def go_home(self):
+        if hasattr(self, 'timer'):
+            self.timer.stop()  # Stop the timer
+            
         start_time = PageTiming.start_timing()
         from page1_welcome import WelcomePage
         self.home_page = WelcomePage()
-        self.home_page.show()
-        PageTiming.end_timing(start_time, "SuccessPage", "WelcomePage") 
-        self.close()
+        
+        def show_new_page():
+            self.home_page.show()
+            self.transition_overlay.fadeOut(lambda: self.close())
+            PageTiming.end_timing(start_time, "SuccessPage", "WelcomePage")
+            
+        self.transition_overlay.fadeIn(show_new_page)
+
+    def closeEvent(self, event):
+        if hasattr(self, 'timer'):
+            self.timer.stop()  # Ensure timer is stopped when window closes
+        super().closeEvent(event)
 
 if __name__ == '__main__': 
     import sys

@@ -24,6 +24,9 @@ class QRCodePage(QWidget):
         super().__init__()
         self.page_load_time = time.time()  # Track when page loads
         self.cart_state = CartState()
+        # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
+        self.setWindowIcon(QIcon(icon_path))
         # Calculate total first
         raw_total = sum(float(product['price']) * quantity 
                        for product, quantity in self.cart_state.cart_items)
@@ -76,7 +79,7 @@ class QRCodePage(QWidget):
         self.setWindowTitle('QR Code Payment')
         self.setGeometry(100, 100, 800, 480)
         self.setFixedSize(800, 480)
-        self.setStyleSheet("background-color: #F5F9F7;")
+        self.setStyleSheet("background-color: #F0F6F1;")
 
         # Set window icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')

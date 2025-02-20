@@ -1,12 +1,13 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
                            QGridLayout, QApplication, QFrame, QHBoxLayout)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize
-from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie
+from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie, QIcon
 import os
 import json
 import urllib.request
 from urllib.error import URLError
 import threading
+from page_timing import PageTiming
 
 class SimpleImageLoader:
     _cache = {}  # Add image cache
@@ -100,7 +101,7 @@ class ProductCard(QFrame):
         # Name
         name = self.product['name'].replace('_', ' ')
         name_label = QLabel(name)
-        name_label.setFont(QFont("Josefin Sans", 8))
+        name_label.setFont(QFont("Josefin Sans", 10))
         name_label.setWordWrap(True)
         name_label.setAlignment(Qt.AlignHCenter)
         name_label.setFixedHeight(48)
@@ -184,6 +185,9 @@ class ProductPage(QWidget):
             else:
                 # Use cached products directly
                 self.display_cached_products()
+                    # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
+        self.setWindowIcon(QIcon(icon_path))
 
     def display_cached_products(self):
         """Display products from cache without reloading"""
@@ -373,11 +377,7 @@ class ProductPage(QWidget):
                     scan_icon.setPixmap(self.normal_pixmap)
                     return True
                 elif event.type() == QEvent.MouseButtonPress:
-                    from import_module import ImportModule
-                    shopping_page = ImportModule.get_shopping_page()
-                    shopping_page.show()
-                    print("Switching to shopping page...")
-                    obj.window().hide()
+                    self.parent().show_shopping_page()
                     return True
                 return False
 
@@ -425,6 +425,14 @@ class ProductPage(QWidget):
         error_label = QLabel(f"Error loading products: {error_message}")
         error_label.setStyleSheet("color: red;")
         self.grid_layout.addWidget(error_label, 0, 0)
+
+    def show_shopping_page(self):
+        start_time = PageTiming.start_timing()
+        from page4_shopping import ShoppingPage
+        self.shopping_page = ShoppingPage()
+        self.shopping_page.show()
+        PageTiming.end_timing(start_time, "ProductPage", "ShoppingPage")
+        self.hide()
 
 if __name__ == '__main__':
     import sys
