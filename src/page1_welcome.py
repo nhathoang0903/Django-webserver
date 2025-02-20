@@ -5,6 +5,7 @@ from PyQt5.QtGui import QFont, QPixmap, QFontDatabase
 from page2_instruction import InstructionPage  
 import os
 from cart_state import CartState  # Add this import
+from page_timing import PageTiming
 
 class WelcomePage(QWidget):
     def __init__(self):
@@ -131,9 +132,10 @@ class WelcomePage(QWidget):
         self.setLayout(layout)
 
     def start_shopping(self):
+        start_time = PageTiming.start_timing()
         self.instruction_page = InstructionPage()
         self.instruction_page.show()
-        print("Instruction page opened")
+        PageTiming.end_timing(start_time, "WelcomePage", "InstructionPage")
         self.hide()  # Hide the welcome page
 
 if __name__ == '__main__':

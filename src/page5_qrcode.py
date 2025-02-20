@@ -14,6 +14,7 @@ import json
 from PIL import Image
 from cart_state import CartState
 from threading import Thread
+from page_timing import PageTiming
 
 class QRCodePage(QWidget):
     switch_to_success = pyqtSignal()  # Add signal for page switching
@@ -21,6 +22,7 @@ class QRCodePage(QWidget):
     
     def __init__(self):
         super().__init__()
+        self.page_load_time = time.time()  # Track when page loads
         self.cart_state = CartState()
         # Calculate total first
         raw_total = sum(float(product['price']) * quantity 
@@ -74,7 +76,7 @@ class QRCodePage(QWidget):
         self.setWindowTitle('QR Code Payment')
         self.setGeometry(100, 100, 800, 480)
         self.setFixedSize(800, 480)
-        self.setStyleSheet("background-color: #F5F9F7;")
+        self.setStyleSheet("background-color: #F0F6F1;")
 
         # Set window icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
@@ -265,10 +267,16 @@ class QRCodePage(QWidget):
 
     def return_to_shopping(self):
         """Return to shopping page when QR expires"""
+        transition_start = time.time()
+        
         from page4_shopping import ShoppingPage
         self.shopping_page = ShoppingPage()
+        
+        # Calculate transition time
+        transition_time = time.time() - transition_start
+        print(f"Time to return to shopping: {transition_time:.2f} seconds")
+        
         self.shopping_page.show()
-        # Clean up and close current page
         self.cleanup_resources()
         self.close()
 
@@ -355,19 +363,13 @@ class QRCodePage(QWidget):
                 time.sleep(0.2)
 
     def handle_success(self):
-        """Handle successful transaction in main thread"""
+        start_time = PageTiming.start_timing()
         self.countdown_timer.stop()
         from page6_success import SuccessPage
-        
-        # Tạo page6 trước để nó có thể lấy dữ liệu từ cart_state
         self.success_page = SuccessPage()
-        
-        # Sau khi page6 được tạo, mới emit signal để page4 xử lý reset
         self.payment_completed.emit(True)
-        
-        # Show page6 và đóng page hiện tại
         self.success_page.show()
-        print("Switched to success page")
+        PageTiming.end_timing(start_time, "QRCodePage", "SuccessPage")
         self.close()
 
     def closeEvent(self, event):

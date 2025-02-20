@@ -8,6 +8,7 @@ import random
 import datetime
 import requests
 from cart_state import CartState
+from page_timing import PageTiming
 
 class SuccessPage(QWidget):
     def __init__(self):
@@ -172,11 +173,11 @@ class SuccessPage(QWidget):
         main_layout.addWidget(center_widget)
 
     def go_home(self):
-        self.timer.stop()
-        from page1_welcome import WelcomePage  # Import page1
-        self.home_page = WelcomePage()  # create instance for WelcomePage
+        start_time = PageTiming.start_timing()
+        from page1_welcome import WelcomePage
+        self.home_page = WelcomePage()
         self.home_page.show()
-        print("Redirected to home page")
+        PageTiming.end_timing(start_time, "SuccessPage", "WelcomePage") 
         self.close()
 
 if __name__ == '__main__': 

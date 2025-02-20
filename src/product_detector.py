@@ -2,7 +2,7 @@ import torch
 from ultralytics import YOLO
 import json
 import os
-import onnxruntime
+# import onnxruntime
 
 class ProductDetector:
     _instance = None
@@ -25,7 +25,7 @@ class ProductDetector:
         """Call this method early in the application to start loading the model"""
         instance = cls()
         if instance.model is None:
-            model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'model25nv2.onnx')
+            model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'best.pt')
             instance.model = YOLO(model_path)
     
     def load_product_data(self):
