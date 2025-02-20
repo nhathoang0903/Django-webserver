@@ -84,7 +84,7 @@ class WelcomePage(QWidget):
 
         # Welcome text using Inria Sans Bold
         welcome_label = QLabel("Welcome to Cartsy !")
-        welcome_label.setFont(QFont("Inria Sans", 34, QFont.Bold))
+        welcome_label.setFont(QFont("Inria Sans", 30, QFont.Bold))
         welcome_label.setStyleSheet("color: #3D6F4A;")
         left_layout.addWidget(welcome_label)
 
@@ -113,7 +113,7 @@ class WelcomePage(QWidget):
         # Right side image
         right_container = QWidget()
         right_layout = QVBoxLayout(right_container)
-        right_layout.setContentsMargins(50, 0, 0, 0)  # Increased left margin from 30 to 50
+        right_layout.setContentsMargins(10, 0, 0, 0) 
         right_layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # Keep VCenter alignment for instruction image
         
         welcome_img_label = QLabel()

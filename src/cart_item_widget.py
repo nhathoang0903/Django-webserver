@@ -3,12 +3,7 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QLabel,
 from PyQt5.QtGui import QPixmap, QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint, QTimer
 import os
-from urllib.request import urlopen
-from rembg import remove
-from PIL import Image
-from io import BytesIO
-import requests
-import threading
+from page3_productsinfo import SimpleImageLoader  # Import SimpleImageLoader
 
 class CartItemWidget(QFrame):
     quantityChanged = pyqtSignal(int)  # Signal for quantity changes
@@ -49,7 +44,7 @@ class CartItemWidget(QFrame):
         layout.setSpacing(15)
         
         # Left: Image
-        image_label = QLabel()
+        self.image_label = QLabel()
         # Set image size based on category (80% of modal sizes)
         category = product.get('category', '')
         if (category == "Đồ ăn vặt"):
@@ -61,41 +56,31 @@ class CartItemWidget(QFrame):
         else:
             image_size = (37, 96)  # Default size (75*0.5, 120*0.8)
             
-        image_label.setFixedSize(*image_size)
-        image_label.setStyleSheet("""
+        self.image_label.setFixedSize(*image_size)
+        self.image_label.setStyleSheet("""
             QLabel {
                 background-color: transparent;
                 border: none;
             }
         """)
         
-        try:
-            # Tải ảnh từ URL
-            image_data = urlopen(product['image_url']).read()
-            
-            # Chuyển đổi sang PIL Image và remove background
-            input_image = Image.open(BytesIO(image_data))
-            output_image = remove(input_image)
-            
-            # Chuyển đổi lại thành QPixmap với transparency
-            byte_array = BytesIO()
-            output_image.save(byte_array, format='PNG')
-            image_bytes = byte_array.getvalue()
-            
-            pixmap = QPixmap()
-            pixmap.loadFromData(image_bytes)
-            
-            # Scale theo kích thước category
-            scaled_pixmap = pixmap.scaled(image_size[0], image_size[1],
-                                        Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            image_label.setPixmap(scaled_pixmap)
-            
-        except Exception as e:
-            print(f"Error loading/processing image: {e}")
-            image_label.setText("N/A")
+        # Try to get cached image first
+        image_url = product['image_url']
+        cache_key = f"{image_url}_{image_size[0]}x{image_size[1]}"
         
-        image_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(image_label)
+        if cache_key in SimpleImageLoader._cache:
+            # Use cached image if available
+            self.image_label.setPixmap(SimpleImageLoader._cache[cache_key])
+        else:
+            # If not in cache, load using SimpleImageLoader
+            pixmap = SimpleImageLoader.load_image(image_url, image_size)
+            if (pixmap):
+                self.image_label.setPixmap(pixmap)
+            else:
+                self.image_label.setText("N/A")
+        
+        self.image_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.image_label)
         
         # Middle: Name and Quantity Controls
         middle_widget = QWidget()
@@ -283,40 +268,6 @@ class CartItemWidget(QFrame):
         self.slide_animation.finished.connect(self._on_animation_finished)
         
         self.image_loaded = False
-        self._load_image_async(product.get('image_url'))
-
-    def _load_image_async(self, image_url):
-        """Load image asynchronously with improved caching"""
-        if not image_url:
-            return
-            
-        def load():
-            try:
-                # Check global image cache first
-                if image_url in self.cart_state._image_cache:
-                    print(f"Using cached image for {image_url}")
-                    img = self.cart_state._image_cache[image_url]
-                else:
-                    # Load and process image
-                    print(f"Processing new image for {image_url}")
-                    response = requests.get(image_url, timeout=5)
-                    img = Image.open(BytesIO(response.content))
-                    img = remove(img)  # Remove background
-                    
-                    # Cache the processed image
-                    self.cart_state._image_cache[image_url] = img
-                    
-                # Convert to pixmap and display
-                pixmap = self._convert_to_pixmap(img)
-                if pixmap:
-                    self.image_label.setPixmap(pixmap)
-                    
-            except Exception as e:
-                print(f"Error loading image: {e}")
-                
-        thread = threading.Thread(target=load)
-        thread.daemon = True
-        thread.start()
 
     def update_price_display(self):
         """Update the price display based on current quantity"""

@@ -14,6 +14,7 @@ from cart_item_widget import CartItemWidget
 from cart_state import CartState
 from cancelshopping_modal import CancelShoppingModal
 from PyQt5 import sip
+from countdown_overlay import CountdownOverlay
 
 class ShoppingPage(QWidget):
     # Class level attributes for critical components
@@ -76,6 +77,7 @@ class ShoppingPage(QWidget):
         
         # Thêm flag để theo dõi trạng thái thanh toán
         self.payment_completed = False 
+        self.countdown_overlay = None
 
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
@@ -720,12 +722,21 @@ class ShoppingPage(QWidget):
         # Set detection delay if needed
         if delay_detection:
             self.detection_start_time = True  # Block detection initially
+            
+            # Create and show countdown overlay
+            if not self.countdown_overlay:
+                self.countdown_overlay = CountdownOverlay(self.camera_frame)
+                self.countdown_overlay.resize(self.camera_frame.size())
+            
+            self.countdown_overlay.start()
             QTimer.singleShot(5000, self.enable_detection)  # Enable detection after 5s
         else:
             self.detection_start_time = None  # No delay, enable detection immediately
 
     def enable_detection(self):
         """Callback to enable detection after delay"""
+        if self.countdown_overlay:
+            self.countdown_overlay.stop()
         self.detection_start_time = None  # Clear flag to enable detection
 
     def stop_camera(self):
@@ -746,6 +757,8 @@ class ShoppingPage(QWidget):
             self.camera_label.clear()
         
         self._processing = False
+        if self.countdown_overlay:
+            self.countdown_overlay.stop()
 
     def update_frame(self):
         if not (self.camera and self.camera_active and not self.product_detected) or self._processing:
@@ -792,7 +805,7 @@ class ShoppingPage(QWidget):
                     if product:
                         # Save detected frame
                         detected_path = os.path.join(self.temp_detected_folder, frame_name)
-                        cv2.imwrite(detected_path, cv2.cvtColor(detect_frame, cv2.COLOR_RGB2BGR))
+                        cv2.imwrite(detected_path, cv2.COLOR_RGB2BGR)
                         # Delete the to_detect frame since detection succeeded
                         try:
                             os.remove(to_detect_path)
@@ -1058,14 +1071,37 @@ class ShoppingPage(QWidget):
         # Kết nối cancel signal với handler mới
         self.cancel_modal.cancelled.connect(handle_cancel_payment)
 
+    def handle_cancel_payment(self):
+        """Single handler for cancel payment"""
+        # Cleanup effects and blur container
+        if self.blur_effect:
+            self.blur_effect.setBlurRadius(0)
+        if self.opacity_effect:
+            self.opacity_effect.setOpacity(1)
+        if self.blur_container:
+            self.blur_container.hide()
+            self.blur_container.deleteLater()
+            
+        self.blur_container = None
+        self.blur_effect = None
+        self.opacity_effect = None
+
+        # Set payment_completed flag to trigger reset only once
+        self.payment_completed = True
+        
+        # Clear cart data only once before going home
+        self.cart_state.clear_cart()
+        self.cart_state.save_to_json()
+        
+        # Go to home page
+        self.go_home()
+
     def go_home(self):
         """Handle going back to home page"""
         from page1_welcome import WelcomePage
         
-        # Clear cart và reset UI nếu cancel payment hoặc thanh toán thành công
-        if (self.sender() == self.cancel_modal) or self.payment_completed:
-            self.cart_state.clear_cart()
-            self.cart_state.save_to_json()
+        # Remove duplicate cart clearing - now handled in handle_cancel_payment
+        if self.payment_completed:
             self.reset_page()
             
         self.home_page = WelcomePage()

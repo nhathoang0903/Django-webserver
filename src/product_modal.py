@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QFrame
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap, QFont, QFontDatabase
+from page3_productsinfo import SimpleImageLoader  # Import SimpleImageLoader
 import os
 
 class ProductModal(QFrame):
@@ -311,28 +312,17 @@ class ProductModal(QFrame):
         formatted_name = product['name'].replace('_', ' ')
         self.name_label.setText(formatted_name)
         
-        # Convert price to float and format with dot as thousand separator
+        # Format price
         try:
             price_value = float(product['price'])
             formatted_price = "{:,.0f}".format(price_value).replace(',', '.')
         except (ValueError, TypeError):
-            formatted_price = product['price']  # Fallback to original if conversion fails
+            formatted_price = product['price']
             
         price_text = f'<span style="color: #000000;">Price: </span><span style="color: #D30E11;"><b>{formatted_price} vnd / item</b></span>'
         self.price_label.setText(price_text)
 
-        # Clean up image URL
-        image_url = product['image_url']
-        if image_url.endswith('.webp'):
-            image_url = image_url[:-5]
-            
-        print(f"Attempting to load image from: {image_url}")
-        
-        if not image_url:
-            print("Warning: No image URL provided")
-            return
-
-        # Update image size based on category
+        # Get image size based on category
         category = product.get('category', '')
         if category == "Đồ ăn vặt":
             image_size = (75, 120)
@@ -341,59 +331,44 @@ class ProductModal(QFrame):
         elif category == "Thức ăn":
             image_size = (75, 125)
         else:
-            image_size = (75, 75)  # Default size
+            image_size = (75, 75)
             
         self.image_label.setFixedSize(*image_size)
 
-        # Create QPixmap from URL
-        pixmap = QPixmap()
-        from urllib.request import urlopen
-        try:
-            data = urlopen(image_url).read()
-            pixmap.loadFromData(data)
-            
-            # Scale according to category size
-            scaled_pixmap = pixmap.scaled(
-                image_size[0], 
-                image_size[1],
-                Qt.KeepAspectRatio, 
-                Qt.SmoothTransformation
-            )
-            self.image_label.setPixmap(scaled_pixmap)
-        except Exception as e:
-            print(f"Error loading image: {e}")
-            # Load default image if URL fails
-            default_image_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)), 
-                'assets', 
-                'default-product.png'
-            )
-            pixmap.load(default_image_path)
-
-        if pixmap.isNull():
-            print("Error: Failed to load image")
-            return
-
-        scaled_pixmap = pixmap.scaled(
-            self.image_label.width(), 
-            self.image_label.height(),
-            Qt.KeepAspectRatio, 
-            Qt.SmoothTransformation
-        )
+        # Try to get cached image first
+        image_url = product['image_url']
+        cache_key = f"{image_url}_{image_size[0]}x{image_size[1]}"
         
-        self.image_label.setPixmap(scaled_pixmap)
+        if cache_key in SimpleImageLoader._cache:
+            # Use cached image if available
+            self.image_label.setPixmap(SimpleImageLoader._cache[cache_key])
+        else:
+            # If not in cache, load using SimpleImageLoader
+            pixmap = SimpleImageLoader.load_image(image_url, image_size)
+            if pixmap:
+                self.image_label.setPixmap(pixmap)
+            else:
+                # Load default image if failed
+                default_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), 
+                    'assets', 
+                    'default-product.png'
+                )
+                default_pixmap = QPixmap(default_path)
+                scaled = default_pixmap.scaled(
+                    image_size[0], image_size[1],
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation
+                )
+                self.image_label.setPixmap(scaled)
 
-        # Toggle visibility and maintain layout
+        # Toggle visibility
         if existing_quantity is not None:
             self.controls_container.hide()
             self.warning_label.hide()
             
-            # Calculate position to show message on the right side
-            # Leave space for image (75px + 10px margin) from the left
-            left_margin = 85  # image width + spacing
-            available_width = self.width() - left_margin - 10  # 10px right margin
-            
-            # Calculate x position to align message on the right while avoiding image
+            left_margin = 85
+            available_width = self.width() - left_margin - 10
             msg_x = left_margin + (available_width - self.existing_message.width()) // 2
             msg_y = (self.height() - self.existing_message.height()) // 2
             

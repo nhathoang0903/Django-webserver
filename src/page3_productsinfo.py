@@ -9,25 +9,74 @@ from urllib.error import URLError
 import threading
 
 class SimpleImageLoader:
+    _cache = {}  # Add image cache
+
     @staticmethod
     def load_image(url, size=(75, 75)):
+        # Check cache first
+        cache_key = f"{url}_{size[0]}x{size[1]}"
+        if cache_key in SimpleImageLoader._cache:
+            return SimpleImageLoader._cache[cache_key]
+
         try:
-            data = urllib.request.urlopen(url, timeout=2).read()
+            # Convert URL to use images.weserv.nl proxy
+            if not url.startswith('https://images.weserv.nl'):
+                proxy_url = f"https://images.weserv.nl/?url={url}"
+            else:
+                proxy_url = url
+
+            # Add timeout to prevent hanging
+            request = urllib.request.Request(
+                proxy_url,
+                headers={'User-Agent': 'Mozilla/5.0'}
+            )
+            data = urllib.request.urlopen(request, timeout=5).read()  # Increased timeout
             pixmap = QPixmap()
             pixmap.loadFromData(data)
-            return pixmap.scaled(size[0], size[1], Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        except (URLError, Exception):
-            return None
+            
+            # Scale image before caching
+            scaled = pixmap.scaled(size[0], size[1], 
+                                 Qt.KeepAspectRatio, 
+                                 Qt.SmoothTransformation)
+            
+            # Cache the scaled image
+            SimpleImageLoader._cache[cache_key] = scaled
+            return scaled
+
+        except Exception as e:
+            print(f"Error loading image {url}: {e}")
+            # Load and cache default image
+            default_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), 
+                'assets', 
+                'default-product.png'
+            )
+            default_pixmap = QPixmap(default_path)
+            scaled = default_pixmap.scaled(size[0], size[1],
+                                         Qt.KeepAspectRatio,
+                                         Qt.SmoothTransformation)
+            SimpleImageLoader._cache[cache_key] = scaled
+            return scaled
 
 class ProductCard(QFrame):
     def __init__(self, product):
         super().__init__()
         self.product = product
+        # self.font_family = "Arial"  # Default font
         self.setup_ui()
         self.load_image_async()
+    def load_fonts(self):
+        font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/JosefinSans-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
     def setup_ui(self):
-        self.setFixedSize(160, 170)
+        self.setFixedSize(160, 180)  # Tăng từ 170 lên 180
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
@@ -51,16 +100,16 @@ class ProductCard(QFrame):
         # Name
         name = self.product['name'].replace('_', ' ')
         name_label = QLabel(name)
-        name_label.setFont(QFont("Josefin Sans", 9))
+        name_label.setFont(QFont("Josefin Sans", 8))
         name_label.setWordWrap(True)
         name_label.setAlignment(Qt.AlignHCenter)
-        name_label.setFixedHeight(45)
+        name_label.setFixedHeight(48)
         layout.addWidget(name_label)
 
         # Price
         price = "{:,.0f}".format(float(self.product['price'])).replace(',', '.')
         price_label = QLabel(f"{price} vnd")
-        price_label.setFont(QFont("Josefin Sans", 8, QFont.Bold))
+        price_label.setFont(QFont("Josefin Sans", 8))
         price_label.setAlignment(Qt.AlignCenter)
         price_label.setStyleSheet("color: #E72225;")
         layout.addWidget(price_label)
@@ -68,7 +117,7 @@ class ProductCard(QFrame):
     def load_image_async(self):
         def load():
             pixmap = SimpleImageLoader.load_image(self.product['image_url'])
-            if pixmap:
+            if (pixmap):
                 self.image_label.setPixmap(pixmap)
             else:
                 self.image_label.setText("N/A")
@@ -81,36 +130,115 @@ class LoadProductsThread(QThread):
 
     def run(self):
         try:
-            # Read from local JSON file
-            json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'products.json')
+            json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                   'json', 'products.json')
             with open(json_path, 'r', encoding='utf-8') as file:
                 products = json.load(file)
-            # Pre-fetch images
-            for product in products[:8]:  # Load first 8 initially
-                SimpleImageLoader.load_image(product['image_url'])
+
+            # Pre-load images in batches to avoid overwhelming network
+            batch_size = 4
+            for i in range(0, min(16, len(products)), batch_size):
+                batch = products[i:i+batch_size]
+                threads = []
+                for product in batch:
+                    thread = threading.Thread(
+                        target=SimpleImageLoader.load_image,
+                        args=(product['image_url'],),
+                        daemon=True
+                    )
+                    threads.append(thread)
+                    thread.start()
+                
+                # Wait for batch to complete
+                for thread in threads:
+                    thread.join(timeout=3)  # Timeout after 3 seconds
+
             self.finished.emit(products)
+            
         except Exception as e:
             self.error.emit(str(e))
 
 class ProductPage(QWidget):
+    _instance = None
+    _products_cache = None
+    _cards_cache = []
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ProductPage, cls).__new__(cls)
+            # Set a flag to track initialization
+            cls._instance._needs_init = True
+        return cls._instance
+
     def __init__(self):
-        super().__init__()
-        self._fonts_loaded = False
-        self.init_ui()
-        self.setup_loading_indicator()
-        self.start_loading_products()
+        if hasattr(self, '_needs_init') and self._needs_init:
+            super().__init__()  # Call parent's __init__
+            self._needs_init = False  # Reset flag
+            self._fonts_loaded = False
+            self.init_ui()
+            
+            # Only show loading indicator and load products if not cached
+            if not ProductPage._products_cache:
+                self.setup_loading_indicator()
+                self.start_loading_products()
+            else:
+                # Use cached products directly
+                self.display_cached_products()
+
+    def display_cached_products(self):
+        """Display products from cache without reloading"""
+        if ProductPage._products_cache and ProductPage._cards_cache:
+            # Restore cached cards to grid
+            for i, card in enumerate(ProductPage._cards_cache):
+                row = (i // 4) * 2
+                col = i % 4
+                self.grid_layout.addWidget(card, row, col)
+                
+    def on_products_loaded(self, products):
+        """Cache products and cards when first loaded"""
+        self.gif_movie.stop()
+        self.loading_widget.hide()
+        
+        # Cache the products
+        ProductPage._products_cache = products
+        
+        # Load font before creating cards
+        font_family = self.load_fonts()
+        
+        # Create and cache product cards
+        ProductPage._cards_cache = []
+        for i, product in enumerate(products[:24]):
+            row = (i // 4) * 2
+            col = i % 4
+            card = ProductCard(product)
+            card.font_family = font_family
+            self.grid_layout.addWidget(card, row, col)
+            ProductPage._cards_cache.append(card)
+            if (i + 1) % 4 == 0:
+                QApplication.processEvents()
+
+    def closeEvent(self, event):
+        """Keep cache when closing"""
+        # Don't clear cache here
+        super().closeEvent(event)
+
+    @classmethod
+    def clear_cache(cls):
+        """Method to manually clear cache if needed"""
+        cls._products_cache = None
+        cls._cards_cache = []
+        if cls._instance:
+            cls._instance = None
 
     def load_fonts(self):
-        if self._fonts_loaded:
-            return
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
-        self._fonts_loaded = True
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/JosefinSans-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
     def init_ui(self):
         self.setWindowTitle('Product Information - Smart Shopping Cart')
@@ -291,19 +419,6 @@ class ProductPage(QWidget):
         self.loading_thread.finished.connect(self.on_products_loaded)
         self.loading_thread.error.connect(self.on_loading_error)
         self.loading_thread.start()
-
-    def on_products_loaded(self, products):
-        # Stop the loading GIF
-        self.gif_movie.stop()
-        self.loading_widget.hide()
-        
-        # Load only first 16 products
-        for i, product in enumerate(products[:16]):
-            row = (i // 4) * 2
-            col = i % 4
-            self.grid_layout.addWidget(ProductCard(product), row, col)
-            if (i + 1) % 4 == 0:
-                QApplication.processEvents()
 
     def on_loading_error(self, error_message):
         self.loading_widget.hide()

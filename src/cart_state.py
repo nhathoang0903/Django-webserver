@@ -9,14 +9,29 @@ from functools import lru_cache
 import time
 
 class CartState:
-    _instance = None
     JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'shopping_process.json')
+
+    def __init__(self):
+        self.cart_items = []
+        self.load_from_json()
+
+    _instance = None
+    _original_images = {}  # Cache for original images 
+    _processed_images = {} # Cache for processed images
     
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(CartState, cls).__new__(cls)
+            # Define JSON path
+            json_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json')
+            if not os.path.exists(json_dir):
+                os.makedirs(json_dir)
+            cls._instance.JSON_PATH = os.path.join(json_dir, 'shopping_process.json')
+            # Initialize other attributes
             cls._instance.cart_items = []
             cls._instance._image_cache = {}  # Add image cache at instance creation
+            cls._instance._original_images = {}
+            cls._instance._processed_images = {}
         return cls._instance
 
     def __init__(self):
@@ -43,6 +58,12 @@ class CartState:
             except Exception as e:
                 print(f"Error processing image: {e}")
                 return None
+
+    def clear_cache(self):
+        """Clear image caches"""
+        self._image_cache.clear()
+        self._original_images.clear() 
+        self._processed_images.clear()
 
     def save_to_json(self):
         """Save cart state to JSON file in json folder"""

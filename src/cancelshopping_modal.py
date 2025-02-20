@@ -168,5 +168,7 @@ class CancelShoppingModal(QFrame):
         self.hide()
 
     def handle_cancel(self):
+        # Emit signal only once and hide
         self.cancelled.emit()
         self.hide()
+        # Don't handle cart clearing here - let page4 handle it
