@@ -15,7 +15,6 @@ from cart_state import CartState
 from cancelshopping_modal import CancelShoppingModal
 from PyQt5 import sip
 from countdown_overlay import CountdownOverlay
-from page_timing import PageTiming
 
 class ShoppingPage(QWidget):
     # Class level attributes for critical components
@@ -494,13 +493,16 @@ class ShoppingPage(QWidget):
             self.animate_disabled_payment()
             return
             
-        start_time = PageTiming.start_timing()
+        # Stop camera before switching to payment page
+        if self.camera_active:
+            self.stop_camera()
+            
+        # Only proceed if cart has items
         from page5_qrcode import QRCodePage
         self.payment_page = QRCodePage()
         # Kết nối signal từ page5 để theo dõi trạng thái thanh toán  
         self.payment_page.payment_completed.connect(self.handle_payment_completed)
         self.payment_page.show()
-        PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
         self.hide()
 
     def handle_payment_completed(self, success):
@@ -554,7 +556,6 @@ class ShoppingPage(QWidget):
         if self.toast_label:
             self.toast_label.hide()
         self.show_synchronized_toast("Cart is empty! Please add items to proceed.")
-        print("Cart is empty! Please add items to proceed.")
         
         # Change button color
         payment_button.setStyleSheet("""

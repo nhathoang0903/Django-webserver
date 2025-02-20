@@ -7,7 +7,6 @@ import json
 import urllib.request
 from urllib.error import URLError
 import threading
-from page_timing import PageTiming
 
 class SimpleImageLoader:
     _cache = {}  # Add image cache
@@ -374,7 +373,11 @@ class ProductPage(QWidget):
                     scan_icon.setPixmap(self.normal_pixmap)
                     return True
                 elif event.type() == QEvent.MouseButtonPress:
-                    self.parent().show_shopping_page()
+                    from import_module import ImportModule
+                    shopping_page = ImportModule.get_shopping_page()
+                    shopping_page.show()
+                    print("Switching to shopping page...")
+                    obj.window().hide()
                     return True
                 return False
 
@@ -422,14 +425,6 @@ class ProductPage(QWidget):
         error_label = QLabel(f"Error loading products: {error_message}")
         error_label.setStyleSheet("color: red;")
         self.grid_layout.addWidget(error_label, 0, 0)
-
-    def show_shopping_page(self):
-        start_time = PageTiming.start_timing()
-        from page4_shopping import ShoppingPage
-        self.shopping_page = ShoppingPage()
-        self.shopping_page.show()
-        PageTiming.end_timing(start_time, "ProductPage", "ShoppingPage")
-        self.hide()
 
 if __name__ == '__main__':
     import sys

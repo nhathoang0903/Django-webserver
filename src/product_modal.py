@@ -276,7 +276,7 @@ class ProductModal(QFrame):
         message_layout.addWidget(warning_icon)
 
         warning_text = QLabel("THE PRODUCT IS ALREADY IN THE CART")
-        warning_text.setFont(QFont("Inria Sans", 4, QFont.Bold))
+        warning_text.setFont(QFont("Inria Sans", 7, QFont.Bold))
         warning_text.setStyleSheet("color: black; background: transparent;")
         warning_text.setContentsMargins(-30, 0, 0, 0)  # Add negative left margin to overlap with icon
         warning_text.setMinimumWidth(200)
