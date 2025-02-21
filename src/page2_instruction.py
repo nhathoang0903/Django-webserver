@@ -1,7 +1,7 @@
 from base_page import BasePage  # New import
 from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QWidget,
                            QPushButton, QApplication, QHBoxLayout, QSizePolicy)
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QEvent, QPoint
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon
 import os
 from page3_productsinfo import ProductPage  
@@ -11,7 +11,7 @@ from components.PageTransitionOverlay import PageTransitionOverlay
 class InstructionPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
         super().__init__()  # Call BasePage init
-        self.installEventFilter(self)  # Register event filter
+        self.start_pos = QPoint()  # Initialize start position for swipe detection
         
         self.current_slide = 0
         self.total_slides = 5
@@ -319,6 +319,19 @@ class InstructionPage(BasePage):  # Changed from QWidget to BasePage
         if self.current_slide == 4:  # Only for slide 5
             self.slide5_index = (self.slide5_index + 1) % 2
             self.slide_label.setPixmap(self.slides[4][self.slide5_index].scaled(209, 230, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    def mousePressEvent(self, event):
+        """Record the start position"""
+        self.start_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        """Check the swipe direction"""
+        dx = event.pos().x() - self.start_pos.x()
+        
+        if dx > 50:
+            self.navigate_slide('prev')
+        elif dx < -50:
+            self.navigate_slide('next')
 
 if __name__ == '__main__':
     import sys
