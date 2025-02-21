@@ -1,3 +1,5 @@
+from base_page import BasePage  
+from components.PageTransitionOverlay import PageTransitionOverlay
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
                            QGridLayout, QApplication, QFrame, QHBoxLayout)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize
@@ -159,7 +161,7 @@ class LoadProductsThread(QThread):
         except Exception as e:
             self.error.emit(str(e))
 
-class ProductPage(QWidget):
+class ProductPage(BasePage):  # Changed from QWidget to BasePage
     _instance = None
     _products_cache = None
     _cards_cache = []
@@ -167,27 +169,28 @@ class ProductPage(QWidget):
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ProductPage, cls).__new__(cls)
-            # Set a flag to track initialization
             cls._instance._needs_init = True
         return cls._instance
 
     def __init__(self):
         if hasattr(self, '_needs_init') and self._needs_init:
-            super().__init__()  # Call parent's __init__
-            self._needs_init = False  # Reset flag
+            super().__init__()  # Call BasePage init
+            self.installEventFilter(self)  # Register event filter
+            self._needs_init = False  
             self._fonts_loaded = False
             self.init_ui()
             
-            # Only show loading indicator and load products if not cached
+            # Initialize transition overlay
+            self.transition_overlay = PageTransitionOverlay(self)
+            
             if not ProductPage._products_cache:
                 self.setup_loading_indicator()
                 self.start_loading_products()
             else:
-                # Use cached products directly
                 self.display_cached_products()
-                    # Set application icon
-        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
-        self.setWindowIcon(QIcon(icon_path))
+                
+            icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
+            self.setWindowIcon(QIcon(icon_path))
 
     def display_cached_products(self):
         """Display products from cache without reloading"""
@@ -246,8 +249,7 @@ class ProductPage(QWidget):
 
     def init_ui(self):
         self.setWindowTitle('Product Information - Smart Shopping Cart')
-        self.setGeometry(100, 100, 800, 480)
-        self.setFixedSize(800, 480)
+        # Remove setGeometry and setFixedSize since handled by BasePage
         self.setStyleSheet(f"background-color: #EEF5F0;")
 
         # Main layout
@@ -427,12 +429,20 @@ class ProductPage(QWidget):
         self.grid_layout.addWidget(error_label, 0, 0)
 
     def show_shopping_page(self):
-        start_time = PageTiming.start_timing()
-        from page4_shopping import ShoppingPage
-        self.shopping_page = ShoppingPage()
-        self.shopping_page.show()
-        PageTiming.end_timing(start_time, "ProductPage", "ShoppingPage")
-        self.hide()
+        """Enhanced transition to shopping page"""
+        def switch_page():
+            start_time = PageTiming.start_timing()
+            from page4_shopping import ShoppingPage
+            self.shopping_page = ShoppingPage()
+            
+            def show_new_page():
+                self.shopping_page.show()
+                self.transition_overlay.fadeOut(lambda: self.hide())
+                PageTiming.end_timing(start_time, "ProductPage", "ShoppingPage")
+                
+            self.transition_overlay.fadeIn(show_new_page)
+            
+        switch_page()
 
 if __name__ == '__main__':
     import sys

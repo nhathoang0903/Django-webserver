@@ -9,16 +9,15 @@ class PageTransitionOverlay(QWidget):
         
         # Set overlay to top and full screen
         self.setAttribute(Qt.WA_StyledBackground)
-        self.setFixedSize(800, 480)
         self.setStyleSheet("""
             QWidget#transitionOverlay {
-                background-color: rgba(0, 0, 0, 0.5);
+                background-color: rgba(0, 0, 0, 0.7);  # Increase opacity for better coverage
             }
         """)
         
         # Set up animation
         self.fadeAnimation = QPropertyAnimation(self, b"windowOpacity")
-        self.fadeAnimation.setDuration(300)  # 300ms for each animation
+        self.fadeAnimation.setDuration(500)  # Increase duration for smoother transition
         
         # Khởi tạo layout
         layout = QVBoxLayout(self)
@@ -41,6 +40,8 @@ class PageTransitionOverlay(QWidget):
 
     def fadeIn(self, callback=None):
         # Enhanced fade in with callback cleanup
+        if self.parent():
+            self.setFixedSize(self.parent().size())  # Ensure it covers the entire parent window
         self.show()
         self.fadeAnimation.setStartValue(0)
         self.fadeAnimation.setEndValue(1)

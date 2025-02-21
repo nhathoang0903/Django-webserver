@@ -17,8 +17,9 @@ from PyQt5 import sip
 from countdown_overlay import CountdownOverlay
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
+from base_page import BasePage  # New import
 
-class ShoppingPage(QWidget):
+class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
     # Class level attributes for critical components
     _current_frame = None
     _processing = False
@@ -30,7 +31,8 @@ class ShoppingPage(QWidget):
     _cancel_modal = None
 
     def __init__(self):
-        super().__init__()
+        super().__init__()  # Call BasePage init
+        self.installEventFilter(self)  # Register event filter
         
         # Initialize memory management attributes first
         ShoppingPage._current_frame = None  # Ensure class attribute is initialized
@@ -81,6 +83,7 @@ class ShoppingPage(QWidget):
         self.payment_completed = False 
         self.countdown_overlay = None
         self.transition_overlay = PageTransitionOverlay(self)
+        self.transition_in_progress = False  # Add this line
 
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
@@ -101,13 +104,8 @@ class ShoppingPage(QWidget):
 
     def init_ui(self):
         self.setWindowTitle('Shopping - Smart Shopping Cart')
-        self.setGeometry(100, 100, 800, 480)
-        self.setFixedSize(800, 480)
+        # Remove setGeometry and setFixedSize since handled by BasePage
         
-        # Set application icon
-        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
-        self.setWindowIcon(QIcon(icon_path))
-
         # Main horizontal layout
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -489,21 +487,27 @@ class ShoppingPage(QWidget):
         self.content_layout.addWidget(footer_container, alignment=Qt.AlignBottom)  # Align to bottom
 
     def show_payment_page(self):
+        """Enhanced transition to payment page"""
         total_amount = sum(float(product['price']) * quantity 
                          for product, quantity in self.cart_state.cart_items)
         if total_amount == 0:
-            # Animate payment button
             self.animate_disabled_payment()
             return
             
-        start_time = PageTiming.start_timing()
-        from page5_qrcode import QRCodePage
-        self.payment_page = QRCodePage()
-        # Kết nối signal từ page5 để theo dõi trạng thái thanh toán  
-        self.payment_page.payment_completed.connect(self.handle_payment_completed)
-        self.payment_page.show()
-        PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
-        self.hide()
+        def switch_page():
+            start_time = PageTiming.start_timing()
+            from page5_qrcode import QRCodePage
+            self.payment_page = QRCodePage()
+            self.payment_page.payment_completed.connect(self.handle_payment_completed)
+            
+            def show_new_page():
+                self.payment_page.show()
+                self.transition_overlay.fadeOut(lambda: self.hide())
+                PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
+                
+            self.transition_overlay.fadeIn(show_new_page)
+            
+        switch_page()
 
     def handle_payment_completed(self, success):
         """Xử lý khi thanh toán hoàn tất"""
@@ -1074,57 +1078,61 @@ class ShoppingPage(QWidget):
 
     def handle_cancel_payment(self):
         """Single handler for cancel payment"""
-        def switch_to_home():
-            # Cleanup effects and blur container first
-            if self.blur_effect:
-                self.blur_effect.setBlurRadius(0)
-            if self.opacity_effect:
-                self.opacity_effect.setOpacity(1)
-            if self.blur_container:
-                self.blur_container.hide()
-                self.blur_container.deleteLater()
-                
-            self.blur_container = None
-            self.blur_effect = None
-            self.opacity_effect = None
+        if not self.transition_in_progress:  # Check if transition is already in progress
+            self.transition_in_progress = True  # Set the flag to indicate transition is in progress
+            def switch_to_home():
+                # Cleanup effects and blur container first
+                if self.blur_effect:
+                    self.blur_effect.setBlurRadius(0)
+                if self.opacity_effect:
+                    self.opacity_effect.setOpacity(1)
+                if self.blur_container:
+                    self.blur_container.hide()
+                    self.blur_container.deleteLater()
+                    
+                self.blur_container = None
+                self.blur_effect = None
+                self.opacity_effect = None
 
-            # Clear cart data
-            self.cart_state.clear_cart()
-            self.cart_state.save_to_json()
-            
-            # Show transition overlay
-            def transition_complete():
-                from page1_welcome import WelcomePage
-                self.home_page = WelcomePage()
-                # Show new page before hiding overlay
-                self.home_page.show()
-                # Hide overlay after new page is ready
-                self.transition_overlay.fadeOut(lambda: self.close())
+                # Clear cart data
+                self.cart_state.clear_cart()
+                self.cart_state.save_to_json()
                 
-            # Start transition with callback
-            self.transition_overlay.fadeIn(transition_complete)
+                # Show transition overlay
+                def transition_complete():
+                    from page1_welcome import WelcomePage
+                    self.home_page = WelcomePage()
+                    # Show new page before hiding overlay
+                    self.home_page.show()
+                    # Hide overlay after new page is ready
+                    self.transition_overlay.fadeOut(lambda: self.close())
+                    
+                # Start transition with callback
+                self.transition_overlay.fadeIn(transition_complete)
 
-        # Execute transition
-        switch_to_home()
+            # Execute transition
+            switch_to_home()
 
     def go_home(self):
         """Enhanced going back to home page with transition"""
-        def switch_to_home():
-            start_time = PageTiming.start_timing()
-            from page1_welcome import WelcomePage
-            
-            def show_new_page():
-                self.home_page = WelcomePage()
-                self.home_page.show()
-                self.transition_overlay.fadeOut(lambda: self.close())
-                PageTiming.end_timing(start_time, "ShoppingPage", "WelcomePage")
+        if not self.transition_in_progress:  # Check if transition is already in progress
+            self.transition_in_progress = True  # Set the flag to indicate transition is in progress
+            def switch_to_home():
+                start_time = PageTiming.start_timing()
+                from page1_welcome import WelcomePage
                 
-            self.transition_overlay.fadeIn(show_new_page)
-            
-        # Only reset page if payment was completed
-        if self.payment_completed:
-            self.reset_page()
-        switch_to_home()
+                def show_new_page():
+                    self.home_page = WelcomePage()
+                    self.home_page.show()
+                    self.transition_overlay.fadeOut(lambda: self.close())
+                    PageTiming.end_timing(start_time, "ShoppingPage", "WelcomePage")
+                    
+                self.transition_overlay.fadeIn(show_new_page)
+                
+            # Only reset page if payment was completed
+            if self.payment_completed:
+                self.reset_page()
+            switch_to_home()
 
     def closeEvent(self, event):
         self.cleanup_resources()

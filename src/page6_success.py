@@ -10,10 +10,12 @@ import requests
 from cart_state import CartState
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay  # Add this import
+from base_page import BasePage  # New import
 
-class SuccessPage(QWidget):
+class SuccessPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
-        super().__init__()
+        super().__init__()  # Call BasePage init
+        self.installEventFilter(self)  # Register event filter
         self.cart_state = CartState()
         self.load_fonts()
         self.init_ui()
@@ -64,7 +66,7 @@ class SuccessPage(QWidget):
 
             # Send POST request
             response = requests.post(
-                'http://127.0.0.1:8000/history/',
+                'http://192.168.4.249:9000/history/',
                 json=payload
             )
 
@@ -80,8 +82,8 @@ class SuccessPage(QWidget):
 
     def init_ui(self):
         self.setWindowTitle('Payment Success')
-        self.setGeometry(100, 100, 800, 480)
-        self.setFixedSize(800, 480)
+        # Remove setGeometry and setFixedSize since handled by BasePage
+
         self.setStyleSheet("background-color: #F0F6F1;")
 
         # Set window icon

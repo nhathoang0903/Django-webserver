@@ -20,6 +20,7 @@ class CancelShoppingModal(QFrame):
 
         self.init_ui()
         self.transition_overlay = PageTransitionOverlay(self)
+        self.transition_in_progress = False  # Add this line
 
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -172,8 +173,10 @@ class CancelShoppingModal(QFrame):
 
     def handle_cancel(self):
         # Emit signal only once and hide
-        self.cancelled.emit()
-        self.hide()
+        if not self.transition_in_progress:  # Check if transition is already in progress
+            self.transition_in_progress = True  # Set the flag to indicate transition is in progress
+            self.cancelled.emit()
+            self.hide()
         # Don't handle cart clearing here - let page4 handle it
 
     def accept(self):
@@ -181,8 +184,10 @@ class CancelShoppingModal(QFrame):
         def handle_transition():
             # Emit cancelled signal after overlay appears
             def emit_signal():
-                self.cancelled.emit()
-                self.close()
+                if not self.transition_in_progress:  # Check if transition is already in progress
+                    self.transition_in_progress = True  # Set the flag to indicate transition is in progress
+                    self.cancelled.emit()
+                    self.close()
                 
             self.transition_overlay.fadeIn(emit_signal)
             

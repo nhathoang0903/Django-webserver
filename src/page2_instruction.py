@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, 
+from base_page import BasePage  # New import
+from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QWidget,
                            QPushButton, QApplication, QHBoxLayout, QSizePolicy)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon
@@ -7,9 +8,11 @@ from page3_productsinfo import ProductPage
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 
-class InstructionPage(QWidget):
+class InstructionPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
-        super().__init__()
+        super().__init__()  # Call BasePage init
+        self.installEventFilter(self)  # Register event filter
+        
         self.current_slide = 0
         self.total_slides = 5
         self.slide_timer = QTimer()
@@ -236,6 +239,7 @@ class InstructionPage(QWidget):
         self.setLayout(layout)
 
     def next_page(self):
+        """Enhanced transition to product page"""
         def switch_page():
             start_time = PageTiming.start_timing()
             self.product_page = ProductPage()

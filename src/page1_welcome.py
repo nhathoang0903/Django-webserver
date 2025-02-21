@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, 
+from base_page import BasePage  # New import
+from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QWidget,
                            QPushButton, QApplication, QMessageBox, QHBoxLayout)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon
@@ -8,7 +9,7 @@ from cart_state import CartState
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 
-class WelcomePage(QWidget):
+class WelcomePage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
         super().__init__()
         # Clear any existing cart data when welcome page opens
@@ -17,6 +18,10 @@ class WelcomePage(QWidget):
         self.load_fonts()
         self.init_ui()
         self.transition_overlay = PageTransitionOverlay(self)
+        
+        # Install event filter for Ctrl+X detection
+        self.installEventFilter(self)
+        
         # Set application icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))

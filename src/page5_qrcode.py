@@ -1,5 +1,6 @@
+from base_page import BasePage  # New import
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
-                           QFrame, QApplication)
+                           QFrame, QApplication, QPushButton)  # Add import for QPushButton
 from PyQt5.QtCore import Qt, QTimer, QDateTime, pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QImage, QColor, QBitmap, QFontDatabase
 import os
@@ -13,15 +14,17 @@ import time
 import json
 from PIL import Image
 from cart_state import CartState
-from threading import Thread
+from threading import Thread, Event  # Add import for Event
 from page_timing import PageTiming
+from components.PageTransitionOverlay import PageTransitionOverlay
 
-class QRCodePage(QWidget):
+class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Add signal for page switching
     payment_completed = pyqtSignal(bool)  # Signal cho trạng thái thanh toán
     
     def __init__(self):
-        super().__init__()
+        super().__init__()  # Call BasePage init
+        self.installEventFilter(self)  # Register event filter
         self.page_load_time = time.time()  # Track when page loads
         self.cart_state = CartState()
         # Set application icon
@@ -61,9 +64,11 @@ class QRCodePage(QWidget):
         self.target_time = datetime.now()  # Set target time when page opens
         self.load_qr_code()
         # Start transaction check after QR is loaded
+        self.stop_transaction_check = Event()  # Add event to stop transaction check
         self.start_transaction_check()
         self.switch_to_success.connect(self.handle_success)  # Connect signal to handler
         self.shopping_page = None  # Add reference to shopping page
+        self.transition_overlay = PageTransitionOverlay(self)  # Add transition overlay
 
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -77,9 +82,8 @@ class QRCodePage(QWidget):
 
     def init_ui(self):
         self.setWindowTitle('QR Code Payment')
-        self.setGeometry(100, 100, 800, 480)
-        self.setFixedSize(800, 480)
-        self.setStyleSheet("background-color: #F0F6F1;")
+        # Remove setGeometry and setFixedSize since handled by BasePage
+        self.setStyleSheet("background-color: #F5F9F7;")
 
         # Set window icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
@@ -116,6 +120,18 @@ class QRCodePage(QWidget):
         instruction_label.setAlignment(Qt.AlignCenter)
         instruction_label.setStyleSheet("color: black;")
         left_layout.addWidget(instruction_label, alignment=Qt.AlignCenter)
+
+        # Add Cancel Payment button below title and instruction labels
+        self.cancel_button = QPushButton("Cancel Payment")
+        self.cancel_button.setFont(QFont("Inter", 11, QFont.Bold))
+        self.cancel_button.setFixedSize(200, 50)
+        self.cancel_button.setStyleSheet("""
+        background-color: #507849;
+        color: white;
+        border-radius:15px;
+        """)
+        self.cancel_button.clicked.connect(self.cancel_payment)
+        left_layout.addWidget(self.cancel_button, alignment=Qt.AlignCenter)
 
         # Add stretch after text
         left_layout.addStretch(1)
@@ -155,7 +171,7 @@ class QRCodePage(QWidget):
         self.amount_label.setText(f"Số tiền: {'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
 
         # Account Details
-        # acc_name_label = QLabel("Tên chủ tài khoản: VO PHAN NHAT HOANG")
+        # acc_name_label = QLabel("T��n chủ tài khoản: VO PHAN NHAT HOANG")
         # acc_num_label = QLabel("Số tài khoản: 3099932002")
         # bank_label = QLabel("Ngân hàng TMCP Quân Đội")
 
@@ -180,6 +196,7 @@ class QRCodePage(QWidget):
         right_layout.addWidget(details_frame)
         right_layout.addWidget(self.countdown_label, alignment=Qt.AlignCenter)
         right_layout.addWidget(self.gen_time_label, alignment=Qt.AlignCenter)
+        
         right_layout.addStretch()
 
         main_layout.addWidget(right_section)
@@ -268,8 +285,14 @@ class QRCodePage(QWidget):
             # Return to shopping page after 1 second
             QTimer.singleShot(1000, self.return_to_shopping)
 
+    def cancel_payment(self):
+        """Handle cancel payment action"""
+        self.stop_transaction_check.set()  # Signal to stop transaction check
+        self.countdown_timer.stop()
+        self.return_to_shopping()
+        
     def return_to_shopping(self):
-        """Return to shopping page when QR expires"""
+        """Return to shopping page when QR expires or payment is canceled"""
         transition_start = time.time()
         
         from page4_shopping import ShoppingPage
@@ -287,7 +310,7 @@ class QRCodePage(QWidget):
         """Clean up resources before closing"""
         if self.countdown_timer:
             self.countdown_timer.stop()
-        # Stop any ongoing transaction checks
+        self.stop_transaction_check.set()  # Ensure transaction check is stopped
         # Clean up any other resources
 
     def start_transaction_check(self):
@@ -314,7 +337,7 @@ class QRCodePage(QWidget):
         print(f"Starting transaction check. QR generated at: {self.qr_start_time}")
         print(f"Checking for amount: {amount} VND")
 
-        while True:
+        while not self.stop_transaction_check.is_set():
             try:
                 response = requests.get(CHECK_TRANSACTION_URL, headers=headers)
                 if response.status_code == 200:
@@ -366,14 +389,22 @@ class QRCodePage(QWidget):
                 time.sleep(0.2)
 
     def handle_success(self):
-        start_time = PageTiming.start_timing()
-        self.countdown_timer.stop()
-        from page6_success import SuccessPage
-        self.success_page = SuccessPage()
-        self.payment_completed.emit(True)
-        self.success_page.show()
-        PageTiming.end_timing(start_time, "QRCodePage", "SuccessPage")
-        self.close()
+        """Enhanced transition to success page"""
+        def switch_page():
+            start_time = PageTiming.start_timing()
+            self.countdown_timer.stop()
+            from page6_success import SuccessPage
+            self.success_page = SuccessPage()
+            self.payment_completed.emit(True)
+            
+            def show_new_page():
+                self.success_page.show()
+                self.transition_overlay.fadeOut(lambda: self.close())
+                PageTiming.end_timing(start_time, "QRCodePage", "SuccessPage")
+                
+            self.transition_overlay.fadeIn(show_new_page)
+            
+        switch_page()
 
     def closeEvent(self, event):
         self.cleanup_resources()
