@@ -1,5 +1,6 @@
 from base_page import BasePage  
 from components.PageTransitionOverlay import PageTransitionOverlay
+from components.ProductCardDialog import ProductCardDialog 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
                            QGridLayout, QApplication, QFrame, QHBoxLayout, QScroller)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize
@@ -65,9 +66,27 @@ class ProductCard(QFrame):
     def __init__(self, product):
         super().__init__()
         self.product = product
-        # self.font_family = "Arial"  # Default font
+        self.cached_image = None  # Store cached image
         self.setup_ui()
         self.load_image_async()
+        self.setCursor(Qt.PointingHandCursor)
+        
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            dialog = ProductCardDialog(self.product, self.cached_image, self)
+            dialog.exec_()
+            
+    def load_image_async(self):
+        def load():
+            pixmap = SimpleImageLoader.load_image(self.product['image_url'])
+            if pixmap:
+                self.cached_image = pixmap  # Cache the image
+                self.image_label.setPixmap(pixmap)
+            else:
+                self.image_label.setText("N/A")
+
+        threading.Thread(target=load, daemon=True).start()
+
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
@@ -117,16 +136,6 @@ class ProductCard(QFrame):
         price_label.setStyleSheet("color: #E72225;")
         layout.addWidget(price_label)
 
-    def load_image_async(self):
-        def load():
-            pixmap = SimpleImageLoader.load_image(self.product['image_url'])
-            if (pixmap):
-                self.image_label.setPixmap(pixmap)
-            else:
-                self.image_label.setText("N/A")
-
-        threading.Thread(target=load, daemon=True).start()
-
 class LoadProductsThread(QThread):
     finished = pyqtSignal(list)
     error = pyqtSignal(str)
@@ -175,6 +184,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
         if hasattr(self, '_needs_init') and self._needs_init:
             super().__init__()  # Call BasePage init
+            self.setObjectName("ProductPage")  # Add this line
             self.installEventFilter(self)  # Register event filter
             self._needs_init = False  
             self._fonts_loaded = False
