@@ -1,7 +1,7 @@
 from base_page import BasePage  
 from components.PageTransitionOverlay import PageTransitionOverlay
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
-                           QGridLayout, QApplication, QFrame, QHBoxLayout)
+                           QGridLayout, QApplication, QFrame, QHBoxLayout, QScroller)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie, QIcon
 import os
@@ -191,6 +191,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 
             icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
             self.setWindowIcon(QIcon(icon_path))
+            
 
     def display_cached_products(self):
         """Display products from cache without reloading"""
@@ -309,6 +310,9 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 height: 0px;
             }
         """)
+
+        # Enable touch scrolling
+        QScroller.grabGesture(scroll_area.viewport(), QScroller.LeftMouseButtonGesture)
 
         # Container widget for the grid
         self.container = QWidget()
