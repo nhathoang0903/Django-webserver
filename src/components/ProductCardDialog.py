@@ -9,12 +9,18 @@ class OverlayWidget(QWidget):
         super().__init__(parent)
         self.dialog = dialog
         self.setStyleSheet("background-color: rgba(0, 0, 0, 100);")
-        # Đảm bảo overlay nhận sự kiện chuột và hiển thị đúng
         self.setAttribute(Qt.WA_TransparentForMouseEvents, False)
         self.setMouseTracking(True)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        # Đảm bảo overlay luôn ở trên cùng
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.raise_()
         print("Overlay created")
         
+    def showEvent(self, event):
+        # Đảm bảo overlay luôn ở trên dialog
+        self.raise_()
+        super().showEvent(event)
+
     def mousePressEvent(self, event):
         pos = event.pos()
         print(f"Mouse pressed at: ({pos.x()}, {pos.y()})")
@@ -45,8 +51,10 @@ class ProductCardDialog(QDialog):
         if self.main_page:
             self.overlay = OverlayWidget(self, self.main_page)
             self.overlay.setGeometry(self.main_page.rect())
+            # Hiển thị overlay sau dialog
+            self.show()
             self.overlay.show()
-            print("Overlay shown")
+            self.overlay.raise_()  # Đảm bảo overlay ở trên cùng
             
             # Đặt vị trí dialog ngay lập tức
             geometry = self.main_page.geometry()
@@ -184,3 +192,8 @@ class ProductCardDialog(QDialog):
         if hasattr(self, 'overlay'):
             self.overlay.deleteLater()
         super().closeEvent(event)
+
+    def exec_(self):
+        # Override exec_ để đảm bảo thứ tự hiển thị đúng
+        result = super().exec_()
+        return result
