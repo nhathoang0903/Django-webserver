@@ -2,8 +2,8 @@ from base_page import BasePage
 from components.PageTransitionOverlay import PageTransitionOverlay
 from components.ProductCardDialog import ProductCardDialog 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
-                           QGridLayout, QApplication, QFrame, QHBoxLayout, QScroller)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize
+                           QGridLayout, QApplication, QFrame, QHBoxLayout, QScroller, QComboBox, QPushButton, QMenu)
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie, QIcon
 import os
 import json
@@ -98,7 +98,7 @@ class ProductCard(QFrame):
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
     def setup_ui(self):
-        self.setFixedSize(160, 180)  # Tăng từ 170 lên 180
+        self.setFixedSize(160, 180)  
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
@@ -170,6 +170,73 @@ class LoadProductsThread(QThread):
         except Exception as e:
             self.error.emit(str(e))
 
+class CategoryDropdown(QPushButton):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(140, 40)
+        self.setText("All Categories")
+        self.setFont(QFont("Josefin Sans", 11))
+        self.setCursor(Qt.PointingHandCursor)
+        
+        # Style for main button
+        self.setStyleSheet("""
+            QPushButton {
+                background-color: white;
+                border: 2px solid #3D6F4A;
+                border-radius: 8px;
+                padding: 5px 15px;
+                color: #3D6F4A;
+                text-align: left;
+            }
+            QPushButton:hover {
+                background-color: #F5F5F5;
+            }
+        """)
+        
+        # Create custom dropdown menu
+        self.menu = QMenu(self)
+        self.menu.setStyleSheet("""
+            QMenu {
+                background-color: white;
+                border: 2px solid #3D6F4A;
+                border-radius: 8px;
+                padding: 5px;
+                min-width: 140px;
+            }
+            QMenu::item {
+                padding: 8px 15px;
+                border-radius: 4px;
+                color: #3D6F4A;
+                font-family: 'Josefin Sans';
+                font-size: 11pt;
+            }
+            QMenu::item:selected {
+                background-color: #EEF5F0;
+            }
+            QMenu::item:pressed {
+                background-color: #3D6F4A;
+                color: white;
+            }
+        """)
+        
+        # Add categories
+        categories = ["All Categories", "Beverage", "Food", "Snack"]
+        for category in categories:
+            action = self.menu.addAction(category)
+            action.triggered.connect(lambda checked, c=category: self.on_category_selected(c))
+        
+        # Show dropdown on click
+        self.clicked.connect(self.show_menu)
+        
+    def show_menu(self):
+        # Calculate position for dropdown to appear below button
+        pos = self.mapToGlobal(self.rect().bottomLeft())
+        self.menu.popup(pos)
+        
+    def on_category_selected(self, category):
+        self.setText(category)
+        self.parent().filter_products(category)
+
 class ProductPage(BasePage):  # Changed from QWidget to BasePage
     _instance = None
     _products_cache = None
@@ -213,23 +280,22 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 self.grid_layout.addWidget(card, row, col)
                 
     def on_products_loaded(self, products):
-        """Cache products and cards when first loaded"""
+        """Modified to maintain grid layout when filtering"""
         self.gif_movie.stop()
         self.loading_widget.hide()
         
-        # Cache the products
         ProductPage._products_cache = products
-        
-        # Load font before creating cards
         font_family = self.load_fonts()
         
-        # Create and cache product cards
+        # Create and cache product cards with fixed positions
         ProductPage._cards_cache = []
         for i, product in enumerate(products[:24]):
             row = (i // 4) * 2
             col = i % 4
             card = ProductCard(product)
             card.font_family = font_family
+            # Store original position
+            card.grid_pos = (row, col)
             self.grid_layout.addWidget(card, row, col)
             ProductPage._cards_cache.append(card)
             if (i + 1) % 4 == 0:
@@ -287,6 +353,10 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         header_label.setStyleSheet("color: #3D6F4A;")
         header_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         top_layout.addWidget(header_label)
+        
+        # Replace category_button with CategoryDropdown
+        self.category_dropdown = CategoryDropdown(self)
+        top_layout.addWidget(self.category_dropdown)
         
         # Add stretch to push everything to the left
         top_layout.addStretch()
@@ -457,6 +527,41 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             self.transition_overlay.fadeIn(show_new_page)
             
         switch_page()
+
+    def filter_products(self, category):
+        # Hide all cards and remove from layout
+        for card in ProductPage._cards_cache:
+            card.hide()
+            self.grid_layout.removeWidget(card)
+
+        if category == "All Categories":
+            # Restore original positions for all cards
+            for card in ProductPage._cards_cache:
+                row, col = card.grid_pos
+                self.grid_layout.addWidget(card, row, col)
+                card.show()
+        else:
+            # Map English categories to Vietnamese
+            category_map = {
+                "Beverage": "Thức uống",
+                "Food": "Thức ăn",
+                "Snack": "Đồ ăn vặt"
+            }
+            vn_category = category_map.get(category)
+            
+            # Filter and rearrange matching cards
+            filtered_cards = [card for card in ProductPage._cards_cache 
+                            if card.product['category'] == vn_category]
+            
+            # Add filtered cards in new positions
+            for i, card in enumerate(filtered_cards):
+                row = (i // 4) * 2
+                col = i % 4
+                self.grid_layout.addWidget(card, row, col)
+                card.show()
+
+        # Force layout update
+        self.container.update()
 
 if __name__ == '__main__':
     import sys

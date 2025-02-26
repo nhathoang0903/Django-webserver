@@ -1,3 +1,56 @@
+# 1. Thiết lập môi trường Python
 python3 -m venv venv --system-site-packages
+source venv/bin/activate
+
+# 2. Cài đặt các thư viện cần thiết
+pip install -r requirements.txt
+
+# 3. Cấu hình Display
 export DISPLAY=:0
-run => python run.py
+xhost +
+
+# 4. Tạo và cấu hình service để chạy tự động
+sudo nano /etc/systemd/system/smartcart-controller.service
+
+# Nội dung file service:
+[Unit]
+Description=Smart Cart Controller Service
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/smartcart/Pick-and-go-CS/src
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+ExecStart=/home/pi/smartcart/Pick-and-go-CS/src/venv/bin/python3 service_controller.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+# 5. Kích hoạt service
+sudo systemctl daemon-reload
+sudo systemctl enable smartcart-controller.service
+sudo systemctl start smartcart-controller.service
+
+# 6. Kiểm tra trạng thái service
+sudo systemctl status smartcart-controller.service
+
+# 7. Các lệnh điều khiển service
+# Dừng service:
+sudo systemctl stop smartcart-controller.service
+# Khởi động lại service:
+sudo systemctl restart smartcart-controller.service
+# Xem logs:
+sudo journalctl -u smartcart-controller.service
+
+# 8. Chạy thủ công (nếu cần)
+# Đăng ký thiết bị:
+python device_registration.py
+# Chạy ứng dụng:
+python run.py
+
+# 9. Kiểm tra logs
+tail -f app/logs/service.log

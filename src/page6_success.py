@@ -9,8 +9,9 @@ import datetime
 import requests
 from cart_state import CartState
 from page_timing import PageTiming
-from components.PageTransitionOverlay import PageTransitionOverlay  # Add this import
-from base_page import BasePage  # New import
+from components.PageTransitionOverlay import PageTransitionOverlay  
+from base_page import BasePage  
+from config import HISTORY_API_URL
 
 class SuccessPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
@@ -64,9 +65,9 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
                 "product": json.dumps(product_list)
             }
 
-            # Send POST request
+            # Send POST request using config URL
             response = requests.post(
-                'http://192.168.4.249:9000/history/',
+                HISTORY_API_URL,
                 json=payload
             )
 
