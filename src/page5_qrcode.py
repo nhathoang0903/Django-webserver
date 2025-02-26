@@ -1,6 +1,16 @@
-from base_page import BasePage  # New import
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Force CPU
+import torch
+torch.set_default_tensor_type('torch.FloatTensor')  # Force CPU tensors
+torch.set_num_threads(1)  # Set number of threads
+import warnings
+warnings.filterwarnings("ignore")
+import gc
+
+from base_page import BasePage 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
-                           QFrame, QApplication, QPushButton)  # Add import for QPushButton
+                           QFrame, QApplication, QPushButton) 
+from mbbank import MBBank 
 from PyQt5.QtCore import Qt, QTimer, QDateTime, pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QImage, QColor, QBitmap, QFontDatabase
 import os
@@ -9,12 +19,12 @@ import cv2
 import numpy as np
 from io import BytesIO
 import pygame
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import json
 from PIL import Image
 from cart_state import CartState
-from threading import Thread, Event  # Add import for Event
+from threading import Thread, Event  
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 
@@ -23,6 +33,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     payment_completed = pyqtSignal(bool)  # Signal cho trạng thái thanh toán
     
     def __init__(self):
+        # Force CPU configuration before any other initialization
+        self.configure_device()
         super().__init__()  # Call BasePage init
         self.installEventFilter(self)  # Register event filter
         self.page_load_time = time.time()  # Track when page loads
@@ -69,6 +81,27 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.switch_to_success.connect(self.handle_success)  # Connect signal to handler
         self.shopping_page = None  # Add reference to shopping page
         self.transition_overlay = PageTransitionOverlay(self)  # Add transition overlay
+
+    def configure_device(self):
+        """Configure CUDA and torch settings"""
+        # Force CPU
+        os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
+        # Force CPU tensors
+        torch.set_default_tensor_type('torch.FloatTensor')
+        torch.set_num_threads(1)
+        
+        # Move any existing CUDA tensors to CPU
+        if hasattr(torch, 'cuda') and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            for obj in gc.get_objects():
+                try:
+                    if torch.is_tensor(obj):
+                        obj = obj.cpu()
+                except:
+                    pass
 
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -210,7 +243,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             print(f"Generating QR for amount: {self.total_amount}")
             print(f"URL amount parameter: {self.total_amount}")
             
-            url = (f"https://img.vietqr.io/image/mbbank-3099932002-print.jpg?"
+            url = (f"https://img.vietqr.io/image/mbbank-3099932002-KGdsu44.jpg?"
                   f"amount={self.total_amount}&accountName=VO%20PHAN%20NHAT%20HOANG")
             print(url)
             print("Creating QR code for total amount:", self.total_amount)
@@ -322,71 +355,102 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         check_thread.start()
 
     def check_transaction(self, amount):
-        API_TOKEN = 'XUWZS8RM4UB3WAJRPUBNZDSXYTJJQMBRVP6NRE37XZUKAGL2G6IW9SAFPCGFWIHL'
-        CHECK_TRANSACTION_URL = 'https://my.sepay.vn/userapi/transactions/list'
+        # Force CPU configuration at start of thread
+        self.configure_device()
+        
+        USERNAME = "NHATHOANG0903"
+        PASSWORD = "Nhathoang@4"
+        account_no = "3099932002"
+
         ting_sound_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                        'sound', 'ting-ting.mp3')
+                                'sound', 'ting-ting.mp3')
         success_sound_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                        'sound', 'payment-success.mp3')
+                                'sound', 'payment-success.mp3')
 
-        headers = {
-            'Authorization': f'Bearer {API_TOKEN}',
-            'Content-Type': 'application/json'
-        }
-
-        print(f"Starting transaction check. QR generated at: {self.qr_start_time}")
-        print(f"Checking for amount: {amount} VND")
-
-        while not self.stop_transaction_check.is_set():
-            try:
-                response = requests.get(CHECK_TRANSACTION_URL, headers=headers)
-                if response.status_code == 200:
-                    data = response.json()
-                    if data['status'] == 200 and data['messages']['success']:
-                        transactions = data['transactions']
-                        if transactions:
-                            latest_transaction = transactions[0]
-                            transaction_id = latest_transaction['id']
-                            latest_amount_in = int(float(latest_transaction['amount_in']))
-                            
-                            transaction_time_str = latest_transaction['transaction_date']
-                            transaction_time = datetime.strptime(transaction_time_str, '%Y-%m-%d %H:%M:%S')
-                            
-                            # Tính thời gian chênh lệch
-                            time_diff = abs((transaction_time - self.qr_start_time).total_seconds())
-                            
-                            print(f"Transaction ID: {transaction_id}")
-                            print(f"Time difference: {time_diff} seconds")
-                            
-                            # Kiểm tra điều kiện:
-                            # 1. Số tiền khớp
-                            # 2. Thời gian giao dịch trong vòng 5 phút của thời điểm tạo QR
-                            # 3. Giao dịch chưa được xử lý trước đó
-                            if (latest_amount_in == amount and 
-                                time_diff <= 300 and  # 5 phút = 300 giây
-                                transaction_id not in self.processed_transaction_ids):
+        mb = None
+        try:
+            print("Khởi tạo kết nối...")
+            mb = MBBank(username=USERNAME, password=PASSWORD)
+            
+            print("Đang đăng nhập...")
+            mb._authenticate()
+            print("Xác thực thành công!")
+            
+            print(f"\nBắt đầu theo dõi giao dịch:")
+            print(f"- Số tiền: {amount:,} VND")
+            print(f"- Từ thời điểm: {self.qr_start_time.strftime('%d/%m/%Y %H:%M:%S')}")
+            
+            while not self.stop_transaction_check.is_set():
+                try:
+                    current_time = datetime.now()
+                    # Get transactions since QR creation
+                    transactions = mb.getTransactionAccountHistory(
+                        accountNo=account_no,
+                        from_date=self.qr_start_time,
+                        to_date=current_time
+                    )
+                    
+                    if transactions and 'transactionHistoryList' in transactions:
+                        trans_list = transactions['transactionHistoryList']
+                        
+                        for trans in trans_list:
+                            try:
+                                credit = int(trans.get('creditAmount', '0'))
+                                debit = int(trans.get('debitAmount', '0'))
+                                trans_time = datetime.strptime(trans.get('transactionDate', ''), '%d/%m/%Y %H:%M:%S')
+                                trans_id = trans.get('refNo', '')
                                 
-                                self.processed_transaction_ids.add(transaction_id)
-                                print("✓ Transaction successful!")
-                                
-                                # Phát âm thanh theo thứ tự
-                                pygame.mixer.music.load(ting_sound_file)
-                                pygame.mixer.music.play()
-                                pygame.time.wait(1000)
-                                
-                                pygame.mixer.music.load(success_sound_file)
-                                pygame.mixer.music.play()
-                                pygame.time.wait(1000)
-                                
-                                # Emit signal instead of directly switching pages
-                                self.switch_to_success.emit()
-                                break
-
-                time.sleep(0.2)
-                
-            except Exception as e:
-                print(f"Error checking transaction: {e}")
-                time.sleep(0.2)
+                                # Check conditions:
+                                # 1. Is credit transaction (credit > 0, debit = 0)
+                                # 2. Amount matches QR code
+                                # 3. Transaction time after QR creation
+                                # 4. Transaction not processed before
+                                if (credit == amount and debit == 0 and
+                                    trans_time > self.qr_start_time and
+                                    trans_id not in self.processed_transaction_ids):
+                                    
+                                    self.processed_transaction_ids.add(trans_id)
+                                    print("\n" + "="*50)
+                                    print(f"Phát hiện giao dịch khớp! ({current_time.strftime('%H:%M:%S')})")
+                                    print(f"Thời gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
+                                    print(f"Số tiền nhận: +{credit:,} VND")
+                                    print(f"Từ: {trans.get('benAccountName', 'N/A')}")
+                                    print(f"Nội dung: {trans.get('description', 'N/A')}")
+                                    print(f"Mã GD: {trans_id}")
+                                    print("="*50)
+                                    
+                                    # Play sounds
+                                    pygame.mixer.music.load(ting_sound_file)
+                                    pygame.mixer.music.play()
+                                    pygame.time.wait(1000)
+                                    
+                                    pygame.mixer.music.load(success_sound_file)
+                                    pygame.mixer.music.play()
+                                    pygame.time.wait(1000)
+                                    
+                                    self.switch_to_success.emit()
+                                    return
+                                    
+                            except Exception as e:
+                                print(f"Error processing transaction: {e}")
+                                continue
+                    
+                    time.sleep(0.2)
+                    
+                except Exception as e:
+                    print(f"Error checking transactions: {e}")
+                    time.sleep(1)
+                    continue
+                    
+        except Exception as e:
+            print(f"Lỗi khởi tạo: {str(e)}")
+        finally:
+            if mb:
+                try:
+                    print("Đang đăng xuất...")
+                    mb._req.close()
+                except:
+                    pass
 
     def handle_success(self):
         """Enhanced transition to success page"""
