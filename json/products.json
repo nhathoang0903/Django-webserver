@@ -6,7 +6,7 @@
         "price": "12000",
         "description": "Nước ngọt Sting dâu lon 320ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/DPtcxhG5/Canned-Strawberry-Sting.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543698/hmwiyvf6ilkf4xqgihe8.png"
     },
     {
         "product_id": 2,
@@ -15,7 +15,7 @@
         "price": "10000",
         "description": "Nước ngọt Sting vàng lon 320ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/Q7n1npSp/Canned-Yellow-Sting.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543702/mxryjazo7ckse5cuaakw.png"
     },
     {
         "product_id": 3,
@@ -24,7 +24,7 @@
         "price": "10000",
         "description": "Goodmood vị sữa chua chai 320ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/kgkHWn7B/Good-Mood-Yogurt-Flavor.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543703/va0pbxa1ndtc6olrs5b3.png"
     },
     {
         "product_id": 4,
@@ -33,7 +33,7 @@
         "price": "8000",
         "description": "Mì ly Hảo Hảo Handy",
         "category": "Thức ăn",
-        "image_url": "https://i.ibb.co/GQ1hxY2F/Hao-Hao-Cup-Noodles.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543704/b4nxicmgnkj4bkaj6cvk.png"
     },
     {
         "product_id": 5,
@@ -42,7 +42,7 @@
         "price": "5000",
         "description": "Mì gói Hảo Hảo vị tôm chua cay",
         "category": "Thức ăn",
-        "image_url": "https://i.ibb.co/20MD2qgL/Hao-Hao-Noodles.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543706/dnymrh4wnppxmz8eompn.png"
     },
     {
         "product_id": 6,
@@ -51,7 +51,7 @@
         "price": "9000",
         "description": "Cà phê sữa Highland lon 250ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/S45HPNdM/Highland-Milk-Coffee.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543707/iwjlgfnyiffm5kpjxv80.png"
     },
     {
         "product_id": 7,
@@ -60,7 +60,7 @@
         "price": "5000",
         "description": "Snack vị cua Crabme",
         "category": "Đồ ăn vặt",
-        "image_url": "https://i.ibb.co/JDNPpRv/Oishi-Crabme.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543708/nxzryntfvjwwy9urcmf8.png"
     },
     {
         "product_id": 8,
@@ -69,7 +69,7 @@
         "price": "5000",
         "description": "Snack vị khoai tây Flutes",
         "category": "Đồ ăn vặt",
-        "image_url": "https://i.ibb.co/cKhTfhQg/Oishi-Flutes.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543709/wxvexzv20x685fkzchzi.png"
     },
     {
         "product_id": 9,
@@ -78,7 +78,7 @@
         "price": "5000",
         "description": "Snack Matys vị heo quay chay",
         "category": "Đồ ăn vặt",
-        "image_url": "https://i.ibb.co/KpdFJZBR/Oishi-Matys-Vegetarian.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543710/mojmaedwanub6btsytmn.png"
     },
     {
         "product_id": 10,
@@ -87,7 +87,7 @@
         "price": "5000",
         "description": "Snack tôm cay đặc biệt",
         "category": "Đồ ăn vặt",
-        "image_url": "https://i.ibb.co/X6BXMzy/Oishi-Special-Shrimp.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543712/jyf3t874cynxzvtewlqk.png"
     },
     {
         "product_id": 11,
@@ -96,7 +96,7 @@
         "price": "5000",
         "description": "Snack tôm cay",
         "category": "Đồ ăn vặt",
-        "image_url": "https://i.ibb.co/MyRn8hkL/Oishi-Spicy-Shrimp.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543713/v1oyn9yjtwvyuzbpk5ym.png"
     },
     {
         "product_id": 12,
@@ -105,7 +105,7 @@
         "price": "5000",
         "description": "Snack bắp ngọt",
         "category": "Đồ ăn vặt",
-        "image_url": "https://i.ibb.co/tw9KMy3F/Oishi-Sweet-Corn.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543714/s6ugqgnxxatdsfjsb6ni.png"
     },
     {
         "product_id": 13,
@@ -114,7 +114,7 @@
         "price": "5000",
         "description": "Snack Tater thins vị dưa leo",
         "category": "Đồ ăn vặt",
-        "image_url": "https://i.ibb.co/0p6Ctdg5/Oishi-Tater-Thins.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543715/viu5rvyb3r5fbvc2f2k4.png"
     },
     {
         "product_id": 14,
@@ -123,7 +123,7 @@
         "price": "7000",
         "description": "Trà Ô Long Tea Plus chai 320ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/bjkkpwV9/Oolong-Tea-Plus.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543716/qpe1lgybbnfrz3afz3ir.png"
     },
     {
         "product_id": 15,
@@ -132,7 +132,7 @@
         "price": "9000",
         "description": "Mirinda Cam chai 320ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/6cTwH4mr/Orange-Juice-Mirinda.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543717/xdgnz9sveffua4z759ey.png"
     },
     {
         "product_id": 16,
@@ -141,7 +141,7 @@
         "price": "10000",
         "description": "Pepsi không đường",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/vCsXfX6y/Pepsi-Zero-Sugar.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543718/fwxdqoljfgszpx8datqk.png"
     },
     {
         "product_id": 17,
@@ -150,7 +150,7 @@
         "price": "10000",
         "description": "Xúc xích CP red, gói 5 cây, 40g",
         "category": "Thức ăn",
-        "image_url": "https://i.ibb.co/Xkr3YBsg/Pork-Hot-Dog.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543719/ezxxqlyz4amqj5kqfudn.png"
     },
     {
         "product_id": 18,
@@ -159,7 +159,7 @@
         "price": "11000",
         "description": "Nước tăng lực Red Bull.",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/ZtTBG4w/Red-Bull.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543720/eask5pasgojs7ff9wmzb.png"
     },
     {
         "product_id": 19,
@@ -168,7 +168,7 @@
         "price": "9000",
         "description": "Revive nguyên bản muối khoáng chai 420ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/N2G56QyY/Revive-Original.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543721/vg9yfgvxmkfjplelule2.png"
     },
     {
         "product_id": 20,
@@ -177,7 +177,7 @@
         "price": "7000",
         "description": "Revive chanh muối chai 320ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/Jj6MJvD8/Revive-Salted-Lemon.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543722/g4rt7akg2pzitt2cdkby.png"
     },
     {
         "product_id": 21,
@@ -186,7 +186,7 @@
         "price": "12000",
         "description": "Nước tăng lực Rock Star.",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/hRxpJgP4/Rock-Star.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543723/wni52bz9hvjegbptlpbf.png"
     },
     {
         "product_id": 22,
@@ -195,7 +195,7 @@
         "price": "7000",
         "description": "Nước ngọt Seven Up",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/xSLt5kx8/Seven-Up.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543723/c3fpisddeh0vunutjmda.png"
     },
     {
         "product_id": 23,
@@ -204,7 +204,7 @@
         "price": "8000",
         "description": "Sữa hộp Susu vị việt quất chuối",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/9HXBgQ5X/Susu-Milk-Box.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543726/kg9owrcgfimgccuhnlch.png"
     },
     {
         "product_id": 24,
@@ -213,6 +213,6 @@
         "price": "9000",
         "description": "Nước cam ép Tropicana Twister chai 320ml",
         "category": "Thức uống",
-        "image_url": "https://i.ibb.co/v4KfKgxk/Twister-Orange-Juice.png"
+        "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543727/missb8u87bwbxfziut5w.png"
     }
 ]
