@@ -692,21 +692,19 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         if self.camera_active:
             self.stop_camera()
         else:
-            # Start camera immediately with detection delayed
+            # Start camera immediately without delay
             self.product_detected = False
             
-            # Kiểm tra và chỉ hide nếu modal tồn tại và chưa bị xóa
             if hasattr(self, 'product_modal') and self.product_modal and not sip.isdeleted(self.product_modal):
                 self.product_modal.hide()
             else:
-                # Tạo mới modal nếu không tồn tại hoặc đã bị xóa
                 self.product_modal = self.get_product_modal()
                 
-            self.start_camera(delay_detection=True)
+            self.start_camera()  # Remove delay_detection parameter
             self.camera_frame.show()
 
-    def start_camera(self, delay_detection=False):
-        """Start camera with optional detection delay"""
+    def start_camera(self):
+        """Start camera with immediate detection"""
         if self.camera is None:
             self.camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -723,26 +721,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.camera_frame.show()
         self.camera_label.show()
         self.timer.start(33)  # Start camera feed immediately
-        
-        # Set detection delay if needed
-        if delay_detection:
-            self.detection_start_time = True  # Block detection initially
-            
-            # Create and show countdown overlay
-            if not self.countdown_overlay:
-                self.countdown_overlay = CountdownOverlay(self.camera_frame)
-                self.countdown_overlay.resize(self.camera_frame.size())
-            
-            self.countdown_overlay.start()
-            QTimer.singleShot(5000, self.enable_detection)  # Enable detection after 5s
-        else:
-            self.detection_start_time = None  # No delay, enable detection immediately
-
-    def enable_detection(self):
-        """Callback to enable detection after delay"""
-        if self.countdown_overlay:
-            self.countdown_overlay.stop()
-        self.detection_start_time = None  # Clear flag to enable detection
+        self.detection_start_time = None  # Enable detection immediately
 
     def stop_camera(self):
         """Enhanced camera cleanup"""
@@ -880,7 +859,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             self.camera_label.show()
             
             # Start camera with delay
-            QTimer.singleShot(100, lambda: self.start_camera(delay_detection=True))
+            QTimer.singleShot(100, lambda: self.start_camera())
             
             return is_existing
             
@@ -899,7 +878,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.product_detected = False
         self.camera_frame.show()
         self.camera_label.show()
-        self.start_camera(delay_detection=True)  # Start with 5s delay for detection
+        self.start_camera()  # Remove delay_detection parameter
 
     def handle_product_detection(self, product):
         """Handle detected product and show product modal"""
@@ -944,7 +923,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.product_modal.hide()
         self.camera_frame.show()
         self.product_detected = False
-        self.start_camera(delay_detection=True)  # Start with 5s delay for detection
+        self.start_camera()  # Remove delay_detection parameter
         self.camera_label.show()
 
     def show_cancel_dialog(self):

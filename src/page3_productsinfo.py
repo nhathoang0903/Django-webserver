@@ -280,16 +280,16 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 self.grid_layout.addWidget(card, row, col)
                 
     def on_products_loaded(self, products):
-        """Modified to maintain grid layout when filtering"""
+        """Modified to show all products without limit"""
         self.gif_movie.stop()
         self.loading_widget.hide()
         
         ProductPage._products_cache = products
         font_family = self.load_fonts()
         
-        # Create and cache product cards with fixed positions
+        # Create and cache all product cards with fixed positions
         ProductPage._cards_cache = []
-        for i, product in enumerate(products[:24]):
+        for i, product in enumerate(products):  # Removed [:24] limit
             row = (i // 4) * 2
             col = i % 4
             card = ProductCard(product)
