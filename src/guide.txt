@@ -1,6 +1,7 @@
 # 1. Thiết lập môi trường Python
 python3 -m venv venv --system-site-packages
 source venv/bin/activate
+sudo apt-get install tesseract-ocr  (cài tesseract vào hệ thống)
 
 # 2. Cài đặt các thư viện cần thiết
 pip install -r requirements.txt
@@ -25,7 +26,7 @@ Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/pi/.Xauthority
 ExecStart=/home/pi/smartcart/Pick-and-go-CS/src/venv/bin/python3 service_controller.py
 Restart=always
-RestartSec=5
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
