@@ -145,3 +145,11 @@ class CartState:
                 self.cart_items.append(item)
                 self.save_to_json()
                 break
+
+    def set_guest_name(self, name):
+        with open(self.JSON_PATH, 'r+') as f:
+            data = json.load(f)
+            data['guest_name'] = name
+            f.seek(0)
+            json.dump(data, f)
+            f.truncate()

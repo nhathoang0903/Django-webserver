@@ -33,7 +33,7 @@ def get_device_ip():
         return "127.0.0.1"
 
 def register_device():
-    API_URL = f"{BASE_URL}/devices/"
+    API_URL = f"{BASE_URL}/api/devices/"
     
     # Prepare device data
     device_data = {

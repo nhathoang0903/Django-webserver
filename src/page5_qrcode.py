@@ -6,6 +6,7 @@ torch.set_num_threads(1)  # Set number of threads
 import warnings
 warnings.filterwarnings("ignore")
 import gc
+import logging 
 
 from base_page import BasePage 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
@@ -18,7 +19,6 @@ import requests
 import cv2
 import numpy as np
 from io import BytesIO
-import pygame
 from datetime import datetime, timedelta
 import time
 import json
@@ -35,7 +35,12 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
         # Force CPU configuration before any other initialization
         self.configure_device()
-        super().__init__()  # Call BasePage init
+        super().__init__()
+        
+        # Remove pygame sound initialization
+        self.sound_enabled = False  # Disable sound functionality
+        
+        # Rest of initialization
         self.installEventFilter(self)  # Register event filter
         self.page_load_time = time.time()  # Track when page loads
         self.cart_state = CartState()
@@ -59,7 +64,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             self.close()
             return
             
-        pygame.mixer.init()  # Initialize pygame for sound
+        # pygame.mixer.init()  # Initialize pygame for sound
         self.qr_start_time = None  # Add start time tracking
         self.processed_transaction_ids = set()  # Thêm set để lưu các ID đã xử lý
         
@@ -362,11 +367,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         PASSWORD = "Nhathoang@4"
         account_no = "3099932002"
 
-        ting_sound_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                'sound', 'ting-ting.mp3')
-        success_sound_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                'sound', 'payment-success.mp3')
-
+        # Remove sound file references
+        
         mb = None
         try:
             print("Khởi tạo kết nối...")
@@ -419,15 +421,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                     print(f"Mã GD: {trans_id}")
                                     print("="*50)
                                     
-                                    # Play sounds
-                                    pygame.mixer.music.load(ting_sound_file)
-                                    pygame.mixer.music.play()
-                                    pygame.time.wait(1000)
-                                    
-                                    pygame.mixer.music.load(success_sound_file)
-                                    pygame.mixer.music.play()
-                                    pygame.time.wait(1000)
-                                    
+                                    # Remove sound playing code
                                     self.switch_to_success.emit()
                                     return
                                     

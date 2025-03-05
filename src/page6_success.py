@@ -11,7 +11,7 @@ from cart_state import CartState
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay  
 from base_page import BasePage  
-from config import HISTORY_API_URL
+from config import HISTORY_API_URL, CUSTOMER_HISTORY_LINK_URL
 
 class SuccessPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
@@ -72,9 +72,23 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
             )
 
             if response.status_code == 201:
-                print("Successfully sent purchase history to API")
-                print(f"Response: {response.json()}")
-                return True
+                response_data = response.json()
+                # Send customer history link data
+                customer_data = {
+                    "random_id": response_data["random_id"],
+                    "username": "",
+                    "guest_name": shopping_data.get("guest_name", "")
+                }
+                
+                customer_response = requests.post(
+                    CUSTOMER_HISTORY_LINK_URL,
+                    json=customer_data
+                )
+                
+                if customer_response.status_code == 201:
+                    print("Successfully sent customer history link")
+                    return True
+                    
             return False
 
         except Exception as e:
