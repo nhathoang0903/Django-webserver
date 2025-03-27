@@ -27,6 +27,10 @@ from cart_state import CartState
 from threading import Thread, Event  
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
+import qrcode
+from vietqr.VietQR import genQRString, getBincode
+from PIL import Image
+import io
 
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Add signal for page switching
@@ -195,46 +199,43 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.qr_label.setText("Loading...")
         self.qr_label.setStyleSheet("background-color: transparent;")
 
-        # Payment Details Container
-        details_frame = QFrame()
-        details_frame.setStyleSheet("background-color: transparent;")
-        details_layout = QVBoxLayout(details_frame)
-        details_layout.setSpacing(8)
+        # Create individual labels for bank details with center alignment
+        bank_labels = []
+        bank_details = [
+            "Ngân hàng TMCP Quân đội",
+            "Tên tài khoản: NGUYEN THE NGO",
+            f"Số tiền: {'{:,.0f}'.format(self.total_amount).replace(',', '.')} vnđ"
+        ]
 
-        # Amount
-        self.amount_label = QLabel()
-        self.amount_label.setFont(QFont("Inria Sans", 11))
-        amount_text = sum(float(product['price']) * quantity 
-                         for product, quantity in self.cart_state.cart_items)
-        self.amount_label.setText(f"Số tiền: {'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
+        for text in bank_details:
+            label = QLabel(text)
+            label.setFont(QFont("Inria Sans", 12))
+            label.setStyleSheet("color: black;")
+            label.setAlignment(Qt.AlignCenter)
+            bank_labels.append(label)
+        
+        self.amount_label = bank_labels[2]  # Store reference to amount label
 
-        # Account Details
-        # acc_name_label = QLabel("T��n chủ tài khoản: VO PHAN NHAT HOANG")
-        # acc_num_label = QLabel("Số tài khoản: 3099932002")
-        # bank_label = QLabel("Ngân hàng TMCP Quân Đội")
-
-        # for label in [self.amount_label, acc_name_label, acc_num_label, bank_label]:
-        #     label.setFont(QFont("Inter", 11))
-        #     details_layout.addWidget(label)
-
-        # Countdown label
+        # Countdown and generation time labels as before
         self.countdown_label = QLabel()
         self.countdown_label.setFont(QFont("Inria Sans", 10))
         self.countdown_label.setAlignment(Qt.AlignCenter)
         self.countdown_label.hide()
 
-        # Generation time label
         self.gen_time_label = QLabel()
         self.gen_time_label.setFont(QFont("Inria Sans", 12, italic=True))
         self.gen_time_label.setAlignment(Qt.AlignCenter)
         self.gen_time_label.hide()
 
-        # Add widgets in desired order
+        # Add widgets to layout in order
         right_layout.addWidget(self.qr_frame, alignment=Qt.AlignHCenter | Qt.AlignTop)
-        right_layout.addWidget(details_frame)
-        right_layout.addWidget(self.countdown_label, alignment=Qt.AlignCenter)
-        right_layout.addWidget(self.gen_time_label, alignment=Qt.AlignCenter)
         
+        # Add bank detail labels individually
+        for label in bank_labels:
+            right_layout.addWidget(label, alignment=Qt.AlignHCenter)
+            
+        right_layout.addWidget(self.countdown_label, alignment=Qt.AlignHCenter)
+        right_layout.addWidget(self.gen_time_label, alignment=Qt.AlignHCenter)
         right_layout.addStretch()
 
         main_layout.addWidget(right_section)
@@ -246,35 +247,50 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             
             # Debug prints to verify amount
             print(f"Generating QR for amount: {self.total_amount}")
-            print(f"URL amount parameter: {self.total_amount}")
             
-            url = (f"https://img.vietqr.io/image/mbbank-0375712517-KGdsu44.jpg?"
-                  f"amount={self.total_amount}&accountName=NGUYEN%20THE%20NGO")
-            print(url)
-            print("Creating QR code for total amount:", self.total_amount)
+            # VietQR configuration
+            bank_name = "MB"  # MB Bank
+            account_number = "0375712517"  #account number
+            bank_code = getBincode(bank_name)
             
-            response = requests.get(url)
-            image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
-            # Read as BGR image
-            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+            # Generate VietQR string with proper format
+            vietqr_string = genQRString(
+                merchant_id=account_number,
+                acq=bank_code,
+                amount=str(self.total_amount),  # Convert amount to string
+                merchant_name="NGUYEN THE NGO",  # Add merchant name
+                service_code="QRIBFTTA"
+            )
             
-            # Create mask for white pixels
-            lower_white = np.array([250, 250, 250])
-            upper_white = np.array([255, 255, 255])
-            mask = cv2.inRange(image, lower_white, upper_white)
+            # Create QR code with custom styling
+            qr = qrcode.QRCode(
+                version=5,
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
+                box_size=10,
+                border=4
+            )
             
-            # Create transparent image with alpha channel
-            rgba = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
-            # Set alpha channel to 0 for white pixels
-            rgba[mask == 255] = [0, 0, 0, 0]
+            qr.add_data(vietqr_string)
+            qr.make(fit=True)
             
-            # Convert to RGB for display
-            h, w, ch = rgba.shape
-            bytes_per_line = ch * w
-            qt_image = QImage(rgba.data, w, h, bytes_per_line, QImage.Format_RGBA8888)
-            qr_pixmap = QPixmap.fromImage(qt_image)
+            # Create QR image with custom colors
+            qr_img = qr.make_image(fill_color="#507849", back_color="#F5F9F7")
             
-            self.qr_label.setPixmap(qr_pixmap.scaled(300, 400, Qt.KeepAspectRatio))
+            # Add border and styling
+            qr_img = qr_img.convert("RGBA")
+            border_size = 30
+            new_size = (qr_img.size[0] + border_size, qr_img.size[1] + border_size)
+            canvas = Image.new("RGBA", new_size, "#F5F9F7")  # Match page background
+            canvas.paste(qr_img, (border_size // 2, border_size // 2), qr_img)
+            
+            # Convert PIL Image to QPixmap using BytesIO
+            img_byte_array = io.BytesIO()
+            canvas.save(img_byte_array, format='PNG')
+            qr_pixmap = QPixmap()
+            qr_pixmap.loadFromData(img_byte_array.getvalue())
+            
+            # Display QR code
+            self.qr_label.setPixmap(qr_pixmap.scaled(300, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             
             # Show generation time with ordinal suffix
             current_time = QDateTime.currentDateTime()

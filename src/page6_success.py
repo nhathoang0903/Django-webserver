@@ -11,7 +11,7 @@ from cart_state import CartState
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay  
 from base_page import BasePage  
-from config import HISTORY_API_URL, CUSTOMER_HISTORY_LINK_URL
+from config import HISTORY_API_URL, CUSTOMER_HISTORY_LINK_URL, DEVICE_ID
 
 class SuccessPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
@@ -88,7 +88,8 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
                 # Send customer history link data based on mode
                 customer_data = {
                     "random_id": response_data["random_id"],
-                    "username": phone_number  # Empty for guest, phone number for member
+                    "username": phone_number,  # Empty for guest, phone number for member
+                    "device_id": DEVICE_ID
                 }
                 
                 print(f"Sending customer data: {customer_data}")

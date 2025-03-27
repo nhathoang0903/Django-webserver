@@ -22,10 +22,9 @@ from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 from base_page import BasePage  # New import
 import requests
-from config import CART_END_SESSION_API, DEVICE_ID
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
-from config import CART_END_SESSION_STATUS_API, DEVICE_ID
+from config import CART_END_SESSION_STATUS_API, DEVICE_ID, CART_CHECK_PAYMENT_SIGNAL, CART_END_SESSION_API
 
 class SessionMonitor(QThread):
     """Thread to monitor cart session status"""
@@ -54,6 +53,39 @@ class SessionMonitor(QThread):
                         
             except Exception as e:
                 print(f"Error checking session status: {e}")
+                
+            time.sleep(0.5)  # Poll every 500ms
+
+    def stop(self):
+        self.is_running = False
+
+class PaymentSignalMonitor(QThread):
+    """Thread to monitor payment signals"""
+    payment_signal_received = pyqtSignal()  # Signal when payment is requested
+
+    def __init__(self):
+        super().__init__()
+        self.is_running = True
+
+    def run(self):
+        while self.is_running:
+            try:
+                # Get payment signal status
+                url = f"{CART_CHECK_PAYMENT_SIGNAL}{DEVICE_ID}"
+                print(f"Checking payment signal: {url}")
+                response = requests.get(url)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    print(f"Payment signal response: {data}")
+                    
+                    if "message" in data and data["message"] == "Payment signal received":
+                        print("Payment signal received, switching to QR page")
+                        self.payment_signal_received.emit()
+                        break  # Exit thread when signal received
+                        
+            except Exception as e:
+                print(f"Error checking payment signal: {e}")
                 
             time.sleep(0.5)  # Poll every 500ms
 
@@ -128,8 +160,15 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
         # Initialize session monitor
         self.session_monitor = SessionMonitor()
+        self.payment_monitor = PaymentSignalMonitor()
+        
+        # Connect signals
         self.session_monitor.session_ended.connect(self.handle_remote_session_end)
+        self.payment_monitor.payment_signal_received.connect(self.handle_payment_signal)
+        
+        # Start both monitors with offset
         self.session_monitor.start()
+        QTimer.singleShot(250, self.payment_monitor.start)  # Start with 250ms offset
 
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
@@ -1206,6 +1245,22 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
             switch_to_home()
 
+    def handle_payment_signal(self):
+        """Handle received payment signal by switching to QR page"""
+        print("Payment signal received, preparing QR page")
+        if not self.transition_in_progress:
+            self.transition_in_progress = True
+            
+            # Stop both monitors
+            self.session_monitor.stop()
+            self.session_monitor.wait()
+            self.payment_monitor.stop()
+            self.payment_monitor.wait()
+            print("Stopped monitors before QR page")
+            
+            # Switch to QR page
+            self.show_payment_page()
+
     def closeEvent(self, event):
         # Stop all monitoring and cleanup before closing
         if hasattr(self, 'session_monitor'):
@@ -1221,6 +1276,9 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         if hasattr(self, 'session_monitor'):
             self.session_monitor.stop()
             self.session_monitor.wait()
+        if hasattr(self, 'payment_monitor'):
+            self.payment_monitor.stop()
+            self.payment_monitor.wait()
         super().closeEvent(event)
         
     def cleanup_resources(self):

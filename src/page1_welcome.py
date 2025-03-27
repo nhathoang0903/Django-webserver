@@ -570,8 +570,7 @@ class SelectModeFrame(BaseOverlayFrame):
         self.container.setFixedSize(500, 400)
         self.container.setStyleSheet("""
             QWidget {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #FFFFFF, stop:1 #F5F9F7);
+                background: transparent;
                 border: 2px solid #507849;
                 border-radius: 25px;
             }
@@ -642,7 +641,6 @@ class SelectModeFrame(BaseOverlayFrame):
         
         self.setStyleSheet("""
             QWidget {
-                background-color: white;
                 border: 2px solid #507849;
                 border-radius: 25px;
             }
@@ -663,17 +661,17 @@ class SelectModeFrame(BaseOverlayFrame):
         icon_label = QLabel(icon)
         icon_label.setFont(QFont("Segoe UI Emoji", 20))
         icon_label.setAlignment(Qt.AlignCenter)
-        icon_label.setStyleSheet("border: none;")
+        icon_label.setStyleSheet("background: transparent; border: none;")
         
         title_label = QLabel(title)
         title_label.setFont(QFont("Inter", 16, QFont.Bold))
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("color: #3D6F4A; border: none;")
+        title_label.setStyleSheet("color: #3D6F4A; background: transparent; border: none;")
         
         desc_label = QLabel(description)
         desc_label.setFont(QFont("Inter", 10))
         desc_label.setAlignment(Qt.AlignCenter)
-        desc_label.setStyleSheet("color: #666666; border: none;")
+        desc_label.setStyleSheet("color: #666666; background: transparent; border: none;")
         desc_label.setWordWrap(True)
         
         layout.addWidget(icon_label)
@@ -683,15 +681,15 @@ class SelectModeFrame(BaseOverlayFrame):
         btn.setLayout(layout)
         btn.setStyleSheet("""
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #FFFFFF, stop:1 #F8FAF9);
+                background: transparent;
                 border: 2px solid #E0E0E0;
                 border-radius: 20px;
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #F5F9F7, stop:1 #E8F0EA);
                 border-color: #507849;
+            }
+            QPushButton > QWidget {
+                background: transparent;
             }
         """)
         
