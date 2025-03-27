@@ -1,8 +1,11 @@
+import json
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget, QDialog
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFontDatabase, QFont
 import os
 from components.PageTransitionOverlay import PageTransitionOverlay
+import requests
+from config import CART_END_SESSION_API, DEVICE_ID
 
 class CancelShoppingModal(QFrame):
     cancelled = pyqtSignal()
@@ -154,7 +157,7 @@ class CancelShoppingModal(QFrame):
                 color: #000000;
             }
         """)
-        cancel_btn.clicked.connect(self.handle_cancel)
+        cancel_btn.clicked.connect(self.handle_cancel_shopping)
 
         button_layout.addStretch()
         button_layout.addWidget(not_now_btn)
@@ -169,6 +172,40 @@ class CancelShoppingModal(QFrame):
             self.parent.blur_effect.setBlurRadius(0)
             self.parent.opacity_effect.setOpacity(1)
         self.not_now.emit()
+        self.hide()
+
+    def handle_cancel_shopping(self):
+        """Handle cancel payment button click with API call"""
+        print("Cancel payment button clicked!")
+        try:
+            # Format API endpoint with device_id
+            end_session_url = f"{CART_END_SESSION_API}{DEVICE_ID}/"
+            print(f"Sending cancel request to: {end_session_url}")
+            
+            # Call API
+            response = requests.post(end_session_url)
+            print(f"API Response status code: {response.status_code}")
+            print(f"API Response content: {response.text}")
+            
+            if response.status_code == 200:
+                print("Successfully cancelled shopping session")
+                # Clear phone number in JSON file
+                try:
+                    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                        'config', 'phone_number.json')
+                    with open(file_path, 'w') as f:
+                        json.dump({"phone_number": ""}, f)
+                    print("Successfully cleared phone number")
+                except Exception as e:
+                    print(f"Error clearing phone number: {e}")
+            else:
+                print(f"Error cancelling session: {response.text}")
+                
+        except Exception as e:
+            print(f"Error calling end session API: {e}")
+        
+        # Emit signal to close modal and return to home
+        self.cancelled.emit()
         self.hide()
 
     def handle_cancel(self):

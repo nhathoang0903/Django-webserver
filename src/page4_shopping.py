@@ -1,9 +1,12 @@
+import json
 import weakref
 from functools import lru_cache
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
                            QPushButton, QApplication, QFrame, QGridLayout, QScrollArea, QDialog, QGraphicsBlurEffect, QGraphicsOpacityEffect, QGraphicsDropShadowEffect)
 from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation, QRect, QParallelAnimationGroup
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
+from PyQt5.QtMultimedia import QMediaPlayer, QAudioOutput
+from PyQt5.QtCore import QUrl
 import os
 import cv2
 import numpy as np
@@ -18,6 +21,44 @@ from countdown_overlay import CountdownOverlay
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 from base_page import BasePage  # New import
+import requests
+from config import CART_END_SESSION_API, DEVICE_ID
+from PyQt5.QtCore import QThread, pyqtSignal
+import time
+from config import CART_END_SESSION_STATUS_API, DEVICE_ID
+
+class SessionMonitor(QThread):
+    """Thread to monitor cart session status"""
+    session_ended = pyqtSignal()  # Signal when session ends
+
+    def __init__(self):
+        super().__init__()
+        self.is_running = True
+
+    def run(self):
+        while self.is_running:
+            try:
+                # Get session status
+                url = f"{CART_END_SESSION_STATUS_API}{DEVICE_ID}/status/"
+                print(f"Checking session status: {url}")
+                response = requests.get(url)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    print(f"Session status response: {data}")
+                    
+                    if data.get("device_status") == "available":
+                        print(f"Session ended at: {data.get('last_session_end')}")
+                        self.session_ended.emit()
+                        break  # Exit thread when session ends
+                        
+            except Exception as e:
+                print(f"Error checking session status: {e}")
+                
+            time.sleep(0.5)  # Poll every 500ms
+
+    def stop(self):
+        self.is_running = False
 
 class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
     # Class level attributes for critical components
@@ -84,6 +125,11 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.countdown_overlay = None
         self.transition_overlay = PageTransitionOverlay(self)
         self.transition_in_progress = False  # Add this line
+
+        # Initialize session monitor
+        self.session_monitor = SessionMonitor()
+        self.session_monitor.session_ended.connect(self.handle_remote_session_end)
+        self.session_monitor.start()
 
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
@@ -495,6 +541,12 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             return
             
         def switch_page():
+            # Stop session monitor before switching page
+            if hasattr(self, 'session_monitor'):
+                self.session_monitor.stop()
+                self.session_monitor.wait()
+                print("Stopped session monitor before payment page")
+                
             start_time = PageTiming.start_timing()
             from page5_qrcode import QRCodePage
             self.payment_page = QRCodePage()
@@ -680,9 +732,14 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
     def show_product_page(self):
         from import_module import ImportModule
-        # Stop camera before switching page
+        # Stop camera and session monitor before switching page
         if self.camera_active:
             self.stop_camera()
+            
+        if hasattr(self, 'session_monitor'):
+            self.session_monitor.stop() 
+            self.session_monitor.wait()
+            print("Stopped session monitor before product page")
             
         product_page = ImportModule.get_product_page()
         product_page.show()
@@ -1056,9 +1113,10 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.cancel_modal.cancelled.connect(handle_cancel_payment)
 
     def handle_cancel_payment(self):
-        """Single handler for cancel payment"""
-        if not self.transition_in_progress:  # Check if transition is already in progress
-            self.transition_in_progress = True  # Set the flag to indicate transition is in progress
+        """Single handler for cancel payment - API call moved to modal"""
+        if not self.transition_in_progress:
+            self.transition_in_progress = True
+
             def switch_to_home():
                 # Cleanup effects and blur container first
                 if self.blur_effect:
@@ -1081,15 +1139,11 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 def transition_complete():
                     from page1_welcome import WelcomePage
                     self.home_page = WelcomePage()
-                    # Show new page before hiding overlay
                     self.home_page.show()
-                    # Hide overlay after new page is ready
                     self.transition_overlay.fadeOut(lambda: self.close())
                     
-                # Start transition with callback
                 self.transition_overlay.fadeIn(transition_complete)
 
-            # Execute transition
             switch_to_home()
 
     def go_home(self):
@@ -1113,11 +1167,60 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 self.reset_page()
             switch_to_home()
 
+    def handle_remote_session_end(self):
+        """Handle session end from remote (mobile app)"""
+        print("Session ended remotely")
+        if not self.transition_in_progress:
+            self.transition_in_progress = True
+            
+            # Stop monitoring since we're ending the session
+            if hasattr(self, 'session_monitor'):
+                self.session_monitor.stop()
+                self.session_monitor.wait()
+                print("Stopped session monitor after remote end")
+                
+            # Clear phone number
+            try:
+                file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                    'config', 'phone_number.json')
+                with open(file_path, 'w') as f:
+                    json.dump({"phone_number": ""}, f)
+                print("Successfully cleared phone number")
+            except Exception as e:
+                print(f"Error clearing phone number: {e}")
+
+            # Switch to home page - simplified version without blur effects
+            def switch_to_home():
+                # Clear cart data
+                self.cart_state.clear_cart()
+                self.cart_state.save_to_json()
+                
+                # Show transition overlay
+                def transition_complete():
+                    from page1_welcome import WelcomePage
+                    self.home_page = WelcomePage()
+                    self.home_page.show()
+                    self.transition_overlay.fadeOut(lambda: self.close())
+                    
+                self.transition_overlay.fadeIn(transition_complete)
+
+            switch_to_home()
+
     def closeEvent(self, event):
+        # Stop all monitoring and cleanup before closing
+        if hasattr(self, 'session_monitor'):
+            self.session_monitor.stop()
+            self.session_monitor.wait()
+            print("Stopped session monitor on page close")
+            
         self.cleanup_resources()
         self.reset_page()  # Reset state when closing
         if hasattr(self, 'home_page') and self.home_page:
             self.home_page.show()
+        # Stop session monitor before closing
+        if hasattr(self, 'session_monitor'):
+            self.session_monitor.stop()
+            self.session_monitor.wait()
         super().closeEvent(event)
         
     def cleanup_resources(self):

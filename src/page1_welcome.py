@@ -1,8 +1,10 @@
 from base_page import BasePage
 from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QWidget,
                            QPushButton, QApplication, QMessageBox, QHBoxLayout, QDialog,
-                           QGraphicsDropShadowEffect, QSizePolicy)  # Add QSizePolicy
-from PyQt5.QtCore import Qt, pyqtSignal
+                           QGraphicsDropShadowEffect, QSizePolicy, QGraphicsBlurEffect)
+import requests
+import json
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QColor
 from page2_instruction import InstructionPage  
 import os
@@ -11,7 +13,7 @@ from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 import qrcode
 from io import BytesIO
-from config import DEVICE_ID, CUSTOMER_HISTORY_LINK_URL
+from config import DEVICE_ID, CUSTOMER_HISTORY_LINK_URL, CART_STATUS_API, CART_CONNECT
 
 
 class WelcomePage(BasePage):  # Changed from QWidget to BasePage
@@ -45,6 +47,37 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
         # Set application icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
+
+        # Add welcome message overlay
+        self.welcome_overlay = QWidget(self)
+        self.welcome_overlay.setGeometry(self.rect())
+        self.welcome_overlay.setStyleSheet("""
+            QWidget {
+                background-color: rgba(245, 249, 247, 0.8);  /* Semi-transparent background */
+            }
+        """)
+        self.welcome_overlay.hide()
+        
+        # Add blur effect for background
+        self.blur_effect = QGraphicsBlurEffect()
+        self.blur_effect.setBlurRadius(10)
+        
+        # Welcome message label with smaller font
+        self.welcome_msg = QLabel(self.welcome_overlay)
+        self.welcome_msg.setFont(QFont("Inter", 14, QFont.Bold))  # Reduced from 48 to 14
+        self.welcome_msg.setStyleSheet("""
+            QLabel {
+                color: #3D6F4A;
+                background: transparent;
+                padding: 20px;
+            }
+        """)
+        self.welcome_msg.setAlignment(Qt.AlignCenter)
+        
+        # Center welcome message
+        welcome_layout = QVBoxLayout(self.welcome_overlay)
+        welcome_layout.addWidget(self.welcome_msg)
+        welcome_layout.setAlignment(Qt.AlignCenter)
 
     def load_fonts(self):
         # Load custom fonts from font-family directory
@@ -208,6 +241,21 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
             self.transition_overlay.fadeIn(show_new_page)
             
         switch_page()
+
+    def show_welcome_message(self, customer_name):
+        """Show welcome message with blurred background"""
+        # Apply blur to main content
+        for child in self.findChildren(QWidget):
+            if child != self.welcome_overlay and child.isVisible():
+                # Create blur effect for each visible widget
+                blur = QGraphicsBlurEffect()
+                blur.setBlurRadius(5)  # Lighter blur
+                child.setGraphicsEffect(blur)
+        
+        # Show welcome message overlay
+        self.welcome_msg.setText(f"Hello, {customer_name}!")
+        self.welcome_overlay.show()
+        self.welcome_overlay.raise_()
 
 class BaseOverlayFrame(QWidget):
     def __init__(self, parent=None):
@@ -409,13 +457,111 @@ class MemberQRFrame(BaseOverlayFrame):
             """)
             
         self.container.setLayout(layout)
+        
+        # Add timer for polling
+        self.poll_timer = QTimer()
+        self.poll_timer.setInterval(500)  # 500ms interval
+        self.poll_timer.timeout.connect(self.check_cart_status)
+        
+        # Add success message label
+        self.success_msg = QLabel()
+        self.success_msg.setFont(QFont("Inter", 18, QFont.Bold))  # Increased font size
+        self.success_msg.setStyleSheet("""
+            QLabel {
+                color: #3D6F4A;
+                background: transparent;
+                padding: 20px;
+            }
+        """)
+        self.success_msg.setAlignment(Qt.AlignCenter)
+        self.success_msg.hide()
+        content_layout.addWidget(self.success_msg)
+        
+        # Store content widgets that need to be hidden/blurred
+        self.content = content
+        self.qr_container = qr_container
+        
+        # Create blur effect
+        self.blur_effect = QGraphicsBlurEffect()
+        self.blur_effect.setBlurRadius(10)
+        self.content.setGraphicsEffect(self.blur_effect)
+        self.blur_effect.setEnabled(False)
 
-    def switch_to_guest(self):
-        """Switch to guest mode"""
+    def showEvent(self, event):
+        super().showEvent(event)
+        # Start polling when QR frame is shown
+        self.poll_timer.start()
+        
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        # Stop polling when QR frame is hidden
+        self.poll_timer.stop()
+        
+    def check_cart_status(self):
+        """Poll cart status API"""
+        try:
+            response = requests.get(f"{CART_STATUS_API}{DEVICE_ID}/")
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("status") == "in_use" and data.get("customer_phone"):
+                    # Stop polling and hide QR frame
+                    self.poll_timer.stop()
+                    self.hide()
+                    
+                    # Save phone number
+                    self.save_phone_number(data["customer_phone"])
+                    
+                    # Show welcome message on main page
+                    if self.welcome_page:
+                        self.welcome_page.show_welcome_message(data['customer_name'])
+                        # Switch to instruction page after 2 seconds
+                        QTimer.singleShot(2000, self.proceed_to_instruction)
+                    
+        except Exception as e:
+            print(f"Error checking cart status: {e}")
+            
+    def save_phone_number(self, phone):
+        """Save phone number to JSON file"""
+        try:
+            file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                   'config', 'phone_number.json')
+            with open(file_path, 'w') as f:
+                json.dump({"phone_number": phone}, f)
+        except Exception as e:
+            print(f"Error saving phone number: {e}")
+            
+    def proceed_to_instruction(self):
+        """Switch to instruction page"""
         self.hide()
         if self.welcome_page:
-            self.welcome_page.select_mode_frame.selected_mode = 1  # Set guest mode
+            self.welcome_page.select_mode_frame.selected_mode = 2  # Set member mode
             self.welcome_page.switch_to_page.emit(2)  # Switch to instruction page
+
+    def switch_to_guest(self):
+        """Switch to guest mode and connect to server"""
+        try:
+            # Prepare data for guest mode
+            data = {
+                "phone_number": "",
+                "device_id": DEVICE_ID
+            }
+            
+            # Send POST request to connect API
+            response = requests.post(CART_CONNECT, json=data)
+            
+            if response.status_code == 200:
+                self.hide()
+                if self.welcome_page:
+                    self.welcome_page.select_mode_frame.selected_mode = 1  # Set guest mode
+                    self.welcome_page.switch_to_page.emit(2)  # Switch to instruction page
+            else:
+                QMessageBox.warning(self, "Connection Error", 
+                    "Failed to connect as guest. Please try again.")
+                
+        except Exception as e:
+            print(f"Error connecting to server: {e}")
+            QMessageBox.warning(self, "Connection Error", 
+                "Failed to connect to server. Please try again.")
 
 class SelectModeFrame(BaseOverlayFrame):
     def __init__(self, parent=None):
@@ -552,9 +698,41 @@ class SelectModeFrame(BaseOverlayFrame):
         return btn
 
     def mode_selected(self, mode):
+        """Handle mode selection and API connection"""
         self.selected_mode = mode
-        self.hide()
         
+        if mode == 1:  # Guest mode
+            try:
+                # Prepare data for guest mode
+                data = {
+                    "phone_number": "",
+                    "device_id": DEVICE_ID
+                }
+                
+                print("Sending guest mode connection request...")
+                print(f"Request data: {data}")
+                print(f"API URL: {CART_CONNECT}")
+                
+                # Send POST request to connect API
+                response = requests.post(CART_CONNECT, json=data)
+                print(f"Response status: {response.status_code}")
+                print(f"Response content: {response.text}")
+                
+                if response.status_code == 200:
+                    self.hide()
+                else:
+                    QMessageBox.warning(self, "Connection Error", 
+                        "Failed to connect as guest. Please try again.")
+                    return
+                    
+            except Exception as e:
+                print(f"Error connecting to server: {e}")
+                QMessageBox.warning(self, "Connection Error", 
+                    "Failed to connect to server. Please try again.")
+                return
+        
+        self.hide()  # Hide frame after successful connection or if member mode selected
+
     def close(self):
         self.hide()  # Always hide instead of close
 

@@ -73,13 +73,25 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
 
             if response.status_code == 201:
                 response_data = response.json()
-                # Send customer history link data
+                
+                # Read phone number from json file
+                phone_number = ""
+                try:
+                    phone_number_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                                   'config', 'phone_number.json')
+                    with open(phone_number_path, 'r') as f:
+                        phone_data = json.load(f)
+                        phone_number = phone_data.get("phone_number", "")
+                except Exception as e:
+                    print(f"Error reading phone number: {e}")
+
+                # Send customer history link data based on mode
                 customer_data = {
                     "random_id": response_data["random_id"],
-                    "username": "",
-                    "guest_name": shopping_data.get("guest_name", "")
+                    "username": phone_number  # Empty for guest, phone number for member
                 }
                 
+                print(f"Sending customer data: {customer_data}")
                 customer_response = requests.post(
                     CUSTOMER_HISTORY_LINK_URL,
                     json=customer_data

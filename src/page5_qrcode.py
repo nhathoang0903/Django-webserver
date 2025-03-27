@@ -248,8 +248,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             print(f"Generating QR for amount: {self.total_amount}")
             print(f"URL amount parameter: {self.total_amount}")
             
-            url = (f"https://img.vietqr.io/image/mbbank-3099932002-KGdsu44.jpg?"
-                  f"amount={self.total_amount}&accountName=VO%20PHAN%20NHAT%20HOANG")
+            url = (f"https://img.vietqr.io/image/mbbank-0375712517-KGdsu44.jpg?"
+                  f"amount={self.total_amount}&accountName=NGUYEN%20THE%20NGO")
             print(url)
             print("Creating QR code for total amount:", self.total_amount)
             
@@ -363,9 +363,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Force CPU configuration at start of thread
         self.configure_device()
         
-        USERNAME = "NHATHOANG0903"
-        PASSWORD = "Nhathoang@4"
-        account_no = "3099932002"
+        USERNAME = "0375712517"
+        PASSWORD = "Ngo252002@"
+        account_no = "0375712517"
 
         # Remove sound file references
         
