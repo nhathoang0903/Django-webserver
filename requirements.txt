@@ -1,7 +1,7 @@
-PyQt5
 ultralytics
 requests
-pygame
-rembg
+playsound
 Pillow
 onnxruntime
+qrcode
+vietqr-generator
