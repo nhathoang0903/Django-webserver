@@ -63,11 +63,16 @@ class PaymentSignalMonitor(QThread):
     """Thread to monitor payment signals"""
     payment_signal_received = pyqtSignal()  # Signal when payment is requested
 
-    def __init__(self):
+    def __init__(self, page_name="page4"):
         super().__init__()
         self.is_running = True
+        self.page_name = page_name  # Add page name to restrict execution
 
     def run(self):
+        if self.page_name != "page4":  # Ensure this thread only runs in page4
+            print(f"PaymentSignalMonitor is disabled for {self.page_name}")
+            return
+
         while self.is_running:
             try:
                 # Get payment signal status
@@ -79,7 +84,7 @@ class PaymentSignalMonitor(QThread):
                     data = response.json()
                     print(f"Payment signal response: {data}")
                     
-                    if "message" in data and data["message"] == "Payment signal received":
+                    if "signal_type" in data and data["signal_type"] == "payment":
                         print("Payment signal received, switching to QR page")
                         self.payment_signal_received.emit()
                         break  # Exit thread when signal received
@@ -160,7 +165,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
         # Initialize session monitor
         self.session_monitor = SessionMonitor()
-        self.payment_monitor = PaymentSignalMonitor()
+        self.payment_monitor = PaymentSignalMonitor(page_name="page4")  # Pass page name here
         
         # Connect signals
         self.session_monitor.session_ended.connect(self.handle_remote_session_end)
@@ -173,7 +178,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
         """Cache image loading to reduce memory usage"""
-        if path not in self._image_cache:
+        if (path not in self._image_cache):
             self._image_cache[path] = QPixmap(path)
         return self._image_cache[path]
         
@@ -243,7 +248,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 border-radius: 9px;
             }
         """)
-        self.camera_frame.setFixedSize(271, 299)  
+        self.camera_frame.setFixedSize(336, 318)  
 
         # Create a label for camera feed
         self.camera_label = QLabel(self.camera_frame)
@@ -266,7 +271,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             }
         """)
         # Make scan area fixed size and center it in camera frame
-        self.scan_area.setFixedSize(231, 231)  # Make it square
+        self.scan_area.setFixedSize(245, 247)  # Make it square
         self.scan_area.move(
             (self.camera_frame.width() - self.scan_area.width()) // 2,
             (self.camera_frame.height() - self.scan_area.height()) // 2
@@ -804,7 +809,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         if self.camera is None:
             self.camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)
             self.camera.set(cv2.CAP_PROP_FPS, 30)
             
             if not self.camera.isOpened():
@@ -1000,9 +1005,10 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         product_modal = self.get_product_modal()
         product_modal.setParent(self)
         
-        # Position modal
+        # Position modal more centered
         camera_pos = self.camera_frame.pos()
-        modal_x = camera_pos.x() - 20
+        camera_center_x = camera_pos.x() + (self.camera_frame.width() // 2)
+        modal_x = camera_center_x - (product_modal.width() // 2)  # Center align
         modal_y = camera_pos.y() + (self.camera_frame.height() - product_modal.height()) // 2
         product_modal.setGeometry(modal_x, modal_y, 271, 270)
         

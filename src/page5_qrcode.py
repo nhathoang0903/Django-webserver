@@ -31,12 +31,16 @@ import qrcode
 from vietqr.VietQR import genQRString, getBincode
 from PIL import Image
 import io
+from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
 
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Add signal for page switching
     payment_completed = pyqtSignal(bool)  # Signal cho trạng thái thanh toán
     
     def __init__(self):
+        # Add thread tracking
+        self.transaction_thread = None
+        self.stop_transaction_check = Event()
         # Force CPU configuration before any other initialization
         self.configure_device()
         super().__init__()
@@ -181,24 +185,40 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         left_layout.addStretch()
         main_layout.addWidget(left_section)
 
-        # Right Section
+        # Right Section with adjusted margins
         right_section = QWidget()
         right_layout = QVBoxLayout(right_section)
-        right_layout.setContentsMargins(20, 20, 20, 20)
-        right_layout.setSpacing(15)
+        right_layout.setContentsMargins(20, 0, 20, 20)  # Set top margin to 0
+        right_layout.setSpacing(5)  # Reduced spacing between elements
 
-        # QR Code Frame
+        # QR Code Frame moved up
+        qr_container = QWidget()
+        qr_layout = QVBoxLayout(qr_container)
+        qr_layout.setContentsMargins(0, 10, 0, 0)  # Reduced top margin to 10
+        # QR Code Frame adjusted position
         self.qr_frame = QFrame()
         self.qr_frame.setFixedSize(259, 376)
         self.qr_frame.setStyleSheet("background-color: transparent;")
         
-        # QR Code Label
+        # Add 20px margin to top of QR frame
+        qr_container = QWidget()
+        qr_layout = QVBoxLayout(qr_container)
+        qr_layout.setContentsMargins(0, 20, 0, 0)  # Add top margin
+        qr_layout.addWidget(self.qr_frame, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        
+        # QR Code Label remains same size
         self.qr_label = QLabel(self.qr_frame)
         self.qr_label.setAlignment(Qt.AlignCenter)
         self.qr_label.setFixedSize(259, 376)
         self.qr_label.setText("Loading...")
         self.qr_label.setStyleSheet("background-color: transparent;")
 
+        # Add widgets to layout with adjusted spacing
+        right_layout.addWidget(qr_container, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        
+        # Reduce spacing before bank labels
+        right_layout.addSpacing(5)  # Reduced from default spacing
+        
         # Create individual labels for bank details with center alignment
         bank_labels = []
         bank_details = [
@@ -250,24 +270,24 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             
             # VietQR configuration
             bank_name = "MB"  # MB Bank
-            account_number = "0375712517"  #account number
+            account_number = "0375712517"  #account number 
             bank_code = getBincode(bank_name)
-            
+            print(f"Bank code: {bank_code}")  # Debug print
+
             # Generate VietQR string with proper format
             vietqr_string = genQRString(
                 merchant_id=account_number,
                 acq=bank_code,
                 amount=str(self.total_amount),  # Convert amount to string
                 merchant_name="NGUYEN THE NGO",  # Add merchant name
-                service_code="QRIBFTTA"
+                service_code="QRIBFTTA"  
             )
             
+            # Print out generated string for debugging
+            print(f"Generated VietQR string: {vietqr_string}")
+
             # Create QR code with custom styling
             qr = qrcode.QRCode(
-                version=5,
-                error_correction=qrcode.constants.ERROR_CORRECT_H,
-                box_size=10,
-                border=4
             )
             
             qr.add_data(vietqr_string)
@@ -322,9 +342,16 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             self.countdown_timer.start(1000)
             self.countdown_label.show()
             
+            # Start transaction check with proper thread management
+            self.start_transaction_check()
+            
         except Exception as e:
-            self.qr_label.setText("Failed to load QR Code")
             print(f"Error loading QR code: {e}")
+            self.qr_label.setText("Failed to load QR Code")
+            # Ensure cleanup happens even if QR fails
+            self.cleanup_resources()
+            # Return to shopping page after 2 seconds on failure
+            QTimer.singleShot(2000, self.return_to_shopping)
 
     def update_countdown(self):
         if self.countdown_seconds > 0:
@@ -341,39 +368,71 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
 
     def cancel_payment(self):
         """Handle cancel payment action"""
+        print("Cancelling payment...")
+        
+        # Send cancel payment signal to server
+        try:
+            cancel_url = f"{CART_CANCEL_PAYMENT_SIGNAL}{DEVICE_ID}"
+            response = requests.post(cancel_url)
+            if response.status_code == 200:
+                print("Cancel payment signal sent successfully")
+            else:
+                print(f"Failed to send cancel signal: {response.status_code}")
+        except Exception as e:
+            print(f"Error sending cancel signal: {e}")
+        
         self.stop_transaction_check.set()  # Signal to stop transaction check
         self.countdown_timer.stop()
         self.return_to_shopping()
         
     def return_to_shopping(self):
-        """Return to shopping page when QR expires or payment is canceled"""
-        transition_start = time.time()
+        """Enhanced return to shopping"""
+        print("Returning to shopping page...")
+        self.cleanup_resources()
         
         from page4_shopping import ShoppingPage
         self.shopping_page = ShoppingPage()
-        
-        # Calculate transition time
-        transition_time = time.time() - transition_start
-        print(f"Time to return to shopping: {transition_time:.2f} seconds")
-        
         self.shopping_page.show()
-        self.cleanup_resources()
         self.close()
+        print("Returned to shopping page")
 
     def cleanup_resources(self):
-        """Clean up resources before closing"""
-        if self.countdown_timer:
+        """Enhanced cleanup of resources"""
+        print("Cleaning up resources...")
+        # Stop the countdown timer
+        if hasattr(self, 'countdown_timer'):
             self.countdown_timer.stop()
-        self.stop_transaction_check.set()  # Ensure transaction check is stopped
-        # Clean up any other resources
+        
+        # Stop transaction check thread
+        self.stop_transaction_check.set()
+        if self.transaction_thread and self.transaction_thread.is_alive():
+            print("Waiting for transaction thread to stop...")
+            self.transaction_thread.join(timeout=2)
+            if self.transaction_thread.is_alive():
+                print("Warning: Transaction thread did not stop cleanly")
+        
+        # Clear any stored data
+        if hasattr(self, 'processed_transaction_ids'):
+            self.processed_transaction_ids.clear()
+        
+        # Force garbage collection
+        gc.collect()
+        print("Cleanup completed")
 
     def start_transaction_check(self):
-        check_thread = Thread(
+        # Stop any existing thread
+        self.stop_transaction_check.set()
+        if self.transaction_thread and self.transaction_thread.is_alive():
+            self.transaction_thread.join(timeout=1)
+            
+        # Reset stop event and create new thread
+        self.stop_transaction_check.clear()
+        self.transaction_thread = Thread(
             target=self.check_transaction,
-            args=(self.total_amount,),  # Pass the integer amount
+            args=(self.total_amount,),
             daemon=True
         )
-        check_thread.start()
+        self.transaction_thread.start()
 
     def check_transaction(self, amount):
         # Force CPU configuration at start of thread
@@ -481,8 +540,11 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         switch_page()
 
     def closeEvent(self, event):
+        """Enhanced close event handler"""
+        print("Closing QRCodePage...")
         self.cleanup_resources()
-        event.accept()
+        super().closeEvent(event)
+        print("QRCodePage closed")
 
 if __name__ == '__main__':
     import sys

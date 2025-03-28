@@ -570,7 +570,7 @@ class SelectModeFrame(BaseOverlayFrame):
         self.container.setFixedSize(500, 400)
         self.container.setStyleSheet("""
             QWidget {
-                background: transparent;
+                background: white;
                 border: 2px solid #507849;
                 border-radius: 25px;
             }
@@ -641,6 +641,7 @@ class SelectModeFrame(BaseOverlayFrame):
         
         self.setStyleSheet("""
             QWidget {
+                background: white;
                 border: 2px solid #507849;
                 border-radius: 25px;
             }

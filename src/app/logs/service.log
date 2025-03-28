@@ -881,3 +881,652 @@
 2025-03-27 16:41:33,173 - Status check - active: True, should_run: False, app: not running
 2025-03-27 16:41:40,185 - Failed to check remote commands: HTTPConnectionPool(host='192.168.4.114', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x7fb90aab10>, 'Connection to 192.168.4.114 timed out. (connect timeout=5)'))
 2025-03-27 16:41:40,186 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:05,382 - Service controller started...
+2025-03-28 15:21:05,537 - Status check - active: True, should_run: True, app: not running
+2025-03-28 15:21:05,537 - Starting app...
+2025-03-28 15:21:05,539 - App started successfully
+2025-03-28 15:21:06,042 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:21:06,048 - App error: 2025-03-28 15:21:06,047 - Starting Kiosk Application
+2025-03-28 15:21:06,234 - App error: Could not parse stylesheet of object PageTransitionOverlay(0xa1dac80, name = "transitionOverlay")
+2025-03-28 15:21:06,244 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:21:07,428 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:21:07,516 - App error: 2025-03-28 15:21:07,515 - Main window displayed
+2025-03-28 15:21:07,997 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:21:10,322 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:21:12,542 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:21:14,767 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:21:17,007 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:21:19,172 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:21:21,320 - Status check - active: True, should_run: False, app: running
+2025-03-28 15:21:21,321 - Stopping app...
+2025-03-28 15:21:21,321 - Last app output before stopping:
+2025-03-28 15:21:21,321 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:21:21,322 - 2025-03-28 15:21:06,047 - Starting Kiosk Application
+2025-03-28 15:21:21,322 - Could not parse stylesheet of object PageTransitionOverlay(0xa1dac80, name = "transitionOverlay")
+2025-03-28 15:21:21,322 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:21:21,323 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:21:21,323 - 2025-03-28 15:21:07,515 - Main window displayed
+2025-03-28 15:21:21,357 - App stopped successfully
+2025-03-28 15:21:23,666 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:25,926 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:28,244 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:30,428 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:32,716 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:35,146 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:37,322 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:39,467 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:41,638 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:43,884 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:46,101 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:48,385 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:50,631 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:52,862 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:55,138 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:57,303 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:21:59,520 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:01,883 - Shutdown command received
+2025-03-28 15:22:18,077 - Failed to update status: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/?is_active=True&app_running=False (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f8a147610>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:22:18,088 - Service controller started...
+2025-03-28 15:22:18,135 - Failed to check remote commands: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89324910>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:22:18,136 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:20,140 - Failed to check remote commands: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89326d90>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:22:20,140 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:22,144 - Failed to check remote commands: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f893311d0>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:22:22,145 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:24,312 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:26,648 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:28,789 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:30,941 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:33,177 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:35,514 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:37,901 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:40,242 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:22:42,380 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:21,229 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:23,556 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:25,834 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:28,105 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:31,154 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:33,419 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:35,597 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:38,103 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:40,332 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:23:42,488 - Status check - active: True, should_run: True, app: not running
+2025-03-28 15:23:42,489 - Starting app...
+2025-03-28 15:23:42,492 - App started successfully
+2025-03-28 15:23:43,730 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:23:43,820 - App error: 2025-03-28 15:23:43,819 - Starting Kiosk Application
+2025-03-28 15:23:44,110 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x1cac79f0, name = "transitionOverlay")
+2025-03-28 15:23:44,124 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:23:44,940 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:23:45,345 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:23:45,399 - App error: 2025-03-28 15:23:45,398 - Main window displayed
+2025-03-28 15:23:47,164 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:23:49,314 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:23:49,364 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x1ce5aa60, name = "transitionOverlay")
+2025-03-28 15:23:51,547 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:23:53,923 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:23:56,086 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:23:57,509 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x1ceee410, name = "transitionOverlay")
+2025-03-28 15:23:58,265 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:00,896 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:03,161 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:05,428 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:07,639 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:09,961 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:12,117 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:14,384 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:16,755 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:19,184 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:21,320 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:23,490 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:25,849 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:27,162 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x22918d70, name = "transitionOverlay")
+2025-03-28 15:24:27,162 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x2339dc10, name = "transitionOverlay")
+2025-03-28 15:24:27,987 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:29,820 - App error: [ WARN:0@13.796] global cap_v4l.cpp:913 open VIDEOIO(V4L2:/dev/video1): can't open camera by index
+2025-03-28 15:24:29,821 - App error: [ WARN:0@13.796] global cap.cpp:478 open VIDEOIO(V4L2): backend is generally available but can't be used to capture by index
+2025-03-28 15:24:30,130 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:32,322 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:34,598 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:36,758 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:38,926 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:40,125 - App output: Cart data file removed successfully
+2025-03-28 15:24:40,125 - App output: Sending guest mode connection request...
+2025-03-28 15:24:40,126 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
+2025-03-28 15:24:40,126 - App output: API URL: http://172.20.10.6:9000/api/device/connect/
+2025-03-28 15:24:40,126 - App output: Response status: 200
+2025-03-28 15:24:40,126 - App output: Response content: {"message":"Connected successfully","customer_name":"Guest","device_name":"Smart Cart Display 1","session_start":"2025-03-28T15:23:49.383317+07:00","is_guest":true}
+2025-03-28 15:24:40,127 - App output: Selected mode: Guest
+2025-03-28 15:24:40,127 - App output: [15:23:49] WelcomePage → InstructionPage: 0.583s
+2025-03-28 15:24:40,127 - App output: [15:23:58] InstructionPage → ProductPage: 0.610s
+2025-03-28 15:24:40,128 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,128 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,129 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,129 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,129 - App output: [15:24:27] ProductPage → ShoppingPage: 12.809s
+2025-03-28 15:24:40,130 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,130 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,130 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,131 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,131 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,131 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,131 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,132 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,132 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,133 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,133 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,133 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,133 - App output: Error: Could not open camera
+2025-03-28 15:24:40,134 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,134 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,134 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,135 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,135 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,135 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,135 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,136 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,136 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,136 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,137 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,137 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,137 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,138 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,138 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,138 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,138 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,139 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,139 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,139 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,139 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,140 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,140 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,140 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,141 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,141 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,141 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,142 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,142 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,142 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,142 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,143 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,143 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,143 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,143 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,144 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,144 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,144 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,145 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,145 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,145 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,146 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,146 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,146 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,146 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,147 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,147 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,147 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,148 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:24:40,148 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:40,148 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:24:40,149 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:24:40,149 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:24:41,123 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:43,300 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:45,505 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:48,211 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:50,276 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x22d5a6b0, name = "transitionOverlay")
+2025-03-28 15:24:50,298 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:24:50,442 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:52,600 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:54,756 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:54,768 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x22876100, name = "transitionOverlay")
+2025-03-28 15:24:57,002 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:24:58,607 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x2377bbc0, name = "transitionOverlay")
+2025-03-28 15:24:58,609 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x2377ebd0, name = "transitionOverlay")
+2025-03-28 15:24:59,154 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:00,455 - App error: [ WARN:0@44.430] global cap_v4l.cpp:913 open VIDEOIO(V4L2:/dev/video1): can't open camera by index
+2025-03-28 15:25:00,456 - App error: [ WARN:0@44.431] global cap.cpp:478 open VIDEOIO(V4L2): backend is generally available but can't be used to capture by index
+2025-03-28 15:25:01,325 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:01,365 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,365 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,366 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,366 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,366 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,366 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,366 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,366 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,366 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,366 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,366 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,366 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,367 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,367 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,367 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,367 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,367 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,367 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,367 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,367 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,367 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,367 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,367 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,368 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,368 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,368 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,368 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,368 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,368 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,368 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,368 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,368 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,369 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,369 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,369 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,369 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,369 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,369 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,369 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,369 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,369 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,369 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,370 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,370 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,370 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'available', 'message': 'Device is available'}
+2025-03-28 15:25:01,370 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,370 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,370 - App output: Session status response: {'status': 'success', 'device_status': 'available', 'last_session_end': '28/03/2025 15:24'}
+2025-03-28 15:25:01,370 - App output: Session ended at: 28/03/2025 15:24
+2025-03-28 15:25:01,370 - App output: Session ended remotely
+2025-03-28 15:25:01,370 - App output: Stopped session monitor after remote end
+2025-03-28 15:25:01,370 - App output: Successfully cleared phone number
+2025-03-28 15:25:01,371 - App output: Cart data file removed successfully
+2025-03-28 15:25:01,371 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'available', 'message': 'Device is available'}
+2025-03-28 15:25:01,371 - App output: Cart data file removed successfully
+2025-03-28 15:25:01,371 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,371 - App output: Stopped session monitor on page close
+2025-03-28 15:25:01,371 - App output: Cart data file removed successfully
+2025-03-28 15:25:01,371 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'available', 'message': 'Device is available'}
+2025-03-28 15:25:01,371 - App output: Sending guest mode connection request...
+2025-03-28 15:25:01,371 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
+2025-03-28 15:25:01,371 - App output: API URL: http://172.20.10.6:9000/api/device/connect/
+2025-03-28 15:25:01,371 - App output: Response status: 200
+2025-03-28 15:25:01,372 - App output: Response content: {"message":"Connected successfully","customer_name":"Guest","device_name":"Smart Cart Display 1","session_start":"2025-03-28T15:24:54.806002+07:00","is_guest":true}
+2025-03-28 15:25:01,372 - App output: Selected mode: Guest
+2025-03-28 15:25:01,372 - App output: [15:24:55] WelcomePage → InstructionPage: 0.542s
+2025-03-28 15:25:01,372 - App output: [15:24:57] InstructionPage → ProductPage: 0.528s
+2025-03-28 15:25:01,372 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,372 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,372 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,372 - App output: [15:24:59] ProductPage → ShoppingPage: 0.643s
+2025-03-28 15:25:01,372 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,373 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,373 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,373 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,373 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,373 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,373 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,373 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:01,373 - App output: Error: Could not open camera
+2025-03-28 15:25:01,373 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:01,374 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:01,374 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:01,374 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:03,628 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:05,789 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:08,039 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:10,202 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:12,489 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:14,763 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:14,843 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,844 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,844 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,844 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,845 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,845 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,845 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,845 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,846 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,846 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,846 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,847 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,847 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,847 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,847 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,848 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,848 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,848 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,850 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,851 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,851 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,852 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,852 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,853 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,853 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,854 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,854 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,855 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,855 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,855 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,855 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,855 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,856 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,856 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,856 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,857 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,857 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,857 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,857 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,857 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,858 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,858 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,858 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,858 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,859 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,859 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,859 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,859 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,860 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,860 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,860 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,861 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,861 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,861 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,861 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,862 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,862 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,862 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,862 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,863 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,863 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,863 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,863 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,863 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,864 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,864 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,864 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,864 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,865 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,865 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:14,865 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:14,865 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:14,866 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:14,866 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:15,776 - App error: [ WARN:0@59.752] global cap_v4l.cpp:913 open VIDEOIO(V4L2:/dev/video1): can't open camera by index
+2025-03-28 15:25:15,777 - App error: [ WARN:0@59.752] global cap.cpp:478 open VIDEOIO(V4L2): backend is generally available but can't be used to capture by index
+2025-03-28 15:25:17,047 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:19,325 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:21,507 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:23,662 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:25,835 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:28,619 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:29,462 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,463 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,463 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,463 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,464 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,464 - App output: Error: Could not open camera
+2025-03-28 15:25:29,464 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,465 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,465 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,465 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,465 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,466 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,466 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,466 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,467 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,467 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,467 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,467 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,468 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,468 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,468 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,468 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,469 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,469 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,469 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,469 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,470 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,470 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,470 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,470 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,471 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,471 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,471 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,471 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,472 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,472 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,472 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,472 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,473 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,473 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,473 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,473 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,474 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,474 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,474 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,474 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,475 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,475 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,475 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,475 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,476 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,476 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,476 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,477 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,477 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,478 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,478 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,478 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,478 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,479 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,479 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,479 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,479 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,480 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,480 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,480 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,480 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,481 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,481 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,481 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,481 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:29,482 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:25:29,482 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:25:29,482 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:25:29,482 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:25:30,764 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:32,908 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:35,059 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:37,207 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:39,375 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:41,685 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:43,834 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:46,114 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:48,380 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:50,694 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:52,900 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:55,135 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:55,616 - App error: [ WARN:0@99.592] global cap_v4l.cpp:913 open VIDEOIO(V4L2:/dev/video1): can't open camera by index
+2025-03-28 15:25:55,617 - App error: [ WARN:0@99.592] global cap.cpp:478 open VIDEOIO(V4L2): backend is generally available but can't be used to capture by index
+2025-03-28 15:25:57,458 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:25:59,635 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:01,820 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:04,057 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:06,235 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:08,683 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:11,243 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:13,515 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:15,881 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:18,170 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:20,382 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:22,590 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:25,014 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:27,263 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:29,473 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:31,796 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:34,097 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:36,281 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:38,471 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:40,708 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:42,926 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:45,080 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:47,427 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:49,755 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:52,034 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:54,186 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:56,337 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:26:58,533 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:00,814 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:02,983 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:05,118 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:07,261 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:09,420 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:11,698 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:13,852 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:16,005 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:18,179 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:20,322 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:22,471 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:24,474 - Last app output before stopping:
+2025-03-28 15:27:24,474 - Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:27:24,475 - Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:27:24,475 - Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:27:24,475 - Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:27:24,475 - Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'message': 'Not signal received'}
+2025-03-28 15:27:24,475 - Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:27:24,475 - Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:27:24,475 - Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:27:24,475 - [ WARN:0@99.592] global cap_v4l.cpp:913 open VIDEOIO(V4L2:/dev/video1): can't open camera by index
+2025-03-28 15:27:24,476 - [ WARN:0@99.592] global cap.cpp:478 open VIDEOIO(V4L2): backend is generally available but can't be used to capture by index
+2025-03-28 15:27:24,476 - App stopped successfully
+2025-03-28 15:27:25,664 - Service controller started...
+2025-03-28 15:27:25,851 - Status check - active: True, should_run: True, app: not running
+2025-03-28 15:27:25,851 - Starting app...
+2025-03-28 15:27:25,854 - App started successfully
+2025-03-28 15:27:26,609 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:27:26,615 - App error: 2025-03-28 15:27:26,614 - Starting Kiosk Application
+2025-03-28 15:27:26,810 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x2f87bae0, name = "transitionOverlay")
+2025-03-28 15:27:26,830 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:27:28,220 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:28,273 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:27:28,323 - App error: 2025-03-28 15:27:28,322 - Main window displayed
+2025-03-28 15:27:30,425 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:32,638 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:34,999 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:37,237 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:39,377 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:41,651 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:42,697 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x2fc0eb40, name = "transitionOverlay")
+2025-03-28 15:27:43,809 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:44,961 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x2fc69250, name = "transitionOverlay")
+2025-03-28 15:27:46,079 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:48,233 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:50,435 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:52,669 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:55,053 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:57,282 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:27:59,543 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:01,824 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:01,854 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x35cfef60, name = "transitionOverlay")
+2025-03-28 15:28:01,856 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x36178350, name = "transitionOverlay")
+2025-03-28 15:28:03,991 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:06,204 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:08,354 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:10,719 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:11,468 - App output: Cart data file removed successfully
+2025-03-28 15:28:11,468 - App output: Sending guest mode connection request...
+2025-03-28 15:28:11,468 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
+2025-03-28 15:28:11,469 - App output: API URL: http://172.20.10.6:9000/api/device/connect/
+2025-03-28 15:28:11,469 - App output: Response status: 400
+2025-03-28 15:28:11,469 - App output: Response content: {"error":"Device is currently in_use"}
+2025-03-28 15:28:11,469 - App output: Sending guest mode connection request...
+2025-03-28 15:28:11,470 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
+2025-03-28 15:28:11,470 - App output: API URL: http://172.20.10.6:9000/api/device/connect/
+2025-03-28 15:28:11,470 - App output: Response status: 200
+2025-03-28 15:28:11,470 - App output: Response content: {"message":"Connected successfully","customer_name":"Guest","device_name":"Smart Cart Display 1","session_start":"2025-03-28T15:27:42.738454+07:00","is_guest":true}
+2025-03-28 15:28:11,470 - App output: Selected mode: Guest
+2025-03-28 15:28:11,470 - App output: [15:27:43] WelcomePage → InstructionPage: 0.561s
+2025-03-28 15:28:11,471 - App output: [15:27:45] InstructionPage → ProductPage: 0.590s
+2025-03-28 15:28:11,471 - App output: Checking session status: http://172.20.10.6:9000/api/device/end-session/raspi_cart_001/status/
+2025-03-28 15:28:11,471 - App output: Session status response: {'status': 'success', 'device_status': 'in_use', 'last_session_end': None}
+2025-03-28 15:28:11,471 - App output: Checking payment signal: http://172.20.10.6:9000/api/shopping/payment-signal/raspi_cart_001
+2025-03-28 15:28:11,471 - App output: [15:28:02] ProductPage → ShoppingPage: 7.388s
+2025-03-28 15:28:11,471 - App output: Payment signal response: {'device_id': 'raspi_cart_001', 'device_name': 'Smart Cart Display 1', 'status': 'in_use', 'customer_name': 'Guest', 'timestamp': '28/03/2025 08:28', 'message': 'Payment signal received'}
+2025-03-28 15:28:11,471 - App output: Payment signal received, switching to QR page
+2025-03-28 15:28:11,471 - App output: Payment signal received, preparing QR page
+2025-03-28 15:28:11,472 - App output: Stopped monitors before QR page
+2025-03-28 15:28:11,472 - App output: Cart is empty! Please add items to proceed.
+2025-03-28 15:28:11,472 - App output: WARNING ⚠️ Unable to automatically guess model task, assuming 'task=detect'. Explicitly define task for your model, i.e. 'task=detect', 'segment', 'classify','pose' or 'obb'.
+2025-03-28 15:28:11,478 - App output: Loading /home/pi/smartcart/Pick-and-go-CS/model/yolov11n20.onnx for ONNX Runtime inference...
+2025-03-28 15:28:11,698 - App output: Using ONNX Runtime CPUExecutionProvider
+2025-03-28 15:28:12,195 - App output: 
+2025-03-28 15:28:12,895 - Status check - active: True, should_run: True, app: running
+                                                                                                                                                                                                                                                                                                                                                                         2025-03-28 15:28:09,822 - Failed to update status: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/?is_active=True&app_running=False (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f86587610>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:28:09,822 - Service controller started...
+2025-03-28 15:28:09,861 - Failed to check remote commands: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f85774910>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:28:09,862 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:28:11,867 - Failed to check remote commands: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f85776d90>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:28:11,867 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:28:13,871 - Failed to check remote commands: HTTPConnectionPool(host='172.20.10.6', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f857811d0>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-03-28 15:28:13,872 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:28:16,132 - Status check - active: True, should_run: True, app: not running
+2025-03-28 15:28:16,133 - Starting app...
+2025-03-28 15:28:16,138 - App started successfully
+2025-03-28 15:28:18,232 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:28:18,331 - App error: 2025-03-28 15:28:18,330 - Starting Kiosk Application
+2025-03-28 15:28:18,522 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:18,661 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x7f7c870, name = "transitionOverlay")
+2025-03-28 15:28:18,680 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:28:19,960 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:28:20,047 - App error: 2025-03-28 15:28:20,047 - Main window displayed
+2025-03-28 15:28:20,724 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:22,885 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:25,106 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:27,250 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:29,493 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:31,746 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:28:33,907 - Status check - active: True, should_run: False, app: running
+2025-03-28 15:28:33,907 - Stopping app...
+2025-03-28 15:28:33,908 - Last app output before stopping:
+2025-03-28 15:28:33,908 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:28:33,908 - 2025-03-28 15:28:18,330 - Starting Kiosk Application
+2025-03-28 15:28:33,908 - Could not parse stylesheet of object PageTransitionOverlay(0x7f7c870, name = "transitionOverlay")
+2025-03-28 15:28:33,908 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:28:33,908 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:28:33,908 - 2025-03-28 15:28:20,047 - Main window displayed
+2025-03-28 15:28:33,926 - App stopped successfully
+2025-03-28 15:30:49,458 - Status check - active: True, should_run: False, app: not running
+2025-03-28 15:30:51,618 - Status check - active: True, should_run: True, app: not running
+2025-03-28 15:30:51,619 - Starting app...
+2025-03-28 15:30:51,620 - App started successfully
+2025-03-28 15:30:52,112 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:30:52,116 - App error: 2025-03-28 15:30:52,116 - Starting Kiosk Application
+2025-03-28 15:30:52,215 - App error: Could not parse stylesheet of object PageTransitionOverlay(0x37730290, name = "transitionOverlay")
+2025-03-28 15:30:52,224 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:30:53,392 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:30:53,425 - App error: 2025-03-28 15:30:53,424 - Main window displayed
+2025-03-28 15:30:54,088 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:30:56,247 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:30:58,397 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:00,608 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:02,781 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:04,984 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:07,139 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:09,271 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:11,450 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:13,584 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:15,776 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:17,980 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:20,122 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:23,316 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:25,463 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:27,627 - Status check - active: True, should_run: True, app: running
+2025-03-28 15:31:29,628 - Last app output before stopping:
+2025-03-28 15:31:29,629 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-03-28 15:31:29,629 - 2025-03-28 15:30:52,116 - Starting Kiosk Application
+2025-03-28 15:31:29,629 - Could not parse stylesheet of object PageTransitionOverlay(0x37730290, name = "transitionOverlay")
+2025-03-28 15:31:29,638 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-03-28 15:31:29,638 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-03-28 15:31:29,638 - 2025-03-28 15:30:53,424 - Main window displayed
+2025-03-28 15:31:29,639 - App stopped successfully

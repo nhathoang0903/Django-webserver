@@ -1,7 +1,7 @@
 import os
 
 # Server configuration
-SERVER_IP = "192.168.1.241"
+SERVER_IP = "172.20.10.6"
 SERVER_PORT = "9000"
 BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
 HISTORY_API_URL = f"{BASE_URL}/history/"
@@ -15,6 +15,7 @@ CART_SHOPPING_MONITOR_API = f"{BASE_URL}/api/shopping/monitor/"
 CART_CONNECT = f"{BASE_URL}/api/device/connect/"
 CART_DISCONNECT = f"{BASE_URL}/api/device/disconnect/"
 CART_CHECK_PAYMENT_SIGNAL = f"{BASE_URL}/api/shopping/payment-signal/"
+CART_CANCEL_PAYMENT_SIGNAL = f"{BASE_URL}/api/shopping/cancel-payment-signal/"
 
 # Device configuration
 DEVICE_ID = "raspi_cart_001"
