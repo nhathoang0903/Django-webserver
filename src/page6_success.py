@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton,
                            QApplication, QHBoxLayout)
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QUrl
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QFontDatabase
+from PyQt5.QtMultimedia import QSoundEffect  # Replace QSound with QSoundEffect
 import os
 import json
 import random
@@ -74,21 +75,31 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
             if response.status_code == 201:
                 response_data = response.json()
                 
-                # Read phone number from json file
-                phone_number = ""
+                # Get the current mode from cart state
+                cart_mode = ""
                 try:
-                    phone_number_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                                   'config', 'phone_number.json')
-                    with open(phone_number_path, 'r') as f:
-                        phone_data = json.load(f)
-                        phone_number = phone_data.get("phone_number", "")
+                    with open(CartState.JSON_PATH, 'r') as f:
+                        cart_data = json.load(f)
+                        cart_mode = cart_data.get("mode", "")
                 except Exception as e:
-                    print(f"Error reading phone number: {e}")
+                    print(f"Error reading cart mode: {e}")
+
+                # Only include phone number if not in guest mode
+                phone_number = ""
+                if cart_mode != "guest":
+                    try:
+                        phone_number_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                                       'config', 'phone_number.json')
+                        with open(phone_number_path, 'r') as f:
+                            phone_data = json.load(f)
+                            phone_number = phone_data.get("phone_number", "")
+                    except Exception as e:
+                        print(f"Error reading phone number: {e}")
 
                 # Send customer history link data based on mode
                 customer_data = {
                     "random_id": response_data["random_id"],
-                    "username": phone_number,  # Empty for guest, phone number for member
+                    "username": phone_number,  # Will be empty for guest mode
                     "device_id": DEVICE_ID
                 }
                 
@@ -100,6 +111,18 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
                 
                 if customer_response.status_code == 201:
                     print("Successfully sent customer history link")
+                    
+                    # Clear phone number after successful API calls
+                    try:
+                        phone_number_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                                        'config', 'phone_number.json')
+                        if os.path.exists(phone_number_path):
+                            with open(phone_number_path, 'w') as f:
+                                json.dump({"phone_number": ""}, f)
+                            print("Phone number cleared successfully")
+                    except Exception as e:
+                        print(f"Error clearing phone number: {e}")
+                        
                     return True
                     
             return False
@@ -113,6 +136,8 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         # Remove setGeometry and setFixedSize since handled by BasePage
 
         self.setStyleSheet("background-color: #F0F6F1;")
+
+        # Remove redundant sound-playing logic
 
         # Set window icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
@@ -212,19 +237,35 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         self.timer.start(5000)  # 5 seconds
 
     def go_home(self):
+        """Clear data and return to the home page."""
         if hasattr(self, 'timer'):
             self.timer.stop()  # Stop the timer
-            
-        start_time = PageTiming.start_timing()
-        from page1_welcome import WelcomePage
-        self.home_page = WelcomePage()
-        
-        def show_new_page():
-            self.home_page.show()
-            self.transition_overlay.fadeOut(lambda: self.close())
-            PageTiming.end_timing(start_time, "SuccessPage", "WelcomePage")
-            
-        self.transition_overlay.fadeIn(show_new_page)
+
+        # Clear cart data only
+        self.cart_state.clear_cart()  # Clear cart state
+        try:
+            # Remove cart data file if it exists
+            if os.path.exists(CartState.JSON_PATH):
+                os.remove(CartState.JSON_PATH)
+                print("Cart data file removed successfully")
+        except Exception as e:
+            print(f"Error clearing cart data: {e}")
+
+        # Transition to WelcomePage only after clearing data
+        def transition_to_home():
+            start_time = PageTiming.start_timing()
+            from page1_welcome import WelcomePage
+            self.home_page = WelcomePage()
+
+            def show_new_page():
+                self.home_page.show()
+                self.transition_overlay.fadeOut(lambda: self.close())
+                PageTiming.end_timing(start_time, "SuccessPage", "WelcomePage")
+
+            self.transition_overlay.fadeIn(show_new_page)
+
+        # Ensure data is cleared before transitioning
+        QTimer.singleShot(100, transition_to_home)
 
     def closeEvent(self, event):
         if hasattr(self, 'timer'):

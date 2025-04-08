@@ -64,21 +64,23 @@ class CartItemWidget(QFrame):
             }
         """)
         
-        # Try to get cached image first
-        image_url = product['image_url']
-        cache_key = f"{image_url}_{image_size[0]}x{image_size[1]}"
+        # Get image URL with default value
+        image_url = product.get('image_url', '')
         
-        if cache_key in SimpleImageLoader._cache:
-            # Use cached image if available
-            self.image_label.setPixmap(SimpleImageLoader._cache[cache_key])
-        else:
-            # If not in cache, load using SimpleImageLoader
-            pixmap = SimpleImageLoader.load_image(image_url, image_size)
-            if (pixmap):
-                self.image_label.setPixmap(pixmap)
+        if image_url:  # Only try to load image if URL exists
+            cache_key = f"{image_url}_{image_size[0]}x{image_size[1]}"
+            
+            if cache_key in SimpleImageLoader._cache:
+                self.image_label.setPixmap(SimpleImageLoader._cache[cache_key])
             else:
-                self.image_label.setText("N/A")
-        
+                pixmap = SimpleImageLoader.load_image(image_url, image_size)
+                if pixmap:
+                    self.image_label.setPixmap(pixmap)
+                else:
+                    self.image_label.setText("N/A")
+        else:
+            self.image_label.setText("N/A")
+
         self.image_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.image_label)
         

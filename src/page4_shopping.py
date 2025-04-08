@@ -39,12 +39,12 @@ class SessionMonitor(QThread):
             try:
                 # Get session status
                 url = f"{CART_END_SESSION_STATUS_API}{DEVICE_ID}/status/"
-                print(f"Checking session status: {url}")
+                # print(f"Checking session status: {url}")
                 response = requests.get(url)
                 
                 if response.status_code == 200:
                     data = response.json()
-                    print(f"Session status response: {data}")
+                    # print(f"Session status response: {data}")
                     
                     if data.get("device_status") == "available":
                         print(f"Session ended at: {data.get('last_session_end')}")
@@ -76,13 +76,13 @@ class PaymentSignalMonitor(QThread):
         while self.is_running:
             try:
                 # Get payment signal status
-                url = f"{CART_CHECK_PAYMENT_SIGNAL}{DEVICE_ID}"
-                print(f"Checking payment signal: {url}")
+                url = f"{CART_CHECK_PAYMENT_SIGNAL}{DEVICE_ID}/"
+                # print(f"Checking payment signal: {url}")
                 response = requests.get(url)
                 
                 if response.status_code == 200:
                     data = response.json()
-                    print(f"Payment signal response: {data}")
+                    # print(f"Payment signal response: {data}")
                     
                     if "signal_type" in data and data["signal_type"] == "payment":
                         print("Payment signal received, switching to QR page")
@@ -174,6 +174,8 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         # Start both monitors with offset
         self.session_monitor.start()
         QTimer.singleShot(250, self.payment_monitor.start)  # Start with 250ms offset
+        self.payment_page = None  # Add reference to payment page
+        self.preload_images()  # Preload images for faster loading
 
     @lru_cache(maxsize=32)
     def load_cached_image(self, path):
@@ -1527,12 +1529,52 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             print(f"Error in reset_page: {e}")
 
     def showEvent(self, event):
-        """Called when widget is shown"""
+        """Enhanced showEvent with better cleanup"""
         super().showEvent(event)
-        # Chỉ reset page khi thanh toán đã hoàn tất hoặc bị hủy
+        
+        # Cleanup payment page resources properly
+        if hasattr(self, 'payment_page') and self.payment_page:
+            # Ensure transaction check is stopped
+            self.payment_page.stop_transaction_check.set()
+            self.payment_page.transaction_check_stopped = True
+            
+            if hasattr(self.payment_page, 'transaction_thread'):
+                if self.payment_page.transaction_thread:
+                    self.payment_page.transaction_thread.join(timeout=0.5)
+                    
+            # Cleanup other resources
+            QTimer.singleShot(0, lambda: self.cleanup_payment_page())
+            self.payment_page = None
+            
+        # Reset page if payment was completed
         if self.payment_completed:
-            self.reset_page()
-            self.payment_completed = False  # Reset flag
+            QTimer.singleShot(0, self.reset_page)
+            self.payment_completed = False
+
+    def cleanup_payment_page(self):
+        """Cleanup payment page resources in background"""
+        try:
+            if hasattr(self, 'payment_page'):
+                self.payment_page.cleanup_resources()
+        except Exception as e:
+            print(f"Error cleaning up payment page: {e}")
+
+    def preload_images(self):
+        """Preload commonly used images"""
+        try:
+            images = [
+                'logo.png',
+                'scanbutton_hover.png', 
+                'productinfobutton.png',
+                'scanarea.png',
+                'emptycart.png'
+            ]
+            for img_name in images:
+                path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', img_name)
+                if img_name not in self._image_cache:
+                    self._image_cache[img_name] = QPixmap(path)
+        except Exception as e:
+            print(f"Error preloading images: {e}")
 
 if __name__ == '__main__':
     import sys

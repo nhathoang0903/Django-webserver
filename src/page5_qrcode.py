@@ -1,23 +1,27 @@
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Force CPU
 import torch
-torch.set_default_tensor_type('torch.FloatTensor')  # Force CPU tensors
+torch.set_default_dtype(torch.float32)  # Thay thế set_default_tensor_type
+torch.set_default_device("cpu")        # Thiết lập thiết bị mặc định
 torch.set_num_threads(1)  # Set number of threads
 import warnings
 warnings.filterwarnings("ignore")
 import gc
 import logging 
+import subprocess  # Add this import at the top
 
 from base_page import BasePage 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
                            QFrame, QApplication, QPushButton) 
 from mbbank import MBBank 
-from PyQt5.QtCore import Qt, QTimer, QDateTime, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, QDateTime, pyqtSignal, QUrl
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QImage, QColor, QBitmap, QFontDatabase
+from PyQt5.QtMultimedia import QSoundEffect  # Ensure QSoundEffect is used
 import os
 import requests
 import cv2
 import numpy as np
+import io
 from io import BytesIO
 from datetime import datetime, timedelta
 import time
@@ -27,20 +31,15 @@ from cart_state import CartState
 from threading import Thread, Event  
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
+import pyttsx3
 import qrcode
 from vietqr.VietQR import genQRString, getBincode
-from PIL import Image
-import io
-from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
 
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Add signal for page switching
-    payment_completed = pyqtSignal(bool)  # Signal cho trạng thái thanh toán
+    payment_completed = pyqtSignal(bool)  # Signal cho tr���ng thái thanh toán
     
     def __init__(self):
-        # Add thread tracking
-        self.transaction_thread = None
-        self.stop_transaction_check = Event()
         # Force CPU configuration before any other initialization
         self.configure_device()
         super().__init__()
@@ -103,7 +102,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             torch.cuda.empty_cache()
         
         # Force CPU tensors
-        torch.set_default_tensor_type('torch.FloatTensor')
+        torch.set_default_dtype(torch.float32)  # Thay thế set_default_tensor_type
+        torch.set_default_device("cpu")        # Thiết lập thiết bị mặc định
         torch.set_num_threads(1)
         
         # Move any existing CUDA tensors to CPU
@@ -185,77 +185,64 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         left_layout.addStretch()
         main_layout.addWidget(left_section)
 
-        # Right Section with adjusted margins
+        # Right Section
         right_section = QWidget()
         right_layout = QVBoxLayout(right_section)
-        right_layout.setContentsMargins(20, 0, 20, 20)  # Set top margin to 0
-        right_layout.setSpacing(5)  # Reduced spacing between elements
+        right_layout.setContentsMargins(20, 20, 20, 20)
+        right_layout.setSpacing(15)
 
-        # QR Code Frame moved up
-        qr_container = QWidget()
-        qr_layout = QVBoxLayout(qr_container)
-        qr_layout.setContentsMargins(0, 10, 0, 0)  # Reduced top margin to 10
-        # QR Code Frame adjusted position
+        # QR Code Frame
         self.qr_frame = QFrame()
         self.qr_frame.setFixedSize(259, 376)
         self.qr_frame.setStyleSheet("background-color: transparent;")
         
-        # Add 20px margin to top of QR frame
-        qr_container = QWidget()
-        qr_layout = QVBoxLayout(qr_container)
-        qr_layout.setContentsMargins(0, 20, 0, 0)  # Add top margin
-        qr_layout.addWidget(self.qr_frame, alignment=Qt.AlignHCenter | Qt.AlignTop)
-        
-        # QR Code Label remains same size
+        # QR Code Label
         self.qr_label = QLabel(self.qr_frame)
         self.qr_label.setAlignment(Qt.AlignCenter)
         self.qr_label.setFixedSize(259, 376)
         self.qr_label.setText("Loading...")
         self.qr_label.setStyleSheet("background-color: transparent;")
 
-        # Add widgets to layout with adjusted spacing
-        right_layout.addWidget(qr_container, alignment=Qt.AlignHCenter | Qt.AlignTop)
-        
-        # Reduce spacing before bank labels
-        right_layout.addSpacing(5)  # Reduced from default spacing
-        
-        # Create individual labels for bank details with center alignment
-        bank_labels = []
-        bank_details = [
-            "Ngân hàng TMCP Quân đội",
-            "Tên tài khoản: NGUYEN THE NGO",
-            f"Số tiền: {'{:,.0f}'.format(self.total_amount).replace(',', '.')} vnđ"
-        ]
+        # Payment Details Container
+        details_frame = QFrame()
+        details_frame.setStyleSheet("background-color: transparent;")
+        details_layout = QVBoxLayout(details_frame)
+        details_layout.setSpacing(8)
 
-        for text in bank_details:
-            label = QLabel(text)
-            label.setFont(QFont("Inria Sans", 12))
-            label.setStyleSheet("color: black;")
-            label.setAlignment(Qt.AlignCenter)
-            bank_labels.append(label)
-        
-        self.amount_label = bank_labels[2]  # Store reference to amount label
+        # Amount
+        self.amount_label = QLabel()
+        self.amount_label.setFont(QFont("Inria Sans", 11))
+        amount_text = sum(float(product['price']) * quantity 
+                         for product, quantity in self.cart_state.cart_items)
+        self.amount_label.setText(f"Số tiền: {'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
 
-        # Countdown and generation time labels as before
+        # Account Details
+        # acc_name_label = QLabel("T��n chủ tài khoản: VO PHAN NHAT HOANG")
+        # acc_num_label = QLabel("Số tài kho�����n: 3099932002")
+        # bank_label = QLabel("Ngân hàng TMCP Quân Đội")
+
+        # for label in [self.amount_label, acc_name_label, acc_num_label, bank_label]:
+        #     label.setFont(QFont("Inter", 11))
+        #     details_layout.addWidget(label)
+
+        # Countdown label
         self.countdown_label = QLabel()
         self.countdown_label.setFont(QFont("Inria Sans", 10))
         self.countdown_label.setAlignment(Qt.AlignCenter)
         self.countdown_label.hide()
 
+        # Generation time label
         self.gen_time_label = QLabel()
         self.gen_time_label.setFont(QFont("Inria Sans", 12, italic=True))
         self.gen_time_label.setAlignment(Qt.AlignCenter)
         self.gen_time_label.hide()
 
-        # Add widgets to layout in order
+        # Add widgets in desired order
         right_layout.addWidget(self.qr_frame, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        right_layout.addWidget(details_frame)
+        right_layout.addWidget(self.countdown_label, alignment=Qt.AlignCenter)
+        right_layout.addWidget(self.gen_time_label, alignment=Qt.AlignCenter)
         
-        # Add bank detail labels individually
-        for label in bank_labels:
-            right_layout.addWidget(label, alignment=Qt.AlignHCenter)
-            
-        right_layout.addWidget(self.countdown_label, alignment=Qt.AlignHCenter)
-        right_layout.addWidget(self.gen_time_label, alignment=Qt.AlignHCenter)
         right_layout.addStretch()
 
         main_layout.addWidget(right_section)
@@ -353,86 +340,41 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             # Return to shopping page after 2 seconds on failure
             QTimer.singleShot(2000, self.return_to_shopping)
 
-    def update_countdown(self):
-        if self.countdown_seconds > 0:
-            minutes = self.countdown_seconds // 60
-            seconds = self.countdown_seconds % 60
-            self.countdown_label.setText(f"QR code expires in {minutes:02d}:{seconds:02d}")
-            self.countdown_label.setStyleSheet("color: #D30E11;")
-            self.countdown_seconds -= 1
-        else:
-            self.countdown_timer.stop()
-            self.countdown_label.setText("Expired")
-            # Return to shopping page after 1 second
-            QTimer.singleShot(1000, self.return_to_shopping)
-
     def cancel_payment(self):
         """Handle cancel payment action"""
-        print("Cancelling payment...")
-        
-        # Send cancel payment signal to server
-        try:
-            cancel_url = f"{CART_CANCEL_PAYMENT_SIGNAL}{DEVICE_ID}"
-            response = requests.post(cancel_url)
-            if response.status_code == 200:
-                print("Cancel payment signal sent successfully")
-            else:
-                print(f"Failed to send cancel signal: {response.status_code}")
-        except Exception as e:
-            print(f"Error sending cancel signal: {e}")
-        
         self.stop_transaction_check.set()  # Signal to stop transaction check
         self.countdown_timer.stop()
         self.return_to_shopping()
         
     def return_to_shopping(self):
-        """Enhanced return to shopping"""
-        print("Returning to shopping page...")
-        self.cleanup_resources()
+        """Return to shopping page when QR expires or payment is canceled"""
+        transition_start = time.time()
         
         from page4_shopping import ShoppingPage
         self.shopping_page = ShoppingPage()
+        
+        # Calculate transition time
+        transition_time = time.time() - transition_start
+        print(f"Time to return to shopping: {transition_time:.2f} seconds")
+        
         self.shopping_page.show()
+        self.cleanup_resources()
         self.close()
-        print("Returned to shopping page")
 
     def cleanup_resources(self):
-        """Enhanced cleanup of resources"""
-        print("Cleaning up resources...")
-        # Stop the countdown timer
-        if hasattr(self, 'countdown_timer'):
+        """Clean up resources before closing"""
+        if self.countdown_timer:
             self.countdown_timer.stop()
-        
-        # Stop transaction check thread
-        self.stop_transaction_check.set()
-        if self.transaction_thread and self.transaction_thread.is_alive():
-            print("Waiting for transaction thread to stop...")
-            self.transaction_thread.join(timeout=2)
-            if self.transaction_thread.is_alive():
-                print("Warning: Transaction thread did not stop cleanly")
-        
-        # Clear any stored data
-        if hasattr(self, 'processed_transaction_ids'):
-            self.processed_transaction_ids.clear()
-        
-        # Force garbage collection
-        gc.collect()
-        print("Cleanup completed")
+        self.stop_transaction_check.set()  # Ensure transaction check is stopped
+        # Clean up any other resources
 
     def start_transaction_check(self):
-        # Stop any existing thread
-        self.stop_transaction_check.set()
-        if self.transaction_thread and self.transaction_thread.is_alive():
-            self.transaction_thread.join(timeout=1)
-            
-        # Reset stop event and create new thread
-        self.stop_transaction_check.clear()
-        self.transaction_thread = Thread(
+        check_thread = Thread(
             target=self.check_transaction,
-            args=(self.total_amount,),
+            args=(self.total_amount,),  # Pass the integer amount
             daemon=True
         )
-        self.transaction_thread.start()
+        check_thread.start()
 
     def check_transaction(self, amount):
         # Force CPU configuration at start of thread
@@ -442,8 +384,6 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         PASSWORD = "Ngo252002@"
         account_no = "0375712517"
 
-        # Remove sound file references
-        
         mb = None
         try:
             print("Khởi tạo kết nối...")
@@ -453,7 +393,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             mb._authenticate()
             print("Xác thực thành công!")
             
-            print(f"\nBắt đầu theo dõi giao dịch:")
+            print(f"\nBat dau theo doi giao dịch:")
             print(f"- Số tiền: {amount:,} VND")
             print(f"- Từ thời điểm: {self.qr_start_time.strftime('%d/%m/%Y %H:%M:%S')}")
             
@@ -488,15 +428,15 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                     
                                     self.processed_transaction_ids.add(trans_id)
                                     print("\n" + "="*50)
-                                    print(f"Phát hiện giao dịch khớp! ({current_time.strftime('%H:%M:%S')})")
-                                    print(f"Thời gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
-                                    print(f"Số tiền nhận: +{credit:,} VND")
-                                    print(f"Từ: {trans.get('benAccountName', 'N/A')}")
-                                    print(f"Nội dung: {trans.get('description', 'N/A')}")
-                                    print(f"Mã GD: {trans_id}")
+                                    print(f"Phat hien giao dich khop ({current_time.strftime('%H:%M:%S')})")
+                                    print(f"Thoi gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
+                                    print(f"So tien nhan: +{credit:,} VND")
+                                    print(f"Tu: {trans.get('benAccountName', 'N/A')}")
+                                    print(f"Noi dung: {trans.get('description', 'N/A')}")
+                                    print(f"Ma GD: {trans_id}")
                                     print("="*50)
                                     
-                                    # Remove sound playing code
+                                    # Emit signal to switch to success page
                                     self.switch_to_success.emit()
                                     return
                                     
@@ -522,7 +462,6 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                     pass
 
     def handle_success(self):
-        """Enhanced transition to success page"""
         def switch_page():
             start_time = PageTiming.start_timing()
             self.countdown_timer.stop()
@@ -534,17 +473,127 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 self.success_page.show()
                 self.transition_overlay.fadeOut(lambda: self.close())
                 PageTiming.end_timing(start_time, "QRCodePage", "SuccessPage")
+            
+            sound_path_ting = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'ting-ting.wav'))
+            sound_path_payment = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'sucesspayment.wav'))
+            
+            try:
+                # Play first sound (ting-ting)
+                self.ting_sound = QSoundEffect()
+                self.ting_sound.setSource(QUrl.fromLocalFile(sound_path_ting))
+                self.ting_sound.setVolume(1.0)
                 
-            self.transition_overlay.fadeIn(show_new_page)
+                def play_payment_and_speak():
+                    # Play payment success sound
+                    self.payment_sound = QSoundEffect()
+                    self.payment_sound.setSource(QUrl.fromLocalFile(sound_path_payment))
+                    self.payment_sound.setVolume(1.0)
+                    self.payment_sound.play()
+                    
+                    # Wait for payment sound then speak amount
+                    def speak_amount():
+                        try:
+                            # Lấy số tiền trực tiếp từ total_amount
+                            amount = self.total_amount
+                            amount_words = self.number_to_vietnamese(amount)
+                            print(f"Speaking amount: {amount} ({amount_words})")  # Debug print
+                            
+                            # Chỉ đọc số tiền với tốc độ chậm hơn (100 từ/phút)
+                            subprocess.run(['espeak', '-vvi', '-s100', '-g5', amount_words + ' đồng'])
+                        except Exception as e:
+                            print(f"Error speaking amount: {e}")
+                    
+                    # Tăng delay lên 2500ms để đảm bảo âm thanh sucesspayment.wav phát xong
+                    QTimer.singleShot(2500, speak_amount)
+                
+                # Start the sequence
+                self.ting_sound.play()
+                QTimer.singleShot(1000, play_payment_and_speak)
+                
+            except Exception as e:
+                print(f"Error playing sounds: {e}")
+                
+            # Tăng delay chuyển trang lên 7000ms để đảm bảo tất cả âm thanh phát xong
+            QTimer.singleShot(7000, lambda: self.transition_overlay.fadeIn(show_new_page))
             
         switch_page()
 
+    def number_to_vietnamese(self, number):
+        """Chuyển số thành chữ tiếng Việt"""
+        units = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"]
+        teen = ["mười", "mười một", "mười hai", "mười ba", "mười bốn", "mười lăm", "mười sáu", "mười bảy", "mười tám", "mười chín"]
+        tens = ["", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"]
+        
+        if number == 0:
+            return "không"
+            
+        def read_group(n):
+            hundreds = n // 100
+            remainder = n % 100
+            tens_digit = remainder // 10
+            ones_digit = remainder % 10
+            
+            result = []
+            if hundreds > 0:
+                result.append(f"{units[hundreds]} trăm")
+            if tens_digit > 0:
+                if tens_digit == 1:
+                    result.append(teen[ones_digit])
+                    return " ".join(result)
+                result.append(tens[tens_digit])
+            if ones_digit > 0:
+                if tens_digit > 1 and ones_digit == 1:
+                    result.append("mốt")
+                elif tens_digit > 0 and ones_digit == 5:
+                    result.append("lăm")
+                else:
+                    result.append(units[ones_digit])
+            elif tens_digit > 0:
+                result.append("")
+            return " ".join(result)
+        
+        groups = []
+        group_names = ["", "nghìn", "triệu", "tỷ"]
+        
+        if number == 0:
+            return "không"
+            
+        number_str = str(number)
+        while number_str:
+            groups.append(number_str[-3:] if len(number_str) >= 3 else number_str)
+            number_str = number_str[:-3]
+            
+        result = []
+        for i, group in enumerate(groups):
+            group_value = int(group)
+            if group_value > 0:
+                group_text = read_group(group_value)
+                if group_names[i]:
+                    group_text += f" {group_names[i]}"
+                result.append(group_text)
+                
+        return " ".join(reversed(result))
+
+    def read_amount(self):
+        """Read the total amount using TTS"""
+        try:
+            engine = pyttsx3.init()
+            engine.setProperty('rate', 150)  # Set speech rate
+            engine.setProperty('volume', 1.0)  # Set volume level
+
+            # Format the amount for reading
+            amount_text = f"{self.total_amount:,}".replace(",", ".")  # Format with dots for thousands
+            message = f"Số tiền là {amount_text} đồng."
+            print(f"Reading amount: {message}")  # Debug print
+
+            engine.say(message)
+            engine.runAndWait()
+        except Exception as e:
+            print(f"Error reading amount: {e}")
+
     def closeEvent(self, event):
-        """Enhanced close event handler"""
-        print("Closing QRCodePage...")
         self.cleanup_resources()
-        super().closeEvent(event)
-        print("QRCodePage closed")
+        event.accept()
 
 if __name__ == '__main__':
     import sys

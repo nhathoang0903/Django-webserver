@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./src/widgets",
+        "./src/widgets"
+    ],
+    "git.ignoreLimitWarning": true
+}

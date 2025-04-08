@@ -10,33 +10,32 @@ class PageTransitionOverlay(QWidget):
         # Set overlay to top and full screen
         self.setAttribute(Qt.WA_StyledBackground)
         self.setStyleSheet("""
-            QWidget#transitionOverlay {
-                background-color: rgba(0, 0, 0, 0.7);  # Increase opacity for better coverage
+            #transitionOverlay {
+                background-color: rgba(0, 0, 0, 70%);
             }
-        """)
-        
-        # Set up animation
-        self.fadeAnimation = QPropertyAnimation(self, b"windowOpacity")
-        self.fadeAnimation.setDuration(500)  # Increase duration for smoother transition
-        
-        # Khởi tạo layout
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignCenter)
-        
-        # Loading indicator
-        self.loadingLabel = QLabel("Loading...")
-        self.loadingLabel.setStyleSheet("""
             QLabel {
                 color: white;
                 font-family: 'Inria Sans';
                 font-size: 16px;
             }
         """)
-        layout.addWidget(self.loadingLabel)
+        
+        # Create layout before adding widgets
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+        self.layout.setAlignment(Qt.AlignCenter)
+        
+        # Loading indicator
+        self.loadingLabel = QLabel("Loading...")
+        self.layout.addWidget(self.loadingLabel)
+        
+        # Set up animation
+        self.fadeAnimation = QPropertyAnimation(self, b"windowOpacity")
+        self.fadeAnimation.setDuration(500)
         
         # Hidden by default
         self.hide()
-        self._callbacks = []  # Store multiple callbacks
+        self._callbacks = []
 
     def fadeIn(self, callback=None):
         # Enhanced fade in with callback cleanup

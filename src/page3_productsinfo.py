@@ -3,7 +3,7 @@ from components.PageTransitionOverlay import PageTransitionOverlay
 from components.ProductCardDialog import ProductCardDialog 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
                            QGridLayout, QApplication, QFrame, QHBoxLayout, QScroller, QComboBox, QPushButton, QMenu)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize, QPropertyAnimation, QEasingCurve, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie, QIcon
 import os
 import json
@@ -11,6 +11,7 @@ import urllib.request
 from urllib.error import URLError
 import threading
 from page_timing import PageTiming
+from cart_state import CartState
 
 class SimpleImageLoader:
     _cache = {}  # Add image cache
@@ -67,6 +68,7 @@ class ProductCard(QFrame):
         super().__init__()
         self.product = product
         self.cached_image = None  # Store cached image
+        self.cart_state = CartState()  # Add CartState instance
         self.setup_ui()
         self.load_image_async()
         self.setCursor(Qt.PointingHandCursor)
@@ -98,7 +100,7 @@ class ProductCard(QFrame):
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
     def setup_ui(self):
-        self.setFixedSize(160, 180)  
+        self.setFixedSize(160, 180)  # Reduced height from 200 to 180
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
@@ -109,7 +111,7 @@ class ProductCard(QFrame):
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(5, 5, 5, 5)
-        layout.setSpacing(2)
+        layout.setSpacing(1)  # Reduced spacing from 2 to 1
 
         # Image placeholder
         self.image_label = QLabel()
@@ -125,7 +127,7 @@ class ProductCard(QFrame):
         name_label.setFont(QFont("Josefin Sans", 10))
         name_label.setWordWrap(True)
         name_label.setAlignment(Qt.AlignHCenter)
-        name_label.setFixedHeight(48)
+        name_label.setFixedHeight(40)  # Reduced from 48 to 40
         layout.addWidget(name_label)
 
         # Price
@@ -135,6 +137,78 @@ class ProductCard(QFrame):
         price_label.setAlignment(Qt.AlignCenter)
         price_label.setStyleSheet("color: #E72225;")
         layout.addWidget(price_label)
+
+        # Add to Cart button
+        self.add_to_cart_btn = QPushButton("Add to Cart")
+        self.add_to_cart_btn.setFont(QFont("Josefin Sans", 8))
+        self.add_to_cart_btn.setCursor(Qt.PointingHandCursor)
+        self.add_to_cart_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #507849;
+                color: white;
+                border: none;
+                border-radius: 7px;
+                padding: 3px 8px;  /* Reduced padding */
+                margin: 1px 10px;  /* Reduced top/bottom margin */
+            }
+            QPushButton:hover {
+                background-color: #3D6F4A;
+            }
+            QPushButton:pressed {
+                background-color: #2C513A;
+            }
+        """)
+        self.add_to_cart_btn.clicked.connect(self.add_to_cart)
+        layout.addWidget(self.add_to_cart_btn)
+        
+    def add_to_cart(self):
+        try:
+            # Add 1 item by default from product page
+            is_existing = self.cart_state.add_item(self.product, 1)
+            
+            # Save cart state to file
+            self.cart_state.save_to_json()
+            
+            # Show visual feedback
+            self.add_to_cart_btn.setText("Added!" if not is_existing else "Added More!")
+            QTimer.singleShot(1000, lambda: self.add_to_cart_btn.setText("Add to Cart"))
+            
+            # Show different feedback for new vs existing items
+            button_style = """
+                QPushButton {{
+                    background-color: {};
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    padding: 5px 10px;
+                    margin: 2px 10px;
+                }}
+            """
+            
+            # Change button color based on whether item was new or existing
+            color = "#4CAF50" if not is_existing else "#FF9800"  
+            self.add_to_cart_btn.setStyleSheet(button_style.format(color))
+            
+            # Reset style after animation
+            QTimer.singleShot(1000, lambda: self.add_to_cart_btn.setStyleSheet(button_style.format("#507849")))
+            
+            print(f"{'Added new' if not is_existing else 'Updated existing'} item: {self.product['name']}")
+            
+        except Exception as e:
+            print(f"Error adding to cart: {e}")
+            # Show error feedback
+            self.add_to_cart_btn.setText("Error!")
+            self.add_to_cart_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #F44336;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    padding: 5px 10px;
+                    margin: 2px 10px;
+                }
+            """)
+            QTimer.singleShot(1000, lambda: self.add_to_cart_btn.setText("Add to Cart"))
 
 class LoadProductsThread(QThread):
     finished = pyqtSignal(list)
@@ -534,7 +608,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             card.hide()
             self.grid_layout.removeWidget(card)
 
-        if category == "All Categories":
+        if (category == "All Categories"):
             # Restore original positions for all cards
             for card in ProductPage._cards_cache:
                 row, col = card.grid_pos
