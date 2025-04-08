@@ -2,8 +2,8 @@ from base_page import BasePage
 from components.PageTransitionOverlay import PageTransitionOverlay
 from components.ProductCardDialog import ProductCardDialog 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, 
-                           QGridLayout, QApplication, QFrame, QHBoxLayout, QScroller, QComboBox, QPushButton, QMenu)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize, QPropertyAnimation, QEasingCurve, QTimer
+                           QGridLayout, QApplication, QFrame, QHBoxLayout, QScroller, QComboBox, QPushButton, QMenu, QDialog, QGraphicsBlurEffect, QLayout)
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QEvent, QSize, QPropertyAnimation, QEasingCurve, QTimer, QFileSystemWatcher
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QMovie, QIcon
 import os
 import json
@@ -12,6 +12,10 @@ from urllib.error import URLError
 import threading
 from page_timing import PageTiming
 from cart_state import CartState
+import requests
+from config import CART_END_SESSION_API, DEVICE_ID
+import importlib
+import sys
 
 class SimpleImageLoader:
     _cache = {}  # Add image cache
@@ -64,6 +68,8 @@ class SimpleImageLoader:
             return scaled
 
 class ProductCard(QFrame):
+    clicked = pyqtSignal(dict)  # Add signal to emit product data
+    
     def __init__(self, product):
         super().__init__()
         self.product = product
@@ -75,9 +81,139 @@ class ProductCard(QFrame):
         
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            dialog = ProductCardDialog(self.product, self.cached_image, self)
-            dialog.exec_()
+            self.clicked.emit(self.product)  # Emit signal with product data
             
+    def show_product_modal(self, product):
+        # Create overlay for blur effect
+        self._overlay = QWidget(self)
+        self._overlay.setGeometry(self.rect())
+        self._overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.3);")
+        self._overlay.show()
+        
+        # Create modal container
+        self._modal = QFrame(self)
+        self._modal.setFixedSize(350, 400)
+        self._modal.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 15px;
+                border: none;
+            }
+        """)
+        
+        # Position modal in center of parent
+        parent_rect = self.geometry()
+        self._modal.move(
+            (parent_rect.width() - self._modal.width()) // 2,
+            (parent_rect.height() - self._modal.height()) // 2
+        )
+        
+        # Create layout
+        layout = QVBoxLayout(self._modal)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(5)  # Reduced spacing between components
+        
+        # Close button (X) at the top right
+        close_btn = QPushButton("×")
+        close_btn.setFixedSize(40, 40)  # Increased size
+        close_btn.setFont(QFont("Arial", 16, QFont.Bold))  # Increased font size
+        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #666;
+                border: none;
+                border-radius: 20px;
+                padding: 0;
+            }
+            QPushButton:hover {
+                background-color: #f0f0f0;
+                color: #333;
+            }
+        """)
+        
+        # Create a container for the close button
+        close_container = QWidget()
+        close_container.setStyleSheet("background-color: transparent;")
+        close_layout = QHBoxLayout(close_container)
+        close_layout.setContentsMargins(0, 0, 0, 0)
+        close_layout.addStretch()
+        close_layout.addWidget(close_btn)
+        
+        # Add close button container to main layout
+        layout.addWidget(close_container)
+        
+        # Image with larger size to fit the modal
+        image_label = QLabel()
+        if product.get('image_url'):
+            pixmap = SimpleImageLoader.load_image(product['image_url'], (180, 180))
+            if pixmap:
+                image_label.setPixmap(pixmap)
+        image_label.setAlignment(Qt.AlignCenter)
+        image_label.setStyleSheet("border: none;")
+        layout.addWidget(image_label)
+        
+        # Name
+        name = product['name'].replace('_', ' ')
+        name_label = QLabel(name)
+        name_label.setFont(QFont("Josefin Sans", 12, QFont.Bold))
+        name_label.setWordWrap(True)
+        name_label.setAlignment(Qt.AlignCenter)
+        name_label.setStyleSheet("border: none;")
+        layout.addWidget(name_label)
+        
+        # Price
+        price = "{:,.0f}".format(float(product['price'])).replace(',', '.')
+        price_label = QLabel(f"{price} vnd")
+        price_label.setFont(QFont("Josefin Sans", 10))
+        price_label.setStyleSheet("color: #E72225; border: none;")
+        price_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(price_label)
+        
+        # Category - Convert to English
+        category_map = {
+            "Thức uống": "Beverage",
+            "Thức ăn": "Food",
+            "Đồ ăn vặt": "Snack"
+        }
+        vn_category = product['category']
+        en_category = category_map.get(vn_category, vn_category)
+        category_label = QLabel(f"Category: {en_category}")
+        category_label.setFont(QFont("Josefin Sans", 12))
+        category_label.setStyleSheet("color: black; border: none;")
+        category_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(category_label)
+        
+        # Description
+        desc_label = QLabel(product['description'])
+        desc_label.setFont(QFont("Josefin Sans", 11))
+        desc_label.setWordWrap(True)
+        desc_label.setAlignment(Qt.AlignCenter)
+        desc_label.setStyleSheet("color: #666; border: none;")
+        layout.addWidget(desc_label)
+        
+        # Connect close button
+        close_btn.clicked.connect(self.close_modal)
+        
+        # Show modal and overlay
+        self._modal.show()
+        self._modal.raise_()
+        
+        # Handle click outside modal
+        def handle_click(event):
+            if not self._modal.geometry().contains(event.pos()):
+                self.close_modal()
+        
+        self._overlay.mousePressEvent = handle_click
+
+    def close_modal(self):
+        if self._modal:
+            self._modal.close()
+            self._modal = None
+        if self._overlay:
+            self._overlay.close()
+            self._overlay = None
+
     def load_image_async(self):
         def load():
             pixmap = SimpleImageLoader.load_image(self.product['image_url'])
@@ -89,18 +225,8 @@ class ProductCard(QFrame):
 
         threading.Thread(target=load, daemon=True).start()
 
-    def load_fonts(self):
-        font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/JosefinSans-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
-
     def setup_ui(self):
-        self.setFixedSize(160, 180)  # Reduced height from 200 to 180
+        self.setFixedSize(140, 180)  # Reduced card width from 160 to 140
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
@@ -111,24 +237,39 @@ class ProductCard(QFrame):
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(5, 5, 5, 5)
-        layout.setSpacing(1)  # Reduced spacing from 2 to 1
+        layout.setSpacing(1)
+        layout.setSizeConstraint(QLayout.SetFixedSize)
 
         # Image placeholder
         self.image_label = QLabel()
-        self.image_label.setFixedSize(75, 75)
+        self.image_label.setFixedSize(65, 65)  # Reduced image size from 75 to 65
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setText("Loading...")
         self.image_label.setStyleSheet("color: #3D6F4A;")
         layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
 
+        # Name container with fixed size
+        name_container = QWidget()
+        name_container.setFixedSize(130, 40)  # Reduced width from 150 to 130
+        name_layout = QVBoxLayout(name_container)
+        name_layout.setContentsMargins(0, 0, 0, 0)
+        name_layout.setSpacing(0)
+        
         # Name
         name = self.product['name'].replace('_', ' ')
         name_label = QLabel(name)
         name_label.setFont(QFont("Josefin Sans", 10))
         name_label.setWordWrap(True)
-        name_label.setAlignment(Qt.AlignHCenter)
-        name_label.setFixedHeight(40)  # Reduced from 48 to 40
-        layout.addWidget(name_label)
+        name_label.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        name_label.setFixedWidth(120)  # Reduced width from 140 to 120
+        name_label.setStyleSheet("""
+            QLabel {
+                color: black;
+                padding: 0px 5px;
+            }
+        """)
+        name_layout.addWidget(name_label)
+        layout.addWidget(name_container)
 
         # Price
         price = "{:,.0f}".format(float(self.product['price'])).replace(',', '.')
@@ -142,14 +283,15 @@ class ProductCard(QFrame):
         self.add_to_cart_btn = QPushButton("Add to Cart")
         self.add_to_cart_btn.setFont(QFont("Josefin Sans", 8))
         self.add_to_cart_btn.setCursor(Qt.PointingHandCursor)
+        self.add_to_cart_btn.setFixedHeight(25)
         self.add_to_cart_btn.setStyleSheet("""
             QPushButton {
                 background-color: #507849;
                 color: white;
                 border: none;
                 border-radius: 7px;
-                padding: 3px 8px;  /* Reduced padding */
-                margin: 1px 10px;  /* Reduced top/bottom margin */
+                padding: 3px 8px;
+                margin: 1px 10px;
             }
             QPushButton:hover {
                 background-color: #3D6F4A;
@@ -315,6 +457,9 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
     _instance = None
     _products_cache = None
     _cards_cache = []
+    _modal = None
+    _overlay = None
+    _watcher = None  # Add file watcher
 
     def __new__(cls):
         if cls._instance is None:
@@ -340,9 +485,34 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             else:
                 self.display_cached_products()
                 
+            # Set application icon
             icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
             self.setWindowIcon(QIcon(icon_path))
+
+    def reload_current_page(self):
+        """Reload the current page"""
+        try:
+            # Store current state
+            current_products = ProductPage._products_cache
+            current_cards = ProductPage._cards_cache
             
+            # Clear cache
+            ProductPage._products_cache = None
+            ProductPage._cards_cache = []
+            
+            # Reinitialize the page
+            self._needs_init = True
+            self.__init__()
+            
+            # Restore state
+            ProductPage._products_cache = current_products
+            ProductPage._cards_cache = current_cards
+            
+            # Redisplay products
+            self.display_cached_products()
+            
+        except Exception as e:
+            print(f"Error reloading current page: {str(e)}")
 
     def display_cached_products(self):
         """Display products from cache without reloading"""
@@ -363,11 +533,13 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         
         # Create and cache all product cards with fixed positions
         ProductPage._cards_cache = []
-        for i, product in enumerate(products):  # Removed [:24] limit
+        for i, product in enumerate(products):
             row = (i // 4) * 2
             col = i % 4
             card = ProductCard(product)
             card.font_family = font_family
+            # Connect card's clicked signal to show_product_modal
+            card.clicked.connect(self.show_product_modal)
             # Store original position
             card.grid_pos = (row, col)
             self.grid_layout.addWidget(card, row, col)
@@ -405,8 +577,8 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
 
         # Main layout
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(30, 8, 30, 8)  # Reduced bottom margin
-        main_layout.setSpacing(25)  # Increased spacing
+        main_layout.setContentsMargins(30, 0, 30, 8)  # Reduced top margin to 0
+        main_layout.setSpacing(0)  # Remove all spacing between elements
 
         # Top section with logo and header
         top_layout = QHBoxLayout()
@@ -428,40 +600,113 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         header_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         top_layout.addWidget(header_label)
         
-        # Replace category_button with CategoryDropdown
+        # Category dropdown
         self.category_dropdown = CategoryDropdown(self)
         top_layout.addWidget(self.category_dropdown)
+        
+        # Add home button
+        home_button = QPushButton()
+        home_button.setFixedSize(40, 40)  
+        home_button.setCursor(Qt.PointingHandCursor)
+        home_button.setStyleSheet("""
+            QPushButton {
+                background-color: #507849;
+                border: none;
+                border-radius: 20px;
+                padding: 0px;
+            }
+            QPushButton:hover {
+                background-color: #3e5c38;
+            }
+        """)
+        
+        # Add home icon
+        home_icon = QLabel()
+        home_icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'home.png')
+        home_pixmap = QPixmap(home_icon_path)
+        if not home_pixmap.isNull():
+            home_icon.setPixmap(home_pixmap.scaled(35, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        home_icon.setStyleSheet("""
+            QLabel {
+                background: transparent;
+                border: none;
+                padding: 0px;
+            }
+        """)
+        
+        # Create container for icon
+        icon_container = QWidget()
+        icon_container.setFixedSize(30, 30) 
+        icon_container.setStyleSheet("""
+            QWidget {
+                background: transparent;
+                border: none;
+                border-radius: 15px; 
+            }
+        """)
+        icon_layout = QVBoxLayout(icon_container)
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+        icon_layout.addWidget(home_icon, alignment=Qt.AlignCenter)
+        home_button.setLayout(icon_layout)
+        
+        # Connect home button to return to page1
+        home_button.clicked.connect(self.return_to_welcome)
+        top_layout.addWidget(home_button)
         
         # Add stretch to push everything to the left
         top_layout.addStretch()
 
         main_layout.addLayout(top_layout)
+        
+        # Add minimal spacing between top layout and scroll area
+        main_layout.addSpacing(-12)  
 
         # Scroll Area for products
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setFixedHeight(330)  
+        scroll_area.setFixedHeight(380) 
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none;
                 background-color: transparent;
-                margin-right: -20px;  
+                margin-right: 0px;
+                margin-top: -12px;
             }
             QScrollBar:vertical {
                 border: none;
                 background: white;
-                border-radius: 5px;
-                width: 20px;
-                margin: 0px;
-                height: 290px;
+                border-radius: 10px;
+                width: 25px;
+                margin: 0px 0px 0px 0px;
+                height: 380px;
+                subcontrol-origin: margin;
+                subcontrol-position: top;
             }
             QScrollBar::handle:vertical {
                 background: #D9D9D9;
-                border-radius: 5px;
-                min-height: 20px;
+                border-radius: 10px;
+                min-height: 30px;
+                margin: 0px;
             }
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 height: 0px;
+                border: none;
+                background: none;
+            }
+            QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+                border: none;
+                background: none;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+                border: none;
+            }
+            QScrollBar:horizontal {
+                height: 0px;
+                background: transparent;
+                border: none;
+                display: none;
             }
         """)
 
@@ -471,23 +716,29 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Container widget for the grid
         self.container = QWidget()
         self.container.setStyleSheet("background-color: transparent;")
+        self.container.setFixedWidth(600)
+        self.container.setMinimumHeight(360) 
         
         # Grid layout for products
         self.grid_layout = QGridLayout(self.container)
-        self.grid_layout.setSpacing(20)
-        self.grid_layout.setContentsMargins(0, 0, 15, 0)  # Add right margin to create space before scrollbar
+        self.grid_layout.setSpacing(25)  
+        self.grid_layout.setContentsMargins(10, 10, 60, 10)
+        self.grid_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
 
         scroll_area.setWidget(self.container)
         main_layout.addWidget(scroll_area)
 
+        # Add spacing before SCAN button
+        main_layout.addSpacing(20)
+
         # Create a horizontal layout for the button content
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(10)  # Space between icon and text
+        button_layout.setSpacing(10)
         button_layout.setAlignment(Qt.AlignCenter)
         
         # Create a container widget for the button
         button_container = QWidget()
-        button_container.setCursor(Qt.PointingHandCursor)  # Add cursor
+        button_container.setCursor(Qt.PointingHandCursor)
         button_container.setFixedSize(160, 40)
         button_container.setStyleSheet("""
             QWidget {
@@ -517,7 +768,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Add widgets to button layout
         button_layout.addWidget(scan_icon)
         button_layout.addWidget(scan_text)
-        button_layout.addStretch()  # Push content to the left
+        button_layout.addStretch()
         button_container.setLayout(button_layout)
         
         # Create event filters for hover effect
@@ -636,6 +887,261 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
 
         # Force layout update
         self.container.update()
+
+    def return_to_welcome(self):
+        """Return to welcome page using CART_END_SESSION_API"""
+        try:
+            # Call end session API
+            response = requests.post(f"{CART_END_SESSION_API}{DEVICE_ID}/")
+            if response.status_code == 200:
+                # Clear phone number in JSON file
+                try:
+                    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                        'config', 'phone_number.json')
+                    with open(file_path, 'w') as f:
+                        json.dump({"phone_number": ""}, f)
+                    print("Successfully cleared phone number")
+                except Exception as e:
+                    print(f"Error clearing phone number: {e}")
+                    
+                # Return to page1
+                from page1_welcome import WelcomePage
+                self.welcome_page = WelcomePage()
+                self.welcome_page.show()
+                self.close()
+            else:
+                print(f"Error ending session: {response.text}")
+        except Exception as e:
+            print(f"Error returning to welcome page: {e}")
+
+    def show_product_modal(self, product):
+        # Create overlay for blur effect
+        self._overlay = QWidget(self)
+        self._overlay.setGeometry(self.rect())
+        self._overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.3);")
+        self._overlay.show()
+        
+        # Create modal container
+        self._modal = QFrame(self)
+        self._modal.setFixedSize(350, 400)
+        self._modal.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 15px;
+                border: none;
+            }
+        """)
+        
+        # Position modal in center of parent
+        parent_rect = self.geometry()
+        self._modal.move(
+            (parent_rect.width() - self._modal.width()) // 2,
+            (parent_rect.height() - self._modal.height()) // 2
+        )
+        
+        # Create layout
+        layout = QVBoxLayout(self._modal)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(5)  # Reduced spacing between components
+        
+        # Close button (X) at the top right
+        close_btn = QPushButton("×")
+        close_btn.setFixedSize(40, 40)  # Increased size
+        close_btn.setFont(QFont("Arial", 16, QFont.Bold))  # Increased font size
+        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #666;
+                border: none;
+                border-radius: 20px;
+                padding: 0;
+            }
+            QPushButton:hover {
+                background-color: #f0f0f0;
+                color: #333;
+            }
+        """)
+        
+        # Create a container for the close button
+        close_container = QWidget()
+        close_container.setStyleSheet("background-color: transparent;")
+        close_layout = QHBoxLayout(close_container)
+        close_layout.setContentsMargins(0, 0, 0, 0)
+        close_layout.addStretch()
+        close_layout.addWidget(close_btn)
+        
+        # Add close button container to main layout
+        layout.addWidget(close_container)
+        
+        # Image with larger size to fit the modal
+        image_label = QLabel()
+        if product.get('image_url'):
+            pixmap = SimpleImageLoader.load_image(product['image_url'], (180, 180))
+            if pixmap:
+                image_label.setPixmap(pixmap)
+        image_label.setAlignment(Qt.AlignCenter)
+        image_label.setStyleSheet("border: none;")
+        layout.addWidget(image_label)
+        
+        # Name
+        name = product['name'].replace('_', ' ')
+        name_label = QLabel(name)
+        name_label.setFont(QFont("Josefin Sans", 12, QFont.Bold))
+        name_label.setWordWrap(True)
+        name_label.setAlignment(Qt.AlignCenter)
+        name_label.setStyleSheet("border: none;")
+        layout.addWidget(name_label)
+        
+        # Price
+        price = "{:,.0f}".format(float(product['price'])).replace(',', '.')
+        price_label = QLabel(f"{price} vnd")
+        price_label.setFont(QFont("Josefin Sans", 10))
+        price_label.setStyleSheet("color: #E72225; border: none;")
+        price_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(price_label)
+        
+        # Category - Convert to English
+        category_map = {
+            "Thức uống": "Beverage",
+            "Thức ăn": "Food",
+            "Đồ ăn vặt": "Snack"
+        }
+        vn_category = product['category']
+        en_category = category_map.get(vn_category, vn_category)
+        category_label = QLabel(f"Category: {en_category}")
+        category_label.setFont(QFont("Josefin Sans", 12))
+        category_label.setStyleSheet("color: black; border: none;")
+        category_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(category_label)
+        
+        # Description
+        desc_label = QLabel(product['description'])
+        desc_label.setFont(QFont("Josefin Sans", 11))
+        desc_label.setWordWrap(True)
+        desc_label.setAlignment(Qt.AlignCenter)
+        desc_label.setStyleSheet("color: #666; border: none;")
+        layout.addWidget(desc_label)
+        
+        # Connect close button
+        close_btn.clicked.connect(self.close_modal)
+        
+        # Show modal and overlay
+        self._modal.show()
+        self._modal.raise_()
+        
+        # Handle click outside modal
+        def handle_click(event):
+            if not self._modal.geometry().contains(event.pos()):
+                self.close_modal()
+        
+        self._overlay.mousePressEvent = handle_click
+
+    def close_modal(self):
+        if self._modal:
+            self._modal.close()
+            self._modal = None
+        if self._overlay:
+            self._overlay.close()
+            self._overlay = None
+
+class ProductCardDialog(QDialog):
+    def __init__(self, product, image, parent=None):
+        super().__init__(parent)
+        self.product = product
+        self.image = image
+        self.setup_ui()
+        
+    def setup_ui(self):
+        self.setFixedSize(400, 500)  # Increased dialog size
+        self.setStyleSheet("""
+            QDialog {
+                background-color: white;
+                border-radius: 15px;
+            }
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
+        
+        # Image
+        image_label = QLabel()
+        if self.image:
+            image_label.setPixmap(self.image.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        image_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(image_label)
+        
+        # Name
+        name = self.product['name'].replace('_', ' ')
+        name_label = QLabel(name)
+        name_label.setFont(QFont("Josefin Sans", 14, QFont.Bold))
+        name_label.setWordWrap(True)
+        name_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(name_label)
+        
+        # Price
+        price = "{:,.0f}".format(float(self.product['price'])).replace(',', '.')
+        price_label = QLabel(f"{price} vnd")
+        price_label.setFont(QFont("Josefin Sans", 12))
+        price_label.setStyleSheet("color: #E72225;")
+        price_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(price_label)
+        
+        # Description
+        desc_label = QLabel(self.product.get('description', 'No description available'))
+        desc_label.setFont(QFont("Josefin Sans", 10))
+        desc_label.setWordWrap(True)
+        desc_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(desc_label)
+        
+        # Add to Cart button
+        add_to_cart_btn = QPushButton("Add to Cart")
+        add_to_cart_btn.setFont(QFont("Josefin Sans", 12))
+        add_to_cart_btn.setCursor(Qt.PointingHandCursor)
+        add_to_cart_btn.setFixedHeight(30)
+        add_to_cart_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #507849;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 5px 10px;
+                margin: 10px 20px;
+            }
+            QPushButton:hover {
+                background-color: #3D6F4A;
+            }
+            QPushButton:pressed {
+                background-color: #2C513A;
+            }
+        """)
+        add_to_cart_btn.clicked.connect(lambda: self.parent().add_to_cart(self.product))
+        layout.addWidget(add_to_cart_btn)
+        
+        # Close button
+        close_btn = QPushButton("Close")
+        close_btn.setFont(QFont("Josefin Sans", 12))
+        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.setFixedHeight(30)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E72225;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 5px 10px;
+                margin: 10px 20px;
+            }
+            QPushButton:hover {
+                background-color: #C41E3A;
+            }
+            QPushButton:pressed {
+                background-color: #A31A32;
+            }
+        """)
+        close_btn.clicked.connect(self.close)
+        layout.addWidget(close_btn)
 
 if __name__ == '__main__':
     import sys

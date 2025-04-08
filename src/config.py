@@ -1,7 +1,7 @@
 import os
 
 # Server configuration
-SERVER_IP = "172.20.10.6"
+SERVER_IP = "192.168.1.242"
 SERVER_PORT = "9000"
 BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
 HISTORY_API_URL = f"{BASE_URL}/history/"

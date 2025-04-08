@@ -3,8 +3,8 @@ import weakref
 from functools import lru_cache
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
                            QPushButton, QApplication, QFrame, QGridLayout, QScrollArea, QDialog, QGraphicsBlurEffect, QGraphicsOpacityEffect, QGraphicsDropShadowEffect)
-from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation, QRect, QParallelAnimationGroup
-from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage
+from PyQt5.QtCore import Qt, QObject, QEvent, QTimer, QPropertyAnimation, QRect, QParallelAnimationGroup, QPoint, QEasingCurve
+from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QImage, QCursor
 from PyQt5.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt5.QtCore import QUrl
 import os
@@ -96,6 +96,184 @@ class PaymentSignalMonitor(QThread):
 
     def stop(self):
         self.is_running = False
+
+class CartItemsScrollArea(QScrollArea):
+    """Custom scroll area with touch scrolling support for cart items"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWidgetResizable(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: white;
+                width: 15px;
+                margin: 0px;
+                margin-left: 5px;
+            }
+            QScrollBar::handle:vertical {
+                background: #D9D9D9;
+                min-height: 20px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar:horizontal {
+                height: 0px;
+                background: transparent;
+            }
+        """)
+        
+        # Variables for mouse tracking
+        self.mouse_pressed = False
+        self.last_mouse_pos = QPoint()
+        self.velocity = 0
+        self.scroll_timer = QTimer(self)
+        self.scroll_timer.timeout.connect(self.decelerate_scroll)
+        self.scroll_timer.setInterval(16)  # ~60fps
+        
+        # Variables for bounce effect
+        self.bounce_animation = QPropertyAnimation(self.verticalScrollBar(), b"value")
+        self.bounce_animation.setDuration(300)
+        self.bounce_animation.setEasingCurve(QEasingCurve.OutCubic)
+        self.is_bouncing = False
+        
+        # Enable viewport mouse tracking
+        self.viewport().setMouseTracking(True)
+        
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mouse_pressed = True
+            self.last_mouse_pos = event.pos()
+            self.velocity = 0
+            self.scroll_timer.stop()
+            if self.bounce_animation.state() == QPropertyAnimation.Running:
+                self.bounce_animation.stop()
+            event.accept()
+        else:
+            super().mousePressEvent(event)
+    
+    def mouseMoveEvent(self, event):
+        if self.mouse_pressed:
+            delta = event.pos().y() - self.last_mouse_pos.y()
+            
+            # Get current scroll value and bounds
+            scrollbar = self.verticalScrollBar()
+            current_value = scrollbar.value()
+            min_value = scrollbar.minimum()
+            max_value = scrollbar.maximum()
+            
+            # Check if we're at the top or bottom boundary
+            at_top = current_value == min_value and delta > 0
+            at_bottom = current_value == max_value and delta < 0
+            
+            if at_top or at_bottom:
+                # Apply resistance when pulling beyond limits
+                delta = delta * 0.3  # Reduce scroll effect to create resistance
+                
+            # Apply scroll - convert to int
+            scrollbar.setValue(int(current_value - delta))
+            
+            # Update velocity
+            self.velocity = delta
+            self.last_mouse_pos = event.pos()
+            event.accept()
+        else:
+            super().mouseMoveEvent(event)
+    
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and self.mouse_pressed:
+            self.mouse_pressed = False
+            
+            # Get current scroll value and bounds
+            scrollbar = self.verticalScrollBar()
+            current_value = scrollbar.value()
+            min_value = scrollbar.minimum()
+            max_value = scrollbar.maximum()
+            
+            # Check if we need to apply bounce animation
+            if current_value <= min_value and self.velocity > 0:
+                # Bounce from top
+                self.apply_bounce_animation(min_value)
+            elif current_value >= max_value and self.velocity < 0:
+                # Bounce from bottom
+                self.apply_bounce_animation(max_value)
+            # Otherwise start deceleration
+            elif abs(self.velocity) > 5:
+                self.scroll_timer.start()
+                
+            event.accept()
+        else:
+            super().mouseReleaseEvent(event)
+    
+    def apply_bounce_animation(self, target_value):
+        """Apply bounce animation when reaching the end of scrollable area"""
+        self.is_bouncing = True
+        self.bounce_animation.setStartValue(self.verticalScrollBar().value())
+        self.bounce_animation.setEndValue(target_value)
+        self.bounce_animation.start()
+    
+    def wheelEvent(self, event):
+        """Enhanced wheel event for smoother scrolling"""
+        # Get the delta value from the wheel event
+        delta = event.angleDelta().y()
+        
+        # Calculate scroll amount (faster for larger deltas)
+        scroll_amount = delta / 2
+        
+        # Get current scroll value and bounds
+        scrollbar = self.verticalScrollBar()
+        current_value = scrollbar.value()
+        min_value = scrollbar.minimum()
+        max_value = scrollbar.maximum()
+        
+        # Check if we're at boundaries
+        at_top = current_value == min_value and scroll_amount > 0
+        at_bottom = current_value == max_value and scroll_amount < 0
+        
+        if at_top or at_bottom:
+            # Apply resistance when at boundaries
+            scroll_amount = scroll_amount * 0.3
+        
+        # Apply scroll - convert to int
+        scrollbar.setValue(int(current_value - scroll_amount))
+        
+        # Start inertial scrolling with the wheel velocity
+        self.velocity = delta / 12
+        if not self.scroll_timer.isActive() and abs(self.velocity) > 5:
+            self.scroll_timer.start()
+        
+        event.accept()
+    
+    def decelerate_scroll(self):
+        # Apply deceleration
+        self.velocity *= 0.9
+        
+        # Stop when velocity is very low
+        if abs(self.velocity) < 0.5:
+            self.scroll_timer.stop()
+            return
+            
+        # Get current scroll value and bounds
+        scrollbar = self.verticalScrollBar()
+        current_value = scrollbar.value()
+        min_value = scrollbar.minimum()
+        max_value = scrollbar.maximum()
+        
+        # Check if we've hit boundaries
+        if (current_value <= min_value and self.velocity > 0) or (current_value >= max_value and self.velocity < 0):
+            self.scroll_timer.stop()
+            # Apply bounce animation
+            self.apply_bounce_animation(min_value if current_value <= min_value else max_value)
+            return
+            
+        # Continue scrolling with decelerating velocity - convert to int
+        scrollbar.setValue(int(current_value - self.velocity))
 
 class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
     # Class level attributes for critical components
@@ -467,34 +645,8 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             scroll_layout = QVBoxLayout(scroll_container)
             scroll_layout.setContentsMargins(0, 0, 0, 0)
             
-            # Create scroll area for items
-            scroll_area = QScrollArea()
-            scroll_area.setWidgetResizable(True)
-            scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Disable horizontal scrollbar
-            scroll_area.setStyleSheet("""
-                QScrollArea {
-                    border: none;
-                    background-color: transparent;
-                }
-                QScrollBar:vertical {
-                    border: none;
-                    background: white;
-                    width: 15px;
-                    margin: 0px;
-                    margin-left: 5px;
-                }
-                QScrollBar::handle:vertical {
-                    background: #D9D9D9;
-                    min-height: 20px;
-                }
-                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                    height: 0px;
-                }
-                QScrollBar:horizontal {
-                    height: 0px;
-                    background: transparent;
-                }
-            """)
+            # Create scroll area for items with custom scrolling behavior
+            scroll_area = CartItemsScrollArea()
             
             # Items container
             items_container = QWidget()

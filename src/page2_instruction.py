@@ -7,6 +7,9 @@ import os
 from page3_productsinfo import ProductPage  
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
+import requests
+import json
+from config import CART_END_SESSION_API, DEVICE_ID  
 
 class InstructionPage(BasePage):  # Changed from QWidget to BasePage
     def __init__(self):
@@ -100,19 +103,34 @@ class InstructionPage(BasePage):  # Changed from QWidget to BasePage
         left_layout.addWidget(title_label)
 
         # Tagline using Poppins Italic
-        tagline_label = QLabel('“Shop smarter, enjoy life more”')
+        tagline_label = QLabel('"Shop smarter, enjoy life more"')
         tagline_label.setFont(QFont("Poppins", 12))
         tagline_label.setStyleSheet("color: #E72225; font-style: italic;")
         left_layout.addWidget(tagline_label)
 
         left_layout.addSpacing(10)
 
+        # Create button container
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setSpacing(20)  # Add spacing between buttons
+
         # Next button using Inter Bold
         next_button = QPushButton("SHOP NOW")
         next_button.setFont(QFont("Inter", QFont.Bold))
         next_button.setCursor(Qt.PointingHandCursor)
         next_button.clicked.connect(self.next_page)
-        left_layout.addWidget(next_button, alignment=Qt.AlignLeft)
+        button_layout.addWidget(next_button)
+
+        # Add back to home button
+        home_button = QPushButton("BACK TO HOME")
+        home_button.setFont(QFont("Inter", QFont.Bold))
+        home_button.setCursor(Qt.PointingHandCursor)
+        home_button.clicked.connect(self.return_to_welcome)
+        button_layout.addWidget(home_button)
+
+        # Add button container to left layout
+        left_layout.addWidget(button_container, alignment=Qt.AlignLeft)
 
         left_layout.addStretch(1)
 
@@ -332,6 +350,32 @@ class InstructionPage(BasePage):  # Changed from QWidget to BasePage
             self.navigate_slide('prev')
         elif dx < -50:
             self.navigate_slide('next')
+
+    def return_to_welcome(self):
+        """Return to welcome page using CART_END_SESSION_API"""
+        try:
+            # Call end session API
+            response = requests.post(f"{CART_END_SESSION_API}{DEVICE_ID}/")
+            if response.status_code == 200:
+                # Clear phone number in JSON file
+                try:
+                    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                        'config', 'phone_number.json')
+                    with open(file_path, 'w') as f:
+                        json.dump({"phone_number": ""}, f)
+                    print("Successfully cleared phone number")
+                except Exception as e:
+                    print(f"Error clearing phone number: {e}")
+                    
+                # Return to page1
+                from page1_welcome import WelcomePage
+                self.welcome_page = WelcomePage()
+                self.welcome_page.show()
+                self.close()
+            else:
+                print(f"Error ending session: {response.text}")
+        except Exception as e:
+            print(f"Error returning to welcome page: {e}")
 
 if __name__ == '__main__':
     import sys

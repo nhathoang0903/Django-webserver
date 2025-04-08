@@ -23,8 +23,8 @@ class TestWindow(QWidget):
         test_product = {
             'name': 'Test Product',
             'price': '10000',
-            'category': 'Đồ ăn vặt',
-            'image_url': 'https://pvmarthanoi.com.vn/wp-content/uploads/2023/02/mi-handy-hao-hao-tom-chua-cay-ly-67g-201912051400437161.jfif_-500x600.png'  # URL ảnh giả
+            'category': 'Thức uống',
+            'image_url': 'https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png'  # URL ảnh giả
         }
         
         # Tạo cart item widget với product test

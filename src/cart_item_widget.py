@@ -26,8 +26,8 @@ class CartItemWidget(QFrame):
         self.unit_price = float(product['price'])
         self.current_price = self.unit_price * quantity
         
-        self.setFixedHeight(100)  # Reduced from 110 to 100
-        self.setFixedWidth(350)   # Increased width from 320 to 350
+        self.setFixedHeight(100)  # Height of main widget
+        self.setFixedWidth(350)   # Width of main widget
         
         # Main frame styling
         self.setStyleSheet("""
@@ -38,29 +38,45 @@ class CartItemWidget(QFrame):
             }
         """)
         
+        # Track drag state
+        self.is_dragging = False
+        self.drag_start_pos = None
+        self.drag_threshold = 10  # Pixels to consider as drag vs click
+        
         # Main horizontal layout
         layout = QHBoxLayout(self)
         layout.setContentsMargins(15, 5, 15, 5)
         layout.setSpacing(15)
         
         # Left: Image
+        image_container = QWidget()
+        image_container.setStyleSheet("background-color: transparent;")
+        image_container.setFixedWidth(70)
+        # Remove fixed height - let it adjust to parent height
+        
+        image_layout = QVBoxLayout(image_container)
+        image_layout.setContentsMargins(0, 0, 0, 0)
+        image_layout.setSpacing(0)
+        
         self.image_label = QLabel()
-        # Set image size based on category (80% of modal sizes)
+        # Set image size based on category - increased size
         category = product.get('category', '')
         if (category == "Đồ ăn vặt"):
-            image_size = (37, 96)  # 75*0.5, 120*0.8
+            image_size = (75, 95)  
         elif (category == "Thức uống"):
-            image_size = (37, 112)  # 75*0.5, 140*0.8
+            image_size = (75, 95) 
         elif (category == "Thức ăn"):
-            image_size = (37, 100)  # 75*0.5, 125*0.8
+            image_size = (75, 95) 
         else:
-            image_size = (37, 96)  # Default size (75*0.5, 120*0.8)
+            image_size = (75, 95) 
             
         self.image_label.setFixedSize(*image_size)
         self.image_label.setStyleSheet("""
             QLabel {
                 background-color: transparent;
                 border: none;
+                margin: 0;
+                padding: 0;
             }
         """)
         
@@ -71,18 +87,29 @@ class CartItemWidget(QFrame):
             cache_key = f"{image_url}_{image_size[0]}x{image_size[1]}"
             
             if cache_key in SimpleImageLoader._cache:
-                self.image_label.setPixmap(SimpleImageLoader._cache[cache_key])
+                pixmap = SimpleImageLoader._cache[cache_key]
+                self.image_label.setPixmap(pixmap)
+                print(f"Loaded image from cache: {image_url}, size: {image_size}")
             else:
                 pixmap = SimpleImageLoader.load_image(image_url, image_size)
                 if pixmap:
                     self.image_label.setPixmap(pixmap)
+                    print(f"Loaded image: {image_url}, size: {image_size}")
                 else:
                     self.image_label.setText("N/A")
+                    print(f"Failed to load image: {image_url}")
         else:
             self.image_label.setText("N/A")
+            print("No image URL provided")
 
         self.image_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.image_label)
+        
+        # Simpler layout - center the image vertically
+        image_layout.addStretch(1)
+        image_layout.addWidget(self.image_label, 0, Qt.AlignCenter)
+        image_layout.addStretch(1)
+        
+        layout.addWidget(image_container)
         
         # Middle: Name and Quantity Controls
         middle_widget = QWidget()
@@ -111,6 +138,7 @@ class CartItemWidget(QFrame):
         name_label.setFont(QFont("Inria Sans", 8, QFont.Bold))
         name_label.setWordWrap(True)
         name_label.setFixedWidth(170)
+        name_label.setFixedHeight(32)  # Add fixed height to prevent movement
         name_label.setStyleSheet("""
             QLabel {
                 color: #000000; 
@@ -130,16 +158,18 @@ class CartItemWidget(QFrame):
         control_size = 24  # Reduced from 28 to 24
 
         # Quantity controls with center alignment
-        quantity_container = QHBoxLayout()
-        quantity_container.addStretch(3)  # Increased stretch to push more right
-
-        quantity_widget = QWidget()
-        quantity_layout = QHBoxLayout(quantity_widget)
+        quantity_container = QWidget()
+        quantity_container.setFixedHeight(control_size)
+        quantity_layout = QHBoxLayout(quantity_container)
         quantity_layout.setContentsMargins(0, 0, 0, 0)
-        quantity_layout.setSpacing(0)
+        quantity_layout.setSpacing(0)  # Ensure no spacing between buttons
 
-        # Updated quantity controls style to match product_modal
-        
+        # Create a horizontal container to align controls 
+        quantity_controls = QHBoxLayout()
+        quantity_controls.setContentsMargins(0, 0, 0, 0)
+        quantity_controls.setSpacing(0)  # No spacing between buttons
+        quantity_controls.addStretch(1)  # Push controls to center
+
         # Decrease button
         decrease_btn = QPushButton("-")
         decrease_btn.setFixedSize(control_size, control_size)
@@ -198,17 +228,18 @@ class CartItemWidget(QFrame):
         """)
         increase_btn.clicked.connect(self.increase_quantity)
         
-        quantity_layout.addWidget(decrease_btn)
-        quantity_layout.addWidget(self.quantity_label)
-        quantity_layout.addWidget(increase_btn)
+        # Add controls to layout without spacing
+        quantity_controls.addWidget(decrease_btn)
+        quantity_controls.addWidget(self.quantity_label)
+        quantity_controls.addWidget(increase_btn)
+        quantity_controls.addStretch(1)  # Push controls to center
         
-        quantity_container.addWidget(quantity_widget)
-        quantity_container.addStretch(1)
-
-        # Add spacing before quantity controls to push them down
-        middle_layout.addSpacing(3)  # Reduced from 5
-        middle_layout.addLayout(quantity_container)
-        middle_layout.addSpacing(2)  # Reduced from 3
+        quantity_layout.addLayout(quantity_controls)
+        
+        # Use a proper QHBoxLayout for quantity controls centered
+        middle_layout.addSpacing(3)
+        middle_layout.addWidget(quantity_container, 0, Qt.AlignCenter)  # Centered alignment
+        middle_layout.addSpacing(2)
         
         layout.addWidget(middle_widget, 1)
         
@@ -334,3 +365,25 @@ class CartItemWidget(QFrame):
                 widget.setStyleSheet(widget.styleSheet().replace("background-color: #F8FFAA;", "background-color: white;"))
         
         QTimer.singleShot(5000, reset_styles)
+
+    def mousePressEvent(self, event):
+        """Track mouse press for potential drag operations"""
+        if event.button() == Qt.LeftButton:
+            self.is_dragging = False
+            self.drag_start_pos = event.pos()
+        super().mousePressEvent(event)
+        
+    def mouseMoveEvent(self, event):
+        """Handle mouse movement to differentiate between drag and click"""
+        if event.buttons() & Qt.LeftButton and self.drag_start_pos is not None:
+            # Calculate distance moved
+            distance = (event.pos() - self.drag_start_pos).manhattanLength()
+            if distance > self.drag_threshold:
+                self.is_dragging = True
+        super().mouseMoveEvent(event)
+        
+    def mouseReleaseEvent(self, event):
+        """Handle mouse release event"""
+        self.drag_start_pos = None
+        self.is_dragging = False
+        super().mouseReleaseEvent(event)

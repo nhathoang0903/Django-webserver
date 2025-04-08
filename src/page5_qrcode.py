@@ -26,7 +26,7 @@ from io import BytesIO
 from datetime import datetime, timedelta
 import time
 import json
-from PIL import Image
+from PIL import Image, ImageDraw
 from cart_state import CartState
 from threading import Thread, Event  
 from page_timing import PageTiming
@@ -36,8 +36,8 @@ import qrcode
 from vietqr.VietQR import genQRString, getBincode
 
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
-    switch_to_success = pyqtSignal()  # Add signal for page switching
-    payment_completed = pyqtSignal(bool)  # Signal cho tr���ng thái thanh toán
+    switch_to_success = pyqtSignal()  # Signal for page switching
+    payment_completed = pyqtSignal(bool)  # Signal for payment status
     
     def __init__(self):
         # Force CPU configuration before any other initialization
@@ -188,18 +188,25 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Right Section
         right_section = QWidget()
         right_layout = QVBoxLayout(right_section)
-        right_layout.setContentsMargins(20, 20, 20, 20)
+        right_layout.setContentsMargins(20, 0, 20, 20)  # Set top margin to 0
         right_layout.setSpacing(15)
+        right_layout.setAlignment(Qt.AlignTop)  # Force alignment to top
 
         # QR Code Frame
         self.qr_frame = QFrame()
-        self.qr_frame.setFixedSize(259, 376)
-        self.qr_frame.setStyleSheet("background-color: transparent;")
+        self.qr_frame.setFixedSize(300, 300)  # Reduced from 350x350 to 300x300
+        self.qr_frame.setStyleSheet("""
+            QFrame {
+                background-color: #F5F9F7;
+                border: none;
+                margin-top: 20px;  /* Add top margin */
+            }
+        """)
         
         # QR Code Label
         self.qr_label = QLabel(self.qr_frame)
         self.qr_label.setAlignment(Qt.AlignCenter)
-        self.qr_label.setFixedSize(259, 376)
+        self.qr_label.setFixedSize(300, 300)  # Reduced from 350x350 to 300x300
         self.qr_label.setText("Loading...")
         self.qr_label.setStyleSheet("background-color: transparent;")
 
@@ -217,17 +224,21 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.amount_label.setText(f"Số tiền: {'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
 
         # Account Details
-        # acc_name_label = QLabel("T��n chủ tài khoản: VO PHAN NHAT HOANG")
-        # acc_num_label = QLabel("Số tài kho�����n: 3099932002")
-        # bank_label = QLabel("Ngân hàng TMCP Quân Đội")
+        acc_name_label = QLabel("Tên chủ tài khoản: NGUYEN THE NGO")
+        acc_name_label.setFont(QFont("Inria Sans", 11))
+        
+        bank_label = QLabel("Ngân hàng: TMCP Quân Đội")
+        bank_label.setFont(QFont("Inria Sans", 11))
 
-        # for label in [self.amount_label, acc_name_label, acc_num_label, bank_label]:
-        #     label.setFont(QFont("Inter", 11))
-        #     details_layout.addWidget(label)
+        # Add all labels to details layout
+        for label in [self.amount_label, acc_name_label, bank_label]:
+            label.setAlignment(Qt.AlignCenter)
+            details_layout.addWidget(label)
 
         # Countdown label
         self.countdown_label = QLabel()
-        self.countdown_label.setFont(QFont("Inria Sans", 10))
+        self.countdown_label.setFont(QFont("Inria Sans", 12, QFont.Bold))
+        self.countdown_label.setStyleSheet("color: #D30E11;")
         self.countdown_label.setAlignment(Qt.AlignCenter)
         self.countdown_label.hide()
 
@@ -237,13 +248,16 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.gen_time_label.setAlignment(Qt.AlignCenter)
         self.gen_time_label.hide()
 
-        # Add widgets in desired order
-        right_layout.addWidget(self.qr_frame, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        # Add widgets in desired order with adjusted spacing
+        right_layout.addWidget(self.qr_frame, alignment=Qt.AlignTop | Qt.AlignHCenter)
+        right_layout.addStretch(1)  # Add stretch to push details down
         right_layout.addWidget(details_frame)
+        right_layout.addSpacing(10)  # Small spacing between details and countdown
         right_layout.addWidget(self.countdown_label, alignment=Qt.AlignCenter)
         right_layout.addWidget(self.gen_time_label, alignment=Qt.AlignCenter)
         
-        right_layout.addStretch()
+        # Remove the stretch to prevent pushing content to center
+        # right_layout.addStretch()
 
         main_layout.addWidget(right_section)
 
@@ -275,29 +289,40 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
 
             # Create QR code with custom styling
             qr = qrcode.QRCode(
+                version=5,
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
+                box_size=12,  # Increased box size for better scanning
+                border=4
             )
             
             qr.add_data(vietqr_string)
             qr.make(fit=True)
             
             # Create QR image with custom colors
-            qr_img = qr.make_image(fill_color="#507849", back_color="#F5F9F7")
-            
-            # Add border and styling
-            qr_img = qr_img.convert("RGBA")
-            border_size = 30
-            new_size = (qr_img.size[0] + border_size, qr_img.size[1] + border_size)
-            canvas = Image.new("RGBA", new_size, "#F5F9F7")  # Match page background
-            canvas.paste(qr_img, (border_size // 2, border_size // 2), qr_img)
+            qr_img = qr.make_image(fill_color="#2C7A7B", back_color="#F5F9F7").convert("RGBA")
             
             # Convert PIL Image to QPixmap using BytesIO
             img_byte_array = io.BytesIO()
-            canvas.save(img_byte_array, format='PNG')
+            qr_img.save(img_byte_array, format='PNG')
+            img_byte_array.seek(0)  # Reset buffer position
+            
+            # Create QPixmap from bytes
             qr_pixmap = QPixmap()
             qr_pixmap.loadFromData(img_byte_array.getvalue())
             
-            # Display QR code
-            self.qr_label.setPixmap(qr_pixmap.scaled(300, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            # Display QR code with proper scaling and position
+            self.qr_label.setPixmap(qr_pixmap.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.qr_label.setAlignment(Qt.AlignCenter)
+            
+            # Adjust QR frame position
+            self.qr_frame.setFixedSize(300, 300)  
+            self.qr_frame.setStyleSheet("""
+                QFrame {
+                    background-color: #F5F9F7;
+                    border: none;
+                    margin-top: 20px;  
+                }
+            """)
             
             # Show generation time with ordinal suffix
             current_time = QDateTime.currentDateTime()
@@ -573,6 +598,22 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 result.append(group_text)
                 
         return " ".join(reversed(result))
+
+    def update_countdown(self):
+        """Update the countdown timer display"""
+        current_time = datetime.now()
+        elapsed = current_time - self.target_time
+        remaining = self.countdown_seconds - elapsed.total_seconds()
+        
+        if remaining <= 0:
+            self.countdown_timer.stop()
+            self.countdown_label.setText("QR Code expired")
+            self.return_to_shopping()
+            return
+            
+        minutes = int(remaining // 60)
+        seconds = int(remaining % 60)
+        self.countdown_label.setText(f"Time remaining: {minutes:02d}:{seconds:02d}")
 
     def read_amount(self):
         """Read the total amount using TTS"""
