@@ -143,15 +143,15 @@ class CartItemWidget(QFrame):
             QLabel {
                 color: #000000; 
                 background-color: transparent;
-                qproperty-alignment: AlignCenter;
+                qproperty-alignment: AlignLeft;
                 margin: 0px;
-                padding: 0px;
+                padding-left: 15px;
                 min-height: 32px;
             }
         """)
         
         name_layout.addWidget(name_label)
-        middle_layout.addWidget(name_container, 0, Qt.AlignRight)
+        middle_layout.addWidget(name_container, 0, Qt.AlignLeft)
         middle_layout.addStretch(1)  # Reduced stretch ratio
 
         # Quantity controls with smaller size

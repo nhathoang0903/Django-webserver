@@ -53,7 +53,7 @@ logging.basicConfig(
 class KioskApplication(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
-        logging.info("Starting Kiosk Application")
+        logging.info("Starting Cartsy Application")
         # Set application-wide attributes
         self.setOverrideCursor(Qt.BlankCursor)
         
