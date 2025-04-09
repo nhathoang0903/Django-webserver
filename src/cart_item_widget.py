@@ -26,7 +26,7 @@ class CartItemWidget(QFrame):
         self.unit_price = float(product['price'])
         self.current_price = self.unit_price * quantity
         
-        self.setFixedHeight(100)  # Height of main widget
+        self.setFixedHeight(120)  # Increased from 110 to 120
         self.setFixedWidth(350)   # Width of main widget
         
         # Main frame styling
@@ -45,14 +45,13 @@ class CartItemWidget(QFrame):
         
         # Main horizontal layout
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(15, 5, 15, 5)
-        layout.setSpacing(15)
+        layout.setContentsMargins(15, 5, 5, 5)  # Further reduced right margin
+        layout.setSpacing(8)  # Further reduced spacing
         
         # Left: Image
         image_container = QWidget()
         image_container.setStyleSheet("background-color: transparent;")
-        image_container.setFixedWidth(70)
-        # Remove fixed height - let it adjust to parent height
+        image_container.setFixedWidth(65)  # Reduced from 70 to 65
         
         image_layout = QVBoxLayout(image_container)
         image_layout.setContentsMargins(0, 0, 0, 0)
@@ -115,14 +114,15 @@ class CartItemWidget(QFrame):
         middle_widget = QWidget()
         middle_widget.setStyleSheet("background-color: white;")
         middle_layout = QVBoxLayout(middle_widget)
-        middle_layout.setContentsMargins(5, 0, 0, 0)
-        middle_layout.setSpacing(5)  # Reduced from 8
+        middle_layout.setContentsMargins(3, 0, 3, 0)  # Reduced left margin from 5 to 3
+        middle_layout.setSpacing(2)
         
         # Product name container with custom text wrapping
         name_container = QWidget()
-        name_container.setFixedWidth(170)
+        name_container.setFixedWidth(190)  # Increased from 180 to 190
+        name_container.setFixedHeight(55)
         name_layout = QVBoxLayout(name_container)
-        name_layout.setContentsMargins(0, 0, 0, 0)
+        name_layout.setContentsMargins(0, 0, 0, 5)
         name_layout.setSpacing(0)
         
         # Format name with custom line breaks
@@ -135,24 +135,26 @@ class CartItemWidget(QFrame):
             formatted_name = raw_name
             
         name_label = QLabel(formatted_name)
-        name_label.setFont(QFont("Inria Sans", 8, QFont.Bold))
+        name_label.setFont(QFont("Inria Sans", 11, QFont.Bold))
         name_label.setWordWrap(True)
-        name_label.setFixedWidth(170)
-        name_label.setFixedHeight(32)  # Add fixed height to prevent movement
+        name_label.setFixedWidth(190)  
+        name_label.setFixedHeight(50)
         name_label.setStyleSheet("""
             QLabel {
                 color: #000000; 
                 background-color: transparent;
-                qproperty-alignment: AlignLeft;
+                qproperty-alignment: AlignLeft | AlignVCenter;
                 margin: 0px;
-                padding-left: 15px;
-                min-height: 32px;
+                padding-left: 8px;
+                padding-right: 5px;
+                min-height: 50px;
+                line-height: 1.3;
             }
         """)
         
         name_layout.addWidget(name_label)
-        middle_layout.addWidget(name_container, 0, Qt.AlignLeft)
-        middle_layout.addStretch(1)  # Reduced stretch ratio
+        middle_layout.addWidget(name_container, 0, Qt.AlignLeft | Qt.AlignTop)  # Align to top
+        middle_layout.addStretch(1)  # Reduced stretch ratio to accommodate taller name container
 
         # Quantity controls with smaller size
         control_size = 24  # Reduced from 28 to 24
@@ -237,27 +239,29 @@ class CartItemWidget(QFrame):
         quantity_layout.addLayout(quantity_controls)
         
         # Use a proper QHBoxLayout for quantity controls centered
-        middle_layout.addSpacing(3)
+        middle_layout.addSpacing(1)  # Reduced from 3 to 1
         middle_layout.addWidget(quantity_container, 0, Qt.AlignCenter)  # Centered alignment
-        middle_layout.addSpacing(2)
+        middle_layout.addSpacing(0)  # Reduced from 2 to 0
         
         layout.addWidget(middle_widget, 1)
         
         # Right side: Price and Remove button
         right_widget = QWidget()
         right_widget.setStyleSheet("background-color: white;")
-        right_layout = QVBoxLayout(right_widget)  # Changed to QVBoxLayout
-        right_layout.setContentsMargins(10, 3, 0, 0)  # Reduced top margin
-        right_layout.setSpacing(5)  # Reduced from 8
+        right_layout = QVBoxLayout(right_widget)
+        right_layout.setContentsMargins(2, 5, 5, 0)  # Reduced left margin to 2
+        right_layout.setSpacing(3)
         
         # Modify price label to show total price
         self.price_label = QLabel()
-        self.price_label.setFont(QFont("Istok Web", 9, QFont.Bold))
+        self.price_label.setFont(QFont("Istok Web", 12, QFont.Bold))  # Increased from 9 to 12
+        self.price_label.setFixedHeight(30)  # Set fixed height for price label
         self.price_label.setStyleSheet("""
             background-color: white;
             color: #FF0000;
+            padding-right: 5px;  /* Add padding to ensure text is visible */
         """)
-        self.price_label.setAlignment(Qt.AlignRight)
+        self.price_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # Ensure vertical centering
         self.update_price_display()  # Update initial price display
         right_layout.addWidget(self.price_label)
         
@@ -306,7 +310,8 @@ class CartItemWidget(QFrame):
         """Update the price display based on current quantity"""
         self.current_price = self.unit_price * self.quantity
         price_str = "{:,.0f}".format(self.current_price).replace(',', '.')
-        self.price_label.setText(f"{price_str} vnđ")
+        # Use HTML to add bold styling
+        self.price_label.setText(f"<span style='font-weight: bold;'>{price_str} vnđ</span>")
 
     def increase_quantity(self):
         self.quantity += 1

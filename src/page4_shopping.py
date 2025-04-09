@@ -541,7 +541,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
     def create_button(self, text, icon_path):
             button = QPushButton()
-            button.setFixedSize(170, 32)  # Set both width and height
+            button.setFixedSize(170, 40)  
             button.setCursor(Qt.PointingHandCursor)
             button.setStyleSheet("""
                 QPushButton {
@@ -711,7 +711,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         # Payment button
         payment_button = QPushButton("PAYMENT")
         payment_button.setObjectName("payment_button")  # Set object name for finding later
-        payment_button.setFixedSize(120, 40)
+        payment_button.setFixedSize(170, 40)
         payment_button.setStyleSheet("""
             QPushButton {
                 background-color: #4E8F5F;

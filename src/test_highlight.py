@@ -21,7 +21,7 @@ class TestWindow(QWidget):
         
         # Tạo một product giả để test
         test_product = {
-            'name': 'Canned Strawberry Sting',
+            'name': 'Good Mood Yogurt Flavor',
             'price': '10000',
             'category': 'Thức uống',
             'image_url': 'https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png'  # URL ảnh giả
