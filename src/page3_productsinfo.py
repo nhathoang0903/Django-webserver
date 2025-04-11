@@ -170,15 +170,8 @@ class ProductCard(QFrame):
         price_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(price_label)
         
-        # Category - Convert to English
-        category_map = {
-            "Thức uống": "Beverage",
-            "Thức ăn": "Food",
-            "Đồ ăn vặt": "Snack"
-        }
-        vn_category = product['category']
-        en_category = category_map.get(vn_category, vn_category)
-        category_label = QLabel(f"Category: {en_category}")
+        # Category
+        category_label = QLabel(f"Category: {product['category']}")
         category_label.setFont(QFont("Josefin Sans", 12))
         category_label.setStyleSheet("color: black; border: none;")
         category_label.setAlignment(Qt.AlignCenter)
@@ -866,17 +859,9 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 self.grid_layout.addWidget(card, row, col)
                 card.show()
         else:
-            # Map English categories to Vietnamese
-            category_map = {
-                "Beverage": "Thức uống",
-                "Food": "Thức ăn",
-                "Snack": "Đồ ăn vặt"
-            }
-            vn_category = category_map.get(category)
-            
             # Filter and rearrange matching cards
             filtered_cards = [card for card in ProductPage._cards_cache 
-                            if card.product['category'] == vn_category]
+                            if card.product['category'] == category]
             
             # Add filtered cards in new positions
             for i, card in enumerate(filtered_cards):
@@ -1001,15 +986,8 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         price_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(price_label)
         
-        # Category - Convert to English
-        category_map = {
-            "Thức uống": "Beverage",
-            "Thức ăn": "Food",
-            "Đồ ăn vặt": "Snack"
-        }
-        vn_category = product['category']
-        en_category = category_map.get(vn_category, vn_category)
-        category_label = QLabel(f"Category: {en_category}")
+        # Category
+        category_label = QLabel(f"Category: {product['category']}")
         category_label.setFont(QFont("Josefin Sans", 12))
         category_label.setStyleSheet("color: black; border: none;")
         category_label.setAlignment(Qt.AlignCenter)
