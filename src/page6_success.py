@@ -24,8 +24,9 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         # Set application icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
-        # Send data to API
-        self.send_to_history_api()
+        # Gửi dữ liệu API trước, sau đó xóa số điện thoại nếu cần
+        if self.send_to_history_api():
+            self.clear_phone_number()
         # Clear cart only once at initialization
         self.cart_state.clear_cart()
         # Initialize transition overlay
@@ -40,6 +41,22 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
+    
+
+    def clear_phone_number(self):
+        """Clear phone number from config file"""
+        try:
+            phone_number_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                        'config', 'phone_number.json')
+            if os.path.exists(phone_number_path):
+                with open(phone_number_path, 'w') as f:
+                    json.dump({"phone_number": ""}, f, indent=4)
+                print("Phone number cleared successfully")
+                return True
+        except Exception as e:
+            print(f"Error clearing phone number: {e}")
+            return False
+        
 
     def send_to_history_api(self):
         """Return True if data was sent successfully"""
@@ -84,8 +101,8 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
                 except Exception as e:
                     print(f"Error reading cart mode: {e}")
 
-                # Only include phone number if not in guest mode
-                phone_number = ""
+                # Determine phone number or set to "unknown member" for guest mode
+                phone_number = "unknown member" if cart_mode == "guest" else ""
                 if cart_mode != "guest":
                     try:
                         phone_number_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
@@ -240,6 +257,10 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         """Clear data and return to the home page."""
         if hasattr(self, 'timer'):
             self.timer.stop()  # Stop the timer
+
+        # Clear phone number and cart data
+        self.clear_phone_number()
+        self.cart_state.clear_cart()
 
         # Clear cart data only
         self.cart_state.clear_cart()  # Clear cart state
