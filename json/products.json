@@ -1,218 +1,218 @@
 [
-    {
-      "product_id": 1,
-      "name": "Canned_Strawberry_Sting",
-      "quantity": 1,
-      "price": "12000.00",
-      "description": "Contains sugar (~13g/100ml), caffeine, and vitamin B, providing a quick energy boost. A 330ml can provides about 172 kcal.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png"
-    },
-    {
-      "product_id": 2,
-      "name": "Canned_Yellow_Sting",
-      "quantity": 1,
-      "price": "10000.00",
-      "description": "Contains taurine, caffeine (~80mg), sugar (~14g/100ml), helping to stay alert quickly. A 330ml can contains about 182 kcal.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543510/p7rd2alpcacivbkofxcv.png"
-    },
-    {
-      "product_id": 3,
-      "name": "Good_Mood_Yogurt_Flavor",
-      "quantity": 1,
-      "price": "10000.00",
-      "description": "Yogurt-flavored drink with sugar (~10g/100ml) and acidity regulators. A 450ml bottle provides about 180 kcal.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png"
-    },
-    {
-      "product_id": 4,
-      "name": "Hao_Hao_Cup_Noodles",
-      "quantity": 1,
-      "price": "8000.00",
-      "description": "Provides 290 kcal per cup (~65g), contains high fat and sodium. Suitable for a quick meal but not for frequent consumption.",
-      "category": "Thức ăn",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543514/ywh72ibgrqtziqowvgwe.png"
-    },
-    {
-      "product_id": 5,
-      "name": "Hao_Hao_Noodles",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "High in carbohydrates, fat, and sodium, providing ~350 kcal per 75g pack. Should be eaten with vegetables and protein for balanced nutrition.",
-      "category": "Thức ăn",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543515/gxpswqhxrd5dmuzw2k0o.png"
-    },
-    {
-      "product_id": 6,
-      "name": "Highland_Milk_Coffee",
-      "quantity": 1,
-      "price": "9000.00",
-      "description": "Contains caffeine (~50mg/100ml), sugar, condensed milk, providing ~60 kcal/100ml. Helps to stay alert but should be consumed in moderation.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543516/nrgruukdp6stenredbrh.png"
-    },
-    {
-      "product_id": 7,
-      "name": "Oishi_Crabme",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "Crab-flavored snack, rich in starch and vegetable oil, providing ~480 kcal/100g. Tasty but should be eaten in controlled portions.",
-      "category": "Đồ ăn vặt",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543517/uxmn56cd8twjbe92cang.png"
-    },
-    {
-      "product_id": 8,
-      "name": "Oishi_Flutes",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "Made of wheat flour, sugar, and vegetable fat, providing ~500 kcal/100g. A delicious snack but can lead to weight gain if consumed excessively.",
-      "category": "Đồ ăn vặt",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543518/ylqstf1cczqwzv5mnaco.png"
-    },
-    {
-      "product_id": 9,
-      "name": "Oishi_Matys_Vegetarian",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "Vegetarian snack, rich in starch and vegetable oil, providing ~450 kcal/100g. Should be consumed moderately to avoid excessive calorie intake.",
-      "category": "Đồ ăn vặt",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543519/pvj1tofdjtigpyncxvwq.png"
-    },
-    {
-      "product_id": 10,
-      "name": "Oishi_Special_Shrimp",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "Spicy shrimp-flavored snack, containing vegetable oil and seasonings, providing ~460 kcal/100g. Suitable for those who like spicy Thức ăn but should be consumed in moderation.",
-      "category": "Đồ ăn vặt",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543520/zq1i6kgnmrn47pbhmorb.png"
-    },
-    {
-      "product_id": 11,
-      "name": "Oishi_Spicy_Shrimp",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "Shrimp-flavored snack, high in carbohydrates and fat, providing ~470 kcal/100g. A good snack but not suitable for a diet.",
-      "category": "Đồ ăn vặt",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543522/deoyqvpn6dsbtdnet3su.png"
-    },
-    {
-      "product_id": 12,
-      "name": "Oishi_Sweet_Corn",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "Corn-flavored snack, rich in starch, providing ~420 kcal/100g. A light snack but should be eaten in moderation to avoid excessive calories.",
-      "category": "Đồ ăn vặt",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543523/omerrawef9dpbv9mr4cv.png"
-    },
-    {
-      "product_id": 13,
-      "name": "Oishi_Tater_Thins",
-      "quantity": 1,
-      "price": "5000.00",
-      "description": "Potato chip snack, high in fat, providing ~510 kcal/100g. Tasty but can cause weight gain if eaten in excess.",
-      "category": "Đồ ăn vặt",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/c2nrlmbtkahipgz7bada.png"
-    },
-    {
-      "product_id": 14,
-      "name": "Oolong_Tea_Plus",
-      "quantity": 1,
-      "price": "7000.00",
-      "description": "Sugar-free oolong tea, low in calories (~20 kcal/100ml). Helps cleanse the body and supports weight loss.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png"
-    },
-    {
-      "product_id": 15,
-      "name": "Orange_Juice_Mirinda",
-      "quantity": 1,
-      "price": "9000.00",
-      "description": "Carbonated orange drink, contains sugar (~48 kcal/100ml). A refreshing drink but should be consumed in moderation to avoid excess sugar.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543525/rofmsrxbzczhsjgmidwm.png"
-    },
-    {
-      "product_id": 16,
-      "name": "Pepsi_Zero_Sugar",
-      "quantity": 1,
-      "price": "10000.00",
-      "description": "Sugar-free soft drink with artificial sweeteners, almost 0 kcal. Suitable for dieters but should not be consumed excessively.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543526/zda1sruhwosm4cejpzyy.png"
-    },
-    {
-      "product_id": 17,
-      "name": "Pork_Hot_Dog",
-      "quantity": 1,
-      "price": "10000.00",
-      "description": "High in protein (~12g/100g), contains a lot of fat (~24g/100g), providing ~270 kcal. Should be eaten with vegetables for a balanced diet.",
-      "category": "Thức ăn",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543527/x6srfd1mwildqjabcsix.png"
-    },
-    {
-      "product_id": 18,
-      "name": "Red_Bull",
-      "quantity": 1,
-      "price": "11000.00",
-      "description": "Contains caffeine, taurine, and vitamin B, providing a quick energy boost with ~45 kcal/100ml. Should not be consumed excessively to avoid insomnia.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543529/r1repvjulpvabxqc0iv7.png"
-    },
-    {
-      "product_id": 19,
-      "name": "Revive_Original",
-      "quantity": 1,
-      "price": "9000.00",
-      "description": "Sports drink with added minerals, contains sugar, providing ~24 kcal/100ml. Suitable for active individuals but should not replace plain water.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543530/af8rk7dhdn6ywqllzcdp.png"
-    },
-    {
-      "product_id": 20,
-      "name": "Revive_Salted_Lemon",
-      "quantity": 1,
-      "price": "7000.00",
-      "description": "Sports drink with salted lemon flavor, providing ~25 kcal/100ml. Helps with hydration but should be limited to avoid excess sugar intake.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543530/gnca8hiemlkppldtztff.png"
-    },
-    {
-      "product_id": 21,
-      "name": "Rock_Star",
-      "quantity": 1,
-      "price": "12000.00",
-      "description": "Energy drink containing sugar and caffeine (~60 kcal/100ml). Helps improve alertness but may cause stress and rapid heartbeat if consumed in excess.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543531/mnosds0plrzqw6lqbjjg.png"
-    },
-    {
-      "product_id": 22,
-      "name": "Seven_Up",
-      "quantity": 1,
-      "price": "7000.00",
-      "description": "Carbonated lemon-flavored soft drink, contains sugar (~45 kcal/100ml). Frequent consumption may lead to weight gain and dental health issues.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543532/hfzxynvgeie5fy660our.png"
-    },
-    {
-      "product_id": 23,
-      "name": "Susu_Milk_Box",
-      "quantity": 1,
-      "price": "8000.00",
-      "description": "Nutrient-rich milk, contains protein (~3g/100ml), providing ~65 kcal/100ml. Suitable for children and individuals needing extra energy.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543533/stjul7t1lhvq7ioxp2xt.png"
-    },
-    {
-      "product_id": 24,
-      "name": "Twister_Orange_Juice",
-      "quantity": 1,
-      "price": "9000.00",
-      "description": "Orange juice with added sugar and vitamin C, providing ~50 kcal/100ml. Convenient but not a substitute for fresh oranges due to preservatives.",
-      "category": "Thức uống",
-      "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543534/bybdeidqjkirrvlakyfc.png"
-    }
-  ]
+  {
+    "product_id": 1,
+    "name": "Canned_Strawberry_Sting",
+    "quantity": 1,
+    "price": "12000.00",
+    "description": "Contains sugar (~13g/100ml), caffeine, and vitamin B, providing a quick energy boost. A 330ml can provides about 172 kcal.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png"
+  },
+  {
+    "product_id": 2,
+    "name": "Canned_Yellow_Sting",
+    "quantity": 1,
+    "price": "10000.00",
+    "description": "Contains taurine, caffeine (~80mg), sugar (~14g/100ml), helping to stay alert quickly. A 330ml can contains about 182 kcal.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543510/p7rd2alpcacivbkofxcv.png"
+  },
+  {
+    "product_id": 3,
+    "name": "Good_Mood_Yogurt_Flavor",
+    "quantity": 1,
+    "price": "10000.00",
+    "description": "Yogurt-flavored drink with sugar (~10g/100ml) and acidity regulators. A 450ml bottle provides about 180 kcal.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png"
+  },
+  {
+    "product_id": 4,
+    "name": "Hao_Hao_Cup_Noodles",
+    "quantity": 1,
+    "price": "8000.00",
+    "description": "Provides 290 kcal per cup (~65g), contains high fat and sodium. Suitable for a quick meal but not for frequent consumption.",
+    "category": "Food",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543514/ywh72ibgrqtziqowvgwe.png"
+  },
+  {
+    "product_id": 5,
+    "name": "Hao_Hao_Noodles",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "High in carbohydrates, fat, and sodium, providing ~350 kcal per 75g pack. Should be eaten with vegetables and protein for balanced nutrition.",
+    "category": "Food",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543515/gxpswqhxrd5dmuzw2k0o.png"
+  },
+  {
+    "product_id": 6,
+    "name": "Highland_Milk_Coffee",
+    "quantity": 1,
+    "price": "9000.00",
+    "description": "Contains caffeine (~50mg/100ml), sugar, condensed milk, providing ~60 kcal/100ml. Helps to stay alert but should be consumed in moderation.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543516/nrgruukdp6stenredbrh.png"
+  },
+  {
+    "product_id": 7,
+    "name": "Oishi_Crabme",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "Crab-flavored snack, rich in starch and vegetable oil, providing ~480 kcal/100g. Tasty but should be eaten in controlled portions.",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543517/uxmn56cd8twjbe92cang.png"
+  },
+  {
+    "product_id": 8,
+    "name": "Oishi_Flutes",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "Made of wheat flour, sugar, and vegetable fat, providing ~500 kcal/100g. A delicious snack but can lead to weight gain if consumed excessively.",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543518/ylqstf1cczqwzv5mnaco.png"
+  },
+  {
+    "product_id": 9,
+    "name": "Oishi_Matys_Vegetarian",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "Vegetarian snack, rich in starch and vegetable oil, providing ~450 kcal/100g. Should be consumed moderately to avoid excessive calorie intake.",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543519/pvj1tofdjtigpyncxvwq.png"
+  },
+  {
+    "product_id": 10,
+    "name": "Oishi_Special_Shrimp",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "Spicy shrimp-flavored snack, containing vegetable oil and seasonings, providing ~460 kcal/100g. Suitable for those who like spicy food but should be consumed in moderation.",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543520/zq1i6kgnmrn47pbhmorb.png"
+  },
+  {
+    "product_id": 11,
+    "name": "Oishi_Spicy_Shrimp",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "Shrimp-flavored snack, high in carbohydrates and fat, providing ~470 kcal/100g. A good snack but not suitable for a diet.",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543522/deoyqvpn6dsbtdnet3su.png"
+  },
+  {
+    "product_id": 12,
+    "name": "Oishi_Sweet_Corn",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "Corn-flavored snack, rich in starch, providing ~420 kcal/100g. A light snack but should be eaten in moderation to avoid excessive calories.",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543523/omerrawef9dpbv9mr4cv.png"
+  },
+  {
+    "product_id": 13,
+    "name": "Oishi_Tater_Thins",
+    "quantity": 1,
+    "price": "5000.00",
+    "description": "Potato chip snack, high in fat, providing ~510 kcal/100g. Tasty but can cause weight gain if eaten in excess.",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/c2nrlmbtkahipgz7bada.png"
+  },
+  {
+    "product_id": 14,
+    "name": "Oolong_Tea_Plus",
+    "quantity": 1,
+    "price": "7000.00",
+    "description": "Sugar-free oolong tea, low in calories (~20 kcal/100ml). Helps cleanse the body and supports weight loss.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png"
+  },
+  {
+    "product_id": 15,
+    "name": "Orange_Juice_Mirinda",
+    "quantity": 1,
+    "price": "9000.00",
+    "description": "Carbonated orange drink, contains sugar (~48 kcal/100ml). A refreshing drink but should be consumed in moderation to avoid excess sugar.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543525/rofmsrxbzczhsjgmidwm.png"
+  },
+  {
+    "product_id": 16,
+    "name": "Pepsi_Zero_Sugar",
+    "quantity": 1,
+    "price": "10000.00",
+    "description": "Sugar-free soft drink with artificial sweeteners, almost 0 kcal. Suitable for dieters but should not be consumed excessively.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543526/zda1sruhwosm4cejpzyy.png"
+  },
+  {
+    "product_id": 17,
+    "name": "Pork_Hot_Dog",
+    "quantity": 1,
+    "price": "10000.00",
+    "description": "High in protein (~12g/100g), contains a lot of fat (~24g/100g), providing ~270 kcal. Should be eaten with vegetables for a balanced diet.",
+    "category": "Food",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543527/x6srfd1mwildqjabcsix.png"
+  },
+  {
+    "product_id": 18,
+    "name": "Red_Bull",
+    "quantity": 1,
+    "price": "11000.00",
+    "description": "Contains caffeine, taurine, and vitamin B, providing a quick energy boost with ~45 kcal/100ml. Should not be consumed excessively to avoid insomnia.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543529/r1repvjulpvabxqc0iv7.png"
+  },
+  {
+    "product_id": 19,
+    "name": "Revive_Original",
+    "quantity": 1,
+    "price": "9000.00",
+    "description": "Sports drink with added minerals, contains sugar, providing ~24 kcal/100ml. Suitable for active individuals but should not replace plain water.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543530/af8rk7dhdn6ywqllzcdp.png"
+  },
+  {
+    "product_id": 20,
+    "name": "Revive_Salted_Lemon",
+    "quantity": 1,
+    "price": "7000.00",
+    "description": "Sports drink with salted lemon flavor, providing ~25 kcal/100ml. Helps with hydration but should be limited to avoid excess sugar intake.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543530/gnca8hiemlkppldtztff.png"
+  },
+  {
+    "product_id": 21,
+    "name": "Rock_Star",
+    "quantity": 1,
+    "price": "12000.00",
+    "description": "Energy drink containing sugar and caffeine (~60 kcal/100ml). Helps improve alertness but may cause stress and rapid heartbeat if consumed in excess.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543531/mnosds0plrzqw6lqbjjg.png"
+  },
+  {
+    "product_id": 22,
+    "name": "Seven_Up",
+    "quantity": 1,
+    "price": "7000.00",
+    "description": "Carbonated lemon-flavored soft drink, contains sugar (~45 kcal/100ml). Frequent consumption may lead to weight gain and dental health issues.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543532/hfzxynvgeie5fy660our.png"
+  },
+  {
+    "product_id": 23,
+    "name": "Susu_Milk_Box",
+    "quantity": 1,
+    "price": "8000.00",
+    "description": "Nutrient-rich milk, contains protein (~3g/100ml), providing ~65 kcal/100ml. Suitable for children and individuals needing extra energy.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543533/stjul7t1lhvq7ioxp2xt.png"
+  },
+  {
+    "product_id": 24,
+    "name": "Twister_Orange_Juice",
+    "quantity": 1,
+    "price": "9000.00",
+    "description": "Orange juice with added sugar and vitamin C, providing ~50 kcal/100ml. Convenient but not a substitute for fresh oranges due to preservatives.",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543534/bybdeidqjkirrvlakyfc.png"
+  }
+]
