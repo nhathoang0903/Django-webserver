@@ -26,7 +26,7 @@ class ProductDetector:
         """Call this method early in the application to start loading the model"""
         instance = cls()
         if instance.model is None:
-            model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'yolov11n20.onnx')
+            model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model', 'yolov11vs30withdata35.onnx')
             instance.model = YOLO(model_path)
     
     def load_product_data(self):

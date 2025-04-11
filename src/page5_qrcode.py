@@ -8,7 +8,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import gc
 import logging 
-import subprocess  # Add this import at the top
+import subprocess
 
 from base_page import BasePage 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
@@ -72,7 +72,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             return
             
         # pygame.mixer.init()  # Initialize pygame for sound
-        self.qr_start_time = None  # Add start time tracking
+        self.qr_start_time = None  # start time tracking
         self.processed_transaction_ids = set()  # Thêm set để lưu các ID đã xử lý
         
         # Calculate and format total amount properly
@@ -88,11 +88,11 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.target_time = datetime.now()  # Set target time when page opens
         self.load_qr_code()
         # Start transaction check after QR is loaded
-        self.stop_transaction_check = Event()  # Add event to stop transaction check
+        self.stop_transaction_check = Event()  # event to stop transaction check
         self.start_transaction_check()
         self.switch_to_success.connect(self.handle_success)  # Connect signal to handler
         self.shopping_page = None  # Add reference to shopping page
-        self.transition_overlay = PageTransitionOverlay(self)  # Add transition overlay
+        self.transition_overlay = PageTransitionOverlay(self)  # transition overlay
 
     def configure_device(self):
         """Configure CUDA and torch settings"""
@@ -188,25 +188,25 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Right Section
         right_section = QWidget()
         right_layout = QVBoxLayout(right_section)
-        right_layout.setContentsMargins(20, 0, 20, 20)  # Set top margin to 0
+        right_layout.setContentsMargins(20, 0, 20, 20) 
         right_layout.setSpacing(15)
         right_layout.setAlignment(Qt.AlignTop)  # Force alignment to top
 
         # QR Code Frame
         self.qr_frame = QFrame()
-        self.qr_frame.setFixedSize(300, 300)  # Reduced from 350x350 to 300x300
+        self.qr_frame.setFixedSize(300, 300)
         self.qr_frame.setStyleSheet("""
             QFrame {
                 background-color: #F5F9F7;
                 border: none;
-                margin-top: 20px;  /* Add top margin */
+                margin-top: 20px;  
             }
         """)
         
         # QR Code Label
         self.qr_label = QLabel(self.qr_frame)
         self.qr_label.setAlignment(Qt.AlignCenter)
-        self.qr_label.setFixedSize(300, 300)  # Reduced from 350x350 to 300x300
+        self.qr_label.setFixedSize(300, 300)
         self.qr_label.setText("Loading...")
         self.qr_label.setStyleSheet("background-color: transparent;")
 
@@ -279,8 +279,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             vietqr_string = genQRString(
                 merchant_id=account_number,
                 acq=bank_code,
-                amount=str(self.total_amount),  # Convert amount to string
-                merchant_name="NGUYEN THE NGO",  # Add merchant name
+                amount=str(self.total_amount), 
+                merchant_name="NGUYEN THE NGO",
                 service_code="QRIBFTTA"  
             )
             
@@ -538,8 +538,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             except Exception as e:
                 print(f"Error playing sounds: {e}")
                 
-            # Tăng delay chuyển trang lên 7000ms để đảm bảo tất cả âm thanh phát xong
-            QTimer.singleShot(7000, lambda: self.transition_overlay.fadeIn(show_new_page))
+            # Reduce delay for page transition to 3 seconds (still enough for sound effects)
+            # but ensuring the success page is shown before its timer expires
+            QTimer.singleShot(3000, lambda: self.transition_overlay.fadeIn(show_new_page))
             
         switch_page()
 

@@ -31,6 +31,11 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         self.cart_state.clear_cart()
         # Initialize transition overlay
         self.transition_overlay = PageTransitionOverlay(self)
+        
+        # Initialize timer but don't start it yet
+        self.timer = QTimer(self)
+        self.timer.setSingleShot(True)  # Timer will only fire once
+        self.timer.timeout.connect(self.go_home)
 
     def load_fonts(self):
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
@@ -247,11 +252,12 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
 
         main_layout.addWidget(center_widget)
 
-        # Initialize timer
-        self.timer = QTimer(self)
-        self.timer.setSingleShot(True)  # Timer will only fire once
-        self.timer.timeout.connect(self.go_home)
+        # No longer initializing timer here - moved to showEvent
+
+    def showEvent(self, event):
+        # Start the timer when the page is actually shown
         self.timer.start(5000)  # 5 seconds
+        super().showEvent(event)
 
     def go_home(self):
         """Clear data and return to the home page."""

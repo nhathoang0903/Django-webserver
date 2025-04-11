@@ -20,7 +20,7 @@ from PyQt5 import sip
 from countdown_overlay import CountdownOverlay
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
-from base_page import BasePage  # New import
+from base_page import BasePage  
 import requests
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
@@ -30,11 +30,16 @@ class SessionMonitor(QThread):
     """Thread to monitor cart session status"""
     session_ended = pyqtSignal()  # Signal when session ends
 
-    def __init__(self):
+    def __init__(self, page_name="page4"):
         super().__init__()
         self.is_running = True
+        self.page_name = page_name  
 
     def run(self):
+        if self.page_name != "page4":  # Ensure this thread only runs in page4
+            print(f"SessionMonitor is disabled for {self.page_name}")
+            return
+            
         while self.is_running:
             try:
                 # Get session status
@@ -342,7 +347,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.transition_in_progress = False  # Add this line
 
         # Initialize session monitor
-        self.session_monitor = SessionMonitor()
+        self.session_monitor = SessionMonitor(page_name="page4")
         self.payment_monitor = PaymentSignalMonitor(page_name="page4")  # Pass page name here
         
         # Connect signals
@@ -744,6 +749,12 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 self.session_monitor.stop()
                 self.session_monitor.wait()
                 print("Stopped session monitor before payment page")
+                
+            # Stop payment monitor before switching page
+            if hasattr(self, 'payment_monitor'):
+                self.payment_monitor.stop()
+                self.payment_monitor.wait()
+                print("Stopped payment monitor before payment page")
                 
             start_time = PageTiming.start_timing()
             from page5_qrcode import QRCodePage
@@ -1349,6 +1360,18 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         """Enhanced going back to home page with transition"""
         if not self.transition_in_progress:  # Check if transition is already in progress
             self.transition_in_progress = True  # Set the flag to indicate transition is in progress
+            
+            # Stop monitors before switching page
+            if hasattr(self, 'session_monitor'):
+                self.session_monitor.stop()
+                self.session_monitor.wait()
+                print("Stopped session monitor before going home")
+                
+            if hasattr(self, 'payment_monitor'):
+                self.payment_monitor.stop()
+                self.payment_monitor.wait()
+                print("Stopped payment monitor before going home")
+                
             def switch_to_home():
                 start_time = PageTiming.start_timing()
                 from page1_welcome import WelcomePage
