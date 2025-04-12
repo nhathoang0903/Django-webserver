@@ -1,7 +1,7 @@
 from base_page import BasePage
 from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QWidget,
                            QPushButton, QApplication, QHBoxLayout, QSizePolicy)
-from PyQt5.QtCore import Qt, QTimer, QEvent, QPoint, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import Qt, QTimer, QEvent, QPoint, QPropertyAnimation, QEasingCurve, QSize
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QColor
 import os
 from page3_productsinfo import ProductPage  
@@ -44,6 +44,7 @@ class InstructionPage(BasePage):
         # Set application icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
+        self.is_animating = False  # Add this flag
 
     def load_fonts(self):
         # Same font loading as page1
@@ -156,15 +157,18 @@ class InstructionPage(BasePage):
         slide_layout.setContentsMargins(10, 0, 10, 0)  # Add some padding
         slide_layout.setSpacing(10)  # Add space between elements
         
-        # Left arrow
-        left_arrow = QLabel()
+        # Define arrow paths before using them
         left_arrow_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'left-arrow.jpg')
-        left_arrow_pixmap = QPixmap(left_arrow_path)
-        if not left_arrow_pixmap.isNull():
-            left_arrow.setPixmap(left_arrow_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        right_arrow_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'right-arrow.jpg')
+        
+        # Left arrow
+        left_arrow = QPushButton()
+        left_arrow.setFixedSize(40, 40)
         left_arrow.setCursor(Qt.PointingHandCursor)
-        left_arrow.setFixedSize(40, 40)  # Ensure fixed size for arrow
-        left_arrow.mousePressEvent = lambda e: self.navigate_slide('prev')
+        left_arrow.setIcon(QIcon(left_arrow_path))
+        left_arrow.setIconSize(QSize(40, 40))
+        left_arrow.setStyleSheet("QPushButton { border: none; background: transparent; }")
+        left_arrow.clicked.connect(lambda: self.navigate_slide('prev'))
         
         # Center content
         content_container = QWidget()
@@ -245,14 +249,13 @@ class InstructionPage(BasePage):
         content_layout.addWidget(image_container, 1)
 
         # Right arrow (same settings as left arrow)
-        right_arrow = QLabel()
-        right_arrow_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'right-arrow.jpg')
-        right_arrow_pixmap = QPixmap(right_arrow_path)
-        if not right_arrow_pixmap.isNull():
-            right_arrow.setPixmap(right_arrow_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        right_arrow = QPushButton()
+        right_arrow.setFixedSize(40, 40)
         right_arrow.setCursor(Qt.PointingHandCursor)
-        right_arrow.setFixedSize(40, 40)  # Ensure fixed size for arrow
-        right_arrow.mousePressEvent = lambda e: self.navigate_slide('next')
+        right_arrow.setIcon(QIcon(right_arrow_path))
+        right_arrow.setIconSize(QSize(40, 40))
+        right_arrow.setStyleSheet("QPushButton { border: none; background: transparent; }")
+        right_arrow.clicked.connect(lambda: self.navigate_slide('next'))
 
         # Add all elements to slide layout
         slide_layout.addWidget(left_arrow, 0, Qt.AlignVCenter)
@@ -362,7 +365,12 @@ class InstructionPage(BasePage):
             self.slide_label.setPixmap(current_images[0].scaled(209, 230, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
     def navigate_slide(self, direction):
+        # Check if animation is already running
+        if self.is_animating:
+            return
+            
         self.slide_timer.stop()  # Reset timer
+        self.is_animating = True  # Set flag
         
         # Store current slide index
         previous_slide = self.current_slide
@@ -437,6 +445,7 @@ class InstructionPage(BasePage):
         # Reset positions
         self.slide_label.move(0, 0)
         self.next_slide_label.hide()
+        self.is_animating = False  # Reset flag when animation is done
         
         # Stop all animation timers for slide 5 and 6 if not on those slides
         if self.current_slide == 4:  # Slide 5

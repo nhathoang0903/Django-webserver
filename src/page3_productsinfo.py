@@ -300,50 +300,16 @@ class ProductCard(QFrame):
         try:
             # Add 1 item by default from product page
             is_existing = self.cart_state.add_item(self.product, 1)
-            
-            # Save cart state to file
-            self.cart_state.save_to_json()
-            
-            # Show visual feedback
+
+            # Update the cart count to reflect the total number of items in detected_products
+            from count_item import update_cart_count
+            update_cart_count(self)
+
+            # Visual feedback
             self.add_to_cart_btn.setText("Added!" if not is_existing else "Added More!")
             QTimer.singleShot(1000, lambda: self.add_to_cart_btn.setText("Add to Cart"))
-            
-            # Show different feedback for new vs existing items
-            button_style = """
-                QPushButton {{
-                    background-color: {};
-                    color: white;
-                    border: none;
-                    border-radius: 10px;
-                    padding: 5px 10px;
-                    margin: 2px 10px;
-                }}
-            """
-            
-            # Change button color based on whether item was new or existing
-            color = "#4CAF50" if not is_existing else "#FF9800"  
-            self.add_to_cart_btn.setStyleSheet(button_style.format(color))
-            
-            # Reset style after animation
-            QTimer.singleShot(1000, lambda: self.add_to_cart_btn.setStyleSheet(button_style.format("#507849")))
-            
-            print(f"{'Added new' if not is_existing else 'Updated existing'} item: {self.product['name']}")
-            
         except Exception as e:
             print(f"Error adding to cart: {e}")
-            # Show error feedback
-            self.add_to_cart_btn.setText("Error!")
-            self.add_to_cart_btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #F44336;
-                    color: white;
-                    border: none;
-                    border-radius: 10px;
-                    padding: 5px 10px;
-                    margin: 2px 10px;
-                }
-            """)
-            QTimer.singleShot(1000, lambda: self.add_to_cart_btn.setText("Add to Cart"))
 
 class LoadProductsThread(QThread):
     finished = pyqtSignal(list)
@@ -657,22 +623,24 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Scroll Area for products
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setFixedHeight(380) 
+        scroll_area.setFixedHeight(390)  # Increased from 380 to 390
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none;
                 background-color: transparent;
                 margin-right: 0px;
                 margin-top: -12px;
+                margin-bottom: 5px;  /* Add bottom margin */
             }
             QScrollBar:vertical {
                 border: none;
                 background: white;
                 border-radius: 10px;
                 width: 25px;
-                margin: 0px 0px 0px 0px;
-                height: 380px;
+                margin: 8px 0px 8px 0px;  /* Increased from 5px to 8px */
+                height: 364px;  /* Adjusted to accommodate increased margins */
                 subcontrol-origin: margin;
                 subcontrol-position: top;
             }
@@ -680,7 +648,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 background: #D9D9D9;
                 border-radius: 10px;
                 min-height: 30px;
-                margin: 0px;
+                margin: 2px;  /* Added margin all around handle */
             }
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 height: 0px;
@@ -703,33 +671,97 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             }
         """)
 
-        # Enable touch scrolling
-        QScroller.grabGesture(scroll_area.viewport(), QScroller.LeftMouseButtonGesture)
+        # Custom gesture handling
+        class GestureFilter(QObject):
+            def __init__(self, parent=None):
+                super().__init__(parent)
+                self.start_pos = None
+                self.min_distance = 10  # Minimum distance for swipe
+
+            def eventFilter(self, obj, event):
+                if event.type() == QEvent.MouseButtonPress:
+                    self.start_pos = event.pos()
+                    return True
+                elif event.type() == QEvent.MouseMove and self.start_pos:
+                    current_pos = event.pos()
+                    dx = current_pos.x() - self.start_pos.x()
+                    dy = current_pos.y() - self.start_pos.y()
+                    
+                    # Only process vertical movement
+                    if abs(dy) > self.min_distance:
+                        # Calculate scroll amount based on vertical movement
+                        scroll_amount = dy * 0.5  # Adjust sensitivity
+                        scroll_area.verticalScrollBar().setValue(
+                            scroll_area.verticalScrollBar().value() - int(scroll_amount)
+                        )
+                        self.start_pos = current_pos
+                    return True
+                elif event.type() == QEvent.MouseButtonRelease:
+                    self.start_pos = None
+                    return True
+                return False
+
+        # Install gesture filter
+        gesture_filter = GestureFilter(scroll_area)
+        scroll_area.viewport().installEventFilter(gesture_filter)
 
         # Container widget for the grid
         self.container = QWidget()
         self.container.setStyleSheet("background-color: transparent;")
         self.container.setFixedWidth(600)
-        self.container.setMinimumHeight(360) 
+        self.container.setMinimumHeight(380)  # Increased from 360 to 380
         
         # Grid layout for products
         self.grid_layout = QGridLayout(self.container)
         self.grid_layout.setSpacing(25)  
-        self.grid_layout.setContentsMargins(10, 10, 60, 10)
+        self.grid_layout.setContentsMargins(10, 10, 60, 20)  # Increased bottom margin from 10 to 20
         self.grid_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
 
         scroll_area.setWidget(self.container)
         main_layout.addWidget(scroll_area)
 
-        # Add spacing before SCAN button
-        main_layout.addSpacing(20)
-
-        # Create a horizontal layout for the button content
-        button_layout = QHBoxLayout()
-        button_layout.setSpacing(10)
-        button_layout.setAlignment(Qt.AlignCenter)
+        # Create a horizontal layout for the bottom section
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Create a container widget for the button
+        # Create the first part (left side) with cart labels
+        left_part = QHBoxLayout()
+        left_part.setSpacing(2)
+        
+        # Add "Your Cart" text with black color
+        your_cart_text = QLabel("Your Cart")
+        your_cart_text.setFont(QFont("Josefin Sans", 14, QFont.Bold))
+        your_cart_text.setStyleSheet("color: black;")
+        left_part.addWidget(your_cart_text)
+        
+        # Add item count with red color
+        cart_count_text = QLabel("(0)")
+        cart_count_text.setFont(QFont("Josefin Sans", 14, QFont.Bold))
+        cart_count_text.setStyleSheet("color: #E72225;")
+        left_part.addWidget(cart_count_text)
+        
+        # Create container for the entire bottom section with fixed height 
+        bottom_container = QWidget()
+        bottom_container.setFixedHeight(45)  # Reduced from 50 to 45
+        bottom_container_layout = QHBoxLayout(bottom_container)
+        bottom_container_layout.setContentsMargins(20, 0, 20, 0)
+        
+        # Create 3 equal width sections
+        left_widget = QWidget()
+        left_widget.setLayout(left_part)
+        
+        middle_widget = QWidget()
+        middle_layout = QHBoxLayout(middle_widget)
+        middle_layout.setContentsMargins(0, 0, 0, 0)
+        
+        right_widget = QWidget()  # Empty right widget for spacing
+        
+        # Add all sections with equal width
+        bottom_container_layout.addWidget(left_widget, 1)  # Stretch factor 1
+        bottom_container_layout.addWidget(middle_widget, 1)  # Stretch factor 1
+        bottom_container_layout.addWidget(right_widget, 1)  # Stretch factor 1
+        
+        # Create SCAN button
         button_container = QWidget()
         button_container.setCursor(Qt.PointingHandCursor)
         button_container.setFixedSize(160, 40)
@@ -740,6 +772,11 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             }
         """)
         
+        # Create button content layout
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(20, 0, 10, 0)
+        button_layout.setSpacing(10)
+        
         # Add scan icon with both normal and hover states
         scan_icon = QLabel()
         scan_icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'scanbutton.png')
@@ -747,23 +784,20 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         self.normal_pixmap = QPixmap(scan_icon_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.hover_pixmap = QPixmap(scan_hover_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         scan_icon.setPixmap(self.normal_pixmap)
-        scan_icon.setStyleSheet("padding-left: 20px;")
         
         # Add SCAN text
         scan_text = QLabel("SCAN")
         scan_text.setFont(QFont("Inter", 10, QFont.Bold))
-        scan_text.setStyleSheet("""
-            QLabel {
-                color: white;
-            }
-        """)
+        scan_text.setStyleSheet("color: white;")
         
         # Add widgets to button layout
         button_layout.addWidget(scan_icon)
         button_layout.addWidget(scan_text)
         button_layout.addStretch()
-        button_container.setLayout(button_layout)
-        
+
+        # Add SCAN button to center widget
+        middle_layout.addWidget(button_container, 0, Qt.AlignCenter)
+
         # Create event filters for hover effect
         class HoverEventFilter(QObject):
             def __init__(self, parent=None):
@@ -787,10 +821,13 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
 
         # Install event filter
         button_container.installEventFilter(HoverEventFilter(self))
-        
-        # Add spacer before button
-        main_layout.addSpacing(5)
-        main_layout.addWidget(button_container, alignment=Qt.AlignCenter)
+
+        # Add bottom container to main layout
+        main_layout.addWidget(bottom_container)
+
+        # Save references to the cart labels for updates
+        self.cart_text_label = your_cart_text
+        self.cart_count_label = cart_count_text
 
     def setup_loading_indicator(self):
         self.loading_widget = QWidget(self)
@@ -1123,7 +1160,10 @@ class ProductCardDialog(QDialog):
 
 if __name__ == '__main__':
     import sys
+    from PyQt5.QtWidgets import QApplication
+    from count_item import add_cart_count_label, update_cart_count
     app = QApplication(sys.argv)
     product_page = ProductPage()
+    add_cart_count_label(product_page)  # Thêm widget "Your Cart"
     product_page.show()
     sys.exit(app.exec_())

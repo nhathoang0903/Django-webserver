@@ -10,6 +10,7 @@ import time
 from threading import Thread, Event, Lock
 from config import CART_SHOPPING_MONITOR_API, DEVICE_ID
 from queue import Queue
+from count_item import update_cart_count  # Import the update_cart_count function
 
 class CartState:
     JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'shopping_process.json')
@@ -146,29 +147,10 @@ class CartState:
             with open(self.JSON_PATH, 'w') as f:
                 json.dump(cart_data, f, indent=4)
 
-            # Only send to API if there are products
-            if cart_data["detected_products"]:  # Check if products exist
-                try:
-                    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                        'config', 'phone_number.json'), 'r') as f:
-                        phone_data = json.load(f)
-                        phone_number = phone_data.get("phone_number", "")
-                except:
-                    phone_number = ""
-
-                # Add to queue instead of starting new thread
-                payload = {
-                    "phone_number": phone_number,
-                    "device_id": DEVICE_ID, 
-                    "cart_data": cart_data
-                }
-
-                # Try to add to queue without blocking
-                try:
-                    self._monitor_queue.put_nowait(payload)
-                except:
-                    # Queue full, skip this update
-                    pass
+            # Update the cart count dynamically
+            from count_item import update_cart_count
+            from page3_productsinfo import ProductPage
+            update_cart_count(ProductPage._instance)
 
         except Exception as e:
             print(f"Error saving cart data: {e}")

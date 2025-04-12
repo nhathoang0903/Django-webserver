@@ -25,6 +25,7 @@ import requests
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
 from config import CART_END_SESSION_STATUS_API, DEVICE_ID, CART_CHECK_PAYMENT_SIGNAL, CART_END_SESSION_API
+from threading import Thread
 
 class SessionMonitor(QThread):
     """Thread to monitor cart session status"""
@@ -736,39 +737,94 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.content_layout.addWidget(footer_container, alignment=Qt.AlignBottom)  # Align to bottom
 
     def show_payment_page(self):
-        """Enhanced transition to payment page"""
+        """Enhanced transition to payment page with optimized performance"""
+        # Bắt đầu đo thời gian
+        transition_start_time = time.time()
+        print(f"[TIMING] Starting page transition at: {transition_start_time}")
+        
         total_amount = sum(float(product['price']) * quantity 
                          for product, quantity in self.cart_state.cart_items)
         if total_amount == 0:
             self.animate_disabled_payment()
             return
             
-        def switch_page():
-            # Stop session monitor before switching page
+        if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
+            self.transition_in_progress = True
+            
+            # Start transition overlay immediately
+            self.transition_overlay.fadeIn()
+            print(f"[TIMING] Transition overlay started at: {time.time() - transition_start_time:.4f}s")
+            
+            # Lưu ý QUAN TRỌNG: KHÔNG khởi tạo QTimer trong thread khác
+            # Stop monitors trực tiếp
             if hasattr(self, 'session_monitor'):
                 self.session_monitor.stop()
-                self.session_monitor.wait()
+                # Không dùng wait() để tránh blocking
                 print("Stopped session monitor before payment page")
                 
-            # Stop payment monitor before switching page
             if hasattr(self, 'payment_monitor'):
                 self.payment_monitor.stop()
-                self.payment_monitor.wait()
+                # Không dùng wait() để tránh blocking
                 print("Stopped payment monitor before payment page")
                 
+            print(f"[TIMING] Monitors stopped at: {time.time() - transition_start_time:.4f}s")
+            
+            # Pre-cleanup để giảm tải
+            if self.camera:
+                self.stop_camera()
+                print(f"[TIMING] Camera stopped at: {time.time() - transition_start_time:.4f}s")
+            
+            # Load QR page trong main thread để tránh lỗi QTimer
             start_time = PageTiming.start_timing()
+            
+            # Chuẩn bị tải page mới
+            print(f"[TIMING] Starting to load QRCodePage at: {time.time() - transition_start_time:.4f}s")
             from page5_qrcode import QRCodePage
+            
+            # Khởi tạo page với tham số đồng bộ
+            print(f"[TIMING] Creating QRCodePage at: {time.time() - transition_start_time:.4f}s")
             self.payment_page = QRCodePage()
             self.payment_page.payment_completed.connect(self.handle_payment_completed)
             
+            # Hiển thị trang mới và ẩn trang hiện tại
             def show_new_page():
+                page_ready_time = time.time()
+                print(f"[TIMING] QRCodePage ready at: {page_ready_time - transition_start_time:.4f}s")
                 self.payment_page.show()
+                print(f"[TIMING] QRCodePage shown at: {time.time() - transition_start_time:.4f}s")
                 self.transition_overlay.fadeOut(lambda: self.hide())
+                # Kết thúc đo thời gian
+                total_time = time.time() - transition_start_time
+                print(f"[TIMING] Total transition time: {total_time:.4f}s")
                 PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
-                
-            self.transition_overlay.fadeIn(show_new_page)
             
-        switch_page()
+            # Dùng QTimer ở main thread
+            QTimer.singleShot(100, show_new_page)
+            
+            # Cleanup nặng để chạy sau khi đã chuyển trang
+            def background_cleanup():
+                try:
+                    # Clear caches
+                    self._image_cache.clear()
+                    self._widgets_cache.clear()
+                    
+                    # Clean up modals
+                    if hasattr(self, '_product_modal') and self._product_modal:
+                        self._product_modal.hide()
+                    
+                    if hasattr(self, '_cancel_modal') and self._cancel_modal:
+                        self._cancel_modal.hide()
+                    
+                    # Force garbage collection
+                    import gc
+                    gc.collect()
+                    
+                    print(f"[TIMING] Background cleanup completed at: {time.time() - transition_start_time:.4f}s")
+                except Exception as e:
+                    print(f"Error in cleanup: {e}")
+            
+            # Chạy cleanup sau khi đã chuyển trang
+            QTimer.singleShot(500, background_cleanup)
 
     def handle_payment_completed(self, success):
         """Xử lý khi thanh toán hoàn tất"""

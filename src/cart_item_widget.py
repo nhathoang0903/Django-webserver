@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QLabel,
 from PyQt5.QtGui import QPixmap, QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint, QTimer
 import os
-from page3_productsinfo import SimpleImageLoader  # Import SimpleImageLoader
+from page3_productsinfo import SimpleImageLoader  
 
 class CartItemWidget(QFrame):
     quantityChanged = pyqtSignal(int)  # Signal for quantity changes
@@ -60,11 +60,11 @@ class CartItemWidget(QFrame):
         self.image_label = QLabel()
         # Set image size based on category - increased size
         category = product.get('category', '')
-        if (category == "Đồ ăn vặt"):
+        if (category == "Snack"):
             image_size = (75, 95)  
-        elif (category == "Thức uống"):
+        elif (category == "Beverage"):
             image_size = (75, 95) 
-        elif (category == "Thức ăn"):
+        elif (category == "Food"):
             image_size = (75, 95) 
         else:
             image_size = (75, 95) 
@@ -156,8 +156,8 @@ class CartItemWidget(QFrame):
         middle_layout.addWidget(name_container, 0, Qt.AlignLeft | Qt.AlignTop)  # Align to top
         middle_layout.addStretch(1)  # Reduced stretch ratio to accommodate taller name container
 
-        # Quantity controls with smaller size
-        control_size = 24  # Reduced from 28 to 24
+        # Quantity controls with larger size
+        control_size = 32  # Increased from 24 to 32
 
         # Quantity controls with center alignment
         quantity_container = QWidget()
@@ -175,35 +175,34 @@ class CartItemWidget(QFrame):
         # Decrease button
         decrease_btn = QPushButton("-")
         decrease_btn.setFixedSize(control_size, control_size)
-        decrease_btn.setFont(QFont("Inria Sans", 13, QFont.Bold))
+        decrease_btn.setFont(QFont("Inria Sans", 16, QFont.Bold))  # Increased font size
         decrease_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
+                background-color: #D8D8D8;
                 color: #000000;
-                border: 1px solid #000000;
-                border-top-left-radius: 8px;
-                border-bottom-left-radius: 8px;
-                border-right: none;
-                font-size: 16px;
+                border: none;
+                border-radius: 10px;
+                font-size: 20px;
                 font-weight: bold;
             }
             QPushButton:hover {
-                background-color: #F5F5F5;
+                background-color: #BDBDBD;
+            }
+            QPushButton:pressed {
+                background-color: #A8A8A8;
             }
         """)
         decrease_btn.clicked.connect(self.decrease_quantity)
         
-        # Quantity label with full borders and explicit border-radius: 0
+        # Quantity label with larger font and red color
         self.quantity_label = QLabel(str(quantity))
-        self.quantity_label.setFixedSize(control_size, control_size)
-        self.quantity_label.setFont(QFont("Inria Sans", 13, QFont.Bold))
+        self.quantity_label.setFixedSize(control_size + 15, control_size)  # Wider for larger numbers
+        self.quantity_label.setFont(QFont("Inria Sans", 18, QFont.Bold))  # Increased font size
         self.quantity_label.setStyleSheet("""
             QLabel {
-                background-color: white;
-                color: #000000;
-                border: 1px solid #000000;
-                border-radius: 0px;
-                font-size: 14px;
+                background-color: transparent;
+                color: #FF0000;
+                border: none;
                 font-weight: bold;
                 qproperty-alignment: AlignCenter;
             }
@@ -212,20 +211,21 @@ class CartItemWidget(QFrame):
         # Increase button
         increase_btn = QPushButton("+")
         increase_btn.setFixedSize(control_size, control_size)
-        increase_btn.setFont(QFont("Inria Sans", 13, QFont.Bold))
+        increase_btn.setFont(QFont("Inria Sans", 16, QFont.Bold))  # Increased font size
         increase_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
+                background-color: #D8D8D8;
                 color: #000000;
-                border: 1px solid #000000;
-                border-top-right-radius: 8px;
-                border-bottom-right-radius: 8px;
-                border-left: none;
-                font-size: 16px;
+                border: none;
+                border-radius: 10px;
+                font-size: 20px;
                 font-weight: bold;
             }
             QPushButton:hover {
-                background-color: #F5F5F5;
+                background-color: #BDBDBD;
+            }
+            QPushButton:pressed {
+                background-color: #A8A8A8;
             }
         """)
         increase_btn.clicked.connect(self.increase_quantity)
@@ -254,12 +254,12 @@ class CartItemWidget(QFrame):
         
         # Modify price label to show total price
         self.price_label = QLabel()
-        self.price_label.setFont(QFont("Istok Web", 12, QFont.Bold))  # Increased from 9 to 12
+        self.price_label.setFont(QFont("Istok Web", 12))  # Increased from 9 to 12
         self.price_label.setFixedHeight(30)  # Set fixed height for price label
         self.price_label.setStyleSheet("""
             background-color: white;
             color: #FF0000;
-            padding-right: 5px;  /* Add padding to ensure text is visible */
+            padding-right: 5px;
         """)
         self.price_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # Ensure vertical centering
         self.update_price_display()  # Update initial price display
@@ -267,10 +267,10 @@ class CartItemWidget(QFrame):
         
         # Remove button with larger icon but same button size
         remove_btn = QPushButton()
-        remove_btn.setFixedSize(30, 30)  # Keep original button size
+        remove_btn.setFixedSize(35, 35)  # Keep original button size
         remove_icon = QPixmap(os.path.join(os.path.dirname(os.path.dirname(__file__)),
                                        'assets', 'remove.png'))
-        scaled_icon = remove_icon.scaled(28, 28, Qt.KeepAspectRatio, Qt.SmoothTransformation)  # Larger icon
+        scaled_icon = remove_icon.scaled(33, 33, Qt.KeepAspectRatio, Qt.SmoothTransformation)  # Larger icon
         remove_btn.setIconSize(scaled_icon.size())  # Set icon size independently
         remove_btn.setIcon(QIcon(scaled_icon))
         remove_btn.setStyleSheet("""

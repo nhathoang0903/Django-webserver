@@ -34,32 +34,53 @@ from components.PageTransitionOverlay import PageTransitionOverlay
 import pyttsx3
 import qrcode
 from vietqr.VietQR import genQRString, getBincode
+from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
 
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Signal for page switching
     payment_completed = pyqtSignal(bool)  # Signal for payment status
     
     def __init__(self):
+        # Ghi lại thời gian bắt đầu khởi tạo
+        init_start_time = time.time()
+        print(f"[QR_TIMING] Starting QRCodePage initialization at: {init_start_time}")
+        
         # Force CPU configuration before any other initialization
         self.configure_device()
+        print(f"[QR_TIMING] Device configured at: {time.time() - init_start_time:.4f}s")
+        
         super().__init__()
+        print(f"[QR_TIMING] BasePage initialized at: {time.time() - init_start_time:.4f}s")
         
-        # Remove pygame sound initialization
-        self.sound_enabled = False  # Disable sound functionality
+        # Disable sound functionality (lightweight)
+        self.sound_enabled = False
         
-        # Rest of initialization
-        self.installEventFilter(self)  # Register event filter
-        self.page_load_time = time.time()  # Track when page loads
-        self.cart_state = CartState()
-        # Set application icon
+        # Register event filter
+        self.installEventFilter(self)
+        self.page_load_time = time.time()
+        
+        # Simplify initialization:
+        # 1. Set minimum attributes first
+        self.transition_overlay = PageTransitionOverlay(self)
+        self.setWindowTitle('QR Code Payment')
+        self.setStyleSheet("background-color: #F5F9F7;")
+        
+        # Set window icon (defer image loading)
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
-        # Calculate total first
-        raw_total = sum(float(product['price']) * quantity 
-                       for product, quantity in self.cart_state.cart_items)
-        self.total_amount = int(raw_total)
         
-        # Check if total is zero
+        # Core data loading
+        print(f"[QR_TIMING] Starting to load cart state at: {time.time() - init_start_time:.4f}s")
+        self.cart_state = CartState()
+        
+        # Calculate total first - do this only once
+        print(f"[QR_TIMING] Calculating total amount at: {time.time() - init_start_time:.4f}s")
+        raw_total = sum(float(product['price']) * quantity 
+                      for product, quantity in self.cart_state.cart_items)
+        self.total_amount = int(raw_total)
+        print(f"[QR_TIMING] Initialized total amount: {self.total_amount} at {time.time() - init_start_time:.4f}s")
+        
+        # Quick validation
         if self.total_amount == 0:
             from PyQt5.QtWidgets import QMessageBox
             msg = QMessageBox()
@@ -70,29 +91,34 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             msg.exec_()
             self.close()
             return
-            
-        # pygame.mixer.init()  # Initialize pygame for sound
-        self.qr_start_time = None  # start time tracking
-        self.processed_transaction_ids = set()  # Thêm set để lưu các ID đã xử lý
         
-        # Calculate and format total amount properly
-        raw_total = sum(float(product['price']) * quantity 
-                       for product, quantity in self.cart_state.cart_items)
-        self.total_amount = int(raw_total)  # Convert to integer to avoid floating point issues
-        print(f"Initialized total amount: {self.total_amount}")  # Debug print
+        # Setup core timing variables
+        self.qr_start_time = None
+        self.processed_transaction_ids = set()
         
+        # Initialize UI early
+        print(f"[QR_TIMING] Starting UI initialization at: {time.time() - init_start_time:.4f}s")
         self.init_ui()
+        print(f"[QR_TIMING] UI initialized at: {time.time() - init_start_time:.4f}s")
+        
+        # Setup timers and connect signals
         self.countdown_timer = QTimer()
         self.countdown_timer.timeout.connect(self.update_countdown)
         self.countdown_seconds = 300  # 5 minutes
-        self.target_time = datetime.now()  # Set target time when page opens
-        self.load_qr_code()
-        # Start transaction check after QR is loaded
-        self.stop_transaction_check = Event()  # event to stop transaction check
-        self.start_transaction_check()
-        self.switch_to_success.connect(self.handle_success)  # Connect signal to handler
-        self.shopping_page = None  # Add reference to shopping page
-        self.transition_overlay = PageTransitionOverlay(self)  # transition overlay
+        self.target_time = datetime.now()
+        
+        # Connect signals - đã khai báo ở mức lớp, chỉ connect ở đây
+        self.switch_to_success.connect(self.handle_success)
+        self.shopping_page = None
+        
+        # Load QR code (heavy operation) - show loading first, then generate in QTimer
+        self.qr_label.setText("Generating QR Code...")
+        
+        # Generate QR code with a short delay to allow UI to show first
+        QTimer.singleShot(50, self.load_qr_code)
+        
+        self.stop_transaction_check = Event()
+        print(f"[QR_TIMING] QRCodePage initialization completed at: {time.time() - init_start_time:.4f}s")
 
     def configure_device(self):
         """Configure CUDA and torch settings"""
@@ -262,103 +288,109 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         main_layout.addWidget(right_section)
 
     def load_qr_code(self):
+        """Optimized QR code generation"""
+        qr_start = time.time()
+        print(f"[QR_TIMING] Starting QR code generation at: {qr_start}")
+        
         try:
             # Set the start time when QR is generated
             self.qr_start_time = datetime.now()
             
-            # Debug prints to verify amount
-            print(f"Generating QR for amount: {self.total_amount}")
-            
-            # VietQR configuration
-            bank_name = "MB"  # MB Bank
-            account_number = "0375712517"  #account number 
-            bank_code = getBincode(bank_name)
-            print(f"Bank code: {bank_code}")  # Debug print
+            # Generate QR directly in main thread to fix UI update issues
+            try:
+                # VietQR configuration
+                bank_name = "MB"  # MB Bank
+                account_number = "0375712517"  #account number 
+                bank_code = getBincode(bank_name)
+                print(f"[QR_TIMING] Got bank code at: {time.time() - qr_start:.4f}s")
 
-            # Generate VietQR string with proper format
-            vietqr_string = genQRString(
-                merchant_id=account_number,
-                acq=bank_code,
-                amount=str(self.total_amount), 
-                merchant_name="NGUYEN THE NGO",
-                service_code="QRIBFTTA"  
-            )
-            
-            # Print out generated string for debugging
-            print(f"Generated VietQR string: {vietqr_string}")
-
-            # Create QR code with custom styling
-            qr = qrcode.QRCode(
-                version=5,
-                error_correction=qrcode.constants.ERROR_CORRECT_H,
-                box_size=12,  # Increased box size for better scanning
-                border=4
-            )
-            
-            qr.add_data(vietqr_string)
-            qr.make(fit=True)
-            
-            # Create QR image with custom colors
-            qr_img = qr.make_image(fill_color="#2C7A7B", back_color="#F5F9F7").convert("RGBA")
-            
-            # Convert PIL Image to QPixmap using BytesIO
-            img_byte_array = io.BytesIO()
-            qr_img.save(img_byte_array, format='PNG')
-            img_byte_array.seek(0)  # Reset buffer position
-            
-            # Create QPixmap from bytes
-            qr_pixmap = QPixmap()
-            qr_pixmap.loadFromData(img_byte_array.getvalue())
-            
-            # Display QR code with proper scaling and position
-            self.qr_label.setPixmap(qr_pixmap.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            self.qr_label.setAlignment(Qt.AlignCenter)
-            
-            # Adjust QR frame position
-            self.qr_frame.setFixedSize(300, 300)  
-            self.qr_frame.setStyleSheet("""
-                QFrame {
-                    background-color: #F5F9F7;
-                    border: none;
-                    margin-top: 20px;  
-                }
-            """)
-            
-            # Show generation time with ordinal suffix
-            current_time = QDateTime.currentDateTime()
-            day = current_time.date().day()
-            
-            # Get ordinal suffix
-            if day in [1, 21, 31]:
-                suffix = "st"
-            elif day in [2, 22]:
-                suffix = "nd"
-            elif day in [3, 23]:
-                suffix = "rd"
-            else:
-                suffix = "th"
-
-            # Format date with superscript suffix
-            date_str = f"{day}<sup>{suffix}</sup>"
-            time_str = current_time.toString('hh:mm:ss')
-            month_str = current_time.toString('MMM')
-            year_str = current_time.toString('yyyy')
-            
-            self.gen_time_label.setText(
-                f"Generated {time_str}, {month_str} {date_str}, {year_str}")
-            self.gen_time_label.setTextFormat(Qt.RichText)  # Enable HTML formatting
-            self.gen_time_label.show()
-            print("QR code generated at:", current_time.toString('hh:mm:ss, MMM d, yyyy'))
-            
-            # Start countdown
-            self.countdown_timer.start(1000)
-            self.countdown_label.show()
-            
-            # Start transaction check with proper thread management
-            self.start_transaction_check()
+                # Generate VietQR string with proper format
+                vietqr_string = genQRString(
+                    merchant_id=account_number,
+                    acq=bank_code,
+                    amount=str(self.total_amount), 
+                    merchant_name="NGUYEN THE NGO",
+                    service_code="QRIBFTTA"  
+                )
+                print(f"[QR_TIMING] Generated VietQR string at: {time.time() - qr_start:.4f}s")
+                
+                # Create QR code with custom styling
+                qr = qrcode.QRCode(
+                    version=5,
+                    error_correction=qrcode.constants.ERROR_CORRECT_H,
+                    box_size=12,
+                    border=4
+                )
+                
+                qr.add_data(vietqr_string)
+                qr.make(fit=True)
+                print(f"[QR_TIMING] QR code created at: {time.time() - qr_start:.4f}s")
+                
+                # Create QR image with custom colors
+                qr_img = qr.make_image(fill_color="#2C7A7B", back_color="#F5F9F7").convert("RGBA")
+                print(f"[QR_TIMING] QR image generated at: {time.time() - qr_start:.4f}s")
+                
+                # Convert PIL Image to QPixmap using BytesIO
+                img_byte_array = io.BytesIO()
+                qr_img.save(img_byte_array, format='PNG')
+                img_byte_array.seek(0)
+                print(f"[QR_TIMING] Converted to bytes at: {time.time() - qr_start:.4f}s")
+                
+                # Create QPixmap from bytes and update UI directly
+                qr_pixmap = QPixmap()
+                qr_pixmap.loadFromData(img_byte_array.getvalue())
+                
+                # Cập nhật UI ngay lập tức
+                print(f"[QR_TIMING] About to update UI at: {time.time() - qr_start:.4f}s")
+                self.qr_label.setPixmap(qr_pixmap.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                self.qr_label.setAlignment(Qt.AlignCenter)
+                print(f"[QR_TIMING] QR image displayed at: {time.time() - qr_start:.4f}s")
+                
+                # Update date/time display
+                current_time = QDateTime.currentDateTime()
+                time_str = current_time.toString('hh:mm:ss')
+                month_str = current_time.toString('MMM')
+                day = current_time.date().day()
+                year_str = current_time.toString('yyyy')
+                
+                # Get ordinal suffix
+                if day in [1, 21, 31]:
+                    suffix = "st"
+                elif day in [2, 22]:
+                    suffix = "nd"
+                elif day in [3, 23]:
+                    suffix = "rd"
+                else:
+                    suffix = "th"
+                
+                date_str = f"{day}<sup>{suffix}</sup>"
+                self.gen_time_label.setText(
+                    f"Generated {time_str}, {month_str} {date_str}, {year_str}")
+                self.gen_time_label.setTextFormat(Qt.RichText)
+                self.gen_time_label.show()
+                print(f"[QR_TIMING] Generation time displayed at: {time.time() - qr_start:.4f}s")
+                
+                # Đảm bảo UI được cập nhật ngay lập tức
+                QApplication.processEvents()
+                
+                # Start countdown
+                self.countdown_timer.start(1000)
+                self.countdown_label.show()
+                print(f"[QR_TIMING] Countdown started at: {time.time() - qr_start:.4f}s")
+                
+                # Start transaction check after UI được cập nhật
+                self.start_transaction_check()
+                print(f"[QR_TIMING] Transaction check started at: {time.time() - qr_start:.4f}s")
+                print(f"[QR_TIMING] Total QR code generation time: {time.time() - qr_start:.4f}s")
+                
+            except Exception as e:
+                print(f"Error in QR generation: {e}")
+                self.qr_label.setText(f"Error: {str(e)}")
+                # Ensure UI update is processed
+                QApplication.processEvents()
             
         except Exception as e:
-            print(f"Error loading QR code: {e}")
+            print(f"Error setting up QR generation: {e}")
             self.qr_label.setText("Failed to load QR Code")
             # Ensure cleanup happens even if QR fails
             self.cleanup_resources()
@@ -366,25 +398,92 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             QTimer.singleShot(2000, self.return_to_shopping)
 
     def cancel_payment(self):
-        """Handle cancel payment action"""
-        self.stop_transaction_check.set()  # Signal to stop transaction check
+        """Handle cancel payment action with API call"""
+        cancel_start = time.time()
+        print(f"[QR_TIMING] Starting cancel payment at: {cancel_start}")
+        
+        # Check if already in transition
+        if hasattr(self, 'transition_in_progress') and self.transition_in_progress:
+            return
+            
+        self.transition_in_progress = True
+        
+        # Stop transaction check and countdown immediately
+        self.stop_transaction_check.set()
         self.countdown_timer.stop()
+        print(f"[QR_TIMING] Stopped monitoring at: {time.time() - cancel_start:.4f}s")
+        
+        # Show transition overlay immediately for smoother UX
+        self.transition_overlay.fadeIn()
+        print(f"[QR_TIMING] Started transition overlay at: {time.time() - cancel_start:.4f}s")
+        
+        # Send cancel signal in background thread
+        def send_cancel_signal():
+            try:
+                url = f"{CART_CANCEL_PAYMENT_SIGNAL}{DEVICE_ID}/"
+                print(f"[QR_TIMING] Sending cancel API request to: {url}")
+                response = requests.post(url)
+                print(f"[QR_TIMING] Cancel payment signal sent: {response.status_code} at {time.time() - cancel_start:.4f}s")
+            except Exception as e:
+                print(f"Error sending cancel signal: {e}")
+                
+        # Start API thread
+        cancel_thread = Thread(target=send_cancel_signal, daemon=True)
+        cancel_thread.start()
+        
+        # Switch to shopping page in main thread
         self.return_to_shopping()
         
     def return_to_shopping(self):
-        """Return to shopping page when QR expires or payment is canceled"""
-        transition_start = time.time()
+        """Enhanced return to shopping with smooth transition"""
+        return_start = time.time()
+        print(f"[QR_TIMING] Starting return to shopping at: {return_start}")
         
-        from page4_shopping import ShoppingPage
-        self.shopping_page = ShoppingPage()
+        # Prepare to switch pages
+        def switch_to_shopping():
+            start_time = PageTiming.start_timing()
+            
+            # Import here to avoid circular imports
+            print(f"[QR_TIMING] Importing ShoppingPage at: {time.time() - return_start:.4f}s")
+            from page4_shopping import ShoppingPage
+            
+            # Create shopping page
+            print(f"[QR_TIMING] Creating ShoppingPage at: {time.time() - return_start:.4f}s")
+            self.shopping_page = ShoppingPage()
+            
+            # Define transition completion handler
+            def show_new_page():
+                page_show_start = time.time()
+                print(f"[QR_TIMING] About to show ShoppingPage at: {page_show_start - return_start:.4f}s")
+                self.shopping_page.show()
+                print(f"[QR_TIMING] Shopping page shown at: {time.time() - page_show_start:.4f}s")
+                
+                # Fade out overlay and close QR page
+                self.transition_overlay.fadeOut(lambda: self.close())
+                
+                # Log timing
+                total_time = time.time() - return_start
+                print(f"[QR_TIMING] Total page return time: {total_time:.4f}s")
+                PageTiming.end_timing(start_time, "QRCodePage", "ShoppingPage")
+            
+            # Execute the transition with fade effect
+            # Start the fade in with the callback to show new page
+            self.transition_overlay.fadeIn(show_new_page)
+            
+        # Start page switch
+        switch_to_shopping()
         
-        # Calculate transition time
-        transition_time = time.time() - transition_start
-        print(f"Time to return to shopping: {transition_time:.2f} seconds")
-        
-        self.shopping_page.show()
-        self.cleanup_resources()
-        self.close()
+        # Clean up resources in background to avoid lag
+        def cleanup_resources_bg():
+            try:
+                self.cleanup_resources()
+                print(f"[QR_TIMING] Resources cleaned up at: {time.time() - return_start:.4f}s")
+            except Exception as e:
+                print(f"Error in cleanup: {e}")
+                
+        # Start cleanup in background (non-blocking)
+        cleanup_thread = Thread(target=cleanup_resources_bg, daemon=True)
+        cleanup_thread.start()
 
     def cleanup_resources(self):
         """Clean up resources before closing"""
