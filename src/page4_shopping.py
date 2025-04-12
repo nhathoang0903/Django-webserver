@@ -26,6 +26,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import time
 from config import CART_END_SESSION_STATUS_API, DEVICE_ID, CART_CHECK_PAYMENT_SIGNAL, CART_END_SESSION_API
 from threading import Thread
+from count_item import update_cart_count
 
 class SessionMonitor(QThread):
     """Thread to monitor cart session status"""
@@ -403,14 +404,14 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         logo_pixmap = self.load_cached_image(logo_path)
         if not logo_pixmap.isNull():
             logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        logo_label.setContentsMargins(0, 0, 0, 15)  # Add bottom margin to logo
+        logo_label.setContentsMargins(0, 0, 0, 0)  # Loại bỏ hoàn toàn bottom margin
         left_layout.addWidget(logo_label, 0, 0, 1, 2)  # row 0, col 0, rowspan 1, colspan 2
 
         # Buttons Container - Row 1 with adjusted margins
         buttons_container = QWidget()
         buttons_layout = QHBoxLayout(buttons_container)
         buttons_layout.setSpacing(10)
-        buttons_layout.setContentsMargins(0, 0, 0, 15)  # Reduce top margin to 0, keep bottom margin
+        buttons_layout.setContentsMargins(0, 0, 0, 5)  # Giảm bottom margin từ 15 xuống 5
 
         # Scan Button
         scan_button = self.create_button("SCAN", icon_path="camera.png")
@@ -434,7 +435,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 border-radius: 9px;
             }
         """)
-        self.camera_frame.setFixedSize(336, 318)  
+        self.camera_frame.setFixedSize(360, 340)  
 
         # Create a label for camera feed
         self.camera_label = QLabel(self.camera_frame)
@@ -457,7 +458,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             }
         """)
         # Make scan area fixed size and center it in camera frame
-        self.scan_area.setFixedSize(245, 247)  # Make it square
+        self.scan_area.setFixedSize(265, 267)  
         self.scan_area.move(
             (self.camera_frame.width() - self.scan_area.width()) // 2,
             (self.camera_frame.height() - self.scan_area.height()) // 2
@@ -481,7 +482,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         left_layout.addWidget(self.camera_frame, 2, 0, 1, 2, Qt.AlignCenter)
 
         # Set vertical spacing between rows
-        left_layout.setVerticalSpacing(5)  # Reduce space between rows
+        left_layout.setVerticalSpacing(0)
 
         # Add vertical stretch at the bottom if needed
         left_layout.setRowStretch(3, 1)  # Make row 3 (empty row) stretch
@@ -493,12 +494,12 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
         # Main right layout
         self.right_layout = QVBoxLayout(self.right_section)
-        self.right_layout.setContentsMargins(20, 35, 20, 20)
+        self.right_layout.setContentsMargins(20, 15, 20, 20)  # Giảm top margin từ 35 xuống 15
         self.right_layout.setSpacing(0)
 
         # Fixed header container with horizontal layout
         self.header_widget = QWidget()
-        self.header_widget.setFixedHeight(60)
+        self.header_widget.setFixedHeight(40)  # Giảm chiều cao từ 60 xuống 40
         self.header_widget.setStyleSheet("background-color: transparent;")
         header_layout = QHBoxLayout(self.header_widget)
         header_layout.setContentsMargins(0, 0, 0, 0)
@@ -506,8 +507,14 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         # Cart Header (left aligned)
         self.cart_header = QLabel("Your Cart")
         self.cart_header.setFont(QFont("Baloo", 24))
-        self.cart_header.setStyleSheet("color: black; padding-top: 10px;")
-        header_layout.addWidget(self.cart_header)
+        self.cart_header.setStyleSheet("color: black;")
+        header_layout.addWidget(self.cart_header, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        # Cart count label for items (will be updated when items are added)
+        self.cart_count_label = QLabel("")
+        self.cart_count_label.setFont(QFont("Baloo", 24))
+        self.cart_count_label.setStyleSheet("color: #D30E11;")
+        header_layout.addWidget(self.cart_count_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
         # Cancel Shopping button (right aligned)
         self.cancel_shopping_btn = QPushButton("Cancel shopping")
@@ -608,6 +615,12 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         # Clear widgets properly
         self.clear_layout(self.content_layout)
         
+        # Update cart count label to match page3's style
+        if self.cart_state.cart_items:
+            self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
+        else:
+            self.cart_count_label.setText("")
+        
         # Update background color based on cart state
         self.right_section.setStyleSheet(
             f"background-color: {'#F3F3F3' if self.cart_state.cart_items else 'white'};"
@@ -698,7 +711,8 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         footer_container = QWidget()
         footer_container.setStyleSheet("background-color: transparent;")
         footer_layout = QHBoxLayout(footer_container)
-        footer_layout.setContentsMargins(0, 10, 0, 10)  # Add padding
+        footer_layout.setContentsMargins(0, 5, 0, 5)  # Reduce padding from 10 to 5
+        footer_layout.setSpacing(10)  # Add explicit spacing control
         footer_layout.addStretch()
         
         # Total label
@@ -707,23 +721,24 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                           f'<span style="color: #D30E11;">{formatted_total} vnđ</span>')
         total_label.setTextFormat(Qt.RichText)
         total_label.setStyleSheet("""
-            margin-right: 30px;  /* Tăng từ 15px lên 30px */
+            margin-right: 20px;  
             font-family: Inter;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
         """)
         footer_layout.addWidget(total_label)
         
         # Payment button
         payment_button = QPushButton("PAYMENT")
         payment_button.setObjectName("payment_button")  # Set object name for finding later
-        payment_button.setFixedSize(170, 40)
+        payment_button.setFixedSize(160, 35)  # Reduce size from 170x40 to 160x35
         payment_button.setStyleSheet("""
             QPushButton {
                 background-color: #4E8F5F;
                 color: white;
-                border-radius: 20px;
+                border-radius: 17px;
                 font-weight: bold;
+                font-size: 12px;
             }
             QPushButton:hover {
                 background-color: #2C513F;
@@ -946,6 +961,12 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             # Thực hiện xóa item
             self.cart_state.remove_item(index)
             
+            # Update cart count label
+            if self.cart_state.cart_items:
+                self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
+            else:
+                self.cart_count_label.setText("")
+            
             # Update cart display trước
             self.update_cart_display()
             
@@ -1158,6 +1179,9 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             
             # Add item
             is_existing = self.cart_state.add_item(product, quantity)
+            
+            # Update cart count label
+            self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
             
             # Update UI safely
             if self.product_modal and not self.product_modal.isHidden():
@@ -1732,6 +1756,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             # 5. Reset cart state
             self.cart_state.clear_cart()
             self.cart_items = []
+            self.cart_count_label.setText("")
             self.update_cart_display()
             
             # 6. Stop camera if active

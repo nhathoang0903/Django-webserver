@@ -10,7 +10,7 @@ import time
 from threading import Thread, Event, Lock
 from config import CART_SHOPPING_MONITOR_API, DEVICE_ID
 from queue import Queue
-from count_item import update_cart_count  # Import the update_cart_count function
+from count_item import update_cart_count  
 
 class CartState:
     JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'shopping_process.json')
