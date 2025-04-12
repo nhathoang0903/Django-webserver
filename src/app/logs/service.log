@@ -272,3 +272,345 @@
 2025-04-12 13:05:34,028 - Status check - active: True, should_run: False, app: not running
 2025-04-12 13:05:36,067 - Status check - active: True, should_run: False, app: not running
 2025-04-12 13:05:38,101 - Status check - active: True, should_run: False, app: not running
+2025-04-12 15:56:42,592 - Failed to update status: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/?is_active=True&app_running=False (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89a5a890>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-04-12 15:56:42,607 - Service controller started...
+2025-04-12 15:56:42,629 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89814d50>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-04-12 15:56:42,629 - Status check - active: True, should_run: False, app: not running
+2025-04-12 15:56:44,633 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f898171d0>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-04-12 15:56:44,633 - Status check - active: True, should_run: False, app: not running
+2025-04-12 15:56:46,637 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89821610>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
+2025-04-12 15:56:46,638 - Status check - active: True, should_run: False, app: not running
+2025-04-12 15:56:48,701 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89817750>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-04-12 15:56:48,701 - Status check - active: True, should_run: False, app: not running
+2025-04-12 15:56:50,711 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89a56d10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-04-12 15:56:50,711 - Status check - active: True, should_run: False, app: not running
+2025-04-12 15:56:52,761 - Status check - active: True, should_run: True, app: not running
+2025-04-12 15:56:52,762 - Starting app...
+2025-04-12 15:56:52,777 - App started successfully
+2025-04-12 15:56:54,866 - Status check - active: True, should_run: True, app: running
+2025-04-12 15:56:55,364 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-04-12 15:56:55,664 - App error: 2025-04-12 15:56:55,663 - Starting Cartsy Application
+2025-04-12 15:56:56,385 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-04-12 15:56:56,915 - Status check - active: True, should_run: True, app: running
+2025-04-12 15:56:57,683 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-04-12 15:56:57,747 - App error: 2025-04-12 15:56:57,746 - Main window displayed
+2025-04-12 15:56:58,949 - Status check - active: True, should_run: True, app: running
+2025-04-12 15:57:00,993 - Status check - active: True, should_run: True, app: running
+2025-04-12 15:57:03,025 - Status check - active: True, should_run: True, app: running
+2025-04-12 15:57:05,057 - Status check - active: True, should_run: True, app: running
+2025-04-12 15:57:07,089 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:03:43,856 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:03:45,891 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:03:49,839 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:03:57,138 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:03:59,169 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:01,199 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:03,230 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:05,261 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:07,303 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:09,338 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:11,397 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:13,437 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:15,478 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:17,540 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:19,679 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:21,710 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:23,745 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:25,769 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:27,804 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:29,929 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:32,066 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:34,092 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:36,117 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:38,224 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:40,358 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:42,424 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:44,461 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:46,515 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:48,547 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:50,609 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:52,679 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:54,816 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:55,829 - App error: Unknown property display
+2025-04-12 16:04:55,830 - App error: Unknown property display
+2025-04-12 16:04:55,831 - App error: Unknown property display
+2025-04-12 16:04:55,835 - App error: Unknown property display
+2025-04-12 16:04:55,836 - App error: Unknown property display
+2025-04-12 16:04:55,836 - App error: Unknown property display
+2025-04-12 16:04:55,838 - App error: Unknown property display
+2025-04-12 16:04:55,839 - App error: Unknown property display
+2025-04-12 16:04:55,839 - App error: Unknown property display
+2025-04-12 16:04:56,964 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:04:59,093 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:01,133 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:03,209 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:05,243 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:07,292 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:09,344 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:11,389 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:13,418 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:15,454 - App output: Started JSON file monitoring
+2025-04-12 16:05:15,455 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:15,456 - App output: Cart data file removed successfully
+2025-04-12 16:05:15,457 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:05:15,457 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:05:15,457 - App output: Cart empty, skipping API call
+2025-04-12 16:05:15,457 - App output: Sending guest mode connection request...
+2025-04-12 16:05:15,458 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
+2025-04-12 16:05:15,458 - App output: API URL: http://172.26.17.194:9000/api/device/connect/
+2025-04-12 16:05:15,458 - App output: Response status: 400
+2025-04-12 16:05:15,458 - App output: Response content: {"error":"Device is currently in_use"}
+2025-04-12 16:05:15,458 - App output: Sending guest mode connection request...
+2025-04-12 16:05:15,458 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
+2025-04-12 16:05:15,458 - App output: API URL: http://172.26.17.194:9000/api/device/connect/
+2025-04-12 16:05:15,458 - App output: Response status: 400
+2025-04-12 16:05:15,458 - App output: Response content: {"error":"Device is currently in_use"}
+2025-04-12 16:05:15,459 - App output: Sending guest mode connection request...
+2025-04-12 16:05:15,459 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
+2025-04-12 16:05:15,459 - App output: API URL: http://172.26.17.194:9000/api/device/connect/
+2025-04-12 16:05:15,459 - App output: Response status: 200
+2025-04-12 16:05:15,459 - App output: Response content: {"message":"Connected successfully","customer_name":"Guest","device_name":"Smart Cart Display 1","session_start":"2025-04-12T16:04:52.613846+07:00","is_guest":true}
+2025-04-12 16:05:15,459 - App output: Selected mode: Guest
+2025-04-12 16:05:15,459 - App output: [16:04:53] WelcomePage → InstructionPage: 0.597s
+2025-04-12 16:05:15,460 - App output: [16:04:56] InstructionPage → ProductPage: 0.661s
+2025-04-12 16:05:15,460 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:05:15,460 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:05:15,460 - App output: Cart empty, skipping API call
+2025-04-12 16:05:15,460 - App output: [16:05:13] ProductPage → ShoppingPage: 12.872s
+2025-04-12 16:05:15,460 - App output: WARNING ⚠️ Unable to automatically guess model task, assuming 'task=detect'. Explicitly define task for your model, i.e. 'task=detect', 'segment', 'classify','pose' or 'obb'.
+2025-04-12 16:05:15,471 - App output: Loading /home/pi/smartcart/Pick-and-go-CS/model/yolov11vs30withdata35.onnx for ONNX Runtime inference...
+2025-04-12 16:05:15,696 - App output: Using ONNX Runtime CPUExecutionProvider
+2025-04-12 16:05:16,197 - App output: 
+2025-04-12 16:05:17,495 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:19,530 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:20,875 - App output: 0: 640x640 (no detections), 578.3ms
+2025-04-12 16:05:20,876 - App output: Speed: 19.6ms preprocess, 578.3ms inference, 59.8ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:21,191 - App output: 
+2025-04-12 16:05:21,567 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:21,687 - App output: 0: 640x640 (no detections), 476.8ms
+2025-04-12 16:05:21,688 - App output: Speed: 9.3ms preprocess, 476.8ms inference, 8.8ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:22,000 - App output: 
+2025-04-12 16:05:22,507 - App output: 0: 640x640 (no detections), 490.2ms
+2025-04-12 16:05:22,508 - App output: Speed: 8.8ms preprocess, 490.2ms inference, 7.1ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:22,820 - App output: 
+2025-04-12 16:05:23,377 - App output: 0: 640x640 1 Oolong_Tea_Plus, 455.0ms
+2025-04-12 16:05:23,378 - App output: Speed: 8.3ms preprocess, 455.0ms inference, 54.5ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:23,379 - App error: [ WARN:0@21.489] global loadsave.cpp:848 imwrite_ Unsupported depth image for selected encoder is fallbacked to CV_8U.
+2025-04-12 16:05:23,605 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:25,642 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:27,687 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:28,758 - App output: Starting add to cart for Oolong_Tea_Plus at 1744448727.1435683
+2025-04-12 16:05:28,759 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:05:28,759 - App output: Cart operation took 0.01s
+2025-04-12 16:05:28,760 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:05:28,761 - App output: Cart has 1 products, sending to API...
+2025-04-12 16:05:28,762 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}], 'total_bill': 7000.0}}
+2025-04-12 16:05:28,762 - App output: Image processing took 0.37s
+2025-04-12 16:05:28,762 - App output: Loaded image: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:05:28,762 - App output: ✓ Added Oolong_Tea_Plus to cart - Time taken: 0.4684s
+2025-04-12 16:05:28,763 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:05:28,763 - App output: 
+2025-04-12 16:05:29,220 - App output: 0: 640x640 (no detections), 442.1ms
+2025-04-12 16:05:29,220 - App output: Speed: 9.0ms preprocess, 442.1ms inference, 6.0ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:29,530 - App output: 
+2025-04-12 16:05:29,729 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:30,007 - App output: 0: 640x640 (no detections), 456.2ms
+2025-04-12 16:05:30,008 - App output: Speed: 9.9ms preprocess, 456.2ms inference, 6.1ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:30,325 - App output: 
+2025-04-12 16:05:30,828 - App output: 0: 640x640 (no detections), 482.4ms
+2025-04-12 16:05:30,828 - App output: Speed: 9.8ms preprocess, 482.4ms inference, 9.0ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:31,772 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:33,925 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:35,970 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:38,026 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:40,064 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:41,585 - App output: 
+2025-04-12 16:05:42,060 - App output: 0: 640x640 1 Good_Mood_Yogurt_Flavor, 452.9ms
+2025-04-12 16:05:42,060 - App output: Speed: 10.7ms preprocess, 452.9ms inference, 9.1ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:05:42,118 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:44,169 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:46,207 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:48,246 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:50,306 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:52,341 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:54,375 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:56,407 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:05:58,453 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:00,492 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:02,082 - App output: Starting add to cart for Good_Mood_Yogurt_Flavor at 1744448744.7741446
+2025-04-12 16:06:02,083 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:02,083 - App output: Cart operation took 0.01s
+2025-04-12 16:06:02,084 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:02,084 - App output: Cart has 2 products, sending to API...
+2025-04-12 16:06:02,085 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 17000.0}}
+2025-04-12 16:06:02,085 - App output: Loaded image: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:06:02,086 - App output: Image processing took 0.34s
+2025-04-12 16:06:02,086 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:06:02,086 - App output: ✓ Added Good_Mood_Yogurt_Flavor to cart - Time taken: 0.4125s
+2025-04-12 16:06:02,087 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:06:02,087 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:06:02,087 - App output: Stopped session monitor before product page
+2025-04-12 16:06:02,088 - App output: Product page opened
+2025-04-12 16:06:02,088 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:02,088 - App output: Cart operation took 0.01s
+2025-04-12 16:06:02,089 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:02,089 - App output: Cart has 3 products, sending to API...
+2025-04-12 16:06:02,090 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}], 'total_bill': 29000.0}}
+2025-04-12 16:06:02,090 - App output: Image processing took 0.38s
+2025-04-12 16:06:02,090 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:02,091 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:02,091 - App output: Cart has 3 products, sending to API...
+2025-04-12 16:06:02,092 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}], 'total_bill': 29000.0}}
+2025-04-12 16:06:02,093 - App output: Loaded image: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
+2025-04-12 16:06:02,093 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:06:02,094 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:06:02,095 - App output: [16:05:52] ProductPage → ShoppingPage: 1.038s
+2025-04-12 16:06:02,098 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:02,100 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:02,100 - App output: Cart has 2 products, sending to API...
+2025-04-12 16:06:02,100 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
+2025-04-12 16:06:02,101 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:06:02,101 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}], 'total_bill': 19000.0}}
+2025-04-12 16:06:02,101 - App output: Stopped session monitor before product page
+2025-04-12 16:06:02,102 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:02,103 - App output: Cart operation took 0.00s
+2025-04-12 16:06:02,104 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:02,105 - App output: Cart has 3 products, sending to API...
+2025-04-12 16:06:02,105 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 29000.0}}
+2025-04-12 16:06:02,106 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:02,106 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:02,107 - App output: Cart has 3 products, sending to API...
+2025-04-12 16:06:02,107 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:06:02,107 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
+2025-04-12 16:06:02,108 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 29000.0}}
+2025-04-12 16:06:02,108 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:06:02,109 - App output: [16:06:00] ProductPage → ShoppingPage: 0.734s
+2025-04-12 16:06:02,110 - App output: 
+2025-04-12 16:06:02,532 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:02,704 - App output: 0: 640x640 (no detections), 584.3ms
+2025-04-12 16:06:02,704 - App output: Speed: 16.9ms preprocess, 584.3ms inference, 6.5ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:06:03,011 - App output: 
+2025-04-12 16:06:03,517 - App output: 0: 640x640 1 Orange_Juice_Mirinda, 488.9ms
+2025-04-12 16:06:03,517 - App output: Speed: 8.8ms preprocess, 488.9ms inference, 7.2ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:06:04,564 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:06,605 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:07,165 - App output: 
+2025-04-12 16:06:07,643 - App output: 0: 640x640 1 Twister_Orange_Juice, 456.5ms
+2025-04-12 16:06:07,644 - App output: Speed: 11.0ms preprocess, 456.5ms inference, 7.5ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:06:07,957 - App output: 
+2025-04-12 16:06:08,459 - App output: 0: 640x640 1 Good_Mood_Yogurt_Flavor, 479.9ms
+2025-04-12 16:06:08,460 - App output: Speed: 9.4ms preprocess, 479.9ms inference, 10.0ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:06:08,643 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:10,675 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:12,714 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:14,793 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:16,826 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:18,860 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:20,924 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:21,479 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:21,479 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:21,480 - App output: Cart has 3 products, sending to API...
+2025-04-12 16:06:21,481 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:06:21,481 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
+2025-04-12 16:06:21,482 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 29000.0}}
+2025-04-12 16:06:21,483 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:06:21,483 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:21,483 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:21,483 - App output: Cart has 2 products, sending to API...
+2025-04-12 16:06:21,483 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:06:21,487 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 17000.0}}
+2025-04-12 16:06:21,487 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:06:21,487 - App output: Added cart data to API queue from save_to_json
+2025-04-12 16:06:21,488 - App output: Processing queue item. Queue size: 0
+2025-04-12 16:06:21,488 - App output: Cart has 1 products, sending to API...
+2025-04-12 16:06:21,488 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:06:21,488 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 10000.0}}
+2025-04-12 16:06:21,488 - App output: 
+2025-04-12 16:06:22,082 - App output: 0: 640x640 (no detections), 559.7ms
+2025-04-12 16:06:22,083 - App output: Speed: 31.7ms preprocess, 559.7ms inference, 8.5ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:06:22,966 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:25,001 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:27,065 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:29,103 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:31,132 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:33,166 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:35,204 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:37,241 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:39,286 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:41,331 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:43,370 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:45,402 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:47,456 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:49,583 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:51,643 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:53,680 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:55,732 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:57,797 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:06:59,847 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:01,882 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:03,916 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:05,948 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:07,981 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:09,982 - Last app output before stopping:
+2025-04-12 16:07:09,982 - API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 17000.0}}
+2025-04-12 16:07:09,982 - Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
+2025-04-12 16:07:09,982 - Added cart data to API queue from save_to_json
+2025-04-12 16:07:09,983 - Processing queue item. Queue size: 0
+2025-04-12 16:07:09,983 - Cart has 1 products, sending to API...
+2025-04-12 16:07:09,983 - Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
+2025-04-12 16:07:09,983 - API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 10000.0}}
+2025-04-12 16:07:09,983 - 
+2025-04-12 16:07:09,983 - 0: 640x640 (no detections), 559.7ms
+2025-04-12 16:07:09,983 - Speed: 31.7ms preprocess, 559.7ms inference, 8.5ms postprocess per image at shape (1, 3, 640, 640)
+2025-04-12 16:07:09,984 - App stopped successfully
+2025-04-12 16:07:15,922 - Service controller started...
+2025-04-12 16:07:15,955 - Status check - active: True, should_run: True, app: not running
+2025-04-12 16:07:15,955 - Starting app...
+2025-04-12 16:07:15,957 - App started successfully
+2025-04-12 16:07:16,457 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-04-12 16:07:16,461 - App error: 2025-04-12 16:07:16,460 - Starting Cartsy Application
+2025-04-12 16:07:16,591 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-04-12 16:07:17,750 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-04-12 16:07:17,784 - App error: 2025-04-12 16:07:17,784 - Main window displayed
+2025-04-12 16:07:18,024 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:20,058 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:22,163 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:24,200 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:26,229 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:28,267 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:30,298 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:32,325 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:34,366 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:36,414 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:38,414 - Last app output before stopping:
+2025-04-12 16:07:38,415 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-04-12 16:07:38,415 - 2025-04-12 16:07:16,460 - Starting Cartsy Application
+2025-04-12 16:07:38,415 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-04-12 16:07:38,415 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-04-12 16:07:38,415 - 2025-04-12 16:07:17,784 - Main window displayed
+2025-04-12 16:07:38,416 - App stopped successfully
+2025-04-12 16:07:44,267 - Service controller started...
+2025-04-12 16:07:44,309 - Status check - active: True, should_run: True, app: not running
+2025-04-12 16:07:44,310 - Starting app...
+2025-04-12 16:07:44,321 - App started successfully
+2025-04-12 16:07:45,000 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-04-12 16:07:45,004 - App error: 2025-04-12 16:07:45,003 - Starting Cartsy Application
+2025-04-12 16:07:45,154 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-04-12 16:07:46,393 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:46,501 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-04-12 16:07:46,547 - App error: 2025-04-12 16:07:46,546 - Main window displayed
+2025-04-12 16:07:48,433 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:50,469 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:52,521 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:54,564 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:56,594 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:07:58,634 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:08:00,675 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:08:02,710 - Status check - active: True, should_run: True, app: running
+2025-04-12 16:08:04,710 - Last app output before stopping:
+2025-04-12 16:08:04,711 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
+2025-04-12 16:08:04,711 - 2025-04-12 16:07:45,003 - Starting Cartsy Application
+2025-04-12 16:08:04,711 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
+2025-04-12 16:08:04,711 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+2025-04-12 16:08:04,711 - 2025-04-12 16:07:46,546 - Main window displayed
+2025-04-12 16:08:04,712 - App stopped successfully

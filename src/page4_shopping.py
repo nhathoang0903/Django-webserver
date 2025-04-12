@@ -731,14 +731,14 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         # Payment button
         payment_button = QPushButton("PAYMENT")
         payment_button.setObjectName("payment_button")  # Set object name for finding later
-        payment_button.setFixedSize(160, 35)  # Reduce size from 170x40 to 160x35
+        payment_button.setFixedSize(160, 45)  # Reduce size from 170x40 to 160x35
         payment_button.setStyleSheet("""
             QPushButton {
                 background-color: #4E8F5F;
                 color: white;
                 border-radius: 17px;
                 font-weight: bold;
-                font-size: 12px;
+                font-size: 14px;
             }
             QPushButton:hover {
                 background-color: #2C513F;

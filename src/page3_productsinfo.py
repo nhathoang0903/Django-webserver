@@ -787,7 +787,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         
         # Add SCAN text
         scan_text = QLabel("SCAN")
-        scan_text.setFont(QFont("Inter", 10, QFont.Bold))
+        scan_text.setFont(QFont("Inter", 12, QFont.Bold))
         scan_text.setStyleSheet("color: white;")
         
         # Add widgets to button layout

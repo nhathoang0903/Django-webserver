@@ -97,9 +97,11 @@ class CartState:
             try:
                 # Get data from queue with timeout
                 payload = self._monitor_queue.get(timeout=1.0)
+                print(f"Processing queue item. Queue size: {self._monitor_queue.qsize()}")
                 
                 # Only process if cart has products
                 if payload["cart_data"]["detected_products"]:
+                    print(f"Cart has {len(payload['cart_data']['detected_products'])} products, sending to API...")
                     # Check if enough time has passed since last API call
                     current_time = time.time()
                     time_since_last = current_time - self._last_api_call
@@ -117,15 +119,19 @@ class CartState:
                             )
                             self._last_api_call = time.time()
                             
-                            if response.status_code != 200:
-                                print(f"API error: {response.status_code}")
+                            if response.status_code == 200:
+                                print(f"API call successful: {response.json()}")
+                            else:
+                                print(f"API error: {response.status_code} - {response.text}")
                                 
                         except Exception as e:
                             print(f"API call failed: {e}")
+                else:
+                    print("Cart empty, skipping API call")
 
-            except Exception:
+            except Exception as e:
                 # Queue empty or other error, continue
-                continue
+                pass
 
     def save_to_json(self):
         """Optimized save with debouncing"""
@@ -151,6 +157,35 @@ class CartState:
             from count_item import update_cart_count
             from page3_productsinfo import ProductPage
             update_cart_count(ProductPage._instance)
+            
+            # Directly call send_monitor_data or add to queue
+            try:
+                # Get phone number
+                phone_number = ""
+                try:
+                    phone_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                            'config', 'phone_number.json')
+                    with open(phone_path, 'r') as f:
+                        phone_data = json.load(f)
+                        phone_number = phone_data.get("phone_number", "")
+                except Exception as e:
+                    print(f"Error reading phone number: {e}")
+                
+                # Prepare payload for queue
+                payload = {
+                    "phone_number": phone_number,
+                    "device_id": DEVICE_ID,
+                    "cart_data": cart_data
+                }
+                
+                # Add to monitor queue for API processing
+                try:
+                    self._monitor_queue.put(payload, block=False)
+                    print("Added cart data to API queue from save_to_json")
+                except:
+                    print("API queue full, skipping this update")
+            except Exception as e:
+                print(f"Error preparing monitor data from save_to_json: {e}")
 
         except Exception as e:
             print(f"Error saving cart data: {e}")
@@ -304,6 +339,35 @@ class CartState:
                         # Only update if content actually changed
                         if self._content_changed(new_data):
                             self._update_cart_items(new_data)
+                            
+                            # Add data to queue for API processing
+                            try:
+                                # Get phone number
+                                phone_number = ""
+                                try:
+                                    phone_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                                        'config', 'phone_number.json')
+                                    with open(phone_path, 'r') as f:
+                                        phone_data = json.load(f)
+                                        phone_number = phone_data.get("phone_number", "")
+                                except Exception as e:
+                                    print(f"Error reading phone number: {e}")
+                                
+                                # Prepare payload for queue
+                                payload = {
+                                    "phone_number": phone_number,
+                                    "device_id": DEVICE_ID,
+                                    "cart_data": new_data
+                                }
+                                
+                                # Add to monitor queue for API processing
+                                try:
+                                    self._monitor_queue.put(payload, block=False)
+                                    print("Added cart data to API queue")
+                                except:
+                                    print("API queue full, skipping this update")
+                            except Exception as e:
+                                print(f"Error preparing monitor data: {e}")
                             
                         last_hash = current_hash
 
