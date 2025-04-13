@@ -310,7 +310,12 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                     acq=bank_code,
                     amount=str(self.total_amount), 
                     merchant_name="NGUYEN THE NGO",
-                    service_code="QRIBFTTA"  
+                    service_code="QRIBFTTA",  
+                    currency="704",            # VND currency code
+                    country_code="VN",         # Vietnam country code
+                    merchant_city="HO CHI MINH",
+                    merchant_category="5499",  # 5499 is for Misc Food Stores
+                    bill_number="SC" + datetime.now().strftime("%Y%m%d%H%M%S")  # Generate a unique bill number
                 )
                 print(f"[QR_TIMING] Generated VietQR string at: {time.time() - qr_start:.4f}s")
                 
@@ -388,14 +393,26 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 self.qr_label.setText(f"Error: {str(e)}")
                 # Ensure UI update is processed
                 QApplication.processEvents()
+                
+                # Show transition overlay before returning to shopping
+                if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
+                    self.transition_in_progress = True
+                    self.transition_overlay.fadeIn()
+                    # Add a small delay to ensure the overlay is visible
+                    QTimer.singleShot(100, self.return_to_shopping)
             
         except Exception as e:
             print(f"Error setting up QR generation: {e}")
             self.qr_label.setText("Failed to load QR Code")
             # Ensure cleanup happens even if QR fails
             self.cleanup_resources()
-            # Return to shopping page after 2 seconds on failure
-            QTimer.singleShot(2000, self.return_to_shopping)
+            
+            # Show transition overlay before returning to shopping
+            if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
+                self.transition_in_progress = True
+                self.transition_overlay.fadeIn()
+                # Add a small delay to ensure the overlay is visible
+                QTimer.singleShot(100, self.return_to_shopping)
 
     def cancel_payment(self):
         """Handle cancel payment action with API call"""
@@ -413,10 +430,6 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.countdown_timer.stop()
         print(f"[QR_TIMING] Stopped monitoring at: {time.time() - cancel_start:.4f}s")
         
-        # Show transition overlay immediately for smoother UX
-        self.transition_overlay.fadeIn()
-        print(f"[QR_TIMING] Started transition overlay at: {time.time() - cancel_start:.4f}s")
-        
         # Send cancel signal in background thread
         def send_cancel_signal():
             try:
@@ -431,47 +444,50 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         cancel_thread = Thread(target=send_cancel_signal, daemon=True)
         cancel_thread.start()
         
-        # Switch to shopping page in main thread
-        self.return_to_shopping()
+        # Import here to avoid circular imports
+        from page4_shopping import ShoppingPage
         
+        # Create shopping page
+        self.shopping_page = ShoppingPage()
+        
+        # Define transition completion handler
+        def show_new_page():
+            # Show shopping page
+            self.shopping_page.show()
+            
+            # Fade out overlay and close QR page
+            self.transition_overlay.fadeOut(lambda: self.close())
+        
+        # Show transition overlay first, then show new page after fade in completes
+        self.transition_overlay.fadeIn(show_new_page)
+
     def return_to_shopping(self):
         """Enhanced return to shopping with smooth transition"""
         return_start = time.time()
         print(f"[QR_TIMING] Starting return to shopping at: {return_start}")
         
-        # Prepare to switch pages
-        def switch_to_shopping():
-            start_time = PageTiming.start_timing()
+        # Check if already in transition
+        if hasattr(self, 'transition_in_progress') and self.transition_in_progress:
+            return
             
-            # Import here to avoid circular imports
-            print(f"[QR_TIMING] Importing ShoppingPage at: {time.time() - return_start:.4f}s")
-            from page4_shopping import ShoppingPage
+        self.transition_in_progress = True
+        
+        # Import here to avoid circular imports
+        from page4_shopping import ShoppingPage
+        
+        # Create shopping page
+        self.shopping_page = ShoppingPage()
+        
+        # Define transition completion handler
+        def show_new_page():
+            # Show shopping page
+            self.shopping_page.show()
             
-            # Create shopping page
-            print(f"[QR_TIMING] Creating ShoppingPage at: {time.time() - return_start:.4f}s")
-            self.shopping_page = ShoppingPage()
-            
-            # Define transition completion handler
-            def show_new_page():
-                page_show_start = time.time()
-                print(f"[QR_TIMING] About to show ShoppingPage at: {page_show_start - return_start:.4f}s")
-                self.shopping_page.show()
-                print(f"[QR_TIMING] Shopping page shown at: {time.time() - page_show_start:.4f}s")
-                
-                # Fade out overlay and close QR page
-                self.transition_overlay.fadeOut(lambda: self.close())
-                
-                # Log timing
-                total_time = time.time() - return_start
-                print(f"[QR_TIMING] Total page return time: {total_time:.4f}s")
-                PageTiming.end_timing(start_time, "QRCodePage", "ShoppingPage")
-            
-            # Execute the transition with fade effect
-            # Start the fade in with the callback to show new page
-            self.transition_overlay.fadeIn(show_new_page)
-            
-        # Start page switch
-        switch_to_shopping()
+            # Fade out overlay and close QR page
+            self.transition_overlay.fadeOut(lambda: self.close())
+        
+        # Show transition overlay first, then show new page after fade in completes
+        self.transition_overlay.fadeIn(show_new_page)
         
         # Clean up resources in background to avoid lag
         def cleanup_resources_bg():
@@ -708,7 +724,14 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         if remaining <= 0:
             self.countdown_timer.stop()
             self.countdown_label.setText("QR Code expired")
-            self.return_to_shopping()
+            
+            # Check if already in transition
+            if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
+                self.transition_in_progress = True
+                
+                # Show transition overlay first, then return to shopping after a delay
+                self.transition_overlay.fadeIn()
+                QTimer.singleShot(300, self.return_to_shopping)
             return
             
         minutes = int(remaining // 60)

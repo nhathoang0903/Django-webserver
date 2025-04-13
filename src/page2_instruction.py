@@ -108,13 +108,13 @@ class InstructionPage(BasePage):
 
         # Title using Inria Sans Bold
         title_label = QLabel("Welcome to Cartsy !")
-        title_label.setFont(QFont("Inria Sans", 24, QFont.Bold))
+        title_label.setFont(QFont("Inria Sans", 28, QFont.Bold))
         title_label.setStyleSheet("color: #3D6F4A;")
         left_layout.addWidget(title_label)
 
         # Tagline using Poppins Italic
         tagline_label = QLabel('"Shop smarter, enjoy life more"')
-        tagline_label.setFont(QFont("Poppins", 12))
+        tagline_label.setFont(QFont("Poppins", 14))
         tagline_label.setStyleSheet("color: #E72225; font-style: italic;")
         left_layout.addWidget(tagline_label)
 

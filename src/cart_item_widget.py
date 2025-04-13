@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPixmap, QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint, QTimer
 import os
 from page3_productsinfo import SimpleImageLoader  
+import weakref
 
 class CartItemWidget(QFrame):
     quantityChanged = pyqtSignal(int)  # Signal for quantity changes
@@ -119,7 +120,7 @@ class CartItemWidget(QFrame):
         
         # Product name container with more content space
         name_container = QWidget()
-        name_container.setFixedWidth(195)  # Reduced from 220 to 195
+        name_container.setFixedWidth(195)  
         name_container.setStyleSheet("background-color: white; border: none;")
         name_layout = QVBoxLayout(name_container)
         name_layout.setContentsMargins(0, 0, 0, 5)
@@ -152,13 +153,12 @@ class CartItemWidget(QFrame):
         name_label = QLabel(formatted_name)
         name_label.setFont(QFont("Inria Sans", 12, QFont.Bold))
         name_label.setWordWrap(True)
-        # Removed fixed width constraints
         name_label.setStyleSheet("""
             QLabel {
                 color: #000000; 
-                background-color: white;
+                background-color: transparent;
                 border: none;
-                qproperty-alignment: AlignLeft | AlignVCenter;
+                qproperty-alignment: AlignVCenter;
                 margin: 0px;
                 padding-left: 8px;
                 padding-right: 0px;
@@ -377,17 +377,36 @@ class CartItemWidget(QFrame):
             current_style = widget.styleSheet()
             widget.setStyleSheet(current_style + "background-color: #F8FFAA;")
         
+        # Tạo biến để theo dõi widget
+        # Sử dụng weakref để tránh giữ reference khi widget đã bị xóa
+        self_ref = weakref.ref(self)
+        
         # Tạo animation để chuyển về màu trắng sau 5s
         def reset_styles():
-            self.setStyleSheet("""
-                QFrame {
-                    background-color: white;
-                    border-radius: 15px;
-                    padding: 5px;
-                }
-            """)
-            for widget in self.findChildren(QWidget):
-                widget.setStyleSheet(widget.styleSheet().replace("background-color: #F8FFAA;", "background-color: white;"))
+            # Kiểm tra xem widget có còn tồn tại không
+            self_widget = self_ref()
+            if self_widget is None or not hasattr(self_widget, 'setStyleSheet'):
+                print("Widget đã bị xóa, bỏ qua reset styles")
+                return
+                
+            try:
+                self_widget.setStyleSheet("""
+                    QFrame {
+                        background-color: white;
+                        border-radius: 15px;
+                        padding: 5px;
+                    }
+                """)
+                
+                for widget in self_widget.findChildren(QWidget):
+                    try:
+                        current_style = widget.styleSheet()
+                        widget.setStyleSheet(current_style.replace("background-color: #F8FFAA;", "background-color: white;"))
+                    except RuntimeError:
+                        # Bỏ qua nếu widget con đã bị xóa
+                        continue
+            except RuntimeError as e:
+                print(f"Lỗi khi reset styles: {e}")
         
         QTimer.singleShot(5000, reset_styles)
 

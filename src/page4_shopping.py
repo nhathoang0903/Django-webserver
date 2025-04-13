@@ -398,16 +398,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         left_layout.setContentsMargins(20, 10, 20, 20)  # Reduced top margin from 20 to 10
         left_layout.setSpacing(0)
 
-        # Top section with logo - Row 0
-        logo_label = QLabel()
-        logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'logo.png')
-        logo_pixmap = self.load_cached_image(logo_path)
-        if not logo_pixmap.isNull():
-            logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        logo_label.setContentsMargins(0, 0, 0, 0)  # Loại bỏ hoàn toàn bottom margin
-        left_layout.addWidget(logo_label, 0, 0, 1, 2)  # row 0, col 0, rowspan 1, colspan 2
-
-        # Buttons Container - Row 1 with adjusted margins
+        # Buttons Container - Row 0 (moved up from Row 1)
         buttons_container = QWidget()
         buttons_layout = QHBoxLayout(buttons_container)
         buttons_layout.setSpacing(10)
@@ -424,9 +415,9 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         # print("Open product info page")
         buttons_layout.addWidget(product_info_button)
 
-        left_layout.addWidget(buttons_container, 1, 0, 1, 2)  # row 1, col 0, rowspan 1, colspan 2
+        left_layout.addWidget(buttons_container, 0, 0, 1, 2)  # row 0, col 0, rowspan 1, colspan 2
 
-        # Camera View Area - Row 2
+        # Camera View Area - Row 1 (moved up from Row 2)
         self.camera_frame = QFrame()
         self.camera_frame.setStyleSheet("""
             QFrame {
@@ -435,7 +426,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 border-radius: 9px;
             }
         """)
-        self.camera_frame.setFixedSize(360, 340)  
+        self.camera_frame.setFixedSize(360, 400)  # Increased size from 360x340 to 400x400
 
         # Create a label for camera feed
         self.camera_label = QLabel(self.camera_frame)
@@ -458,7 +449,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             }
         """)
         # Make scan area fixed size and center it in camera frame
-        self.scan_area.setFixedSize(265, 267)  
+        self.scan_area.setFixedSize(300, 300)  # Increased size from 265x267 to 300x300
         self.scan_area.move(
             (self.camera_frame.width() - self.scan_area.width()) // 2,
             (self.camera_frame.height() - self.scan_area.height()) // 2
@@ -479,13 +470,13 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             97, 97
         )
 
-        left_layout.addWidget(self.camera_frame, 2, 0, 1, 2, Qt.AlignCenter)
+        left_layout.addWidget(self.camera_frame, 1, 0, 1, 2, Qt.AlignCenter)
 
         # Set vertical spacing between rows
         left_layout.setVerticalSpacing(0)
 
         # Add vertical stretch at the bottom if needed
-        left_layout.setRowStretch(3, 1)  # Make row 3 (empty row) stretch
+        left_layout.setRowStretch(2, 1)  # Make row 2 (was 3) stretch
 
         # Right Section (Cart)
         self.right_section = QWidget()
@@ -518,19 +509,23 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
         # Cancel Shopping button (right aligned)
         self.cancel_shopping_btn = QPushButton("Cancel shopping")
-        self.cancel_shopping_btn.setFixedSize(120, 35)
+        self.cancel_shopping_btn.setFixedSize(160, 40)
+        self.cancel_shopping_btn.setCursor(Qt.PointingHandCursor)  # Thêm con trỏ chuột khi hover
         self.cancel_shopping_btn.setStyleSheet("""
             QPushButton {
-                background-color: #F3F3F3;
+                background-color: white;
                 border: 1px solid #D30E11;
-                border-radius: 17px;
+                border-radius: 20px;
                 color: #D30E11;
                 font-weight: bold;
-                font-size: 12px;
+                font-size: 14px;  
+                padding: 0px;
+                margin: 0px;
             }
             QPushButton:hover {
                 background-color: #D32F2F;
                 color: white;
+                border: 1px solid #D32F2F;
             }
         """)
         self.cancel_shopping_btn.clicked.connect(self.show_cancel_dialog)
@@ -554,13 +549,13 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
     def create_button(self, text, icon_path):
             button = QPushButton()
-            button.setFixedSize(170, 40)  
+            button.setFixedSize(170, 50)  
             button.setCursor(Qt.PointingHandCursor)
             button.setStyleSheet("""
                 QPushButton {
                     background-color: #507849;
                     border: none;
-                    border-radius: 16px;
+                    border-radius: 25px;
                     padding: 0px;  
                     text-align: center;
                 }
@@ -575,30 +570,53 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             # Add left stretch to push content to center
             button_layout.addStretch()
 
-            # Icon
+            # Setup icon and text label
             icon_label = QLabel()
+            text_label = QLabel(text)
+            
+            # Store references for updating in event handlers
+            button.icon_label = icon_label
+            button.text_label = text_label
+            
+            # Configure based on button type
             if text == "SCAN":
-                icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                    'assets', 'scanbutton_hover.png')
-                text_color = "#FFFF00"  # Yellow for SCAN
+                # For SCAN button - default state (camera off)
+                scan_hover_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                'assets', 'scanbutton_hover.png')
+                scan_normal_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                'assets', 'scanbutton.png')
+                
+                # Set initial state to normal (white text)
+                icon_path = scan_normal_path
+                text_color = "white"  # Default white text
+                
+                # Store paths for event handling
+                button.scan_hover_path = scan_hover_path
+                button.scan_normal_path = scan_normal_path
+                
+                # Install event filter for hover effects
+                button.installEventFilter(self)
+                button.setObjectName("SCAN_BUTTON")
+                
             else:
+                # For PRODUCT INFO button
                 icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
                             'assets', 'productinfobutton.png')
                 text_color = "white"  # White for PRODUCT INFO
 
+            # Set icon
             if icon_path:
                 icon_pixmap = QPixmap(icon_path).scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 icon_label.setPixmap(icon_pixmap)
                 icon_label.setStyleSheet("background: transparent;")  
                 button_layout.addWidget(icon_label)
 
-            # Text
-            text_label = QLabel(text)
+            # Set text
             text_label.setStyleSheet(f"""
                 color: {text_color}; 
                 font-family: Inter;
                 font-weight: bold;
-                font-size: 12px;
+                font-size: 14px;  /* Increased from 12px to 14px */
                 background: transparent;
                 padding: 0px;
             """)
@@ -610,430 +628,31 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
             return button
 
-    def update_cart_display(self):
-        """Memory-optimized cart display"""
-        # Clear widgets properly
-        self.clear_layout(self.content_layout)
-        
-        # Update cart count label to match page3's style
-        if self.cart_state.cart_items:
-            self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
-        else:
-            self.cart_count_label.setText("")
-        
-        # Update background color based on cart state
-        self.right_section.setStyleSheet(
-            f"background-color: {'#F3F3F3' if self.cart_state.cart_items else 'white'};"
-        )
-        
-        # Keep header transparent
-        self.header_widget.setStyleSheet("background-color: transparent;")
-
-        if not self.cart_state.cart_items:
-            # Empty cart display
-            empty_container = QWidget()
-            empty_layout = QVBoxLayout(empty_container)
-            empty_layout.setContentsMargins(0, 20, 0, 0)  # Reduced top margin from 50 to 20
-            
-            empty_layout.addStretch(2)  # Reduced stretch from 3 to 2
-            
-            empty_text = QLabel("Empty")
-            empty_text.setFont(QFont("Inria Sans", 30))
-            empty_text.setStyleSheet("color: #F68003;")
-            empty_text.setAlignment(Qt.AlignCenter)
-            empty_layout.addWidget(empty_text)
-            
-            empty_layout.addSpacing(20)
-            
-            empty_cart_label = QLabel()
-            empty_cart_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                         'assets', 'emptycart.png')
-            empty_cart_pixmap = QPixmap(empty_cart_path)
-            if not empty_cart_pixmap.isNull():
-                empty_cart_label.setPixmap(empty_cart_pixmap.scaled(100, 100, 
-                                         Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            empty_cart_label.setAlignment(Qt.AlignCenter)
-            empty_layout.addWidget(empty_cart_label)
-            
-            empty_layout.addStretch(3)  # Increased stretch from 2 to 3
-            
-            self.content_layout.addWidget(empty_container)
-        else:
-            # Container for cart items
-            scroll_container = QWidget()
-            scroll_layout = QVBoxLayout(scroll_container)
-            scroll_layout.setContentsMargins(0, 0, 0, 0)
-            
-            # Create scroll area for items with custom scrolling behavior
-            scroll_area = CartItemsScrollArea()
-            
-            # Items container
-            items_container = QWidget()
-            items_layout = QVBoxLayout(items_container)
-            items_layout.setSpacing(30)
-            items_layout.setContentsMargins(0, 0, 0, 0)  # Remove right margin
-
-            # Add cart items
-            highlighted_name = getattr(self, '_highlight_product_name', None)
-            for i, (product, quantity) in enumerate(reversed(self.cart_state.cart_items)):
-                item_widget = CartItemWidget(product, quantity)
-                item_widget.quantityChanged.connect(
-                    lambda q, idx=len(self.cart_state.cart_items)-1-i: self.update_item_quantity(idx, q)
-                )
-                item_widget.itemRemoved.connect(
-                    lambda idx=len(self.cart_state.cart_items)-1-i: self.remove_cart_item(idx)
-                )
-                
-                if highlighted_name and product['name'] == highlighted_name:
-                    item_widget.highlight()
-                    self._highlight_product_name = None
+    def eventFilter(self, obj, event):
+        """Handle state changes for SCAN button"""
+        if obj.objectName() == "SCAN_BUTTON":
+            # No hover effect changes - just maintain current state based on camera
+            return False  # Let default event processing continue
                     
-                items_layout.addWidget(item_widget)
-
-            # Add stretch to push items up
-            items_layout.addStretch()
-            
-            # Set items container to scroll area
-            scroll_area.setWidget(items_container)
-            scroll_layout.addWidget(scroll_area)
-            
-            # Add scroll container to main content
-            self.content_layout.addWidget(scroll_container, stretch=1)  # Add stretch=1 here
-
-        # Show/hide cancel shopping button based on cart state
-        self.cancel_shopping_btn.setVisible(bool(self.cart_state.cart_items))
-
-        # Calculate total amount
-        total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_state.cart_items) if self.cart_state.cart_items else 0
-        formatted_total = "{:,.0f}".format(total_amount).replace(',', '.')
-
-        # Create footer container for total and payment
-        footer_container = QWidget()
-        footer_container.setStyleSheet("background-color: transparent;")
-        footer_layout = QHBoxLayout(footer_container)
-        footer_layout.setContentsMargins(0, 5, 0, 5)  # Reduce padding from 10 to 5
-        footer_layout.setSpacing(10)  # Add explicit spacing control
-        footer_layout.addStretch()
+        return super().eventFilter(obj, event)
         
-        # Total label
-        total_label = QLabel()
-        total_label.setText(f'<span style="color: #000000;">Total </span>'
-                          f'<span style="color: #D30E11;">{formatted_total} vnđ</span>')
-        total_label.setTextFormat(Qt.RichText)
-        total_label.setStyleSheet("""
-            margin-right: 20px;  
-            font-family: Inter;
-            font-weight: bold;
-            font-size: 15px;
-        """)
-        footer_layout.addWidget(total_label)
-        
-        # Payment button
-        payment_button = QPushButton("PAYMENT")
-        payment_button.setObjectName("payment_button")  # Set object name for finding later
-        payment_button.setFixedSize(160, 45)  # Reduce size from 170x40 to 160x35
-        payment_button.setStyleSheet("""
-            QPushButton {
-                background-color: #4E8F5F;
-                color: white;
-                border-radius: 17px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #2C513F;
-            }
-        """)
-        payment_button.clicked.connect(self.show_payment_page)
-        footer_layout.addWidget(payment_button)
-        
-        # Add footer to main layout at the bottom
-        self.content_layout.addStretch()  # Push everything up
-        self.content_layout.addWidget(footer_container, alignment=Qt.AlignBottom)  # Align to bottom
-
-    def show_payment_page(self):
-        """Enhanced transition to payment page with optimized performance"""
-        # Bắt đầu đo thời gian
-        transition_start_time = time.time()
-        print(f"[TIMING] Starting page transition at: {transition_start_time}")
-        
-        total_amount = sum(float(product['price']) * quantity 
-                         for product, quantity in self.cart_state.cart_items)
-        if total_amount == 0:
-            self.animate_disabled_payment()
-            return
-            
-        if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
-            self.transition_in_progress = True
-            
-            # Start transition overlay immediately
-            self.transition_overlay.fadeIn()
-            print(f"[TIMING] Transition overlay started at: {time.time() - transition_start_time:.4f}s")
-            
-            # Lưu ý QUAN TRỌNG: KHÔNG khởi tạo QTimer trong thread khác
-            # Stop monitors trực tiếp
-            if hasattr(self, 'session_monitor'):
-                self.session_monitor.stop()
-                # Không dùng wait() để tránh blocking
-                print("Stopped session monitor before payment page")
-                
-            if hasattr(self, 'payment_monitor'):
-                self.payment_monitor.stop()
-                # Không dùng wait() để tránh blocking
-                print("Stopped payment monitor before payment page")
-                
-            print(f"[TIMING] Monitors stopped at: {time.time() - transition_start_time:.4f}s")
-            
-            # Pre-cleanup để giảm tải
-            if self.camera:
-                self.stop_camera()
-                print(f"[TIMING] Camera stopped at: {time.time() - transition_start_time:.4f}s")
-            
-            # Load QR page trong main thread để tránh lỗi QTimer
-            start_time = PageTiming.start_timing()
-            
-            # Chuẩn bị tải page mới
-            print(f"[TIMING] Starting to load QRCodePage at: {time.time() - transition_start_time:.4f}s")
-            from page5_qrcode import QRCodePage
-            
-            # Khởi tạo page với tham số đồng bộ
-            print(f"[TIMING] Creating QRCodePage at: {time.time() - transition_start_time:.4f}s")
-            self.payment_page = QRCodePage()
-            self.payment_page.payment_completed.connect(self.handle_payment_completed)
-            
-            # Hiển thị trang mới và ẩn trang hiện tại
-            def show_new_page():
-                page_ready_time = time.time()
-                print(f"[TIMING] QRCodePage ready at: {page_ready_time - transition_start_time:.4f}s")
-                self.payment_page.show()
-                print(f"[TIMING] QRCodePage shown at: {time.time() - transition_start_time:.4f}s")
-                self.transition_overlay.fadeOut(lambda: self.hide())
-                # Kết thúc đo thời gian
-                total_time = time.time() - transition_start_time
-                print(f"[TIMING] Total transition time: {total_time:.4f}s")
-                PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
-            
-            # Dùng QTimer ở main thread
-            QTimer.singleShot(100, show_new_page)
-            
-            # Cleanup nặng để chạy sau khi đã chuyển trang
-            def background_cleanup():
-                try:
-                    # Clear caches
-                    self._image_cache.clear()
-                    self._widgets_cache.clear()
-                    
-                    # Clean up modals
-                    if hasattr(self, '_product_modal') and self._product_modal:
-                        self._product_modal.hide()
-                    
-                    if hasattr(self, '_cancel_modal') and self._cancel_modal:
-                        self._cancel_modal.hide()
-                    
-                    # Force garbage collection
-                    import gc
-                    gc.collect()
-                    
-                    print(f"[TIMING] Background cleanup completed at: {time.time() - transition_start_time:.4f}s")
-                except Exception as e:
-                    print(f"Error in cleanup: {e}")
-            
-            # Chạy cleanup sau khi đã chuyển trang
-            QTimer.singleShot(500, background_cleanup)
-
-    def handle_payment_completed(self, success):
-        """Xử lý khi thanh toán hoàn tất"""
-        self.payment_completed = success
-        if success:
-            # Tạm thời chỉ đánh dấu flag, chưa clear cart ngay
-            # Để page6 có thể lấy dữ liệu gửi server trước
-            # Cart sẽ được clear khi page này được show lại
-            self.payment_completed = True
-            # KHÔNG clear cart ở đây nữa
-            # self.cart_state.clear_cart()
-            # self.cart_state.save_to_json()
-
-    def animate_disabled_payment(self):
-        """Animate payment button when cart is empty"""
-        payment_button = self.findChild(QPushButton, "payment_button")  
-        if not payment_button:
-            return
-            
-        # Save original style
-        original_style = payment_button.styleSheet()
-        
-        # Create all animations at once
-        button_anim = QParallelAnimationGroup()
-        
-        # Scale animation
-        scale_anim = QPropertyAnimation(payment_button, b"geometry")
-        scale_anim.setDuration(1000)
-        
-        # Get original geometry
-        orig_geom = payment_button.geometry()
-        center = orig_geom.center()
-        
-        # Calculate scaled geometries
-        scaled_width = int(orig_geom.width() * 1.8)
-        scaled_height = int(orig_geom.height() * 1.8)
-        scaled_x = int(center.x() - scaled_width/2)
-        scaled_y = int(center.y() - scaled_height/2)
-        scaled_geom = QRect(scaled_x, scaled_y, scaled_width, scaled_height)
-        
-        # Set keyframes for scale animation
-        scale_anim.setKeyValueAt(0, orig_geom)
-        scale_anim.setKeyValueAt(0.25, scaled_geom)
-        scale_anim.setKeyValueAt(0.75, scaled_geom)
-        scale_anim.setKeyValueAt(1, orig_geom)
-        
-        button_anim.addAnimation(scale_anim)
-        
-        # Show toast with same duration as button animation
-        if self.toast_label:
-            self.toast_label.hide()
-        self.show_synchronized_toast("Cart is empty! Please add items to proceed.")
-        print("Cart is empty! Please add items to proceed.")
-        
-        # Change button color
-        payment_button.setStyleSheet("""
-            QPushButton {
-                background-color: #F4A261;
-                color: black;
-                border-radius: 20px;
-                font-weight: bold;
-            }
-        """)
-        
-        # Create a single timer for both animations
-        def reset_all():
-            payment_button.setStyleSheet(original_style)
-            if self.toast_label:
-                self.toast_label.hide()
-                
-        # Start animations and set timer
-        button_anim.start()
-        QTimer.singleShot(1000, reset_all)
-
-    def show_synchronized_toast(self, message):
-        """Show toast message without its own timer"""
-        if not self.toast_label:
-            self.toast_label = QLabel(self)
-            self.toast_label.setStyleSheet("""
-                QLabel {
-                    background-color: #264653;
-                    color: white;
-                    padding: 10px 20px;
-                    border-radius: 10px;
-                    font-family: Baloo;
-                    font-size: 13px;
-                    border: 1px solid white;
-                    margin: 10px;
-                }
-            """)
-                
-        self.toast_label.setText(message)
-        self.toast_label.adjustSize()
-        
-        # Position toast
-        x = (self.width() - self.toast_label.width()) // 2
-        self.toast_label.setGeometry(x, 20, self.toast_label.width(), self.toast_label.height())
-        
-        # Add drop shadow
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(15)
-        shadow.setColor(Qt.black)
-        shadow.setOffset(0, 2)
-        self.toast_label.setGraphicsEffect(shadow)
-        
-        # Show immediately
-        self.toast_label.show()
-
-    def update_item_quantity(self, index, quantity):
-        self.cart_state.update_quantity(index, quantity)
-        self.update_cart_display()
-
-    def remove_cart_item(self, index):
-        """Handle cart item removal with improved safety"""
-        try:
-            # Lấy thông tin trước khi xóa
-            removed_product = self.cart_state.cart_items[index][0].copy()  # Tạo bản sao của product
-            
-            # Thực hiện xóa item
-            self.cart_state.remove_item(index)
-            
-            # Update cart count label
-            if self.cart_state.cart_items:
-                self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
-            else:
-                self.cart_count_label.setText("")
-            
-            # Update cart display trước
-            self.update_cart_display()
-            
-            # Kiểm tra và cập nhật product modal
-            if (self.product_modal and 
-                self.product_modal.isVisible() and 
-                self.product_modal.current_product and 
-                self.product_modal.current_product['name'] == removed_product['name']):
-                
-                # Tạo product modal mới với sản phẩm đã xóa
-                self.recreate_product_modal(removed_product)
-            
-        except Exception as e:
-            print(f"Error removing cart item: {e}")
-
-    def recreate_product_modal(self, product):
-        """Recreate product modal safely after item removal"""
-        try:
-            # Lưu vị trí cũ
-            old_pos = self.product_modal.pos()
-            
-            # Tạo modal mới
-            camera_height = 299
-            new_modal = ProductModal(camera_height=camera_height//2)
-            new_modal.setParent(self)
-            new_modal.add_to_cart.connect(self.add_to_cart)
-            new_modal.cancel_clicked.connect(self.handle_cancel)
-            
-            # Di chuyển đến vị trí cũ
-            new_modal.move(old_pos)
-            
-            # Cập nhật sản phẩm 
-            new_modal.update_product(product)
-            
-            # Xóa modal cũ
-            if self.product_modal:
-                self.product_modal.hide()
-                self.product_modal.deleteLater()
-            
-            # Cập nhật reference
-            self.product_modal = new_modal
-            
-            # Hiển thị modal mới
-            self.product_modal.show()
-            self.product_modal.raise_()
-            
-        except Exception as e:
-            print(f"Error recreating product modal: {e}")
-
-    def show_product_page(self):
-        from import_module import ImportModule
-        # Stop camera and session monitor before switching page
-        if self.camera_active:
-            self.stop_camera()
-            
-        if hasattr(self, 'session_monitor'):
-            self.session_monitor.stop() 
-            self.session_monitor.wait()
-            print("Stopped session monitor before product page")
-            
-        product_page = ImportModule.get_product_page()
-        product_page.show()
-        self.hide()
-
     def toggle_camera(self):
         if self.camera_active:
             self.stop_camera()
+            
+            # Update scan button appearance after camera is stopped
+            scan_button = self.findChild(QPushButton, "SCAN_BUTTON")
+            if scan_button:
+                scan_button.text_label.setStyleSheet("""
+                    color: white; 
+                    font-family: Inter;
+                    font-weight: bold;
+                    font-size: 14px;
+                    background: transparent;
+                    padding: 0px;
+                """)
+                icon_pixmap = QPixmap(scan_button.scan_normal_path).scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                scan_button.icon_label.setPixmap(icon_pixmap)
         else:
             # Start camera immediately without delay
             self.product_detected = False
@@ -1045,6 +664,44 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 
             self.start_camera()  # Remove delay_detection parameter
             self.camera_frame.show()
+            
+            # Update scan button appearance after camera is started - set YELLOW for active camera
+            scan_button = self.findChild(QPushButton, "SCAN_BUTTON")
+            if scan_button:
+                scan_button.text_label.setStyleSheet("""
+                    color: #FFFF00; 
+                    font-family: Inter;
+                    font-weight: bold;
+                    font-size: 14px;
+                    background: transparent;
+                    padding: 0px;
+                """)
+                icon_pixmap = QPixmap(scan_button.scan_hover_path).scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                scan_button.icon_label.setPixmap(icon_pixmap)
+
+    def show_product_page(self):
+        """Navigate to the product information page"""
+        # Stop camera and session monitor before switching page
+        if self.camera_active:
+            self.stop_camera()
+            
+        if hasattr(self, 'session_monitor'):
+            self.session_monitor.stop() 
+            self.session_monitor.wait()
+            print("Stopped session monitor before product page")
+            
+        if hasattr(self, 'payment_monitor'):
+            self.payment_monitor.stop()
+            self.payment_monitor.wait()
+            print("Stopped payment monitor before product page")
+            
+        # Import ProductPage dynamically to avoid circular imports
+        from page3_productsinfo import ProductPage
+        product_page = ProductPage()
+        
+        # Show the product page and hide current page
+        product_page.show()
+        self.hide()
 
     def start_camera(self):
         """Start camera with immediate detection"""
@@ -1105,13 +762,63 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             # Process frame for display
             display_frame = frame.copy()
             display_frame = cv2.cvtColor(display_frame, cv2.COLOR_BGR2RGB)
+            
+            # Get the current frame dimensions
             h, w, ch = display_frame.shape
-            self._current_frame = QImage(display_frame.data, w, h, w * ch, QImage.Format_RGB888)
+            
+            # For a true 0.5x zoom (wider field of view), we need to 
+            # resize the original frame to a smaller size, then place it on a canvas
+            
+            # Calculate the size to resize the original frame to simulate 0.5x zoom
+            zoom_factor = 2
+            resized_w = int(w * zoom_factor)  # Make the frame smaller
+            resized_h = int(h * zoom_factor)
+            
+            # Resize the frame to simulate zoom out
+            resized_frame = cv2.resize(display_frame, (resized_w, resized_h), interpolation=cv2.INTER_AREA)
+            
+            # Calculate the scaling factor to fill the 400x400 area (updated from 360x340)
+            target_width = 360
+            target_height = 400
+            
+            # Scale the resized frame to fill the target area
+            scale_w = target_width / resized_w
+            scale_h = target_height / resized_h
+            
+            # Use the larger scaling factor to ensure we fill the entire area
+            scale = max(scale_w, scale_h)
+            
+            # Apply scaling to get dimensions that will fill the target area
+            fill_w = int(resized_w * scale)
+            fill_h = int(resized_h * scale)
+            
+            # Resize again to fill the target area
+            filled_frame = cv2.resize(resized_frame, (fill_w, fill_h), interpolation=cv2.INTER_LINEAR)
+            
+            # If the filled frame is larger than the target area, crop the center
+            if fill_w > target_width or fill_h > target_height:
+                # Calculate crop coordinates
+                start_x = (fill_w - target_width) // 2
+                start_y = (fill_h - target_height) // 2
+                
+                # Crop to exact target size
+                filled_frame = filled_frame[start_y:start_y+target_height, start_x:start_x+target_width]
+            
+            # Make sure the array is contiguous in memory before creating QImage
+            filled_frame = np.ascontiguousarray(filled_frame)
+            
+            # Convert to QImage
+            self._current_frame = QImage(filled_frame.data, target_width, target_height, 
+                                        target_width * ch, QImage.Format_RGB888)
+            
+            # Set the pixmap
             self.camera_label.setPixmap(QPixmap.fromImage(self._current_frame))
 
             # Only run detection if conditions are met
+            # Skip the first 3 frames, only detect from frame 4 onwards
             current_time = time.time()
-            if (self.frame_count % 10 == 0 and  # Reduced from 3 to 10 frames
+            if (self.frame_count > 3 and  # Changed from % 10 == 0 to > 3 to skip first 3 frames
+                self.frame_count % 10 == 0 and  # Still check every 10th frame after that
                 not self.detection_start_time and 
                 current_time - self.last_detect_time > 0.5):  # Min 0.5s between detections
                 
@@ -1250,7 +957,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         product_modal = self.get_product_modal()
         product_modal.setParent(self)
         
-        # Position modal more centered
+        # Position modal more centered with the new camera frame size
         camera_pos = self.camera_frame.pos()
         camera_center_x = camera_pos.x() + (self.camera_frame.width() // 2)
         modal_x = camera_center_x - (product_modal.width() // 2)  # Center align
@@ -1274,6 +981,12 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.camera_label.show()
 
     def show_cancel_dialog(self):
+        # Kiểm tra xem giỏ hàng có trống không
+        if not self.cart_state.cart_items:
+            # Nếu giỏ hàng trống, hủy phiên trực tiếp mà không hiển thị modal
+            self.handle_cancel_without_warning()
+            return
+
         if self.camera_active:
             self.stop_camera()
 
@@ -1331,14 +1044,17 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             QPushButton {
                 background-color: #FED87B;
                 border: 1px solid #FED87B;
-                border-radius: 17px;
+                border-radius: 20px;
                 color: #D30E11;
                 font-weight: bold;
-                font-size: 12px;
+                font-size: 14px;
+                padding: 0px;
+                margin: 0px;
             }
             QPushButton:hover {
                 background-color: #B71C1C;
                 color: white;
+                border: 1px solid #B71C1C;
             }
         """)
         
@@ -1352,16 +1068,19 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             # Reset button style when modal hides
             self.cancel_shopping_btn.setStyleSheet("""
                 QPushButton {
-                    background-color: #F3F3F3;
+                    background-color: white;
                     border: 1px solid #D30E11;
-                    border-radius: 17px;
+                    border-radius: 20px;
                     color: #D30E11;
                     font-weight: bold;
-                    font-size: 12px;
+                    font-size: 14px;
+                    padding: 0px;
+                    margin: 0px;
                 }
                 QPushButton:hover {
                     background-color: #D32F2F;
                     color: white;
+                    border: 1px solid #D32F2F;
                 }
             """)
             if self.blur_effect:
@@ -1377,64 +1096,31 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             self.resume_camera()
 
         self.cancel_modal.not_now.connect(cleanup)
+        
+        # Kết nối cancel signal với handler
+        self.cancel_modal.cancelled.connect(self.handle_cancel_payment)
 
-        # Chỉnh sửa handler cho cancel modal
-        def handle_cancel_payment():
-            # Cleanup effects và blur container
-            if self.blur_effect:
-                self.blur_effect.setBlurRadius(0)
-            if self.opacity_effect:
-                self.opacity_effect.setOpacity(1)
-            if self.blur_container:
-                self.blur_container.hide()
-                self.blur_container.deleteLater()
-                
-            self.blur_container = None
-            self.blur_effect = None
-            self.opacity_effect = None
-
-            # Set payment_completed flag để trigger reset
-            self.payment_completed = True
+    def handle_cancel_without_warning(self):
+        """Hủy phiên mua sắm trực tiếp không cần hiển thị cảnh báo"""
+        try:
+            # Gọi API để hủy phiên
+            url = f"{CART_END_SESSION_API}{DEVICE_ID}/"
+            print(f"Ending session via API: {url}")
+            response = requests.post(url)
             
-            # Chuyển về home page
-            self.go_home()
-
-        # Kết nối cancel signal với handler mới
-        self.cancel_modal.cancelled.connect(handle_cancel_payment)
-
-    def handle_cancel_payment(self):
-        """Single handler for cancel payment - API call moved to modal"""
-        if not self.transition_in_progress:
-            self.transition_in_progress = True
-
-            def switch_to_home():
-                # Cleanup effects and blur container first
-                if self.blur_effect:
-                    self.blur_effect.setBlurRadius(0)
-                if self.opacity_effect:
-                    self.opacity_effect.setOpacity(1)
-                if self.blur_container:
-                    self.blur_container.hide()
-                    self.blur_container.deleteLater()
-                    
-                self.blur_container = None
-                self.blur_effect = None
-                self.opacity_effect = None
-
-                # Clear cart data
-                self.cart_state.clear_cart()
-                self.cart_state.save_to_json()
+            if response.status_code == 200:
+                print("Session ended successfully")
+            else:
+                print(f"Error ending session: {response.status_code}, {response.text}")
                 
-                # Show transition overlay
-                def transition_complete():
-                    from page1_welcome import WelcomePage
-                    self.home_page = WelcomePage()
-                    self.home_page.show()
-                    self.transition_overlay.fadeOut(lambda: self.close())
-                    
-                self.transition_overlay.fadeIn(transition_complete)
-
-            switch_to_home()
+        except Exception as e:
+            print(f"Error calling end session API: {e}")
+            
+        # Set payment_completed flag để trigger reset
+        self.payment_completed = True
+        
+        # Chuyển về home page
+        self.go_home()
 
     def go_home(self):
         """Enhanced going back to home page with transition"""
@@ -1767,16 +1453,19 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             if hasattr(self, 'cancel_shopping_btn'):
                 self.cancel_shopping_btn.setStyleSheet("""
                     QPushButton {
-                        background-color: #F3F3F3;
+                        background-color: white;
                         border: 1px solid #D30E11;
-                        border-radius: 17px;
+                        border-radius: 20px;
                         color: #D30E11;
                         font-weight: bold;
-                        font-size: 12px;
+                        font-size: 14px;
+                        padding: 0px;
+                        margin: 0px;
                     }
                     QPushButton:hover {
                         background-color: #D32F2F;
                         color: white;
+                        border: 1px solid #D32F2F;
                     }
                 """)
                 self.cancel_shopping_btn.hide()  # Hide the button
@@ -1831,6 +1520,468 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                     self._image_cache[img_name] = QPixmap(path)
         except Exception as e:
             print(f"Error preloading images: {e}")
+
+    def update_cart_display(self):
+        """Memory-optimized cart display"""
+        # Clear widgets properly
+        self.clear_layout(self.content_layout)
+        
+        # Update cart count label to match page3's style
+        if self.cart_state.cart_items:
+            self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
+        else:
+            self.cart_count_label.setText("")
+        
+        # Update background color based on cart state
+        self.right_section.setStyleSheet(
+            f"background-color: {'#F3F3F3' if self.cart_state.cart_items else 'white'};"
+        )
+        
+        # Keep header transparent
+        self.header_widget.setStyleSheet("background-color: transparent;")
+        
+        # Luôn hiển thị nút cancel shopping, không phụ thuộc vào trạng thái giỏ hàng
+        self.cancel_shopping_btn.setVisible(True)
+
+        if not self.cart_state.cart_items:
+            # Empty cart display
+            empty_container = QWidget()
+            empty_layout = QVBoxLayout(empty_container)
+            empty_layout.setContentsMargins(0, 20, 0, 0)  # Reduced top margin from 50 to 20
+            
+            empty_layout.addStretch(2)  # Reduced stretch from 3 to 2
+            
+            empty_text = QLabel("Empty")
+            empty_text.setFont(QFont("Inria Sans", 30))
+            empty_text.setStyleSheet("color: #F68003;")
+            empty_text.setAlignment(Qt.AlignCenter)
+            empty_layout.addWidget(empty_text)
+            
+            empty_layout.addSpacing(20)
+            
+            empty_cart_label = QLabel()
+            empty_cart_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                         'assets', 'emptycart.png')
+            empty_cart_pixmap = QPixmap(empty_cart_path)
+            if not empty_cart_pixmap.isNull():
+                empty_cart_label.setPixmap(empty_cart_pixmap.scaled(100, 100, 
+                                         Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            empty_cart_label.setAlignment(Qt.AlignCenter)
+            empty_layout.addWidget(empty_cart_label)
+            
+            empty_layout.addStretch(3)  # Increased stretch from 2 to 3
+            
+            self.content_layout.addWidget(empty_container)
+        else:
+            # Container for cart items
+            scroll_container = QWidget()
+            scroll_layout = QVBoxLayout(scroll_container)
+            scroll_layout.setContentsMargins(0, 0, 0, 0)
+            
+            # Create scroll area for items with custom scrolling behavior
+            scroll_area = CartItemsScrollArea()
+            
+            # Items container
+            items_container = QWidget()
+            items_layout = QVBoxLayout(items_container)
+            items_layout.setSpacing(30)
+            items_layout.setContentsMargins(0, 0, 0, 0)  # Remove right margin
+
+            # Add cart items
+            highlighted_name = getattr(self, '_highlight_product_name', None)
+            for i, (product, quantity) in enumerate(reversed(self.cart_state.cart_items)):
+                item_widget = CartItemWidget(product, quantity)
+                item_widget.quantityChanged.connect(
+                    lambda q, idx=len(self.cart_state.cart_items)-1-i: self.update_item_quantity(idx, q)
+                )
+                item_widget.itemRemoved.connect(
+                    lambda idx=len(self.cart_state.cart_items)-1-i: self.remove_cart_item(idx)
+                )
+                
+                if highlighted_name and product['name'] == highlighted_name:
+                    item_widget.highlight()
+                    self._highlight_product_name = None
+                    
+                items_layout.addWidget(item_widget)
+
+            # Add stretch to push items up
+            items_layout.addStretch()
+            
+            # Set items container to scroll area
+            scroll_area.setWidget(items_container)
+            scroll_layout.addWidget(scroll_area)
+            
+            # Add scroll container to main content
+            self.content_layout.addWidget(scroll_container, stretch=1)
+
+        # Calculate total amount
+        total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_state.cart_items) if self.cart_state.cart_items else 0
+        formatted_total = "{:,.0f}".format(total_amount).replace(',', '.')
+
+        # Create footer container for total and payment
+        footer_container = QWidget()
+        footer_container.setStyleSheet("background-color: transparent;")
+        footer_layout = QHBoxLayout(footer_container)
+        footer_layout.setContentsMargins(0, 5, 0, 5)  # Reduce padding from 10 to 5
+        footer_layout.setSpacing(10)  # Add explicit spacing control
+        footer_layout.addStretch()
+        
+        # Total label
+        total_label = QLabel()
+        total_label.setText(f'<span style="color: #000000;">Total </span>'
+                          f'<span style="color: #D30E11;">{formatted_total} vnđ</span>')
+        total_label.setTextFormat(Qt.RichText)
+        total_label.setStyleSheet("""
+            margin-right: 20px;  
+            font-family: Inter;
+            font-weight: bold;
+            font-size: 15px;
+        """)
+        footer_layout.addWidget(total_label)
+        
+        # Payment button
+        payment_button = QPushButton("PAYMENT")
+        payment_button.setObjectName("payment_button")  # Set object name for finding later
+        payment_button.setFixedSize(160, 45)  # Reduce size from 170x40 to 160x35
+        payment_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4E8F5F;
+                color: white;
+                border-radius: 17px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #2C513F;
+            }
+        """)
+        payment_button.clicked.connect(self.show_payment_page)
+        footer_layout.addWidget(payment_button)
+        
+        # Add footer to main layout at the bottom
+        self.content_layout.addStretch()  # Push everything up
+        self.content_layout.addWidget(footer_container, alignment=Qt.AlignBottom)
+
+    def show_payment_page(self):
+        """Enhanced transition to payment page with optimized performance"""
+        # Bắt đầu đo thời gian
+        transition_start_time = time.time()
+        print(f"[TIMING] Starting page transition at: {transition_start_time}")
+        
+        total_amount = sum(float(product['price']) * quantity 
+                         for product, quantity in self.cart_state.cart_items)
+        if total_amount == 0:
+            self.animate_disabled_payment()
+            return
+            
+        if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
+            self.transition_in_progress = True
+            
+            # Start transition overlay immediately
+            self.transition_overlay.fadeIn()
+            print(f"[TIMING] Transition overlay started at: {time.time() - transition_start_time:.4f}s")
+            
+            # Lưu ý QUAN TRỌNG: KHÔNG khởi tạo QTimer trong thread khác
+            # Stop monitors trực tiếp
+            if hasattr(self, 'session_monitor'):
+                self.session_monitor.stop()
+                # Không dùng wait() để tránh blocking
+                print("Stopped session monitor before payment page")
+                
+            if hasattr(self, 'payment_monitor'):
+                self.payment_monitor.stop()
+                # Không dùng wait() để tránh blocking
+                print("Stopped payment monitor before payment page")
+                
+            print(f"[TIMING] Monitors stopped at: {time.time() - transition_start_time:.4f}s")
+            
+            # Pre-cleanup để giảm tải
+            if self.camera:
+                self.stop_camera()
+                print(f"[TIMING] Camera stopped at: {time.time() - transition_start_time:.4f}s")
+            
+            # Load QR page trong main thread để tránh lỗi QTimer
+            start_time = PageTiming.start_timing()
+            
+            # Chuẩn bị tải page mới
+            print(f"[TIMING] Starting to load QRCodePage at: {time.time() - transition_start_time:.4f}s")
+            from page5_qrcode import QRCodePage
+            
+            # Khởi tạo page với tham số đồng bộ
+            print(f"[TIMING] Creating QRCodePage at: {time.time() - transition_start_time:.4f}s")
+            self.payment_page = QRCodePage()
+            self.payment_page.payment_completed.connect(self.handle_payment_completed)
+            
+            # Hiển thị trang mới và ẩn trang hiện tại
+            def show_new_page():
+                page_ready_time = time.time()
+                print(f"[TIMING] QRCodePage ready at: {page_ready_time - transition_start_time:.4f}s")
+                self.payment_page.show()
+                print(f"[TIMING] QRCodePage shown at: {time.time() - transition_start_time:.4f}s")
+                self.transition_overlay.fadeOut(lambda: self.hide())
+                # Kết thúc đo thời gian
+                total_time = time.time() - transition_start_time
+                print(f"[TIMING] Total transition time: {total_time:.4f}s")
+                PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
+            
+            # Dùng QTimer ở main thread
+            QTimer.singleShot(100, show_new_page)
+            
+            # Cleanup nặng để chạy sau khi đã chuyển trang
+            def background_cleanup():
+                try:
+                    # Clear caches
+                    self._image_cache.clear()
+                    self._widgets_cache.clear()
+                    
+                    # Clean up modals
+                    if hasattr(self, '_product_modal') and self._product_modal:
+                        self._product_modal.hide()
+                    
+                    if hasattr(self, '_cancel_modal') and self._cancel_modal:
+                        self._cancel_modal.hide()
+                    
+                    # Force garbage collection
+                    import gc
+                    gc.collect()
+                    
+                    print(f"[TIMING] Background cleanup completed at: {time.time() - transition_start_time:.4f}s")
+                except Exception as e:
+                    print(f"Error in cleanup: {e}")
+            
+            # Chạy cleanup sau khi đã chuyển trang
+            QTimer.singleShot(500, background_cleanup)
+
+    def handle_payment_completed(self, success):
+        """Xử lý khi thanh toán hoàn tất"""
+        self.payment_completed = success
+        if success:
+            # Tạm thời chỉ đánh dấu flag, chưa clear cart ngay
+            # Để page6 có thể lấy dữ liệu gửi server trước
+            # Cart sẽ được clear khi page này được show lại
+            self.payment_completed = True
+            # KHÔNG clear cart ở đây nữa
+            # self.cart_state.clear_cart()
+            # self.cart_state.save_to_json()
+
+    def animate_disabled_payment(self):
+        """Animate payment button when cart is empty"""
+        payment_button = self.findChild(QPushButton, "payment_button")  
+        if not payment_button:
+            return
+            
+        # Save original style
+        original_style = payment_button.styleSheet()
+        
+        # Create all animations at once
+        button_anim = QParallelAnimationGroup()
+        
+        # Scale animation
+        scale_anim = QPropertyAnimation(payment_button, b"geometry")
+        scale_anim.setDuration(1000)
+        
+        # Get original geometry
+        orig_geom = payment_button.geometry()
+        center = orig_geom.center()
+        
+        # Calculate scaled geometries
+        scaled_width = int(orig_geom.width() * 1.8)
+        scaled_height = int(orig_geom.height() * 1.8)
+        scaled_x = int(center.x() - scaled_width/2)
+        scaled_y = int(center.y() - scaled_height/2)
+        scaled_geom = QRect(scaled_x, scaled_y, scaled_width, scaled_height)
+        
+        # Set keyframes for scale animation
+        scale_anim.setKeyValueAt(0, orig_geom)
+        scale_anim.setKeyValueAt(0.25, scaled_geom)
+        scale_anim.setKeyValueAt(0.75, scaled_geom)
+        scale_anim.setKeyValueAt(1, orig_geom)
+        
+        button_anim.addAnimation(scale_anim)
+        
+        # Show toast with same duration as button animation
+        if self.toast_label:
+            self.toast_label.hide()
+        self.show_synchronized_toast("Cart is empty! Please add items to proceed.")
+        print("Cart is empty! Please add items to proceed.")
+        
+        # Change button color
+        payment_button.setStyleSheet("""
+            QPushButton {
+                background-color: #F4A261;
+                color: black;
+                border-radius: 20px;
+                font-weight: bold;
+            }
+        """)
+        
+        # Create a single timer for both animations
+        def reset_all():
+            payment_button.setStyleSheet(original_style)
+            if self.toast_label:
+                self.toast_label.hide()
+                
+        # Start animations and set timer
+        button_anim.start()
+        QTimer.singleShot(1000, reset_all)
+
+    def show_synchronized_toast(self, message):
+        """Show toast message without its own timer"""
+        if not self.toast_label:
+            self.toast_label = QLabel(self)
+            self.toast_label.setStyleSheet("""
+                QLabel {
+                    background-color: #264653;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-family: Baloo;
+                    font-size: 13px;
+                    border: 1px solid white;
+                    margin: 10px;
+                }
+            """)
+                
+        self.toast_label.setText(message)
+        self.toast_label.adjustSize()
+        
+        # Position toast
+        x = (self.width() - self.toast_label.width()) // 2
+        self.toast_label.setGeometry(x, 20, self.toast_label.width(), self.toast_label.height())
+        
+        # Add drop shadow
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setColor(Qt.black)
+        shadow.setOffset(0, 2)
+        self.toast_label.setGraphicsEffect(shadow)
+        
+        # Show immediately
+        self.toast_label.show()
+
+    def update_item_quantity(self, index, quantity):
+        self.cart_state.update_quantity(index, quantity)
+        self.update_cart_display()
+
+    def remove_cart_item(self, index):
+        """Handle cart item removal with improved safety"""
+        try:
+            # Lấy thông tin trước khi xóa
+            removed_product = self.cart_state.cart_items[index][0].copy()  # Tạo bản sao của product
+            
+            # Thực hiện xóa item
+            self.cart_state.remove_item(index)
+            
+            # Update cart count label
+            if self.cart_state.cart_items:
+                self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
+            else:
+                self.cart_count_label.setText("")
+            
+            # Update cart display trước
+            self.update_cart_display()
+            
+            # Kiểm tra và cập nhật product modal
+            if (self.product_modal and 
+                self.product_modal.isVisible() and 
+                self.product_modal.current_product and 
+                self.product_modal.current_product['name'] == removed_product['name']):
+                
+                # Thay vì recreate_product_modal, chỉ cần ẩn nó đi
+                self.product_modal.hide()
+                
+                # Khôi phục camera để người dùng scan lại
+                self.product_detected = False
+                self.camera_frame.show()
+                self.camera_label.show()
+                QTimer.singleShot(100, lambda: self.start_camera())
+            
+        except Exception as e:
+            print(f"Error removing cart item: {e}")
+
+    def recreate_product_modal(self, product):
+        """Recreate product modal safely after item removal"""
+        try:
+            # Kiểm tra xem sản phẩm còn trong giỏ hàng không
+            product_in_cart = False
+            for cart_product, _ in self.cart_state.cart_items:
+                if cart_product['name'] == product['name']:
+                    product_in_cart = True
+                    break
+                    
+            # Nếu sản phẩm không còn trong giỏ hàng, chỉ cần ẩn modal và khôi phục camera
+            if not product_in_cart:
+                self.product_modal.hide()
+                self.product_detected = False
+                self.camera_frame.show()
+                self.camera_label.show()
+                QTimer.singleShot(100, lambda: self.start_camera())
+                return
+                
+            # Lưu vị trí cũ
+            old_pos = self.product_modal.pos()
+            
+            # Tạo modal mới
+            camera_height = 299
+            new_modal = ProductModal(camera_height=camera_height//2)
+            new_modal.setParent(self)
+            new_modal.add_to_cart.connect(self.add_to_cart)
+            new_modal.cancel_clicked.connect(self.handle_cancel)
+            
+            # Di chuyển đến vị trí cũ
+            new_modal.move(old_pos)
+            
+            # Cập nhật sản phẩm 
+            new_modal.update_product(product)
+            
+            # Xóa modal cũ một cách an toàn
+            old_modal = self.product_modal
+            self.product_modal = new_modal  # Cập nhật reference trước khi đóng modal cũ
+            
+            if old_modal:
+                old_modal.hide()
+                QTimer.singleShot(100, lambda: old_modal.deleteLater())  # Delay việc xóa để tránh lỗi
+            
+            # Hiển thị modal mới
+            self.product_modal.show()
+            self.product_modal.raise_()
+            
+        except Exception as e:
+            print(f"Error recreating product modal: {e}")
+
+    def handle_cancel_payment(self):
+        """Single handler for cancel payment - API call moved to modal"""
+        if not self.transition_in_progress:
+            self.transition_in_progress = True
+
+            def switch_to_home():
+                # Cleanup effects and blur container first
+                if self.blur_effect:
+                    self.blur_effect.setBlurRadius(0)
+                if self.opacity_effect:
+                    self.opacity_effect.setOpacity(1)
+                if self.blur_container:
+                    self.blur_container.hide()
+                    self.blur_container.deleteLater()
+                    
+                self.blur_container = None
+                self.blur_effect = None
+                self.opacity_effect = None
+
+                # Clear cart data
+                self.cart_state.clear_cart()
+                self.cart_state.save_to_json()
+                
+                # Show transition overlay
+                def transition_complete():
+                    from page1_welcome import WelcomePage
+                    self.home_page = WelcomePage()
+                    self.home_page.show()
+                    self.transition_overlay.fadeOut(lambda: self.close())
+                    
+                self.transition_overlay.fadeIn(transition_complete)
+
+            switch_to_home()
 
 if __name__ == '__main__':
     import sys

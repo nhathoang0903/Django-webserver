@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QWidget,
 import requests
 import json
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
-from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QColor
+from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QColor, QMovie
 from page2_instruction import InstructionPage  
 import os
 from cart_state import CartState  
@@ -62,22 +62,78 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
         self.blur_effect = QGraphicsBlurEffect()
         self.blur_effect.setBlurRadius(10)
         
-        # Welcome message label with smaller font
-        self.welcome_msg = QLabel(self.welcome_overlay)
-        self.welcome_msg.setFont(QFont("Inter", 14, QFont.Bold))  # Reduced from 48 to 14
+        # Create welcome container
+        self.welcome_container = QWidget(self.welcome_overlay)
+        self.welcome_container.setFixedSize(500, 400)  # Increased container size
+        self.welcome_container.setStyleSheet("""
+            QWidget {
+                background: transparent;
+                border: none;
+            }
+        """)
+        
+        # Create welcome layout
+        self.welcome_layout = QVBoxLayout(self.welcome_container)
+        self.welcome_layout.setSpacing(20)
+        self.welcome_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Create gif container
+        self.gif_container = QWidget(self.welcome_container)
+        self.gif_container.setFixedSize(305, 305)
+        self.gif_container.setStyleSheet("""
+            QWidget {
+                background: transparent;
+                border: none;
+            }
+        """)
+        
+        # Create gif label
+        self.gif_label = QLabel(self.gif_container)
+        gif_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'welcome_member.gif')
+        self.gif_movie = QMovie(gif_path)
+        self.gif_label.setMovie(self.gif_movie)
+        
+        # Set size policy to maintain aspect ratio
+        self.gif_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.gif_label.setScaledContents(True)  # This will maintain aspect ratio
+        self.gif_label.setFixedSize(305, 305)  # Match container size
+        self.gif_label.setAlignment(Qt.AlignCenter)
+        self.gif_label.setStyleSheet("""
+            QLabel {
+                background: transparent;
+                border: none;
+                padding: 0;
+                margin: 0;
+            }
+        """)
+        
+        # Create gif container layout
+        gif_layout = QVBoxLayout(self.gif_container)
+        gif_layout.setContentsMargins(0, 0, 0, 0)
+        gif_layout.setSpacing(0)
+        gif_layout.addWidget(self.gif_label)
+        
+        # Create welcome message label
+        self.welcome_msg = QLabel(self.welcome_container)
+        self.welcome_msg.setFont(QFont("Inter", 18, QFont.Bold))
         self.welcome_msg.setStyleSheet("""
             QLabel {
                 color: #3D6F4A;
                 background: transparent;
-                padding: 20px;
+                padding: 10px;
+                border: none;
             }
         """)
         self.welcome_msg.setAlignment(Qt.AlignCenter)
         
-        # Center welcome message
-        welcome_layout = QVBoxLayout(self.welcome_overlay)
-        welcome_layout.addWidget(self.welcome_msg)
-        welcome_layout.setAlignment(Qt.AlignCenter)
+        # Add widgets to layout
+        self.welcome_layout.addWidget(self.gif_container, alignment=Qt.AlignCenter)
+        self.welcome_layout.addWidget(self.welcome_msg, alignment=Qt.AlignCenter)
+        
+        # Create overlay layout
+        self.overlay_layout = QVBoxLayout(self.welcome_overlay)
+        self.overlay_layout.setContentsMargins(0, 0, 0, 0)
+        self.overlay_layout.addWidget(self.welcome_container, alignment=Qt.AlignCenter)
 
     def load_fonts(self):
         # Load custom fonts from font-family directory
@@ -187,7 +243,7 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
         img_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'welcome-instruction.png')
         img_pixmap = QPixmap(img_path)
         if not img_pixmap.isNull():
-            welcome_img_label.setPixmap(img_pixmap.scaled(365, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            welcome_img_label.setPixmap(img_pixmap.scaled(370, 345, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         welcome_img_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter) # Keep VCenter alignment
         right_layout.addWidget(welcome_img_label)
 
@@ -218,18 +274,6 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
     # Add signal handlers
     def on_switch_page(self, page_number):
         if page_number == 2:
-            self.proceed_to_instruction()
-            
-    def on_switch_login(self):
-        print("Opening Member QR Frame...")
-        self.qr_frame.show()
-
-    def show_select_mode(self):
-        """Helper method to show select mode frame"""
-        self.select_mode_frame.show()
-
-    def proceed_to_instruction(self):
-        def switch_page():
             start_time = PageTiming.start_timing()
             self.instruction_page = InstructionPage()
             
@@ -240,7 +284,32 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
                 
             self.transition_overlay.fadeIn(show_new_page)
             
-        switch_page()
+    def on_switch_login(self):
+        print("Opening Member QR Frame...")
+        self.qr_frame.show()
+
+    def show_select_mode(self):
+        """Helper method to show select mode frame"""
+        self.select_mode_frame.show()
+
+    def proceed_to_instruction(self):
+        """Switch to instruction page"""
+        # Stop gif animation
+        self.gif_movie.stop()
+        
+        # Hide welcome overlay
+        self.welcome_overlay.hide()
+        
+        # Create and show instruction page directly
+        start_time = PageTiming.start_timing()
+        self.instruction_page = InstructionPage()
+        
+        def show_new_page():
+            self.instruction_page.show()
+            self.transition_overlay.fadeOut(lambda: self.hide())
+            PageTiming.end_timing(start_time, "WelcomePage", "InstructionPage")
+            
+        self.transition_overlay.fadeIn(show_new_page)
 
     def show_welcome_message(self, customer_name):
         """Show welcome message with blurred background"""
@@ -252,10 +321,18 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
                 blur.setBlurRadius(5)  # Lighter blur
                 child.setGraphicsEffect(blur)
         
-        # Show welcome message overlay
+        # Update welcome message
         self.welcome_msg.setText(f"Hello, {customer_name}!")
+        
+        # Start gif animation
+        self.gif_movie.start()
+        
+        # Show overlay
         self.welcome_overlay.show()
         self.welcome_overlay.raise_()
+        
+        # Schedule page transition
+        QTimer.singleShot(2000, self.proceed_to_instruction)
 
 class BaseOverlayFrame(QWidget):
     def __init__(self, parent=None):

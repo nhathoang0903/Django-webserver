@@ -1,616 +1,1317 @@
-2025-04-12 10:47:20,454 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:22,492 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:24,532 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:26,576 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:28,621 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:30,681 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:32,758 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:34,913 - Status check - active: True, should_run: True, app: running
-2025-04-12 10:47:36,914 - Last app output before stopping:
-2025-04-12 10:47:36,915 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 10:47:36,915 - 2025-04-12 10:39:16,794 - Starting Cartsy Application
-2025-04-12 10:47:36,915 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 10:47:36,916 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 10:47:36,916 - 2025-04-12 10:39:18,140 - Main window displayed
-2025-04-12 10:47:36,917 - App stopped successfully
-2025-04-12 12:59:41,487 - Failed to update status: HTTPConnectionPool(host='172.26.17.192', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/?is_active=True&app_running=False (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f8d921c10>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 12:59:41,506 - Service controller started...
-2025-04-12 12:59:41,513 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.192', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f8d4f4b90>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 12:59:41,514 - Status check - active: True, should_run: False, app: not running
-2025-04-12 12:59:43,518 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.192', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f8d4f7010>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 12:59:43,519 - Status check - active: True, should_run: False, app: not running
-2025-04-12 12:59:45,523 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.192', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f8d501450>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 12:59:45,523 - Status check - active: True, should_run: False, app: not running
-2025-04-12 12:59:47,707 - Status check - active: True, should_run: True, app: not running
-2025-04-12 12:59:47,707 - Starting app...
-2025-04-12 12:59:47,710 - App started successfully
-2025-04-12 12:59:49,818 - Status check - active: True, should_run: True, app: running
-2025-04-12 12:59:50,018 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 12:59:50,112 - App error: 2025-04-12 12:59:50,111 - Starting Cartsy Application
-2025-04-12 12:59:50,469 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 12:59:51,782 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 12:59:51,893 - App error: 2025-04-12 12:59:51,892 - Main window displayed
-2025-04-12 12:59:51,980 - Status check - active: True, should_run: True, app: running
-2025-04-12 12:59:54,121 - Status check - active: True, should_run: True, app: running
-2025-04-12 12:59:56,268 - Status check - active: True, should_run: True, app: running
-2025-04-12 12:59:58,308 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:00:00,352 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:00:02,432 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:00:04,549 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:00:06,549 - Last app output before stopping:
-2025-04-12 13:00:06,550 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:00:06,550 - 2025-04-12 12:59:50,111 - Starting Cartsy Application
-2025-04-12 13:00:06,550 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:00:06,550 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:00:06,550 - 2025-04-12 12:59:51,892 - Main window displayed
-2025-04-12 13:00:06,550 - App stopped successfully
-2025-04-12 13:01:25,131 - Service controller started...
-2025-04-12 13:01:25,181 - Status check - active: True, should_run: True, app: not running
-2025-04-12 13:01:25,182 - Starting app...
-2025-04-12 13:01:25,184 - App started successfully
-2025-04-12 13:01:25,689 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:01:25,693 - App error: 2025-04-12 13:01:25,693 - Starting Cartsy Application
-2025-04-12 13:01:25,812 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:01:27,121 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:01:27,153 - App error: 2025-04-12 13:01:27,153 - Main window displayed
-2025-04-12 13:01:27,286 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:29,428 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:31,580 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:33,724 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:35,773 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:37,829 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:39,973 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:42,126 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:44,272 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:46,421 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:48,478 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:01:50,621 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:00,044 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:03,205 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:05,361 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:07,507 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:09,655 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:11,656 - Last app output before stopping:
-2025-04-12 13:02:11,657 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:02:11,657 - 2025-04-12 13:01:25,693 - Starting Cartsy Application
-2025-04-12 13:02:11,657 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:02:11,657 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:02:11,657 - 2025-04-12 13:01:27,153 - Main window displayed
-2025-04-12 13:02:11,658 - App stopped successfully
-2025-04-12 13:02:17,661 - Service controller started...
-2025-04-12 13:02:17,700 - Status check - active: True, should_run: True, app: not running
-2025-04-12 13:02:17,700 - Starting app...
-2025-04-12 13:02:17,711 - App started successfully
-2025-04-12 13:02:18,478 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:02:18,482 - App error: 2025-04-12 13:02:18,481 - Starting Cartsy Application
-2025-04-12 13:02:18,737 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:02:19,906 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:20,090 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:02:20,240 - App error: 2025-04-12 13:02:20,144 - Main window displayed
-2025-04-12 13:02:22,041 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:02:24,042 - Last app output before stopping:
-2025-04-12 13:02:24,043 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:02:24,043 - 2025-04-12 13:02:18,481 - Starting Cartsy Application
-2025-04-12 13:02:24,044 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:02:24,044 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:02:24,044 - 2025-04-12 13:02:20,144 - Main window displayed
-2025-04-12 13:02:24,044 - App stopped successfully
-2025-04-12 13:02:30,118 - Failed to update status: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/?is_active=True&app_running=False
-2025-04-12 13:02:30,119 - Service controller started...
-2025-04-12 13:02:30,153 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:30,153 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:32,199 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:32,199 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:34,243 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:34,244 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:36,278 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:36,278 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:38,320 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:38,321 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:40,353 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:40,353 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:42,431 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:42,431 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:44,478 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:44,479 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:46,513 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:46,513 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:48,547 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:48,547 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:50,668 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:50,668 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:52,719 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:52,719 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:54,740 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:54,740 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:56,783 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:56,783 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:02:58,814 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:02:58,815 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:00,848 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:00,848 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:02,877 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:02,878 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:04,927 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:04,927 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:06,971 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:06,971 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:09,019 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:09,019 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:11,054 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:11,055 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:13,102 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:13,103 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:15,147 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:15,148 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:17,175 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:17,176 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:19,217 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:19,217 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:21,293 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:21,293 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:23,344 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:23,345 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:25,389 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:25,389 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:27,440 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:27,440 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:29,484 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:29,484 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:31,539 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:31,539 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:33,639 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:33,640 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:35,675 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:35,676 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:37,820 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:37,821 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:39,868 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:39,868 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:41,937 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:41,938 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:44,081 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:44,081 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:46,218 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:46,219 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:48,267 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:48,267 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:50,313 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:50,313 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:52,372 - Failed to check remote commands: 404 Client Error: Not Found for url: http://172.26.17.194:9000/api/devices/raspi_cart_001/status/
-2025-04-12 13:03:52,372 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:03:54,412 - Status check - active: True, should_run: True, app: not running
-2025-04-12 13:03:54,412 - Starting app...
-2025-04-12 13:03:54,416 - App started successfully
-2025-04-12 13:03:54,964 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:03:54,967 - App error: 2025-04-12 13:03:54,967 - Starting Cartsy Application
-2025-04-12 13:03:55,089 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:03:56,333 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:03:56,396 - App error: 2025-04-12 13:03:56,395 - Main window displayed
-2025-04-12 13:03:56,483 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:03:58,623 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:00,827 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:02,870 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:04,912 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:07,022 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:09,058 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:11,220 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:13,355 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:14,657 - App error: Unknown property display
-2025-04-12 13:04:14,658 - App error: Unknown property display
-2025-04-12 13:04:14,658 - App error: Unknown property display
-2025-04-12 13:04:14,660 - App error: Unknown property display
-2025-04-12 13:04:14,660 - App error: Unknown property display
-2025-04-12 13:04:14,660 - App error: Unknown property display
-2025-04-12 13:04:14,661 - App error: Unknown property display
-2025-04-12 13:04:14,662 - App error: Unknown property display
-2025-04-12 13:04:14,662 - App error: Unknown property display
-2025-04-12 13:04:15,404 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:17,544 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:19,581 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:21,666 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:23,714 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:25,867 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:28,000 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:30,162 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:32,209 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:34,349 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:36,388 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:38,430 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:40,478 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:42,542 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:44,570 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:46,661 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:48,686 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:50,843 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:52,895 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:53,677 - App error: QObject::startTimer: Timers can only be used with threads started with QThread
-2025-04-12 13:04:54,936 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:56,995 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:04:59,054 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:01,056 - Last app output before stopping:
-2025-04-12 13:05:01,058 - Unknown property display
-2025-04-12 13:05:01,058 - Unknown property display
-2025-04-12 13:05:01,058 - Unknown property display
-2025-04-12 13:05:01,059 - Unknown property display
-2025-04-12 13:05:01,059 - Unknown property display
-2025-04-12 13:05:01,059 - Unknown property display
-2025-04-12 13:05:01,059 - Unknown property display
-2025-04-12 13:05:01,059 - Unknown property display
-2025-04-12 13:05:01,059 - Unknown property display
-2025-04-12 13:05:01,059 - QObject::startTimer: Timers can only be used with threads started with QThread
-2025-04-12 13:05:01,060 - App stopped successfully
-2025-04-12 13:05:07,026 - Service controller started...
-2025-04-12 13:05:07,052 - Status check - active: True, should_run: True, app: not running
-2025-04-12 13:05:07,052 - Starting app...
-2025-04-12 13:05:07,054 - App started successfully
-2025-04-12 13:05:07,557 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:05:07,561 - App error: 2025-04-12 13:05:07,561 - Starting Cartsy Application
-2025-04-12 13:05:07,683 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:05:08,860 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:05:08,894 - App error: 2025-04-12 13:05:08,893 - Main window displayed
-2025-04-12 13:05:09,123 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:11,231 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:13,362 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:15,395 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:17,473 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:19,509 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:21,545 - Status check - active: True, should_run: True, app: running
-2025-04-12 13:05:23,589 - Status check - active: True, should_run: False, app: running
-2025-04-12 13:05:23,589 - Stopping app...
-2025-04-12 13:05:23,590 - Last app output before stopping:
-2025-04-12 13:05:23,590 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 13:05:23,591 - 2025-04-12 13:05:07,561 - Starting Cartsy Application
-2025-04-12 13:05:23,591 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 13:05:23,592 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 13:05:23,592 - 2025-04-12 13:05:08,893 - Main window displayed
-2025-04-12 13:05:23,625 - App stopped successfully
-2025-04-12 13:05:25,711 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:05:27,827 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:05:29,964 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:05:31,997 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:05:34,028 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:05:36,067 - Status check - active: True, should_run: False, app: not running
-2025-04-12 13:05:38,101 - Status check - active: True, should_run: False, app: not running
-2025-04-12 15:56:42,592 - Failed to update status: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/?is_active=True&app_running=False (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89a5a890>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 15:56:42,607 - Service controller started...
-2025-04-12 15:56:42,629 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89814d50>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 15:56:42,629 - Status check - active: True, should_run: False, app: not running
-2025-04-12 15:56:44,633 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f898171d0>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 15:56:44,633 - Status check - active: True, should_run: False, app: not running
-2025-04-12 15:56:46,637 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89821610>: Failed to establish a new connection: [Errno 101] Network is unreachable'))
-2025-04-12 15:56:46,638 - Status check - active: True, should_run: False, app: not running
-2025-04-12 15:56:48,701 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89817750>: Failed to establish a new connection: [Errno 111] Connection refused'))
-2025-04-12 15:56:48,701 - Status check - active: True, should_run: False, app: not running
-2025-04-12 15:56:50,711 - Failed to check remote commands: HTTPConnectionPool(host='172.26.17.194', port=9000): Max retries exceeded with url: /api/devices/raspi_cart_001/status/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f89a56d10>: Failed to establish a new connection: [Errno 111] Connection refused'))
-2025-04-12 15:56:50,711 - Status check - active: True, should_run: False, app: not running
-2025-04-12 15:56:52,761 - Status check - active: True, should_run: True, app: not running
-2025-04-12 15:56:52,762 - Starting app...
-2025-04-12 15:56:52,777 - App started successfully
-2025-04-12 15:56:54,866 - Status check - active: True, should_run: True, app: running
-2025-04-12 15:56:55,364 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 15:56:55,664 - App error: 2025-04-12 15:56:55,663 - Starting Cartsy Application
-2025-04-12 15:56:56,385 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 15:56:56,915 - Status check - active: True, should_run: True, app: running
-2025-04-12 15:56:57,683 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 15:56:57,747 - App error: 2025-04-12 15:56:57,746 - Main window displayed
-2025-04-12 15:56:58,949 - Status check - active: True, should_run: True, app: running
-2025-04-12 15:57:00,993 - Status check - active: True, should_run: True, app: running
-2025-04-12 15:57:03,025 - Status check - active: True, should_run: True, app: running
-2025-04-12 15:57:05,057 - Status check - active: True, should_run: True, app: running
-2025-04-12 15:57:07,089 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:03:43,856 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:03:45,891 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:03:49,839 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:03:57,138 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:03:59,169 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:01,199 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:03,230 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:05,261 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:07,303 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:09,338 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:11,397 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:13,437 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:15,478 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:17,540 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:19,679 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:21,710 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:23,745 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:25,769 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:27,804 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:29,929 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:32,066 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:34,092 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:36,117 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:38,224 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:40,358 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:42,424 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:44,461 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:46,515 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:48,547 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:50,609 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:52,679 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:54,816 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:55,829 - App error: Unknown property display
-2025-04-12 16:04:55,830 - App error: Unknown property display
-2025-04-12 16:04:55,831 - App error: Unknown property display
-2025-04-12 16:04:55,835 - App error: Unknown property display
-2025-04-12 16:04:55,836 - App error: Unknown property display
-2025-04-12 16:04:55,836 - App error: Unknown property display
-2025-04-12 16:04:55,838 - App error: Unknown property display
-2025-04-12 16:04:55,839 - App error: Unknown property display
-2025-04-12 16:04:55,839 - App error: Unknown property display
-2025-04-12 16:04:56,964 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:04:59,093 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:01,133 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:03,209 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:05,243 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:07,292 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:09,344 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:11,389 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:13,418 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:15,454 - App output: Started JSON file monitoring
-2025-04-12 16:05:15,455 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:15,456 - App output: Cart data file removed successfully
-2025-04-12 16:05:15,457 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:05:15,457 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:05:15,457 - App output: Cart empty, skipping API call
-2025-04-12 16:05:15,457 - App output: Sending guest mode connection request...
-2025-04-12 16:05:15,458 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
-2025-04-12 16:05:15,458 - App output: API URL: http://172.26.17.194:9000/api/device/connect/
-2025-04-12 16:05:15,458 - App output: Response status: 400
-2025-04-12 16:05:15,458 - App output: Response content: {"error":"Device is currently in_use"}
-2025-04-12 16:05:15,458 - App output: Sending guest mode connection request...
-2025-04-12 16:05:15,458 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
-2025-04-12 16:05:15,458 - App output: API URL: http://172.26.17.194:9000/api/device/connect/
-2025-04-12 16:05:15,458 - App output: Response status: 400
-2025-04-12 16:05:15,458 - App output: Response content: {"error":"Device is currently in_use"}
-2025-04-12 16:05:15,459 - App output: Sending guest mode connection request...
-2025-04-12 16:05:15,459 - App output: Request data: {'phone_number': '', 'device_id': 'raspi_cart_001'}
-2025-04-12 16:05:15,459 - App output: API URL: http://172.26.17.194:9000/api/device/connect/
-2025-04-12 16:05:15,459 - App output: Response status: 200
-2025-04-12 16:05:15,459 - App output: Response content: {"message":"Connected successfully","customer_name":"Guest","device_name":"Smart Cart Display 1","session_start":"2025-04-12T16:04:52.613846+07:00","is_guest":true}
-2025-04-12 16:05:15,459 - App output: Selected mode: Guest
-2025-04-12 16:05:15,459 - App output: [16:04:53] WelcomePage → InstructionPage: 0.597s
-2025-04-12 16:05:15,460 - App output: [16:04:56] InstructionPage → ProductPage: 0.661s
-2025-04-12 16:05:15,460 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:05:15,460 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:05:15,460 - App output: Cart empty, skipping API call
-2025-04-12 16:05:15,460 - App output: [16:05:13] ProductPage → ShoppingPage: 12.872s
-2025-04-12 16:05:15,460 - App output: WARNING ⚠️ Unable to automatically guess model task, assuming 'task=detect'. Explicitly define task for your model, i.e. 'task=detect', 'segment', 'classify','pose' or 'obb'.
-2025-04-12 16:05:15,471 - App output: Loading /home/pi/smartcart/Pick-and-go-CS/model/yolov11vs30withdata35.onnx for ONNX Runtime inference...
-2025-04-12 16:05:15,696 - App output: Using ONNX Runtime CPUExecutionProvider
-2025-04-12 16:05:16,197 - App output: 
-2025-04-12 16:05:17,495 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:19,530 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:20,875 - App output: 0: 640x640 (no detections), 578.3ms
-2025-04-12 16:05:20,876 - App output: Speed: 19.6ms preprocess, 578.3ms inference, 59.8ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:21,191 - App output: 
-2025-04-12 16:05:21,567 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:21,687 - App output: 0: 640x640 (no detections), 476.8ms
-2025-04-12 16:05:21,688 - App output: Speed: 9.3ms preprocess, 476.8ms inference, 8.8ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:22,000 - App output: 
-2025-04-12 16:05:22,507 - App output: 0: 640x640 (no detections), 490.2ms
-2025-04-12 16:05:22,508 - App output: Speed: 8.8ms preprocess, 490.2ms inference, 7.1ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:22,820 - App output: 
-2025-04-12 16:05:23,377 - App output: 0: 640x640 1 Oolong_Tea_Plus, 455.0ms
-2025-04-12 16:05:23,378 - App output: Speed: 8.3ms preprocess, 455.0ms inference, 54.5ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:23,379 - App error: [ WARN:0@21.489] global loadsave.cpp:848 imwrite_ Unsupported depth image for selected encoder is fallbacked to CV_8U.
-2025-04-12 16:05:23,605 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:25,642 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:27,687 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:28,758 - App output: Starting add to cart for Oolong_Tea_Plus at 1744448727.1435683
-2025-04-12 16:05:28,759 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:05:28,759 - App output: Cart operation took 0.01s
-2025-04-12 16:05:28,760 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:05:28,761 - App output: Cart has 1 products, sending to API...
-2025-04-12 16:05:28,762 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}], 'total_bill': 7000.0}}
-2025-04-12 16:05:28,762 - App output: Image processing took 0.37s
-2025-04-12 16:05:28,762 - App output: Loaded image: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:05:28,762 - App output: ✓ Added Oolong_Tea_Plus to cart - Time taken: 0.4684s
-2025-04-12 16:05:28,763 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:05:28,763 - App output: 
-2025-04-12 16:05:29,220 - App output: 0: 640x640 (no detections), 442.1ms
-2025-04-12 16:05:29,220 - App output: Speed: 9.0ms preprocess, 442.1ms inference, 6.0ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:29,530 - App output: 
-2025-04-12 16:05:29,729 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:30,007 - App output: 0: 640x640 (no detections), 456.2ms
-2025-04-12 16:05:30,008 - App output: Speed: 9.9ms preprocess, 456.2ms inference, 6.1ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:30,325 - App output: 
-2025-04-12 16:05:30,828 - App output: 0: 640x640 (no detections), 482.4ms
-2025-04-12 16:05:30,828 - App output: Speed: 9.8ms preprocess, 482.4ms inference, 9.0ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:31,772 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:33,925 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:35,970 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:38,026 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:40,064 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:41,585 - App output: 
-2025-04-12 16:05:42,060 - App output: 0: 640x640 1 Good_Mood_Yogurt_Flavor, 452.9ms
-2025-04-12 16:05:42,060 - App output: Speed: 10.7ms preprocess, 452.9ms inference, 9.1ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:05:42,118 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:44,169 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:46,207 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:48,246 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:50,306 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:52,341 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:54,375 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:56,407 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:05:58,453 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:00,492 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:02,082 - App output: Starting add to cart for Good_Mood_Yogurt_Flavor at 1744448744.7741446
-2025-04-12 16:06:02,083 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:02,083 - App output: Cart operation took 0.01s
-2025-04-12 16:06:02,084 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:02,084 - App output: Cart has 2 products, sending to API...
-2025-04-12 16:06:02,085 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 17000.0}}
-2025-04-12 16:06:02,085 - App output: Loaded image: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:06:02,086 - App output: Image processing took 0.34s
-2025-04-12 16:06:02,086 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:06:02,086 - App output: ✓ Added Good_Mood_Yogurt_Flavor to cart - Time taken: 0.4125s
-2025-04-12 16:06:02,087 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:06:02,087 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:06:02,087 - App output: Stopped session monitor before product page
-2025-04-12 16:06:02,088 - App output: Product page opened
-2025-04-12 16:06:02,088 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:02,088 - App output: Cart operation took 0.01s
-2025-04-12 16:06:02,089 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:02,089 - App output: Cart has 3 products, sending to API...
-2025-04-12 16:06:02,090 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}], 'total_bill': 29000.0}}
-2025-04-12 16:06:02,090 - App output: Image processing took 0.38s
-2025-04-12 16:06:02,090 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:02,091 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:02,091 - App output: Cart has 3 products, sending to API...
-2025-04-12 16:06:02,092 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}], 'total_bill': 29000.0}}
-2025-04-12 16:06:02,093 - App output: Loaded image: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
-2025-04-12 16:06:02,093 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:06:02,094 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:06:02,095 - App output: [16:05:52] ProductPage → ShoppingPage: 1.038s
-2025-04-12 16:06:02,098 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:02,100 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:02,100 - App output: Cart has 2 products, sending to API...
-2025-04-12 16:06:02,100 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
-2025-04-12 16:06:02,101 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:06:02,101 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}], 'total_bill': 19000.0}}
-2025-04-12 16:06:02,101 - App output: Stopped session monitor before product page
-2025-04-12 16:06:02,102 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:02,103 - App output: Cart operation took 0.00s
-2025-04-12 16:06:02,104 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:02,105 - App output: Cart has 3 products, sending to API...
-2025-04-12 16:06:02,105 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 29000.0}}
-2025-04-12 16:06:02,106 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:02,106 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:02,107 - App output: Cart has 3 products, sending to API...
-2025-04-12 16:06:02,107 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:06:02,107 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
-2025-04-12 16:06:02,108 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 29000.0}}
-2025-04-12 16:06:02,108 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:06:02,109 - App output: [16:06:00] ProductPage → ShoppingPage: 0.734s
-2025-04-12 16:06:02,110 - App output: 
-2025-04-12 16:06:02,532 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:02,704 - App output: 0: 640x640 (no detections), 584.3ms
-2025-04-12 16:06:02,704 - App output: Speed: 16.9ms preprocess, 584.3ms inference, 6.5ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:06:03,011 - App output: 
-2025-04-12 16:06:03,517 - App output: 0: 640x640 1 Orange_Juice_Mirinda, 488.9ms
-2025-04-12 16:06:03,517 - App output: Speed: 8.8ms preprocess, 488.9ms inference, 7.2ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:06:04,564 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:06,605 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:07,165 - App output: 
-2025-04-12 16:06:07,643 - App output: 0: 640x640 1 Twister_Orange_Juice, 456.5ms
-2025-04-12 16:06:07,644 - App output: Speed: 11.0ms preprocess, 456.5ms inference, 7.5ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:06:07,957 - App output: 
-2025-04-12 16:06:08,459 - App output: 0: 640x640 1 Good_Mood_Yogurt_Flavor, 479.9ms
-2025-04-12 16:06:08,460 - App output: Speed: 9.4ms preprocess, 479.9ms inference, 10.0ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:06:08,643 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:10,675 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:12,714 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:14,793 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:16,826 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:18,860 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:20,924 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:21,479 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:21,479 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:21,480 - App output: Cart has 3 products, sending to API...
-2025-04-12 16:06:21,481 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:06:21,481 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png, size: (75, 95)
-2025-04-12 16:06:21,482 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Canned_Strawberry_Sting', 'quantity': 1, 'price': 12000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 29000.0}}
-2025-04-12 16:06:21,483 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:06:21,483 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:21,483 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:21,483 - App output: Cart has 2 products, sending to API...
-2025-04-12 16:06:21,483 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:06:21,487 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 17000.0}}
-2025-04-12 16:06:21,487 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:06:21,487 - App output: Added cart data to API queue from save_to_json
-2025-04-12 16:06:21,488 - App output: Processing queue item. Queue size: 0
-2025-04-12 16:06:21,488 - App output: Cart has 1 products, sending to API...
-2025-04-12 16:06:21,488 - App output: Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:06:21,488 - App output: API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 10000.0}}
-2025-04-12 16:06:21,488 - App output: 
-2025-04-12 16:06:22,082 - App output: 0: 640x640 (no detections), 559.7ms
-2025-04-12 16:06:22,083 - App output: Speed: 31.7ms preprocess, 559.7ms inference, 8.5ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:06:22,966 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:25,001 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:27,065 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:29,103 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:31,132 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:33,166 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:35,204 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:37,241 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:39,286 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:41,331 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:43,370 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:45,402 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:47,456 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:49,583 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:51,643 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:53,680 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:55,732 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:57,797 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:06:59,847 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:01,882 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:03,916 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:05,948 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:07,981 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:09,982 - Last app output before stopping:
-2025-04-12 16:07:09,982 - API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Oolong_Tea_Plus', 'quantity': 1, 'price': 7000.0}, {'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 17000.0}}
-2025-04-12 16:07:09,982 - Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png, size: (75, 95)
-2025-04-12 16:07:09,982 - Added cart data to API queue from save_to_json
-2025-04-12 16:07:09,983 - Processing queue item. Queue size: 0
-2025-04-12 16:07:09,983 - Cart has 1 products, sending to API...
-2025-04-12 16:07:09,983 - Loaded image from cache: https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png, size: (75, 95)
-2025-04-12 16:07:09,983 - API call successful: {'message': 'Shopping data updated successfully', 'cart_data': {'detected_products': [{'product_name': 'Good_Mood_Yogurt_Flavor', 'quantity': 1, 'price': 10000.0}], 'total_bill': 10000.0}}
-2025-04-12 16:07:09,983 - 
-2025-04-12 16:07:09,983 - 0: 640x640 (no detections), 559.7ms
-2025-04-12 16:07:09,983 - Speed: 31.7ms preprocess, 559.7ms inference, 8.5ms postprocess per image at shape (1, 3, 640, 640)
-2025-04-12 16:07:09,984 - App stopped successfully
-2025-04-12 16:07:15,922 - Service controller started...
-2025-04-12 16:07:15,955 - Status check - active: True, should_run: True, app: not running
-2025-04-12 16:07:15,955 - Starting app...
-2025-04-12 16:07:15,957 - App started successfully
-2025-04-12 16:07:16,457 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 16:07:16,461 - App error: 2025-04-12 16:07:16,460 - Starting Cartsy Application
-2025-04-12 16:07:16,591 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 16:07:17,750 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 16:07:17,784 - App error: 2025-04-12 16:07:17,784 - Main window displayed
-2025-04-12 16:07:18,024 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:20,058 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:22,163 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:24,200 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:26,229 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:28,267 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:30,298 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:32,325 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:34,366 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:36,414 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:38,414 - Last app output before stopping:
-2025-04-12 16:07:38,415 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 16:07:38,415 - 2025-04-12 16:07:16,460 - Starting Cartsy Application
-2025-04-12 16:07:38,415 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 16:07:38,415 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 16:07:38,415 - 2025-04-12 16:07:17,784 - Main window displayed
-2025-04-12 16:07:38,416 - App stopped successfully
-2025-04-12 16:07:44,267 - Service controller started...
-2025-04-12 16:07:44,309 - Status check - active: True, should_run: True, app: not running
-2025-04-12 16:07:44,310 - Starting app...
-2025-04-12 16:07:44,321 - App started successfully
-2025-04-12 16:07:45,000 - App error: QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 16:07:45,004 - App error: 2025-04-12 16:07:45,003 - Starting Cartsy Application
-2025-04-12 16:07:45,154 - App error: QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 16:07:46,393 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:46,501 - App error: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 16:07:46,547 - App error: 2025-04-12 16:07:46,546 - Main window displayed
-2025-04-12 16:07:48,433 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:50,469 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:52,521 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:54,564 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:56,594 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:07:58,634 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:08:00,675 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:08:02,710 - Status check - active: True, should_run: True, app: running
-2025-04-12 16:08:04,710 - Last app output before stopping:
-2025-04-12 16:08:04,711 - QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-pi'
-2025-04-12 16:08:04,711 - 2025-04-12 16:07:45,003 - Starting Cartsy Application
-2025-04-12 16:08:04,711 - QWidget::setLayout: Attempting to set QLayout "" on SelectModeFrame "", which already has a layout
-2025-04-12 16:08:04,711 - error: XDG_RUNTIME_DIR is invalid or not set in the environment.
-2025-04-12 16:08:04,711 - 2025-04-12 16:07:46,546 - Main window displayed
-2025-04-12 16:08:04,712 - App stopped successfully
+2025-04-13 15:16:48,747 - Cleared log file: /home/pi/smartcart/Pick-and-go-CS/src/app/logs/service.log
+2025-04-13 15:16:48,861 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:16:50,952 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:16:53,037 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:16:55,254 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:16:57,376 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:16:59,456 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:01,754 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:03,855 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:05,940 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:08,032 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:10,135 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:12,221 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:14,318 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:16,434 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:18,534 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:20,622 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:22,711 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:24,840 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:26,956 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:29,060 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:31,169 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:33,266 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:35,358 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:37,467 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:39,595 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:41,852 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:43,960 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:46,049 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:48,143 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:50,240 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:52,448 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:54,541 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:56,642 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:17:58,748 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:00,849 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:02,934 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:05,161 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:07,257 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:09,370 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:11,455 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:13,554 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:15,645 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:17,730 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:19,829 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:21,917 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:24,061 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:26,152 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:28,234 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:30,361 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:32,457 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:34,551 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:36,642 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:38,734 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:40,828 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:42,924 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:45,016 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:47,105 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:49,198 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:51,284 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:53,382 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:55,472 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:57,571 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:18:59,658 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:01,849 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:04,048 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:06,136 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:08,234 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:10,319 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:12,408 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:14,514 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:16,610 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:18,695 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:20,780 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:22,873 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:24,970 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:27,058 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:29,140 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:31,221 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:33,304 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:35,403 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:37,497 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:39,576 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:41,676 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:43,779 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:45,869 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:47,976 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:50,074 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:52,165 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:54,261 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:56,354 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:19:58,451 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:00,553 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:02,635 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:04,724 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:06,930 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:09,027 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:11,129 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:13,228 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:15,431 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:17,528 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:19,775 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:21,921 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:24,012 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:26,106 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:28,200 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:30,331 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:32,429 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:34,543 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:36,643 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:38,726 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:40,928 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:43,020 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:45,116 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:47,212 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:49,320 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:51,412 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:53,509 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:55,607 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:57,693 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:20:59,786 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:01,989 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:04,201 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:06,304 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:08,387 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:10,489 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:12,580 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:14,671 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:16,855 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:18,956 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:21,061 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:23,146 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:25,364 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:27,457 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:29,543 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:31,637 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:33,722 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:35,806 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:37,896 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:39,985 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:42,068 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:44,171 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:46,271 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:48,371 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:50,464 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:52,637 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:54,731 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:56,830 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:21:58,921 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:01,023 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:03,124 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:05,314 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:07,422 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:09,524 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:11,620 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:13,811 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:15,902 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:18,006 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:20,093 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:22,299 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:24,391 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:26,490 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:28,568 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:30,688 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:32,786 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:34,881 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:36,976 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:39,063 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:41,249 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:43,338 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:45,433 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:47,531 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:49,632 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:51,732 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:53,834 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:55,939 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:22:58,038 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:00,141 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:02,243 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:04,335 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:06,423 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:08,505 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:10,603 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:12,698 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:14,825 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:16,925 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:19,026 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:21,132 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:23,209 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:25,300 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:27,498 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:29,593 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:31,679 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:33,764 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:35,857 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:37,943 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:40,043 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:42,247 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:44,339 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:46,428 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:48,513 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:50,609 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:52,696 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:54,782 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:56,868 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:23:58,956 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:01,059 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:03,154 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:05,252 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:07,358 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:09,557 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:11,653 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:13,738 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:15,943 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:18,144 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:20,348 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:22,449 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:24,578 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:26,665 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:28,872 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:31,059 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:33,137 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:35,229 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:37,321 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:39,405 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:41,509 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:43,608 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:45,704 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:47,801 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:49,893 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:51,986 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:54,081 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:56,178 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:24:58,279 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:00,379 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:02,483 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:04,724 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:06,876 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:08,997 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:11,096 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:13,183 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:15,276 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:17,479 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:19,572 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:21,658 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:23,743 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:25,828 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:27,922 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:30,015 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:32,111 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:34,302 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:36,406 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:38,512 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:40,601 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:42,718 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:44,819 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:46,909 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:49,012 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:51,116 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:53,210 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:55,296 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:57,387 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:25:59,487 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:01,585 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:03,684 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:05,783 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:07,883 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:09,977 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:12,097 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:14,188 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:16,284 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:18,384 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:20,582 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:22,676 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:24,780 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:26,876 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:28,978 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:31,177 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:33,276 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:35,499 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:37,626 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:39,730 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:41,822 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:43,906 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:45,994 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:48,105 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:50,227 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:52,347 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:54,447 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:56,540 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:26:58,629 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:00,727 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:02,921 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:05,008 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:07,094 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:09,188 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:11,277 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:13,393 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:15,490 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:17,585 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:19,791 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:21,893 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:23,985 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:26,078 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:28,171 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:30,252 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:32,337 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:34,426 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:36,521 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:38,633 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:40,737 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:42,830 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:44,919 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:47,007 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:49,206 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:51,416 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:53,516 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:55,619 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:57,706 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:27:59,818 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:01,936 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:04,033 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:06,124 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:08,223 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:10,417 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:12,516 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:14,606 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:16,715 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:18,905 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:21,001 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:23,091 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:25,226 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:27,332 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:29,428 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:31,544 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:33,642 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:35,783 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:37,867 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:39,969 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:42,082 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:44,182 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:46,276 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:48,491 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:50,608 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:52,695 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:54,800 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:56,893 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:28:59,006 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:01,123 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:03,215 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:05,338 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:07,436 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:09,677 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:11,780 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:13,891 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:15,999 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:18,102 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:20,204 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:22,299 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:24,402 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:26,536 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:28,734 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:30,838 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:32,947 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:35,148 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:37,247 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:39,344 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:41,551 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:43,666 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:45,818 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:48,023 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:50,118 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:52,212 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:54,424 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:56,523 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:29:58,726 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:00,823 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:02,919 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:05,015 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:07,105 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:09,195 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:11,294 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:13,390 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:15,493 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:17,597 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:19,695 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:21,785 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:23,893 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:26,008 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:28,214 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:30,316 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:32,410 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:34,513 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:36,613 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:38,713 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:40,804 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:42,910 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:45,009 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:47,116 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:49,315 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:51,409 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:53,506 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:55,607 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:30:57,813 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:00,040 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:02,129 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:04,242 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:06,340 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:08,435 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:10,520 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:12,739 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:14,830 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:16,932 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:19,024 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:21,122 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:23,224 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:25,336 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:27,427 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:29,532 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:31,621 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:33,718 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:35,813 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:37,901 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:39,984 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:42,086 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:44,189 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:46,313 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:48,399 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:50,526 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:52,613 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:54,703 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:56,789 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:31:58,898 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:00,991 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:03,099 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:05,202 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:07,289 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:09,386 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:11,489 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:13,590 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:15,686 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:17,779 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:19,872 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:21,965 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:24,052 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:26,266 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:28,351 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:30,432 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:32,631 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:34,721 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:36,812 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:38,960 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:41,187 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:43,284 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:45,395 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:47,495 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:49,587 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:51,672 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:53,772 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:56,004 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:32:58,132 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:00,267 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:02,364 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:04,556 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:06,649 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:08,747 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:10,845 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:12,955 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:15,046 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:17,252 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:19,350 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:21,457 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:23,553 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:25,651 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:27,743 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:29,960 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:32,151 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:34,276 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:36,395 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:38,486 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:40,575 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:42,674 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:44,869 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:46,975 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:49,086 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:51,184 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:53,280 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:55,372 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:57,472 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:33:59,572 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:01,671 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:03,766 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:05,877 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:07,971 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:10,090 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:12,188 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:14,303 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:16,397 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:18,493 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:20,596 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:22,696 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:24,783 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:26,885 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:28,983 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:31,091 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:33,176 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:35,416 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:37,505 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:39,606 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:41,699 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:43,782 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:45,890 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:47,986 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:50,080 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:52,184 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:54,271 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:56,387 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:34:58,475 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:00,694 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:02,800 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:04,896 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:06,983 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:09,083 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:11,168 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:13,277 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:15,373 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:17,472 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:19,565 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:21,777 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:23,917 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:26,121 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:28,226 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:30,335 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:32,434 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:34,517 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:36,605 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:38,694 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:40,931 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:43,023 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:45,119 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:47,212 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:49,301 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:51,394 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:53,495 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:55,598 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:57,720 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:35:59,923 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:02,021 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:04,114 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:06,218 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:08,311 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:10,424 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:12,632 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:14,834 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:16,944 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:19,032 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:21,239 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:23,334 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:25,438 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:27,543 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:29,644 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:31,733 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:33,838 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:35,933 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:38,023 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:40,223 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:42,320 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:44,413 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:46,505 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:49,617 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:51,724 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:54,062 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:56,157 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:36:58,248 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:00,487 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:02,582 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:04,689 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:06,775 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:08,963 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:11,060 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:13,290 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:15,385 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:17,509 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:19,613 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:21,712 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:23,843 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:25,956 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:28,042 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:30,136 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:32,239 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:34,331 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:36,452 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:38,580 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:40,675 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:42,783 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:44,980 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:47,088 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:49,203 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:51,332 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:53,433 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:55,535 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:57,632 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:37:59,723 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:01,835 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:03,936 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:06,041 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:08,151 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:10,238 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:12,331 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:14,434 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:16,549 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:18,737 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:20,986 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:23,161 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:25,306 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:27,404 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:29,503 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:31,645 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:33,733 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:35,835 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:37,922 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:40,129 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:42,229 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:44,430 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:46,544 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:48,651 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:50,750 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:52,842 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:54,953 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:57,047 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:38:59,175 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:01,264 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:03,353 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:05,440 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:07,544 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:09,631 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:11,775 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:13,864 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:15,972 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:18,080 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:20,276 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:22,364 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:24,474 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:26,663 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:28,755 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:30,839 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:32,927 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:35,020 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:37,219 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:39,316 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:41,411 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:43,514 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:45,712 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:47,817 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:50,004 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:52,102 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:54,200 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:56,289 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:39:58,383 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:00,483 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:02,690 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:04,784 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:06,900 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:09,114 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:11,222 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:13,318 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:15,403 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:17,488 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:19,576 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:21,682 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:23,774 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:25,983 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:28,066 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:30,152 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:32,256 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:34,354 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:36,455 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:38,552 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:40,660 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:42,746 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:44,854 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:46,947 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:49,052 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:51,250 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:53,350 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:55,444 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:57,549 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:40:59,643 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:01,746 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:03,834 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:05,919 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:08,002 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:10,120 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:12,235 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:14,334 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:16,433 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:18,542 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:20,625 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:22,714 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:24,796 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:26,882 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:28,991 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:31,076 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:33,172 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:35,260 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:37,375 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:39,458 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:41,577 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:43,671 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:45,799 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:47,904 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:50,003 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:52,102 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:54,186 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:56,277 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:41:58,389 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:00,494 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:02,591 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:04,800 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:07,019 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:09,156 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:11,270 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:13,373 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:15,486 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:17,591 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:19,685 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:21,798 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:23,910 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:25,995 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:28,108 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:30,237 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:32,343 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:34,438 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:36,565 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:38,661 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:40,774 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:42,875 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:45,000 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:47,095 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:49,193 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:51,324 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:53,415 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:55,520 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:57,607 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:42:59,713 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:01,797 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:03,933 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:06,166 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:08,267 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:10,383 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:12,636 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:14,759 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:16,849 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:18,975 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:21,119 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:23,209 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:25,334 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:27,455 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:29,557 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:31,684 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:33,781 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:35,881 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:37,985 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:40,079 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:42,184 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:44,278 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:46,420 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:48,522 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:50,610 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:52,694 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:54,809 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:56,902 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:43:59,002 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:01,094 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:03,199 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:05,296 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:07,418 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:09,513 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:11,606 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:13,694 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:15,804 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:17,946 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:20,154 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:22,256 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:24,448 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:26,559 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:28,641 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:30,860 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:32,967 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:35,059 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:37,161 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:39,253 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:41,474 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:43,574 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:45,676 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:47,779 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:49,897 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:52,154 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:54,299 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:56,393 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:44:58,522 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:00,622 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:02,715 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:04,822 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:06,950 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:09,057 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:11,178 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:13,262 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:15,348 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:17,447 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:19,547 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:21,648 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:23,743 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:25,849 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:27,959 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:30,062 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:32,167 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:34,250 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:36,387 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:38,484 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:40,591 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:42,711 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:44,807 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:46,941 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:49,025 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:51,121 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:53,206 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:55,453 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:57,559 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:45:59,766 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:01,885 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:03,984 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:06,085 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:08,278 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:10,374 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:12,457 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:14,571 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:16,667 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:18,860 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:20,954 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:23,057 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:25,140 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:27,220 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:29,301 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:31,395 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:33,500 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:35,611 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:37,703 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:39,782 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:41,887 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:43,986 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:46,085 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:48,179 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:50,265 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:52,381 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:54,482 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:56,877 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:46:58,976 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:01,083 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:03,235 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:05,352 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:07,561 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:09,778 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:11,878 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:13,981 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:16,069 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:18,180 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:20,274 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:22,374 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:24,462 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:26,548 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:28,628 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:30,710 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:32,807 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:34,902 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:37,128 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:39,233 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:41,342 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:43,441 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:45,535 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:47,669 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:49,762 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:51,864 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:53,954 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:56,056 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:47:58,133 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:00,223 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:02,313 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:04,396 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:06,513 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:08,631 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:10,716 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:12,832 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:14,930 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:17,029 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:19,117 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:21,331 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:23,429 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:25,527 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:27,621 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:29,857 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:31,951 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:34,056 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:36,142 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:38,227 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:40,317 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:42,426 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:44,518 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:46,623 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:48,716 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:50,822 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:52,913 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:55,018 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:57,111 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:48:59,207 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:01,409 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:03,518 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:05,607 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:07,698 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:09,797 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:11,884 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:14,095 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:16,183 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:18,300 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:20,390 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:22,498 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:24,583 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:26,689 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:28,781 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:30,889 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:32,975 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:35,183 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:37,276 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:39,356 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:41,454 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:43,557 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:45,656 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:47,759 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:49,858 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:51,956 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:54,054 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:56,364 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:49:58,452 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:00,712 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:02,844 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:04,961 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:07,048 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:09,187 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:11,291 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:13,385 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:15,485 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:17,588 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:19,791 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:21,910 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:24,011 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:26,118 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:28,232 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:30,322 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:32,432 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:34,523 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:36,622 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:38,721 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:40,831 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:43,080 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:45,173 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:47,285 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:49,401 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:51,502 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:53,600 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:55,698 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:57,799 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:50:59,903 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:02,025 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:04,119 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:06,231 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:08,321 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:10,424 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:12,512 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:14,623 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:16,732 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:18,843 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:20,943 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:23,038 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:25,142 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:27,254 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:29,360 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:31,455 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:33,569 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:35,661 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:37,786 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:39,882 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:41,978 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:44,110 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:46,206 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:48,315 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:50,409 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:52,619 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:54,814 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:57,019 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:51:59,112 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:01,214 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:03,313 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:05,413 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:07,740 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:09,880 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:11,969 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:14,057 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:16,154 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:18,241 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:20,335 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:22,538 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:24,655 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:26,871 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:28,969 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:31,056 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:33,161 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:35,253 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:37,335 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:39,427 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:41,529 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:43,614 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:45,702 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:47,805 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:50,008 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:52,217 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:54,306 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:56,406 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:52:58,493 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:00,602 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:02,693 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:04,780 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:06,868 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:08,973 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:11,059 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:13,146 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:15,250 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:17,337 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:19,423 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:21,513 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:23,617 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:25,716 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:27,817 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:29,907 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:32,019 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:34,113 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:36,232 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:38,329 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:40,415 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:42,509 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:44,644 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:46,736 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:48,838 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:50,926 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:53,139 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:55,330 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:57,437 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:53:59,532 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:01,644 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:03,762 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:05,858 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:08,088 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:10,182 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:12,391 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:14,482 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:16,587 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:18,679 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:20,781 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:22,876 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:24,990 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:27,079 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:29,178 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:31,299 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:33,396 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:35,511 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:37,601 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:39,725 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:41,821 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:43,931 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:46,119 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:48,205 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:50,298 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:52,531 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:54,726 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:56,831 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:54:58,926 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:01,054 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:03,201 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:05,325 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:07,425 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:09,530 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:11,621 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:13,734 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:15,823 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:18,025 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:20,114 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:22,200 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:24,286 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:26,391 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:28,486 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:30,589 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:32,688 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:34,787 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:36,887 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:39,015 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:41,109 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:43,191 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:45,298 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:47,391 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:49,485 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:51,588 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:53,696 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:55,816 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:55:57,902 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:00,114 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:02,202 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:04,287 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:06,380 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:08,483 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:10,577 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:12,825 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:14,934 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:17,034 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:19,136 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:21,234 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:23,333 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:25,424 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:27,635 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:29,724 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:31,834 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:33,985 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:36,080 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:38,205 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:40,302 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:42,405 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:44,560 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:46,676 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:48,768 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:51,006 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:53,105 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:55,207 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:57,297 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:56:59,397 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:01,497 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:03,577 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:05,664 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:07,758 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:09,957 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:12,176 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:14,259 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:16,344 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:18,447 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:20,545 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:22,640 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:24,726 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:26,926 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:29,021 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:31,119 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:33,209 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:35,320 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:37,420 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:39,517 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:41,606 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:43,812 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:45,909 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:48,124 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:50,219 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:52,346 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:54,440 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:56,539 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:57:58,637 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:00,757 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:02,869 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:04,964 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:07,063 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:09,181 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:11,290 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:13,379 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:15,482 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:17,574 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:19,678 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:21,776 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:23,857 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:25,937 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:28,023 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:30,137 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:32,331 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:34,423 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:36,622 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:38,828 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:40,923 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:43,007 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:45,095 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:47,210 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:49,305 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:51,406 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:53,496 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:55,601 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:57,690 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:58:59,800 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:01,892 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:04,023 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:06,228 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:08,330 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:10,431 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:12,639 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:14,750 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:16,839 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:18,944 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:21,043 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:23,149 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:25,240 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:27,345 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:29,438 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:31,544 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:33,645 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:35,849 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:37,943 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:40,044 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:42,136 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:44,367 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:46,462 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:48,568 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:50,661 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:52,772 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:54,861 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:56,965 - Status check - active: True, should_run: False, app: not running
+2025-04-13 15:59:59,163 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:01,275 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:03,361 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:05,484 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:07,615 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:09,709 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:11,819 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:13,908 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:16,017 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:18,214 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:20,317 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:22,406 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:24,513 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:26,600 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:28,688 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:30,785 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:32,987 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:35,078 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:37,177 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:39,265 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:41,352 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:43,451 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:45,558 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:47,693 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:49,801 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:51,883 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:53,976 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:56,066 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:00:58,279 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:00,370 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:02,476 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:04,573 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:06,679 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:08,770 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:10,871 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:12,958 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:15,047 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:17,255 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:19,345 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:21,461 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:23,572 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:25,677 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:27,771 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:29,971 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:32,093 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:34,193 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:36,297 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:38,448 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:40,543 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:42,758 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:44,845 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:47,051 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:49,255 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:51,347 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:53,554 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:55,653 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:57,745 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:01:59,958 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:02,074 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:04,172 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:06,269 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:08,357 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:10,448 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:12,540 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:14,623 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:16,720 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:18,817 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:20,919 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:23,260 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:25,355 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:27,444 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:29,553 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:32,758 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:34,860 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:36,950 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:39,043 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:41,129 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:43,240 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:45,347 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:47,436 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:49,519 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:51,606 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:53,713 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:55,819 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:02:57,913 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:03:00,001 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:03:02,109 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:03:04,203 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:03:06,311 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:03:08,516 - Status check - active: True, should_run: False, app: not running
+2025-04-13 16:03:10,616 - Status check - active: True, should_run: False, app: not running

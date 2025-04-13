@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
-from PyQt5.QtCore import Qt, QPropertyAnimation, QParallelAnimationGroup
+from PyQt5.QtCore import Qt, QPropertyAnimation, QParallelAnimationGroup, QRect
 from PyQt5.QtGui import QPainter, QColor
 
 class PageTransitionOverlay(QWidget):
@@ -11,7 +11,7 @@ class PageTransitionOverlay(QWidget):
         self.setAttribute(Qt.WA_StyledBackground)
         self.setStyleSheet("""
             #transitionOverlay {
-                background-color: rgba(0, 0, 0, 70%);
+                background-color: black;
             }
             QLabel {
                 color: white;
@@ -24,6 +24,7 @@ class PageTransitionOverlay(QWidget):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         self.layout.setAlignment(Qt.AlignCenter)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         
         # Loading indicator
         self.loadingLabel = QLabel("Loading...")
@@ -36,12 +37,17 @@ class PageTransitionOverlay(QWidget):
         # Hidden by default
         self.hide()
         self._callbacks = []
+        
+        # Ensure the overlay is always on top
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
 
     def fadeIn(self, callback=None):
-        # Enhanced fade in with callback cleanup
         if self.parent():
-            self.setFixedSize(self.parent().size())  # Ensure it covers the entire parent window
+            # Set exact size of parent
+            self.setGeometry(self.parent().rect())
         self.show()
+        self.raise_()  # Ensure overlay is on top
         self.fadeAnimation.setStartValue(0)
         self.fadeAnimation.setEndValue(1)
         
@@ -59,7 +65,6 @@ class PageTransitionOverlay(QWidget):
         self.fadeAnimation.finished.disconnect(self._handleFadeInFinished)
 
     def fadeOut(self, callback=None):
-        # Enhanced fade out with callback cleanup
         self.fadeAnimation.setStartValue(1)
         self.fadeAnimation.setEndValue(0)
         
@@ -77,10 +82,16 @@ class PageTransitionOverlay(QWidget):
         self._callbacks.clear()
         self.fadeAnimation.finished.disconnect(self._handleFadeOutFinished)
 
+    def resizeEvent(self, event):
+        # Keep overlay matched to parent size
+        if self.parent():
+            self.setGeometry(self.parent().rect())
+        super().resizeEvent(event)
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         
-        # Draw background with transparency
-        painter.fillRect(self.rect(), QColor(0, 0, 0, 127))
+        # Draw background with transparency - slightly larger to avoid gaps
+        painter.fillRect(self.rect().adjusted(-1, -1, 1, 1), QColor(0, 0, 0, 127))
         super().paintEvent(event)
