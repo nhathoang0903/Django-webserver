@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
                            QFrame, QApplication, QPushButton) 
 from mbbank import MBBank 
 from PyQt5.QtCore import Qt, QTimer, QDateTime, pyqtSignal, QUrl
-from PyQt5.QtGui import QFont, QPixmap, QIcon, QImage, QColor, QBitmap, QFontDatabase
+from PyQt5.QtGui import QFont, QPixmap, QIcon, QImage, QColor, QBitmap, QFontDatabase, QFontMetrics
 from PyQt5.QtMultimedia import QSoundEffect  # Ensure QSoundEffect is used
 import os
 import requests
@@ -39,6 +39,7 @@ from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Signal for page switching
     payment_completed = pyqtSignal(bool)  # Signal for payment status
+    donation_amount = 0  # Variable to store the donation amount
     
     def __init__(self):
         # Ghi lại thời gian bắt đầu khởi tạo
@@ -55,6 +56,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Disable sound functionality (lightweight)
         self.sound_enabled = False
         
+        # Flag to prevent multiple button clicks
+        self.processing_action = False
+        
         # Register event filter
         self.installEventFilter(self)
         self.page_load_time = time.time()
@@ -62,7 +66,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Simplify initialization:
         # 1. Set minimum attributes first
         self.transition_overlay = PageTransitionOverlay(self)
-        self.setWindowTitle('QR Code Payment')
+        self.setWindowTitle('Charity Donation')
         self.setStyleSheet("background-color: #F5F9F7;")
         
         # Set window icon (defer image loading)
@@ -80,17 +84,17 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.total_amount = int(raw_total)
         print(f"[QR_TIMING] Initialized total amount: {self.total_amount} at {time.time() - init_start_time:.4f}s")
         
-        # Quick validation
-        if self.total_amount == 0:
-            from PyQt5.QtWidgets import QMessageBox
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setText("Invalid total amount")
-            msg.setInformativeText("Cannot generate QR code for zero amount.")
-            msg.setWindowTitle("Error")
-            msg.exec_()
-            self.close()
-            return
+        # Quick validation - allow zero for charity
+        # if self.total_amount == 0:
+        #     from PyQt5.QtWidgets import QMessageBox
+        #     msg = QMessageBox()
+        #     msg.setIcon(QMessageBox.Warning)
+        #     msg.setText("Invalid total amount")
+        #     msg.setInformativeText("Cannot generate QR code for zero amount.")
+        #     msg.setWindowTitle("Error")
+        #     msg.exec_()
+        #     self.close()
+        #     return
         
         # Setup core timing variables
         self.qr_start_time = None
@@ -98,6 +102,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         
         # Initialize UI early
         print(f"[QR_TIMING] Starting UI initialization at: {time.time() - init_start_time:.4f}s")
+        self.load_fonts()
         self.init_ui()
         print(f"[QR_TIMING] UI initialized at: {time.time() - init_start_time:.4f}s")
         
@@ -153,138 +158,229 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
     def init_ui(self):
-        self.setWindowTitle('QR Code Payment')
-        # Remove setGeometry and setFixedSize since handled by BasePage
+        self.setWindowTitle('Charity Donation')
         self.setStyleSheet("background-color: #F5F9F7;")
 
         # Set window icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
 
+        # Define common size for QR code and charity image
+        common_size = 320  # Reduced size
+        
+        # Define common button size
+        button_width = 200
+        button_height = 50
+
         # Main layout
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Left Section with centered content
+        # Left Section - Will now contain QR code and information
         left_section = QWidget()
         left_layout = QVBoxLayout(left_section)
-        left_layout.setContentsMargins(20, 20, 20, 20)
+        # Reduce all margins to minimize lost space
+        left_layout.setContentsMargins(10, 0, 10, 5)
+        left_layout.setSpacing(0)  # Set minimal spacing to control precisely
 
-        # Logo at top
-        logo_label = QLabel()
-        logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'logo.png')
-        logo_pixmap = QPixmap(logo_path)
-        if not logo_pixmap.isNull():
-            logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        left_layout.addWidget(logo_label)
+        # QR Code Container - create a separate container with custom size
+        qr_container = QWidget()
+        # Set fixed height to ensure it doesn't get compressed
+        qr_container.setFixedHeight(common_size)
+        qr_container_layout = QVBoxLayout(qr_container)
+        qr_container_layout.setContentsMargins(0, 0, 0, 0)
+        qr_container_layout.setSpacing(0)
+        qr_container_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
-        # Add stretch before text
-        left_layout.addStretch(1)
-
-        # Center text section
-        title_label = QLabel("PayNow QR Code")
-        title_label.setFont(QFont("Inria Sans", 17))
-        title_label.setStyleSheet("color: black;")
-        left_layout.addWidget(title_label, alignment=Qt.AlignCenter)
-
-        instruction_label = QLabel("Scan or upload this QR code to your Banking app")
-        instruction_label.setFont(QFont("Inria Sans", 10, QFont.Light, italic=True))
-        instruction_label.setAlignment(Qt.AlignCenter)
-        instruction_label.setStyleSheet("color: black;")
-        left_layout.addWidget(instruction_label, alignment=Qt.AlignCenter)
-
-        # Add Cancel Payment button below title and instruction labels
-        self.cancel_button = QPushButton("Cancel Payment")
-        self.cancel_button.setFont(QFont("Inter", 11, QFont.Bold))
-        self.cancel_button.setFixedSize(200, 50)
-        self.cancel_button.setStyleSheet("""
-        background-color: #507849;
-        color: white;
-        border-radius:15px;
-        """)
-        self.cancel_button.clicked.connect(self.cancel_payment)
-        left_layout.addWidget(self.cancel_button, alignment=Qt.AlignCenter)
-
-        # Add stretch after text
-        left_layout.addStretch(1)
-
-        left_layout.addStretch()
-        main_layout.addWidget(left_section)
-
-        # Right Section
-        right_section = QWidget()
-        right_layout = QVBoxLayout(right_section)
-        right_layout.setContentsMargins(20, 0, 20, 20) 
-        right_layout.setSpacing(15)
-        right_layout.setAlignment(Qt.AlignTop)  # Force alignment to top
-
-        # QR Code Frame
+        # QR Code Frame with adjusted size
         self.qr_frame = QFrame()
-        self.qr_frame.setFixedSize(300, 300)
+        self.qr_frame.setFixedSize(common_size, common_size)  # Use common size
         self.qr_frame.setStyleSheet("""
             QFrame {
                 background-color: #F5F9F7;
                 border: none;
-                margin-top: 20px;  
             }
         """)
         
         # QR Code Label
         self.qr_label = QLabel(self.qr_frame)
         self.qr_label.setAlignment(Qt.AlignCenter)
-        self.qr_label.setFixedSize(300, 300)
+        self.qr_label.setFixedSize(common_size, common_size)  # Use common size
         self.qr_label.setText("Loading...")
         self.qr_label.setStyleSheet("background-color: transparent;")
+        
+        # Add QR code to container with top alignment
+        qr_container_layout.addWidget(self.qr_frame, 0, Qt.AlignTop | Qt.AlignHCenter)
+        
+        # Add QR container to main layout
+        left_layout.addWidget(qr_container, 0, Qt.AlignTop | Qt.AlignHCenter)
+        
+        # Add flexible stretch to push everything else to the bottom
+        left_layout.addStretch(2)
 
-        # Payment Details Container
+        # Bottom container for all info and buttons
+        bottom_container = QWidget()
+        bottom_layout = QVBoxLayout(bottom_container)
+        bottom_layout.setContentsMargins(0, 0, 0, 0)
+        bottom_layout.setSpacing(5)  # Small space between elements
+        
+        # Payment Details Container - smaller and compact
         details_frame = QFrame()
-        details_frame.setStyleSheet("background-color: transparent;")
+        details_frame.setStyleSheet("""
+            background-color: transparent;
+        """)
         details_layout = QVBoxLayout(details_frame)
-        details_layout.setSpacing(8)
+        details_layout.setContentsMargins(0, 0, 0, 0)  # Remove internal margins
+        details_layout.setSpacing(2)  # Slightly increased spacing between detail items
 
-        # Amount
+        # Amount with slightly increased font
         self.amount_label = QLabel()
-        self.amount_label.setFont(QFont("Inria Sans", 11))
+        self.amount_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
         amount_text = sum(float(product['price']) * quantity 
                          for product, quantity in self.cart_state.cart_items)
         self.amount_label.setText(f"Số tiền: {'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
 
-        # Account Details
+        # Account number - new information
+        account_number = "0375712517"
+        account_label = QLabel(f"Số tài khoản: {account_number}")
+        account_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
+        
+        # Account Details - increased font
         acc_name_label = QLabel("Tên chủ tài khoản: NGUYEN THE NGO")
-        acc_name_label.setFont(QFont("Inria Sans", 11))
+        acc_name_label.setFont(QFont("Inria Sans", 10))  # Increased font size
         
         bank_label = QLabel("Ngân hàng: TMCP Quân Đội")
-        bank_label.setFont(QFont("Inria Sans", 11))
+        bank_label.setFont(QFont("Inria Sans", 10))  # Increased font size
 
         # Add all labels to details layout
-        for label in [self.amount_label, acc_name_label, bank_label]:
+        for label in [self.amount_label, account_label, acc_name_label, bank_label]:
             label.setAlignment(Qt.AlignCenter)
             details_layout.addWidget(label)
-
+  
+        # Add details frame to bottom layout
+        bottom_layout.addWidget(details_frame, alignment=Qt.AlignCenter)
+        
+        # Zero spacing between info and time
+        bottom_layout.addSpacing(0)
+        
+        # Countdown and generation time
+        time_container = QWidget()
+        time_layout = QVBoxLayout(time_container)
+        time_layout.setContentsMargins(0, 0, 0, 0)
+        time_layout.setSpacing(1)  # Minimal spacing
+        
         # Countdown label
         self.countdown_label = QLabel()
-        self.countdown_label.setFont(QFont("Inria Sans", 12, QFont.Bold))
+        self.countdown_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
         self.countdown_label.setStyleSheet("color: #D30E11;")
         self.countdown_label.setAlignment(Qt.AlignCenter)
         self.countdown_label.hide()
 
         # Generation time label
         self.gen_time_label = QLabel()
-        self.gen_time_label.setFont(QFont("Inria Sans", 12, italic=True))
+        italic_font = QFont("Inria Sans", 10)
+        italic_font.setItalic(True)  # Proper way to set italic
+        self.gen_time_label.setFont(italic_font)
         self.gen_time_label.setAlignment(Qt.AlignCenter)
         self.gen_time_label.hide()
-
-        # Add widgets in desired order with adjusted spacing
-        right_layout.addWidget(self.qr_frame, alignment=Qt.AlignTop | Qt.AlignHCenter)
-        right_layout.addStretch(1)  # Add stretch to push details down
-        right_layout.addWidget(details_frame)
-        right_layout.addSpacing(10)  # Small spacing between details and countdown
-        right_layout.addWidget(self.countdown_label, alignment=Qt.AlignCenter)
-        right_layout.addWidget(self.gen_time_label, alignment=Qt.AlignCenter)
         
-        # Remove the stretch to prevent pushing content to center
-        # right_layout.addStretch()
+        # Add labels to time container
+        time_layout.addWidget(self.countdown_label, alignment=Qt.AlignCenter)
+        time_layout.addWidget(self.gen_time_label, alignment=Qt.AlignCenter)
+        
+        # Add time container to bottom layout
+        bottom_layout.addWidget(time_container, alignment=Qt.AlignCenter)
+        
+        # Add buttons to bottom layout
+        # Cancel Payment button - use common button size
+        self.cancel_button = QPushButton("Cancel Payment")
+        self.cancel_button.setFont(QFont("Josefin Sans", 15, QFont.Bold))  # Use QFont.Bold
+        self.cancel_button.setFixedSize(button_width, button_height)  # Use common button size
+        self.cancel_button.setStyleSheet("""
+            background-color: #507849;
+            color: white;
+            border-radius:15px;
+        """)
+        self.cancel_button.clicked.connect(self.cancel_payment)
+        bottom_layout.addWidget(self.cancel_button, alignment=Qt.AlignCenter)
+        
+        # Add the bottom container to main layout
+        left_layout.addWidget(bottom_container, 0, Qt.AlignBottom)
 
+        # Add left section to main layout
+        main_layout.addWidget(left_section)
+
+        # Right Section - Will now contain charity image and message
+        right_section = QWidget()
+        right_layout = QVBoxLayout(right_section)
+        right_layout.setContentsMargins(10, 0, 10, 5)  # Match left section margins
+        right_layout.setSpacing(0)  # Match left section spacing
+        right_layout.setAlignment(Qt.AlignTop)
+        
+        # Charity image container - match QR code container
+        charity_container = QWidget()
+        charity_container.setFixedHeight(common_size)  # Match QR container height
+        charity_layout = QVBoxLayout(charity_container)
+        charity_layout.setContentsMargins(0, 0, 0, 0)
+        charity_layout.setSpacing(0)
+        charity_layout.setAlignment(Qt.AlignCenter)
+
+        # Charity image
+        charity_label = QLabel()
+        charity_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'lovecharity.png')
+        charity_pixmap = QPixmap(charity_path)
+        
+        if not charity_pixmap.isNull():
+            charity_label.setPixmap(charity_pixmap.scaled(common_size, common_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        else:
+            charity_label.setText("Charity Image")
+            charity_label.setStyleSheet("font-size: 24px; color: #507849;")
+            
+        charity_label.setAlignment(Qt.AlignCenter)
+        charity_label.setFixedSize(common_size, common_size)  # Match QR code size
+        charity_layout.addWidget(charity_label, alignment=Qt.AlignCenter)
+        
+        # Add charity container to right layout
+        right_layout.addWidget(charity_container, alignment=Qt.AlignCenter | Qt.AlignTop)
+        
+        # Message container moved below charity image
+        message_container = QWidget()
+        message_container.setFixedWidth(common_size)  # Match common size
+        message_layout = QVBoxLayout(message_container)
+        message_layout.setContentsMargins(0, 10, 0, 0)  # Add top margin
+        
+        # Charity message with larger font size
+        message_label = QLabel("\"Money may be limited,\nbut love is infinite.\"")
+        message_font = QFont("Josefin Sans", 15)
+        message_font.setItalic(True)  # Proper way to set italic
+        message_label.setFont(message_font)
+        message_label.setAlignment(Qt.AlignCenter)
+        message_label.setWordWrap(True) 
+        message_label.setStyleSheet("""
+            color: #D30E11; 
+            margin: 0px; 
+            padding: 0px;
+        """)
+        
+        message_layout.addWidget(message_label, alignment=Qt.AlignCenter)
+        right_layout.addWidget(message_container, alignment=Qt.AlignCenter)
+        
+        # Add stretch to push button to bottom
+        right_layout.addStretch(2)  # Match left section stretch
+        
+        # No Banking button - match size with Cancel Payment button
+        self.no_banking_button = QPushButton("No Banking")
+        self.no_banking_button.setFont(QFont("Josefin Sans", 15, QFont.Bold))  # Use QFont.Bold
+        self.no_banking_button.setFixedSize(button_width, button_height)  # Use common button size
+        self.no_banking_button.setStyleSheet("""
+            background-color: #507849;
+            color: white;
+            border-radius:15px;
+        """)
+        self.no_banking_button.clicked.connect(self.no_banking)
+        right_layout.addWidget(self.no_banking_button, alignment=Qt.AlignCenter)
+        
+        # Add right section to main layout
         main_layout.addWidget(right_section)
 
     def load_qr_code(self):
@@ -347,7 +443,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 
                 # Cập nhật UI ngay lập tức
                 print(f"[QR_TIMING] About to update UI at: {time.time() - qr_start:.4f}s")
-                self.qr_label.setPixmap(qr_pixmap.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                self.qr_label.setPixmap(qr_pixmap.scaled(320, 320, Qt.KeepAspectRatio, Qt.SmoothTransformation))
                 self.qr_label.setAlignment(Qt.AlignCenter)
                 print(f"[QR_TIMING] QR image displayed at: {time.time() - qr_start:.4f}s")
                 
@@ -416,6 +512,13 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
 
     def cancel_payment(self):
         """Handle cancel payment action with API call"""
+        # Prevent multiple clicks
+        if hasattr(self, 'processing_action') and self.processing_action:
+            print("Already processing an action, ignoring click")
+            return
+            
+        self.processing_action = True
+        
         cancel_start = time.time()
         print(f"[QR_TIMING] Starting cancel payment at: {cancel_start}")
         
@@ -424,6 +527,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             return
             
         self.transition_in_progress = True
+        
+        # Disable button to prevent multiple clicks
+        self.cancel_button.setEnabled(False)
         
         # Stop transaction check and countdown immediately
         self.stop_transaction_check.set()
@@ -534,7 +640,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             print("Xác thực thành công!")
             
             print(f"\nBat dau theo doi giao dịch:")
-            print(f"- Số tiền: {amount:,} VND")
+            print(f"- Đề xuất: {amount:,} VND")
             print(f"- Từ thời điểm: {self.qr_start_time.strftime('%d/%m/%Y %H:%M:%S')}")
             
             while not self.stop_transaction_check.is_set():
@@ -559,22 +665,24 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                 
                                 # Check conditions:
                                 # 1. Is credit transaction (credit > 0, debit = 0)
-                                # 2. Amount matches QR code
-                                # 3. Transaction time after QR creation
-                                # 4. Transaction not processed before
-                                if (credit == amount and debit == 0 and
+                                # 2. Transaction time after QR creation
+                                # 3. Transaction not processed before
+                                if (credit > 0 and debit == 0 and
                                     trans_time > self.qr_start_time and
                                     trans_id not in self.processed_transaction_ids):
                                     
                                     self.processed_transaction_ids.add(trans_id)
                                     print("\n" + "="*50)
-                                    print(f"Phat hien giao dich khop ({current_time.strftime('%H:%M:%S')})")
+                                    print(f"Phat hien giao dich ({current_time.strftime('%H:%M:%S')})")
                                     print(f"Thoi gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
                                     print(f"So tien nhan: +{credit:,} VND")
                                     print(f"Tu: {trans.get('benAccountName', 'N/A')}")
                                     print(f"Noi dung: {trans.get('description', 'N/A')}")
                                     print(f"Ma GD: {trans_id}")
                                     print("="*50)
+                                    
+                                    # Store the donation amount for success page
+                                    QRCodePage.donation_amount = credit
                                     
                                     # Emit signal to switch to success page
                                     self.switch_to_success.emit()
@@ -614,49 +722,58 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 self.transition_overlay.fadeOut(lambda: self.close())
                 PageTiming.end_timing(start_time, "QRCodePage", "SuccessPage")
             
-            sound_path_ting = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'ting-ting.wav'))
-            sound_path_payment = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'sucesspayment.wav'))
-            
-            try:
-                # Play first sound (ting-ting)
-                self.ting_sound = QSoundEffect()
-                self.ting_sound.setSource(QUrl.fromLocalFile(sound_path_ting))
-                self.ting_sound.setVolume(1.0)
+            # Only play sounds if there's an actual donation
+            if QRCodePage.donation_amount > 0:
+                sound_path_ting = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'ting-ting.wav'))
+                sound_path_payment = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'sucesspayment.wav'))
                 
-                def play_payment_and_speak():
-                    # Play payment success sound
-                    self.payment_sound = QSoundEffect()
-                    self.payment_sound.setSource(QUrl.fromLocalFile(sound_path_payment))
-                    self.payment_sound.setVolume(1.0)
-                    self.payment_sound.play()
+                try:
+                    # Play first sound (ting-ting)
+                    self.ting_sound = QSoundEffect()
+                    self.ting_sound.setSource(QUrl.fromLocalFile(sound_path_ting))
+                    self.ting_sound.setVolume(1.0)
                     
-                    # Wait for payment sound then speak amount
-                    def speak_amount():
-                        try:
-                            # Lấy số tiền trực tiếp từ total_amount
-                            amount = self.total_amount
-                            amount_words = self.number_to_vietnamese(amount)
-                            print(f"Speaking amount: {amount} ({amount_words})")  # Debug print
-                            
-                            # Chỉ đọc số tiền với tốc độ chậm hơn (100 từ/phút)
-                            subprocess.run(['espeak', '-vvi', '-s100', '-g5', amount_words + ' đồng'])
-                        except Exception as e:
-                            print(f"Error speaking amount: {e}")
+                    def play_payment_and_speak():
+                        # Play payment success sound
+                        self.payment_sound = QSoundEffect()
+                        self.payment_sound.setSource(QUrl.fromLocalFile(sound_path_payment))
+                        self.payment_sound.setVolume(1.0)
+                        self.payment_sound.play()
+                        
+                        # Wait for payment sound then speak amount
+                        def speak_amount():
+                            try:
+                                # Use the collected donation amount
+                                amount = QRCodePage.donation_amount
+                                amount_words = self.number_to_vietnamese(amount)
+                                print(f"Speaking amount: {amount} ({amount_words})")  # Debug print
+                                
+                                # Only speak if there's an amount (redundant check but kept for safety)
+                                if amount > 0:
+                                    # Chỉ đọc số tiền với tốc độ chậm hơn (100 từ/phút)
+                                    subprocess.run(['espeak', '-vvi', '-s100', '-g5', amount_words + ' đồng'])
+                            except Exception as e:
+                                print(f"Error speaking amount: {e}")
+                        
+                        # Tăng delay lên 2500ms để đảm bảo âm thanh sucesspayment.wav phát xong
+                        QTimer.singleShot(2500, speak_amount)
                     
-                    # Tăng delay lên 2500ms để đảm bảo âm thanh sucesspayment.wav phát xong
-                    QTimer.singleShot(2500, speak_amount)
+                    # Start the sequence
+                    self.ting_sound.play()
+                    QTimer.singleShot(1000, play_payment_and_speak)
+                    
+                    # Increase transition delay for sound to complete
+                    QTimer.singleShot(5000, lambda: self.transition_overlay.fadeIn(show_new_page))
+                    
+                except Exception as e:
+                    print(f"Error playing sounds: {e}")
+                    # If sound fails, still show success page without delay
+                    QTimer.singleShot(500, lambda: self.transition_overlay.fadeIn(show_new_page))
+            else:
+                # For No Banking (zero donation), transition quickly without sound
+                print("No donation amount - skipping sounds")
+                QTimer.singleShot(500, lambda: self.transition_overlay.fadeIn(show_new_page))
                 
-                # Start the sequence
-                self.ting_sound.play()
-                QTimer.singleShot(1000, play_payment_and_speak)
-                
-            except Exception as e:
-                print(f"Error playing sounds: {e}")
-                
-            # Reduce delay for page transition to 3 seconds (still enough for sound effects)
-            # but ensuring the success page is shown before its timer expires
-            QTimer.singleShot(3000, lambda: self.transition_overlay.fadeIn(show_new_page))
-            
         switch_page()
 
     def number_to_vietnamese(self, number):
@@ -758,6 +875,30 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     def closeEvent(self, event):
         self.cleanup_resources()
         event.accept()
+
+    def no_banking(self):
+        """Handle the No Banking button click - go directly to success page with zero amount"""
+        # Prevent multiple clicks
+        if hasattr(self, 'processing_action') and self.processing_action:
+            print("Already processing a No Banking action, ignoring click")
+            return
+            
+        self.processing_action = True
+        print("No Banking selected - proceeding with zero donation amount")
+        
+        # Set donation amount to 0
+        QRCodePage.donation_amount = 0
+        
+        # Stop transaction check and countdown
+        self.stop_transaction_check.set()
+        if self.countdown_timer:
+            self.countdown_timer.stop()
+        
+        # Disable button to prevent multiple clicks
+        self.no_banking_button.setEnabled(False)
+        
+        # Switch to success page
+        self.switch_to_success.emit()
 
 if __name__ == '__main__':
     import sys

@@ -5,7 +5,7 @@ import time
 import signal
 import logging
 import requests
-from config import SERVER_IP, SERVER_PORT, BASE_URL, DEVICE_ID
+from config import BASE_URL, DEVICE_ID
 
 # Update app path
 APP_DIR = os.path.join(os.path.dirname(__file__), 'app')

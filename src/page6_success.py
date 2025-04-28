@@ -15,6 +15,9 @@ from base_page import BasePage
 from config import HISTORY_API_URL, CUSTOMER_HISTORY_LINK_URL, DEVICE_ID
 
 class SuccessPage(BasePage):  # Changed from QWidget to BasePage
+    # Add a class variable to track if history has been posted
+    _history_posted = False
+    
     def __init__(self):
         super().__init__()  # Call BasePage init
         self.installEventFilter(self)  # Register event filter
@@ -25,8 +28,10 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
         # Gửi dữ liệu API trước, sau đó xóa số điện thoại nếu cần
-        if self.send_to_history_api():
-            self.clear_phone_number()
+        if not SuccessPage._history_posted:
+            if self.send_to_history_api():
+                SuccessPage._history_posted = True
+                self.clear_phone_number()
         # Clear cart only once at initialization
         self.cart_state.clear_cart()
         # Initialize transition overlay
@@ -79,12 +84,15 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
                     "price": product["price"] / product["quantity"]  # Price per unit
                 })
 
-            # Prepare payload
+            # Import the donation amount from QRCodePage
+            from page5_qrcode import QRCodePage
+            
+            # Prepare payload with donation amount
             payload = {
                 "purchase_id": random.randint(1, 100),
                 "random_id": str(random.randint(10000, 99999)),
                 "timestamp": datetime.datetime.now().isoformat(),
-                "total_amount": str(shopping_data["total_bill"]),
+                "total_amount": str(QRCodePage.donation_amount),  # Use the donation amount
                 "product": json.dumps(product_list)
             }
 
