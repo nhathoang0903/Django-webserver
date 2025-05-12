@@ -13,6 +13,7 @@ from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay  
 from base_page import BasePage  
 from config import HISTORY_API_URL, CUSTOMER_HISTORY_LINK_URL, DEVICE_ID
+from utils.translation import _, get_current_language  
 
 class SuccessPage(BasePage):  # Changed from QWidget to BasePage
     # Add a class variable to track if history has been posted
@@ -43,12 +44,13 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         self.timer.timeout.connect(self.go_home)
 
     def load_fonts(self):
+        # Load necessary fonts
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
     
@@ -130,7 +132,8 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
                 customer_data = {
                     "random_id": response_data["random_id"],
                     "username": phone_number,  # Will be empty for guest mode
-                    "device_id": DEVICE_ID
+                    "device_id": DEVICE_ID,
+                    "note": QRCodePage.transfer_content if hasattr(QRCodePage, 'transfer_content') else ""
                 }
                 
                 print(f"Sending customer data: {customer_data}")
@@ -162,7 +165,7 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
             return False
 
     def init_ui(self):
-        self.setWindowTitle('Payment Success')
+        self.setWindowTitle(_('successPage.title'))
         # Remove setGeometry and setFixedSize since handled by BasePage
 
         self.setStyleSheet("background-color: #F0F6F1;")
@@ -206,7 +209,7 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         if success_pixmap.isNull():
             # print(f"Error: Could not load image from {success_path}")
             # Tạo một placeholder label nếu không load được hình
-            success_label.setText("Payment Success!")
+            success_label.setText(_("successPage.placeholder"))
             success_label.setStyleSheet("font-size: 30px; color: #2BA616;")
         else:
             print(f"Successfully loaded image from {success_path}")
@@ -216,18 +219,18 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         center_layout.addWidget(success_label)
 
         # Text sections with reduced spacing
-        thank_label = QLabel("Thank you!")
+        thank_label = QLabel(_("successPage.thankYou"))
         thank_label.setFont(QFont("Inria Sans", 30, QFont.Bold))
         thank_label.setStyleSheet("color: #2BA616;")
         thank_label.setAlignment(Qt.AlignCenter)
         center_layout.addWidget(thank_label)
 
-        success_msg = QLabel("Payment done successfully")
+        success_msg = QLabel(_("successPage.paymentSuccess"))
         success_msg.setFont(QFont("Inria Sans", 20))
         success_msg.setAlignment(Qt.AlignCenter)
         center_layout.addWidget(success_msg)
 
-        redirect_msg = QLabel("You will be redirected to the homepage shortly\nor click here to return to the home page")
+        redirect_msg = QLabel(_("successPage.redirectMessage"))
         redirect_msg.setFont(QFont("Inria Sans", 10))
         redirect_msg.setAlignment(Qt.AlignCenter)
         center_layout.addWidget(redirect_msg)
@@ -236,9 +239,9 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         center_layout.addStretch()
 
         # Home button với style giống button SCAN page3
-        home_btn = QPushButton("HOME")
-        home_btn.setFixedSize(154, 42)  # Kích thước giống button SCAN
-        home_btn.setFont(QFont("Inter", 14, QFont.Bold))
+        home_btn = QPushButton(_("successPage.homeButton"))
+        home_btn.setFixedSize(158, 42)  # Kích thước giống button SCAN
+        home_btn.setFont(QFont("Inter", 13, QFont.Bold))
         home_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4E8F5F;

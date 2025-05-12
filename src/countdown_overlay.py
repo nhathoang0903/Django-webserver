@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QGraphicsBlurEffect, QFrame
 from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation
 from PyQt5.QtGui import QFont, QColor, QPainter
+from utils.translation import _, get_current_language
 
 class CountdownOverlay(QWidget):
     def __init__(self, parent=None, duration=5000):

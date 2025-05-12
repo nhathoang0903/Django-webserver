@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QIcon
 from page1_welcome import WelcomePage
 import subprocess
+from utils.translation import set_language
 
 # Create logs directory if it doesn't exist
 LOG_DIR = os.path.join(os.path.dirname(__file__), 'app', 'logs')
@@ -56,6 +57,10 @@ class KioskApplication(QApplication):
         logging.info("Starting Cartsy Application")
         # Set application-wide attributes
         self.setOverrideCursor(Qt.BlankCursor)
+        
+        # Thiết lập ngôn ngữ mặc định là tiếng Việt
+        set_language("vi")
+        logging.info("Set default language to Vietnamese")
         
         # Hide taskbar on Raspberry Pi
         if os.path.exists('/usr/bin/lxpanel'):

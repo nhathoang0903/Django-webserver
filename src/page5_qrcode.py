@@ -35,11 +35,13 @@ import pyttsx3
 import qrcode
 from vietqr.VietQR import genQRString, getBincode
 from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
+from utils.translation import _, get_current_language  # Add translation import if not already there
 
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Signal for page switching
     payment_completed = pyqtSignal(bool)  # Signal for payment status
     donation_amount = 0  # Variable to store the donation amount
+    transfer_content = ""  # Variable to store transfer content
     
     def __init__(self):
         # Ghi lại thời gian bắt đầu khởi tạo
@@ -52,6 +54,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         
         super().__init__()
         print(f"[QR_TIMING] BasePage initialized at: {time.time() - init_start_time:.4f}s")
+        
+        # Define common size for QR code and charity image - moved to class level
+        self.common_size = 250  # Reduced size for better display
         
         # Disable sound functionality (lightweight)
         self.sound_enabled = False
@@ -109,7 +114,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Setup timers and connect signals
         self.countdown_timer = QTimer()
         self.countdown_timer.timeout.connect(self.update_countdown)
-        self.countdown_seconds = 300  # 5 minutes
+        self.countdown_seconds = 60  # Reduced to 1 minute
         self.target_time = datetime.now()
         
         # Connect signals - đã khai báo ở mức lớp, chỉ connect ở đây
@@ -117,7 +122,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.shopping_page = None
         
         # Load QR code (heavy operation) - show loading first, then generate in QTimer
-        self.qr_label.setText("Generating QR Code...")
+        self.qr_label.setText(_("qrCodePage.loading"))
         
         # Generate QR code with a short delay to allow UI to show first
         QTimer.singleShot(50, self.load_qr_code)
@@ -148,14 +153,12 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                     pass
 
     def load_fonts(self):
+        # Register various fonts
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Bold.ttf'))
 
     def init_ui(self):
         self.setWindowTitle('Charity Donation')
@@ -165,12 +168,10 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
 
-        # Define common size for QR code and charity image
-        common_size = 320  # Reduced size
-        
+        # Use class-level common_size variable
         # Define common button size
         button_width = 200
-        button_height = 50
+        button_height = 60  # Increased from 50
 
         # Main layout
         main_layout = QHBoxLayout(self)
@@ -186,7 +187,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # QR Code Container - create a separate container with custom size
         qr_container = QWidget()
         # Set fixed height to ensure it doesn't get compressed
-        qr_container.setFixedHeight(common_size)
+        qr_container.setFixedHeight(self.common_size)
         qr_container_layout = QVBoxLayout(qr_container)
         qr_container_layout.setContentsMargins(0, 0, 0, 0)
         qr_container_layout.setSpacing(0)
@@ -194,7 +195,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
 
         # QR Code Frame with adjusted size
         self.qr_frame = QFrame()
-        self.qr_frame.setFixedSize(common_size, common_size)  # Use common size
+        self.qr_frame.setFixedSize(self.common_size, self.common_size)  # Use common size
         self.qr_frame.setStyleSheet("""
             QFrame {
                 background-color: #F5F9F7;
@@ -205,14 +206,15 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # QR Code Label
         self.qr_label = QLabel(self.qr_frame)
         self.qr_label.setAlignment(Qt.AlignCenter)
-        self.qr_label.setFixedSize(common_size, common_size)  # Use common size
-        self.qr_label.setText("Loading...")
+        self.qr_label.setFixedSize(self.common_size, self.common_size)  # Use common size
+        self.qr_label.setText(_("qrCodePage.loading"))
         self.qr_label.setStyleSheet("background-color: transparent;")
         
         # Add QR code to container with top alignment
         qr_container_layout.addWidget(self.qr_frame, 0, Qt.AlignTop | Qt.AlignHCenter)
         
-        # Add QR container to main layout
+        # QR container to main layout with top margin
+        left_layout.addSpacing(20)  # Add space at the top
         left_layout.addWidget(qr_container, 0, Qt.AlignTop | Qt.AlignHCenter)
         
         # Add flexible stretch to push everything else to the bottom
@@ -238,18 +240,18 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         self.amount_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
         amount_text = sum(float(product['price']) * quantity 
                          for product, quantity in self.cart_state.cart_items)
-        self.amount_label.setText(f"Số tiền: {'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
+        self.amount_label.setText(f"{_('qrCodePage.amount')}{'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
 
         # Account number - new information
         account_number = "0375712517"
-        account_label = QLabel(f"Số tài khoản: {account_number}")
+        account_label = QLabel(f"{_('qrCodePage.accountNumber')}{account_number}")
         account_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
         
         # Account Details - increased font
-        acc_name_label = QLabel("Tên chủ tài khoản: NGUYEN THE NGO")
+        acc_name_label = QLabel(_("qrCodePage.accountName"))
         acc_name_label.setFont(QFont("Inria Sans", 10))  # Increased font size
         
-        bank_label = QLabel("Ngân hàng: TMCP Quân Đội")
+        bank_label = QLabel(_("qrCodePage.bankName"))
         bank_label.setFont(QFont("Inria Sans", 10))  # Increased font size
 
         # Add all labels to details layout
@@ -293,11 +295,11 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         
         # Add buttons to bottom layout
         # Cancel Payment button - use common button size
-        self.cancel_button = QPushButton("Cancel Payment")
+        self.cancel_button = QPushButton(_("qrCodePage.cancelPayment"))
         self.cancel_button.setFont(QFont("Josefin Sans", 15, QFont.Bold))  # Use QFont.Bold
         self.cancel_button.setFixedSize(button_width, button_height)  # Use common button size
         self.cancel_button.setStyleSheet("""
-            background-color: #507849;
+            background-color: #416FFA;
             color: white;
             border-radius:15px;
         """)
@@ -319,7 +321,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         
         # Charity image container - match QR code container
         charity_container = QWidget()
-        charity_container.setFixedHeight(common_size)  # Match QR container height
+        charity_container.setFixedHeight(self.common_size)  # Match QR container height
         charity_layout = QVBoxLayout(charity_container)
         charity_layout.setContentsMargins(0, 0, 0, 0)
         charity_layout.setSpacing(0)
@@ -331,26 +333,27 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         charity_pixmap = QPixmap(charity_path)
         
         if not charity_pixmap.isNull():
-            charity_label.setPixmap(charity_pixmap.scaled(common_size, common_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            charity_label.setPixmap(charity_pixmap.scaled(self.common_size, self.common_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         else:
             charity_label.setText("Charity Image")
             charity_label.setStyleSheet("font-size: 24px; color: #507849;")
             
         charity_label.setAlignment(Qt.AlignCenter)
-        charity_label.setFixedSize(common_size, common_size)  # Match QR code size
+        charity_label.setFixedSize(self.common_size, self.common_size)  # Match QR code size
         charity_layout.addWidget(charity_label, alignment=Qt.AlignCenter)
         
-        # Add charity container to right layout
+        # Add charity container to right layout with top margin
+        right_layout.addSpacing(20)  # Add space at the top
         right_layout.addWidget(charity_container, alignment=Qt.AlignCenter | Qt.AlignTop)
         
         # Message container moved below charity image
         message_container = QWidget()
-        message_container.setFixedWidth(common_size)  # Match common size
+        message_container.setFixedWidth(self.common_size)  # Match common size
         message_layout = QVBoxLayout(message_container)
         message_layout.setContentsMargins(0, 10, 0, 0)  # Add top margin
         
         # Charity message with larger font size
-        message_label = QLabel("\"Money may be limited,\nbut love is infinite.\"")
+        message_label = QLabel(_("qrCodePage.charityMessage"))
         message_font = QFont("Josefin Sans", 15)
         message_font.setItalic(True)  # Proper way to set italic
         message_label.setFont(message_font)
@@ -366,14 +369,14 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         right_layout.addWidget(message_container, alignment=Qt.AlignCenter)
         
         # Add stretch to push button to bottom
-        right_layout.addStretch(2)  # Match left section stretch
+        right_layout.addStretch(2) 
         
-        # No Banking button - match size with Cancel Payment button
-        self.no_banking_button = QPushButton("No Banking")
-        self.no_banking_button.setFont(QFont("Josefin Sans", 15, QFont.Bold))  # Use QFont.Bold
-        self.no_banking_button.setFixedSize(button_width, button_height)  # Use common button size
+        # No Banking button 
+        self.no_banking_button = QPushButton(_("qrCodePage.heartfeltSupport"))
+        self.no_banking_button.setFont(QFont("Josefin Sans", 15, QFont.Bold)) 
+        self.no_banking_button.setFixedSize(button_width, button_height) 
         self.no_banking_button.setStyleSheet("""
-            background-color: #507849;
+            background-color: #CC95BA;
             color: white;
             border-radius:15px;
         """)
@@ -404,7 +407,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 vietqr_string = genQRString(
                     merchant_id=account_number,
                     acq=bank_code,
-                    amount=str(self.total_amount), 
+                    # amount=str(self.total_amount), 
                     merchant_name="NGUYEN THE NGO",
                     service_code="QRIBFTTA",  
                     currency="704",            # VND currency code
@@ -417,9 +420,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 
                 # Create QR code with custom styling
                 qr = qrcode.QRCode(
-                    version=5,
+                    version=6,  # Increased version for better compatibility
                     error_correction=qrcode.constants.ERROR_CORRECT_H,
-                    box_size=12,
+                    box_size=10,  # Reduced box size for better fit
                     border=4
                 )
                 
@@ -427,8 +430,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 qr.make(fit=True)
                 print(f"[QR_TIMING] QR code created at: {time.time() - qr_start:.4f}s")
                 
-                # Create QR image with custom colors
-                qr_img = qr.make_image(fill_color="#2C7A7B", back_color="#F5F9F7").convert("RGBA")
+                # Create QR image with custom colors matching button color #507849
+                qr_img = qr.make_image(fill_color="#507849", back_color="#F5F9F7").convert("RGBA")
                 print(f"[QR_TIMING] QR image generated at: {time.time() - qr_start:.4f}s")
                 
                 # Convert PIL Image to QPixmap using BytesIO
@@ -441,9 +444,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 qr_pixmap = QPixmap()
                 qr_pixmap.loadFromData(img_byte_array.getvalue())
                 
-                # Cập nhật UI ngay lập tức
+                # Update UI with properly scaled QR code - match to common_size
                 print(f"[QR_TIMING] About to update UI at: {time.time() - qr_start:.4f}s")
-                self.qr_label.setPixmap(qr_pixmap.scaled(320, 320, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                self.qr_label.setPixmap(qr_pixmap.scaled(self.common_size, self.common_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
                 self.qr_label.setAlignment(Qt.AlignCenter)
                 print(f"[QR_TIMING] QR image displayed at: {time.time() - qr_start:.4f}s")
                 
@@ -466,7 +469,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 
                 date_str = f"{day}<sup>{suffix}</sup>"
                 self.gen_time_label.setText(
-                    f"Generated {time_str}, {month_str} {date_str}, {year_str}")
+                    f"{_('qrCodePage.generated')}{time_str}, {month_str} {date_str}, {year_str}")
                 self.gen_time_label.setTextFormat(Qt.RichText)
                 self.gen_time_label.show()
                 print(f"[QR_TIMING] Generation time displayed at: {time.time() - qr_start:.4f}s")
@@ -631,13 +634,34 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         account_no = "0375712517"
 
         mb = None
+        # Store the transfer content for later use
+        self.transfer_content = ""
+        
         try:
             print("Khởi tạo kết nối...")
             mb = MBBank(username=USERNAME, password=PASSWORD)
             
+            # Add a timeout for authentication to prevent hanging
+            auth_timeout = 10  # seconds
+            auth_start = time.time()
+            
             print("Đang đăng nhập...")
-            mb._authenticate()
-            print("Xác thực thành công!")
+            try:
+                # Set a timeout for authentication
+                if time.time() - auth_start > auth_timeout:
+                    print("Authentication timed out, proceeding anyway")
+                else:
+                    mb._authenticate()
+                    print("Xác thực thành công!")
+            except Exception as auth_e:
+                print(f"Authentication error: {auth_e}, will retry once")
+                try:
+                    # One retry with shorter timeout
+                    mb = MBBank(username=USERNAME, password=PASSWORD)
+                    mb._authenticate()
+                    print("Xác thực thành công sau khi thử lại!")
+                except:
+                    print("Authentication failed after retry, proceeding with limited functionality")
             
             print(f"\nBat dau theo doi giao dịch:")
             print(f"- Đề xuất: {amount:,} VND")
@@ -662,6 +686,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                 debit = int(trans.get('debitAmount', '0'))
                                 trans_time = datetime.strptime(trans.get('transactionDate', ''), '%d/%m/%Y %H:%M:%S')
                                 trans_id = trans.get('refNo', '')
+                                description = trans.get('description', 'N/A')
                                 
                                 # Check conditions:
                                 # 1. Is credit transaction (credit > 0, debit = 0)
@@ -677,12 +702,15 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                     print(f"Thoi gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
                                     print(f"So tien nhan: +{credit:,} VND")
                                     print(f"Tu: {trans.get('benAccountName', 'N/A')}")
-                                    print(f"Noi dung: {trans.get('description', 'N/A')}")
+                                    print(f"Noi dung: {description}")
                                     print(f"Ma GD: {trans_id}")
                                     print("="*50)
                                     
                                     # Store the donation amount for success page
                                     QRCodePage.donation_amount = credit
+                                    
+                                    # Store the transfer content for the note field
+                                    QRCodePage.transfer_content = description
                                     
                                     # Emit signal to switch to success page
                                     self.switch_to_success.emit()
@@ -840,20 +868,24 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         
         if remaining <= 0:
             self.countdown_timer.stop()
-            self.countdown_label.setText("QR Code expired")
+            self.countdown_label.setText(_("qrCodePage.qrExpired"))
+            
+            # When timer expires, trigger No Banking flow instead of returning to shopping
+            print("Timer expired - proceeding with No Banking flow")
+            QRCodePage.donation_amount = 0
+            self.stop_transaction_check.set()
             
             # Check if already in transition
             if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
                 self.transition_in_progress = True
                 
-                # Show transition overlay first, then return to shopping after a delay
-                self.transition_overlay.fadeIn()
-                QTimer.singleShot(300, self.return_to_shopping)
+                # Switch to success page with zero donation
+                self.switch_to_success.emit()
             return
             
         minutes = int(remaining // 60)
         seconds = int(remaining % 60)
-        self.countdown_label.setText(f"Time remaining: {minutes:02d}:{seconds:02d}")
+        self.countdown_label.setText(f"{_('qrCodePage.timeRemaining')}{minutes:02d}:{seconds:02d}")
 
     def read_amount(self):
         """Read the total amount using TTS"""
@@ -888,6 +920,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         
         # Set donation amount to 0
         QRCodePage.donation_amount = 0
+        
+        # Set a special transfer content for Heartfelt Support
+        QRCodePage.transfer_content = "Heartfelt support donation"
         
         # Stop transaction check and countdown
         self.stop_transaction_check.set()

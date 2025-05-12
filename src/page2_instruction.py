@@ -47,13 +47,11 @@ class InstructionPage(BasePage):
         self.is_animating = False  # Add this flag
 
     def load_fonts(self):
-        # Same font loading as page1
+        # Load all required fonts
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
 
     def init_ui(self):
         self.setWindowTitle('Instructions - Smart Shopping Cart')

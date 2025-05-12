@@ -153,10 +153,12 @@ class CartState:
             with open(self.JSON_PATH, 'w') as f:
                 json.dump(cart_data, f, indent=4)
 
-            # Update the cart count dynamically
-            from count_item import update_cart_count
-            from page3_productsinfo import ProductPage
-            update_cart_count(ProductPage._instance)
+            # Notify all registered callbacks
+            for callback in self._change_callbacks:
+                try:
+                    callback(cart_data)
+                except Exception as e:
+                    print(f"Error in cart state callback: {e}")
             
             # Directly call send_monitor_data or add to queue
             try:

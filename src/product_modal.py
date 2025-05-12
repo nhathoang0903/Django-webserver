@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap, QFont, QFontDatabase
 from page3_productsinfo import SimpleImageLoader  # Import SimpleImageLoader
 import os
+from utils.translation import _, get_current_language  # Add translation import
 
 class ProductModal(QFrame):
     add_to_cart = pyqtSignal(dict, int)  
@@ -27,12 +28,14 @@ class ProductModal(QFrame):
         self.init_ui()  # Remove warning_widget
 
     def load_fonts(self):
+        # Register necessary fonts
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
@@ -223,7 +226,7 @@ class ProductModal(QFrame):
         btn_layout.setAlignment(Qt.AlignCenter)
 
         # Cancel button - increased size and font
-        cancel_btn = QPushButton("Cancel")
+        cancel_btn = QPushButton(_("productModal.cancel"))
         cancel_btn.setFixedSize(90, 40)
         cancel_btn.setFont(QFont("Inria Sans", 12, QFont.Bold))
         cancel_btn.setStyleSheet("""
@@ -241,7 +244,7 @@ class ProductModal(QFrame):
         cancel_btn.clicked.connect(self.handle_cancel)
 
         # Add to cart button
-        add_btn = QPushButton("Add to cart")
+        add_btn = QPushButton(_("productModal.addToCart"))
         add_btn.setFixedSize(90, 40)
         add_btn.setFont(QFont("Inria Sans", 12, QFont.Bold))
         add_btn.setStyleSheet("""
@@ -291,7 +294,7 @@ class ProductModal(QFrame):
         warning_icon.setAlignment(Qt.AlignCenter)
         warning_layout.addWidget(warning_icon)
 
-        warning_text = QLabel("PRODUCT ALREADY IN\nYOUR CART")
+        warning_text = QLabel(_("productModal.alreadyInCart"))
         warning_text.setFont(QFont("Inria Sans", 12, QFont.Bold))
         warning_text.setStyleSheet("color: black; background: transparent;")
         warning_text.setContentsMargins(0, 0, 0, 0)

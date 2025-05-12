@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoin
 import os
 from page3_productsinfo import SimpleImageLoader  
 import weakref
+from utils.translation import _, get_current_language
 
 class CartItemWidget(QFrame):
     quantityChanged = pyqtSignal(int)  # Signal for quantity changes

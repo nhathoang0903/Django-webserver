@@ -27,6 +27,8 @@ import time
 from config import CART_END_SESSION_STATUS_API, DEVICE_ID, CART_CHECK_PAYMENT_SIGNAL, CART_END_SESSION_API
 from threading import Thread
 from count_item import update_cart_count
+from utils.translation import _, get_current_language
+from utils.font_helpers.vietnamese import VietnameseFontHelper
 
 class SessionMonitor(QThread):
     """Thread to monitor cart session status"""
@@ -370,17 +372,18 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         return self._image_cache[path]
         
     def load_fonts(self):
+        # Register fonts for this page
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
     def init_ui(self):
-        self.setWindowTitle('Shopping - Smart Shopping Cart')
+        self.setWindowTitle(_('shoppingPage.title'))
         # Remove setGeometry and setFixedSize since handled by BasePage
         
         # Main horizontal layout
@@ -405,12 +408,12 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         buttons_layout.setContentsMargins(0, 0, 0, 5)  # Giảm bottom margin từ 15 xuống 5
 
         # Scan Button
-        scan_button = self.create_button("SCAN", icon_path="camera.png")
+        scan_button = self.create_button(_("shoppingPage.scan"), icon_path="camera.png")
         scan_button.clicked.connect(self.toggle_camera)
         buttons_layout.addWidget(scan_button)
 
         # Product Info Button
-        product_info_button = self.create_button("PRODUCT INFO", icon_path="info.png")
+        product_info_button = self.create_button(_("shoppingPage.productInfo"), icon_path="info.png")
         product_info_button.clicked.connect(self.show_product_page)
         # print("Open product info page")
         buttons_layout.addWidget(product_info_button)
@@ -496,7 +499,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         header_layout.setContentsMargins(0, 0, 0, 0)
 
         # Cart Header (left aligned)
-        self.cart_header = QLabel("Your Cart")
+        self.cart_header = QLabel(_("shoppingPage.yourCart"))
         self.cart_header.setFont(QFont("Baloo", 24))
         self.cart_header.setStyleSheet("color: black;")
         header_layout.addWidget(self.cart_header, alignment=Qt.AlignLeft | Qt.AlignTop)
@@ -508,7 +511,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         header_layout.addWidget(self.cart_count_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
         # Cancel Shopping button (right aligned)
-        self.cancel_shopping_btn = QPushButton("Cancel shopping")
+        self.cancel_shopping_btn = QPushButton(_("shoppingPage.cancelShopping"))
         self.cancel_shopping_btn.setFixedSize(160, 40)
         self.cancel_shopping_btn.setCursor(Qt.PointingHandCursor)  # Thêm con trỏ chuột khi hover
         self.cancel_shopping_btn.setStyleSheet("""
@@ -882,13 +885,18 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         try:
             # Start timing
             self.add_cart_start_time = time.time()
-            print(f"Starting add to cart for {product['name']} at {self.add_cart_start_time}")
+            print(f"[Page4] Starting add to cart for {product['name']} at {self.add_cart_start_time}")
             
             # Add item
             is_existing = self.cart_state.add_item(product, quantity)
+            print(f"[Page4] Added product to cart: {product['name']}")
+            print(f"[Page4] Is existing item: {is_existing}")
+            print(f"[Page4] Current cart items: {self.cart_state.cart_items}")
             
             # Update cart count label
-            self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
+            cart_count = len(self.cart_state.cart_items)
+            print(f"[Page4] New cart count: {cart_count}")
+            self.cart_count_label.setText(f"({cart_count})")
             
             # Update UI safely
             if self.product_modal and not self.product_modal.isHidden():
@@ -901,7 +909,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             # Log timing after update
             end_time = time.time()
             duration = (end_time - self.add_cart_start_time)  # Convert to milliseconds
-            print(f"✓ Added {product['name']} to cart - Time taken: {duration:.4f}s")
+            print(f"[Page4] ✓ Added {product['name']} to cart - Time taken: {duration:.4f}s")
             
             # Reset timer
             self.add_cart_start_time = None
@@ -1527,10 +1535,16 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         self.clear_layout(self.content_layout)
         
         # Update cart count label to match page3's style
-        if self.cart_state.cart_items:
-            self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
+        cart_count = len(self.cart_state.cart_items)
+        print(f"[Page4] Updating cart display - Current count: {cart_count}")
+        print(f"[Page4] Current cart items: {self.cart_state.cart_items}")
+        
+        if cart_count > 0:
+            self.cart_count_label.setText(f"({cart_count})")
+            self.cart_count_label.show()
         else:
             self.cart_count_label.setText("")
+            self.cart_count_label.hide()
         
         # Update background color based on cart state
         self.right_section.setStyleSheet(
@@ -1551,7 +1565,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             
             empty_layout.addStretch(2)  # Reduced stretch from 3 to 2
             
-            empty_text = QLabel("Empty")
+            empty_text = QLabel(_("productPage.empty"))
             empty_text.setFont(QFont("Inria Sans", 30))
             empty_text.setStyleSheet("color: #F68003;")
             empty_text.setAlignment(Qt.AlignCenter)
@@ -1628,7 +1642,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         
         # Total label
         total_label = QLabel()
-        total_label.setText(f'<span style="color: #000000;">Total </span>'
+        total_label.setText(f'<span style="color: #000000;">{_("shoppingPage.total")} </span>'
                           f'<span style="color: #D30E11;">{formatted_total} vnđ</span>')
         total_label.setTextFormat(Qt.RichText)
         total_label.setStyleSheet("""
@@ -1640,7 +1654,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         footer_layout.addWidget(total_label)
         
         # Payment button
-        payment_button = QPushButton("PAYMENT")
+        payment_button = QPushButton(_("shoppingPage.payment"))
         payment_button.setObjectName("payment_button")  # Set object name for finding later
         payment_button.setFixedSize(160, 45)  # Reduce size from 170x40 to 160x35
         payment_button.setStyleSheet("""
@@ -1802,8 +1816,8 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         # Show toast with same duration as button animation
         if self.toast_label:
             self.toast_label.hide()
-        self.show_synchronized_toast("Cart is empty! Please add items to proceed.")
-        print("Cart is empty! Please add items to proceed.")
+        self.show_synchronized_toast(_("shoppingPage.emptyCartMessage"))
+        print(_("shoppingPage.emptyCartMessage"))
         
         # Change button color
         payment_button.setStyleSheet("""
@@ -1868,15 +1882,22 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         try:
             # Lấy thông tin trước khi xóa
             removed_product = self.cart_state.cart_items[index][0].copy()  # Tạo bản sao của product
+            print(f"[Page4] Removing product from cart: {removed_product['name']}")
             
             # Thực hiện xóa item
             self.cart_state.remove_item(index)
+            print(f"[Page4] Removed item at index {index}")
+            print(f"[Page4] Current cart items: {self.cart_state.cart_items}")
             
             # Update cart count label
+            cart_count = len(self.cart_state.cart_items)
+            print(f"[Page4] New cart count after removal: {cart_count}")
             if self.cart_state.cart_items:
-                self.cart_count_label.setText(f"({len(self.cart_state.cart_items)})")
+                self.cart_count_label.setText(f"({cart_count})")
+                self.cart_count_label.show()
             else:
                 self.cart_count_label.setText("")
+                self.cart_count_label.hide()
             
             # Update cart display trước
             self.update_cart_display()

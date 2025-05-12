@@ -4,7 +4,7 @@ import os
 #SERVER_IP = "192.168.5.6"
 #SERVER_PORT = "9000"
 #BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
-BASE_URL= f"http://172.26.40.78:9000/"
+BASE_URL= f"http://192.168.5.75:9000/"
 HISTORY_API_URL = f"{BASE_URL}/history/"
 CUSTOMER_HISTORY_LINK_URL = f"{BASE_URL}/api/customer-history-link/"  
 

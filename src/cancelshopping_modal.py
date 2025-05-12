@@ -6,6 +6,7 @@ import os
 from components.PageTransitionOverlay import PageTransitionOverlay
 import requests
 from config import CART_END_SESSION_API, DEVICE_ID
+from utils.translation import _, get_current_language
 
 class CancelShoppingModal(QFrame):
     cancelled = pyqtSignal()
@@ -26,12 +27,13 @@ class CancelShoppingModal(QFrame):
         self.transition_in_progress = False  # Add this line
 
     def load_fonts(self):
+        # Load and register fonts
         font_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'font-family')
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/static/Inter_24pt-Bold.ttf'))
+        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Tillana/Tillana-Bold.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inria_Sans/InriaSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Italic.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Inter/Inter-Bold.ttf'))
-        QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Poppins/Poppins-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Josefin_Sans/static/JosefinSans-Regular.ttf'))
         QFontDatabase.addApplicationFont(os.path.join(font_dir, 'Baloo/Baloo-Regular.ttf'))
 
@@ -50,7 +52,7 @@ class CancelShoppingModal(QFrame):
         header_container_layout.setSpacing(0)
 
         # Fix title styling with larger font
-        title = QLabel("Are you sure you want to cancel?")
+        title = QLabel(_("cancelShoppingModal.title"))
         title.setFont(QFont("Inria Sans", 16, QFont.Bold))
         title.setStyleSheet("""
             QLabel {
@@ -104,7 +106,7 @@ class CancelShoppingModal(QFrame):
 
         # Update message font with larger size
         message = QLabel()
-        message.setText("Any items you have added to the cart will be removed, and your current progress will be lost.")
+        message.setText(_("cancelShoppingModal.message"))
         message.setFont(QFont("Josefin Sans", 15))
         message.setWordWrap(True)
         message.setStyleSheet("""
@@ -133,7 +135,7 @@ class CancelShoppingModal(QFrame):
         button_layout.setSpacing(35)
 
         # Update button fonts and sizes
-        not_now_btn = QPushButton("Not now")
+        not_now_btn = QPushButton(_("cancelShoppingModal.notNow"))
         not_now_btn.setFixedSize(170, 50)
         not_now_btn.setFont(QFont("Inria Sans", 13, QFont.Bold))
         not_now_btn.setStyleSheet("""
@@ -146,7 +148,7 @@ class CancelShoppingModal(QFrame):
         """)
         not_now_btn.clicked.connect(self.handle_not_now)
 
-        cancel_btn = QPushButton("Cancel payment")
+        cancel_btn = QPushButton(_("cancelShoppingModal.cancelPayment"))
         cancel_btn.setFixedSize(170, 50)
         cancel_btn.setFont(QFont("Inria Sans", 13, QFont.Bold))
         cancel_btn.setStyleSheet("""
