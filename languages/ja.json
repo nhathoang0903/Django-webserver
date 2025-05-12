@@ -1,0 +1,82 @@
+{
+  "app": {
+    "title": "スマートショッピングカート"
+  },
+  "common": {
+    "backToHome": "ホームに戻る"
+  },
+  "welcomePage": {
+    "welcome": "Cartsyへようこそ！",
+    "tagline": "\"賢く買って、人生をもっと楽しもう\"",
+    "getStarted": "始める"
+  },
+  "languageModal": {
+    "title": "言語を選択",
+    "languages": {
+      "vietnamese": "Tiếng Việt",
+      "english": "English",
+      "japanese": "日本語",
+      "french": "Français"
+    }
+  },
+  "errorMessages": {
+    "connectionError": "接続エラー",
+    "guestConnectionFailed": "ゲストとして接続できませんでした。もう一度お試しください。",
+    "serverConnectionFailed": "サーバーに接続できませんでした。もう一度お試しください。"
+  },
+  "productPage": {
+    "title": "製品の詳細情報",
+    "categories": {
+      "All Categories": "すべてのカテゴリー",
+      "Beverage": "飲料",
+      "Food": "食品",
+      "Snack": "スナック"
+    },
+    "addToCart": "カートに追加",
+    "added": "追加しました！",
+    "yourCart": "カートを見る",
+    "empty": "空"
+  },
+  "shoppingPage": {
+    "title": "ショッピング - スマートカート",
+    "scan": "スキャン",
+    "productInfo": "商品情報",
+    "yourCart": "カート",
+    "cancelShopping": "買い物をキャンセル",
+    "total": "合計",
+    "payment": "決済",
+    "emptyCartMessage": "カートが空です！続行するには商品を追加してください。"
+  },
+  "productModal": {
+    "cancel": "キャンセル",
+    "addToCart": "カートに追加",
+    "alreadyInCart": "この商品は\nカートに既に追加されています"
+  },
+  "cancelShoppingModal": {
+    "title": "本当にキャンセルしますか？",
+    "message": "カートに追加したすべての商品が削除され、現在の進行状況が失われます。",
+    "notNow": "後で",
+    "cancelPayment": "決済をキャンセル"
+  },
+  "qrCodePage": {
+    "loading": "読み込み中...",
+    "amount": "金額: ",
+    "accountNumber": "口座番号: ",
+    "accountName": "口座名義: NGUYEN THE NGO",
+    "bankName": "銀行: 軍事商業合資銀行",
+    "charityMessage": "\"お金に限りがあっても、\n愛には限りがありません。\"",
+    "cancelPayment": "決済をキャンセル",
+    "heartfeltSupport": "心からの支援",
+    "qrExpired": "QRコードの有効期限が切れました",
+    "timeRemaining": "残り時間: ",
+    "generated": "生成時間: "
+  },
+  "successPage": {
+    "title": "決済完了",
+    "thankYou": "ありがとうございます！",
+    "paymentSuccess": "お支払いが正常に完了しました",
+    "redirectMessage": "まもなくホームページに戻ります\nまたはここをクリックしてホームページに戻ります",
+    "homeButton": "ホーム",
+    "placeholder": "お支払い完了！"
+  }
+} 

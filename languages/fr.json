@@ -1,0 +1,82 @@
+{
+  "app": {
+    "title": "Chariot de Courses Intelligent"
+  },
+  "common": {
+    "backToHome": "Retour à l'accueil"
+  },
+  "welcomePage": {
+    "welcome": "Bienvenue à Cartsy !",
+    "tagline": "\"Achetez malin, vivez mieux\"",
+    "getStarted": "COMMENCER"
+  },
+  "languageModal": {
+    "title": "Sélectionner la Langue",
+    "languages": {
+      "vietnamese": "Tiếng Việt",
+      "english": "English",
+      "japanese": "日本語",
+      "french": "Français"
+    }
+  },
+  "errorMessages": {
+    "connectionError": "Erreur de Connexion",
+    "guestConnectionFailed": "Échec de la connexion en tant qu'invité. Veuillez réessayer.",
+    "serverConnectionFailed": "Échec de la connexion au serveur. Veuillez réessayer."
+  },
+  "productPage": {
+    "title": "Information Produit",
+    "categories": {
+      "All Categories": "Toutes Catégories",
+      "Beverage": "Boissons",
+      "Food": "Nourriture",
+      "Snack": "Collations"
+    },
+    "addToCart": "Ajouter",
+    "added": "Ajouté !",
+    "yourCart": "Panier",
+    "empty": "Vide"
+  },
+  "shoppingPage": {
+    "title": "Achat - Chariot",
+    "scan": "SCAN",
+    "productInfo": "DÉTAILS",
+    "yourCart": "Panier",
+    "cancelShopping": "Annuler",
+    "total": "Total",
+    "payment": "PAYER",
+    "emptyCartMessage": "Panier vide. Ajoutez des articles."
+  },
+  "productModal": {
+    "cancel": "Fermer",
+    "addToCart": "Ajouter",
+    "alreadyInCart": "DÉJÀ DANS LE\nPANIER"
+  },
+  "cancelShoppingModal": {
+    "title": "Annuler l'achat ?",
+    "message": "Tous les articles seront supprimés.",
+    "notNow": "Non",
+    "cancelPayment": "Oui, annuler"
+  },
+  "qrCodePage": {
+    "loading": "Chargement...",
+    "amount": "Montant: ",
+    "accountNumber": "Numéro de compte: ",
+    "accountName": "Titulaire: NGUYEN THE NGO",
+    "bankName": "Banque: Banque Militaire S.A.",
+    "charityMessage": "\"L'argent peut être limité,\nmais l'amour est infini.\"",
+    "cancelPayment": "Annuler Paiement",
+    "heartfeltSupport": "Soutien sincère",
+    "qrExpired": "Code QR expiré",
+    "timeRemaining": "Temps restant: ",
+    "generated": "Généré le "
+  },
+  "successPage": {
+    "title": "Paiement Réussi",
+    "thankYou": "Merci !",
+    "paymentSuccess": "Paiement effectué avec succès",
+    "redirectMessage": "Vous serez redirigé vers la page d'accueil\nou cliquez ici pour revenir à l'accueil",
+    "homeButton": "ACCUEIL",
+    "placeholder": "Paiement Réussi !"
+  }
+} 

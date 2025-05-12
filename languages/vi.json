@@ -1,0 +1,82 @@
+{
+  "app": {
+    "title": "Smart Shopping Cart"
+  },
+  "common": {
+    "backToHome": "Về trang chủ"
+  },
+  "welcomePage": {
+    "welcome": "Cartsy đã đến!",
+    "tagline": "\"Sắm thạo, sống vui\"",
+    "getStarted": "BẮT ĐẦU"
+  },
+  "languageModal": {
+    "title": "Chọn Ngôn Ngữ",
+    "languages": {
+      "vietnamese": "Tiếng Việt",
+      "english": "English",
+      "japanese": "日本語",
+      "french": "Français"
+    }
+  },
+  "errorMessages": {
+    "connectionError": "Lỗi kết nối",
+    "guestConnectionFailed": "Không thể kết nối ở chế độ khách. Vui lòng thử lại.",
+    "serverConnectionFailed": "Không thể kết nối đến máy chủ. Vui lòng thử lại."
+  },
+  "productPage": {
+    "title": "Thông Tin Sản Phẩm",
+    "categories": {
+      "All Categories": "Danh mục",
+      "Beverage": "Đồ Uống",
+      "Food": "Thực Phẩm",
+      "Snack": "Đồ Ăn Nhẹ"
+    },
+    "addToCart": "Thêm Vào Giỏ",
+    "added": "Đã Thêm!",
+    "yourCart": "Giỏ Hàng",
+    "empty": "Trống"
+  },
+  "shoppingPage": {
+    "title": "Mua Sắm Thông Minh",
+    "scan": "QUÉT",
+    "productInfo": "THÔNG TIN SP",
+    "yourCart": "Giỏ Hàng",
+    "cancelShopping": "Hủy mua",
+    "total": "Tổng",
+    "payment": "THANH TOÁN",
+    "emptyCartMessage": "Giỏ hàng trống! Vui lòng thêm sản phẩm."
+  },
+  "productModal": {
+    "cancel": "Hủy",
+    "addToCart": "Thêm vào giỏ",
+    "alreadyInCart": "ĐÃ CÓ\nTRONG GIỎ"
+  },
+  "cancelShoppingModal": {
+    "title": "Bạn muốn hủy?",
+    "message": "Các sản phẩm đã thêm sẽ bị xóa, và tiến trình mua sắm sẽ kết thúc.",
+    "notNow": "Để sau",
+    "cancelPayment": "Hủy thanh toán"
+  },
+  "qrCodePage": {
+    "loading": "Đang tải...",
+    "amount": "Số tiền: ",
+    "accountNumber": "Số tài khoản: ",
+    "accountName": "Tên chủ tài khoản: NGUYEN THE NGO",
+    "bankName": "Ngân hàng: TMCP Quân Đội",
+    "charityMessage": "\"Tiền bạc có hạn,\nTình yêu vô biên.\"",
+    "cancelPayment": "Hủy Thanh Toán",
+    "heartfeltSupport": "Trợ Tâm",
+    "qrExpired": "Mã QR đã hết hạn",
+    "timeRemaining": "Thời gian còn lại: ",
+    "generated": "Được tạo lúc "
+  },
+  "successPage": {
+    "title": "Giao Dịch Thành Công",
+    "thankYou": "Cảm ơn bạn!",
+    "paymentSuccess": "Bạn đã thanh toán thành công.",
+    "redirectMessage": "Sẽ trở về trang chủ sau vài giây\nhoặc bấm vào đây nếu bạn muốn quay lại ngay.",
+    "homeButton": "TRANG CHỦ",
+    "placeholder": "Giao dịch hoàn tất!"
+  }
+} 

@@ -1,0 +1,82 @@
+{
+  "app": {
+    "title": "Smart Shopping Cart"
+  },
+  "common": {
+    "backToHome": "Back to Home"
+  },
+  "welcomePage": {
+    "welcome": "Welcome to Cartsy!",
+    "tagline": "\"Shop smart, live better\"",
+    "getStarted": "GET STARTED"
+  },
+  "languageModal": {
+    "title": "Select Language",
+    "languages": {
+      "vietnamese": "Tiếng Việt",
+      "english": "English",
+      "japanese": "日本語",
+      "french": "Français"
+    }
+  },
+  "errorMessages": {
+    "connectionError": "Connection Error",
+    "guestConnectionFailed": "Failed to connect as guest. Please try again.",
+    "serverConnectionFailed": "Failed to connect to server. Please try again."
+  },
+  "productPage": {
+    "title": "Product Information",
+    "categories": {
+      "All Categories": "All Categories",
+      "Beverage": "Beverage",
+      "Food": "Food",
+      "Snack": "Snack"
+    },
+    "addToCart": "Add to Cart",
+    "added": "Added!",
+    "yourCart": "Your Cart",
+    "empty": "Empty"
+  },
+  "shoppingPage": {
+    "title": "Shopping - Smart Shopping Cart",
+    "scan": "SCAN",
+    "productInfo": "PRODUCT INFO",
+    "yourCart": "Your Cart",
+    "cancelShopping": "Cancel shopping",
+    "total": "Total",
+    "payment": "PAYMENT",
+    "emptyCartMessage": "Cart is empty! Please add items to proceed."
+  },
+  "productModal": {
+    "cancel": "Cancel",
+    "addToCart": "Add to cart",
+    "alreadyInCart": "PRODUCT ALREADY IN\nYOUR CART"
+  },
+  "cancelShoppingModal": {
+    "title": "Are you sure you want to cancel?",
+    "message": "Any items you have added to the cart will be removed, and your current progress will be lost.",
+    "notNow": "Not now",
+    "cancelPayment": "Cancel payment"
+  },
+  "qrCodePage": {
+    "loading": "Loading...",
+    "amount": "Amount: ",
+    "accountNumber": "Account number: ",
+    "accountName": "Account holder: NGUYEN THE NGO",
+    "bankName": "Bank: Military Commercial JS Bank",
+    "charityMessage": "\"Money may be limited,\nbut love is infinite.\"",
+    "cancelPayment": "Cancel Payment",
+    "heartfeltSupport": "Heartfelt support",
+    "qrExpired": "QR Code expired",
+    "timeRemaining": "Time remaining: ",
+    "generated": "Generated "
+  },
+  "successPage": {
+    "title": "Payment Success",
+    "thankYou": "Thank you!",
+    "paymentSuccess": "Payment done successfully",
+    "redirectMessage": "You will be redirected to the homepage shortly\nor click here to return to the home page",
+    "homeButton": "HOME",
+    "placeholder": "Payment Success!"
+  }
+} 
