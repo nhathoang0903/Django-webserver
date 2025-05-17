@@ -1,0 +1,1208 @@
+{% load humanize %}
+{% load static %}
+{% load inventory_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management - Smart Shopping Cart</title>
+    <link rel="shortcut icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <style>
+        /* General Styles */
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .container-fluid {
+            max-width: 1920px;
+        }
+        
+        /* Card & Element Styles */
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: none;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: 6px;
+        }
+        
+        /* Back Button Styles */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            padding: 0;
+            font-weight: 500;
+            color: var(--bs-primary);
+            background: transparent;
+            border: none;
+            transition: all 0.3s ease;
+            animation: slideRight 0.3s ease-out;
+        }
+        
+        .btn-back:hover {
+            transform: translateX(-5px);
+            color: var(--bs-primary);
+        }
+        
+        .btn-back-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background: var(--bs-primary);
+            border-radius: 8px;
+            margin-right: 12px;
+        }
+        
+        .btn-back-icon i {
+            color: white;
+            font-size: 14px;
+        }
+        
+        .btn-back-text {
+            font-size: 0.95rem;
+        }
+        
+        .btn-back:hover .btn-back-icon {
+            background: #4338ca;
+            box-shadow: 0 4px 12px rgba(67, 56, 202, 0.15);
+        }
+        
+        /* Dashboard styles */
+        .inventory-summary-card {
+            transition: all 0.3s ease;
+        }
+        
+        .inventory-summary-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .inventory-summary-card .card-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+        }
+        
+        .inventory-summary-card .display-6 {
+            font-weight: 600;
+        }
+        
+        .inventory-summary-card .icon-box {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 1.5rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideRight {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Inventory table */
+        .inventory-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .inventory-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .inventory-table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        /* Stock level badges */
+        .stock-level-high {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .stock-level-medium {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        
+        .stock-level-low {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid px-4 py-3">
+        <!-- Navigation -->
+        <nav class="mb-4 mt-3">
+            <a href="{% url 'product_list' %}" class="btn btn-back">
+                <span class="btn-back-icon">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span class="btn-back-text">Back to Products</span>
+            </a>
+        </nav>
+
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+            <div>
+                <h2 class="text-primary fw-bold mb-0">
+                    <i class="fas fa-warehouse me-2"></i>Inventory Management
+                </h2>
+                <p class="text-muted mb-0">Track, monitor, and manage your product inventory</p>
+            </div>
+            <div>
+                <div class="btn-group me-2">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-download me-2"></i>Export
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" id="exportCSV"><i class="fas fa-file-csv me-2"></i>CSV</a></li>
+                        <li><a class="dropdown-item" href="#" id="exportExcel"><i class="fas fa-file-excel me-2"></i>Excel</a></li>
+                        <li><a class="dropdown-item" href="#" id="pdfExportBtn"><i class="fas fa-file-pdf me-2"></i>PDF</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#bulkAddStockModal">
+                    <i class="fas fa-boxes me-2"></i>Bulk Add Stock
+                </button>
+                <a href="{% url 'product_list' %}" class="btn btn-primary">
+                    <i class="fas fa-list me-2"></i>Product List
+                </a>
+            </div>
+        </div>
+
+        <!-- Inventory Summary Dashboard -->
+        <div class="row g-4 mb-4">
+            <!-- Total Products -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card inventory-summary-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title mb-2">Total Products</h6>
+                                <h2 class="display-6 mb-0">{{ products|length }}</h2>
+                                <p class="text-muted small mb-0">Different items in stock</p>
+                            </div>
+                            <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Low Stock -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card inventory-summary-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title mb-2">Low Stock Items</h6>
+                                <h2 class="display-6 mb-0">{{ low_stock_count }}</h2>
+                                <p class="text-muted small mb-0">Products below threshold</p>
+                            </div>
+                            <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Stock Value -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card inventory-summary-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title mb-2">Total Stock Value</h6>
+                                <h2 class="display-6 mb-0">{{ total_stock_value|intcomma }} VNĐ</h2>
+                                <p class="text-muted small mb-0">Current inventory value</p>
+                            </div>
+                            <div class="icon-box bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stock Distribution -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card inventory-summary-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title mb-2">Stock Distribution</h6>
+                                <div class="mt-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ stock_distribution.high_percent }}%"></div>
+                                        </div>
+                                        <span class="fw-medium small">{{ stock_distribution.high_percent }}% High</span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ stock_distribution.medium_percent }}%"></div>
+                                        </div>
+                                        <span class="fw-medium small">{{ stock_distribution.medium_percent }}% Medium</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stock_distribution.low_percent }}%"></div>
+                                        </div>
+                                        <span class="fw-medium small">{{ stock_distribution.low_percent }}% Low</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="icon-box bg-info bg-opacity-10 text-info">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="search-box">
+                            <i class="fas fa-search text-muted position-absolute ms-3" style="top: 50%; transform: translateY(-50%);"></i>
+                            <input type="text" id="searchInput" class="form-control ps-5" placeholder="Search products...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="categoryFilter" class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="Beverage">Beverage</option>
+                            <option value="Snack">Snack</option>
+                            <option value="Food">Food</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="stockFilter" class="form-select">
+                            <option value="all">All Stock Levels</option>
+                            <option value="low">Low Stock</option>
+                            <option value="medium">Medium Stock</option>
+                            <option value="high">High Stock</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="refreshBtn" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-sync-alt me-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 inventory-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="px-4">No</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Current Stock</th>
+                                <th scope="col">Stock Value</th>
+                                <th scope="col">Last Updated</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr data-category="{{ product.category }}" data-stock-level="{% if product.quantity <= product.low_stock_threshold %}low{% elif product.quantity <= product.low_stock_threshold|add:10 %}medium{% else %}high{% endif %}">
+                                <td class="px-4">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ product.image_url|default:'https://via.placeholder.com/40' }}" 
+                                             class="rounded" 
+                                             width="40" 
+                                             height="40" 
+                                             style="object-fit: cover;"
+                                             alt="{{ product.display_name }}">
+                                        <div class="ms-3">
+                                            <h6 class="mb-0">{{ product.display_name }}</h6>
+                                            <small class="text-muted">ID: {{ product.product_id }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.category }}</td>
+                                <td>{{ product.price|intcomma }} VNĐ</td>
+                                <td>
+                                    {% if product.quantity <= product.low_stock_threshold %}
+                                        <span class="badge stock-level-low">{{ product.quantity }} (Low)</span>
+                                    {% elif product.quantity <= product.low_stock_threshold|add:10 %}
+                                        <span class="badge stock-level-medium">{{ product.quantity }} (Medium)</span>
+                                    {% else %}
+                                        <span class="badge stock-level-high">{{ product.quantity }} (Good)</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ product.price|mul:product.quantity|intcomma }} VNĐ</td>
+                                <td>{{ product.last_updated|default:"N/A"|date:"d/m/Y H:i" }}</td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addStockModal{{ product.product_id }}">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#historyModal{{ product.product_id }}">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                        <a href="{% url 'edit_product' product.product_id %}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No products available</h5>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Success notification -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="stockSuccessToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Stock updated successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Stock Modals -->
+        {% for product in products %}
+        <div class="modal fade" id="addStockModal{{ product.product_id }}" tabindex="-1" aria-labelledby="addStockModalLabel{{ product.product_id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addStockModalLabel{{ product.product_id }}">Add Stock to {{ product.display_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addStockForm{{ product.product_id }}">
+                            <div class="mb-3">
+                                <label for="quantity{{ product.product_id }}" class="form-label">Quantity to Add</label>
+                                <input type="number" class="form-control" id="quantity{{ product.product_id }}" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="notes{{ product.product_id }}" class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="notes{{ product.product_id }}" rows="2"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="addStock({{ product.product_id }})">
+                            <i class="fas fa-plus me-2"></i>Add Stock
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Inventory History Modals -->
+        {% for product in products %}
+        <div class="modal fade" id="historyModal{{ product.product_id }}" tabindex="-1" aria-labelledby="historyModalLabel{{ product.product_id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel{{ product.product_id }}">
+                            <i class="fas fa-history me-2"></i>Inventory History for {{ product.display_name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Tab navigation -->
+                        <ul class="nav nav-tabs mb-3" id="historyTab{{ product.product_id }}" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="all-tab{{ product.product_id }}" data-bs-toggle="tab" 
+                                        data-bs-target="#all{{ product.product_id }}" type="button" role="tab">
+                                    All History
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="stock-tab{{ product.product_id }}" data-bs-toggle="tab" 
+                                        data-bs-target="#stock{{ product.product_id }}" type="button" role="tab">
+                                    Stock Additions
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="purchase-tab{{ product.product_id }}" data-bs-toggle="tab" 
+                                        data-bs-target="#purchase{{ product.product_id }}" type="button" role="tab">
+                                    Purchases
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <!-- Tab content -->
+                        <div class="tab-content" id="historyTabContent{{ product.product_id }}">
+                            <!-- All History Tab -->
+                            <div class="tab-pane fade show active" id="all{{ product.product_id }}" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Transaction Type</th>
+                                                <th>Quantity</th>
+                                                <th>Date & Time</th>
+                                                <th>Reference ID</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="historyTableBody{{ product.product_id }}">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Stock Additions Tab -->
+                            <div class="tab-pane fade" id="stock{{ product.product_id }}" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Transaction Type</th>
+                                                <th>Quantity</th>
+                                                <th>Date & Time</th>
+                                                <th>Reference ID</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="stockTableBody{{ product.product_id }}">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Purchases Tab -->
+                            <div class="tab-pane fade" id="purchase{{ product.product_id }}" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Transaction Type</th>
+                                                <th>Quantity</th>
+                                                <th>Date & Time</th>
+                                                <th>Reference ID</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="purchaseTableBody{{ product.product_id }}">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Bulk Add Stock Modal -->
+        <div class="modal fade" id="bulkAddStockModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-boxes me-2"></i>Bulk Add Stock
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Use this form to add stock to multiple products at once.
+                        </div>
+                        
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Current Stock</th>
+                                    <th width="120">Add Quantity</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bulkAddStockTable">
+                                {% for product in products %}
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input product-checkbox" type="checkbox" id="product{{ product.product_id }}">
+                                            <label class="form-check-label" for="product{{ product.product_id }}">
+                                                {{ product.display_name }}
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if product.quantity <= product.low_stock_threshold %}
+                                            <span class="badge stock-level-low">{{ product.quantity }}</span>
+                                        {% elif product.quantity <= product.low_stock_threshold|add:10 %}
+                                            <span class="badge stock-level-medium">{{ product.quantity }}</span>
+                                        {% else %}
+                                            <span class="badge stock-level-high">{{ product.quantity }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm quantity-input" data-product-id="{{ product.product_id }}" min="0" disabled>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm notes-input" data-product-id="{{ product.product_id }}" disabled>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="bulkAddStockBtn" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Store the inventory history data from the server
+        const inventoryHistoryData = {{ products_inventory_history|safe }};
+        
+        // Debug: Log the inventory history data
+        console.log("Inventory History Data:", inventoryHistoryData);
+
+        // Calculate stock values for each product for sorting
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add stock value calculation to table rows for sorting
+            const tableRows = document.querySelectorAll('.inventory-table tbody tr');
+            tableRows.forEach(row => {
+                if (!row.dataset.category) return; // Skip placeholder rows
+                
+                const priceText = row.querySelector('td:nth-child(4)').textContent;
+                const stockText = row.querySelector('td:nth-child(5) .badge').textContent;
+                
+                // Extract numeric values
+                const price = parseFloat(priceText.replace(/[^\d.]/g, ''));
+                const stock = parseInt(stockText.match(/\d+/)[0]);
+                
+                // Calculate and store stock value for sorting
+                row.dataset.stockValue = price * stock;
+            });
+            
+            // Set up inventory history modals
+            console.log("Setting up inventory history modals");
+            populateAllHistoryModals();
+            
+            // Export button functionality
+            document.getElementById('exportCSV').addEventListener('click', exportToCSV);
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('pdfExportBtn').addEventListener('click', exportToPDF);
+            
+            // Get elements
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const stockFilter = document.getElementById('stockFilter');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const inventoryTableRows = document.querySelectorAll('.inventory-table tbody tr');
+            
+            // Function to filter table rows based on search input, category and stock level
+            function filterTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const category = categoryFilter.value;
+                const stockLevel = stockFilter.value;
+                
+                inventoryTableRows.forEach(row => {
+                    const productName = row.querySelector('h6').textContent.toLowerCase();
+                    const productCategory = row.dataset.category;
+                    const productStockLevel = row.dataset.stockLevel;
+                    
+                    const matchesSearch = productName.includes(searchTerm);
+                    const matchesCategory = category === '' || productCategory === category;
+                    const matchesStockLevel = stockLevel === 'all' || productStockLevel === stockLevel;
+                    
+                    if (matchesSearch && matchesCategory && matchesStockLevel) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Add event listeners
+            searchInput.addEventListener('input', filterTable);
+            categoryFilter.addEventListener('change', filterTable);
+            stockFilter.addEventListener('change', filterTable);
+            refreshBtn.addEventListener('click', function() {
+                window.location.reload();
+            });
+            
+            // Bulk add stock checkboxes functionality
+            const productCheckboxes = document.querySelectorAll('.product-checkbox');
+            productCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const productId = this.id.replace('product', '');
+                    const quantityInput = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+                    const notesInput = document.querySelector(`.notes-input[data-product-id="${productId}"]`);
+                    
+                    if (this.checked) {
+                        quantityInput.disabled = false;
+                        notesInput.disabled = false;
+                        quantityInput.value = 1;
+                    } else {
+                        quantityInput.disabled = true;
+                        notesInput.disabled = true;
+                        quantityInput.value = '';
+                        notesInput.value = '';
+                    }
+                });
+            });
+            
+            // Bulk add stock functionality
+            const bulkAddStockBtn = document.getElementById('bulkAddStockBtn');
+            bulkAddStockBtn.addEventListener('click', function() {
+                const selectedProducts = [];
+                
+                productCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const productId = checkbox.id.replace('product', '');
+                        const quantity = document.querySelector(`.quantity-input[data-product-id="${productId}"]`).value;
+                        const notes = document.querySelector(`.notes-input[data-product-id="${productId}"]`).value;
+                        
+                        if (quantity && parseInt(quantity) > 0) {
+                            selectedProducts.push({
+                                product_id: productId,
+                                quantity: parseInt(quantity),
+                                notes: notes
+                            });
+                        }
+                    }
+                });
+                
+                if (selectedProducts.length === 0) {
+                    alert('Please select at least one product and add a quantity');
+                    return;
+                }
+                
+                // Show loading state
+                bulkAddStockBtn.disabled = true;
+                bulkAddStockBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+                
+                // Process each product one by one
+                processProductBatch(selectedProducts, 0);
+            });
+            
+            // Function to process products batch
+            function processProductBatch(products, index) {
+                if (index >= products.length) {
+                    // All products processed
+                    showSuccessToast();
+                    
+                    // Reset button state
+                    bulkAddStockBtn.disabled = false;
+                    bulkAddStockBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+                    
+                    // Close modal and reload after delay
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('bulkAddStockModal')).hide();
+                        window.location.reload();
+                    }, 1500);
+                    
+                    return;
+                }
+                
+                const product = products[index];
+                
+                // Send request to add stock for this product
+                fetch('/api/product/add-stock/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(product)
+                })
+                .then(response => response.json())
+                .then(() => {
+                    // Process next product
+                    processProductBatch(products, index + 1);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error adding stock for some products. Please try again.');
+                    
+                    // Reset button state
+                    bulkAddStockBtn.disabled = false;
+                    bulkAddStockBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+                });
+            }
+            
+            // Function to show success toast
+            function showSuccessToast() {
+                const toast = new bootstrap.Toast(document.getElementById('stockSuccessToast'));
+                toast.show();
+            }
+        });
+        
+        // Add stock function
+        function addStock(productId) {
+            const quantity = document.getElementById(`quantity${productId}`).value;
+            const notes = document.getElementById(`notes${productId}`).value;
+            
+            if (!quantity || quantity < 1) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+            
+            // Show loading state
+            const submitButton = document.querySelector(`#addStockModal${productId} .btn-success`);
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+            
+            // Send request to add stock
+            fetch('/api/product/add-stock/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: parseInt(quantity),
+                    notes: notes
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Failed to add stock');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Show success toast
+                const toast = new bootstrap.Toast(document.getElementById('stockSuccessToast'));
+                toast.show();
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById(`addStockModal${productId}`)).hide();
+                
+                // Reset form
+                document.getElementById(`addStockForm${productId}`).reset();
+                
+                // Reload page after 1.5 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message || 'An error occurred while adding stock. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            });
+        }
+
+        // Function to populate all history modals when the page loads
+        function populateAllHistoryModals() {
+            console.log("=== Starting populateAllHistoryModals ===");
+            console.log("Available product IDs:", Object.keys(inventoryHistoryData));
+            
+            // Iterate through all products and populate their history data
+            Object.keys(inventoryHistoryData).forEach(productId => {
+                console.log(`Populating history for product ID: ${productId}`);
+                populateHistoryModal(productId);
+            });
+            
+            console.log("=== Finished populateAllHistoryModals ===");
+        }
+
+        // Function to populate a specific history modal with data
+        function populateHistoryModal(productId) {
+            console.log(`=== Starting populateHistoryModal for product ID: ${productId} ===`);
+            
+            // Verify history data exists
+            const historyData = inventoryHistoryData[productId];
+            if (!historyData) {
+                console.error(`No history data found for product ID: ${productId}`);
+                return;
+            }
+            
+            if (!historyData.transactions) {
+                console.error(`No transactions array found for product ID: ${productId}`, historyData);
+                return;
+            }
+            
+            const transactions = historyData.transactions;
+            console.log(`Found ${transactions.length} transactions for product ID: ${productId}`);
+            
+            // Get table body elements
+            const allTableBody = document.getElementById(`historyTableBody${productId}`);
+            const stockTableBody = document.getElementById(`stockTableBody${productId}`);
+            const purchaseTableBody = document.getElementById(`purchaseTableBody${productId}`);
+            
+            // Verify table elements exist
+            if (!allTableBody) {
+                console.error(`Could not find historyTableBody${productId} element`);
+                return;
+            }
+            if (!stockTableBody) {
+                console.error(`Could not find stockTableBody${productId} element`);
+                return;
+            }
+            if (!purchaseTableBody) {
+                console.error(`Could not find purchaseTableBody${productId} element`);
+                return;
+            }
+            
+            console.log(`Clearing existing content in table bodies for product ID: ${productId}`);
+            
+            // Clear existing content in all tabs
+            allTableBody.innerHTML = '';
+            stockTableBody.innerHTML = '';
+            purchaseTableBody.innerHTML = '';
+            
+            // If no transactions, show empty state
+            if (transactions.length === 0) {
+                console.log(`No transactions available for product ID: ${productId}, showing empty state`);
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="5" class="text-center py-4">
+                        <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                        <p class="mb-0">No transaction history available for this product</p>
+                    </td>
+                `;
+                allTableBody.appendChild(emptyRow);
+                stockTableBody.appendChild(emptyRow.cloneNode(true));
+                purchaseTableBody.appendChild(emptyRow.cloneNode(true));
+                console.log(`Empty state added to all table bodies for product ID: ${productId}`);
+                return;
+            }
+            
+            console.log(`Starting to populate tables with ${transactions.length} transactions for product ID: ${productId}`);
+            
+            // Populate all tabs
+            let allCount = 0, stockCount = 0, purchaseCount = 0;
+            
+            transactions.forEach((transaction, index) => {
+                try {
+                    console.log(`Processing transaction ${index} for product ID: ${productId}:`, transaction);
+                    
+                    // Create a new row for each transaction
+                    const row = createTransactionRow(transaction);
+                    
+                    // Add to main history tab
+                    allTableBody.appendChild(row);
+                    allCount++;
+                    
+                    // Add to specific tab based on transaction type
+                    if (transaction.transaction_type === 'addition') {
+                        stockTableBody.appendChild(row.cloneNode(true));
+                        stockCount++;
+                    } else if (transaction.transaction_type === 'subtraction' && transaction.notes && transaction.notes.includes('Purchase transaction')) {
+                        // This is actually a purchase transaction, add to purchase tab
+                        purchaseTableBody.appendChild(row.cloneNode(true));
+                        purchaseCount++;
+                    }
+                } catch (error) {
+                    console.error(`Error processing transaction ${index} for product ID: ${productId}:`, error, transaction);
+                }
+            });
+            
+            console.log(`Successfully populated tables for product ID: ${productId} - All: ${allCount}, Stock: ${stockCount}, Purchase: ${purchaseCount}`);
+            console.log(`=== Finished populateHistoryModal for product ID: ${productId} ===`);
+        }
+        
+        // Helper function to create a transaction row
+        function createTransactionRow(transaction) {
+            console.log("Creating transaction row:", transaction);
+            try {
+                const row = document.createElement('tr');
+                
+                // Check if this is a purchase transaction (subtraction with reference ID)
+                const isPurchase = transaction.transaction_type === 'subtraction' && 
+                                  transaction.notes && 
+                                  transaction.notes.includes('Purchase transaction');
+                
+                console.log(`Transaction type: ${transaction.transaction_type}, isPurchase: ${isPurchase}`);
+                
+                // Set background color based on transaction type
+                if (transaction.transaction_type === 'addition') {
+                    row.classList.add('table-success', 'bg-opacity-25');
+                } else if (transaction.transaction_type === 'subtraction') {
+                    if (isPurchase) {
+                        row.classList.add('table-warning', 'bg-opacity-25');
+                    } else {
+                        row.classList.add('table-danger', 'bg-opacity-25');
+                    }
+                }
+                
+                // Format date - adjust for timezone correctly
+                const date = new Date(transaction.timestamp);
+                // Add 7 hours to compensate for timezone difference
+                date.setHours(date.getHours() + 7);
+                const formattedDate = date.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Create badge based on transaction type
+                let badge;
+                if (transaction.transaction_type === 'addition') {
+                    badge = '<span class="badge bg-success">Stock Addition</span>';
+                } else if (transaction.transaction_type === 'subtraction') {
+                    if (isPurchase) {
+                        badge = '<span class="badge bg-warning text-dark">Customer Purchase</span>';
+                    } else {
+                        badge = '<span class="badge bg-danger">Stock Removal</span>';
+                    }
+                } else {
+                    badge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                // Create row content
+                row.innerHTML = `
+                    <td>${badge}</td>
+                    <td>${transaction.quantity}</td>
+                    <td>${formattedDate}</td>
+                    <td>${transaction.reference_id || '-'}</td>
+                    <td>${transaction.notes || '-'}</td>
+                `;
+                
+                console.log("Successfully created transaction row");
+                return row;
+            } catch (error) {
+                console.error("Error creating transaction row:", error, transaction);
+                // Return a simple error row instead of failing completely
+                const errorRow = document.createElement('tr');
+                errorRow.innerHTML = `
+                    <td colspan="5" class="text-danger">
+                        Error processing transaction data
+                    </td>
+                `;
+                return errorRow;
+            }
+        }
+
+        // Set up history modal data when opened
+        const historyModals = document.querySelectorAll('[id^="historyModal"]');
+        historyModals.forEach(modal => {
+            modal.addEventListener('show.bs.modal', function (event) {
+                const productId = this.id.replace('historyModal', '');
+                console.log(`Showing history modal for product ID: ${productId}`);
+                // The modal is already populated when the page loads
+            });
+        });
+
+        // Function to export inventory data to CSV
+        function exportToCSV() {
+            const table = document.querySelector('.inventory-table');
+            const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+            
+            if (rows.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            // Add headers
+            const headers = ["Product Name", "Category", "Price", "Current Stock", "Stock Value"];
+            csvContent += headers.join(",") + "\r\n";
+            
+            // Add rows
+            rows.forEach(row => {
+                if (!row.querySelector('h6')) return; // Skip empty rows
+                
+                const productName = row.querySelector('h6').textContent.replace(/,/g, ' ');
+                const category = row.dataset.category;
+                const price = row.querySelector('td:nth-child(4)').textContent.trim().replace(/[^\d.]/g, '');
+                const stock = row.querySelector('td:nth-child(5) .badge').textContent.match(/\d+/)[0];
+                const stockValue = row.querySelector('td:nth-child(6)').textContent.trim().replace(/[^\d.]/g, '');
+                
+                const rowData = [productName, category, price, stock, stockValue];
+                csvContent += rowData.join(",") + "\r\n";
+            });
+            
+            // Create download link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "inventory_data.csv");
+            document.body.appendChild(link);
+            
+            // Trigger download
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Function to export inventory data to Excel
+        function exportToExcel() {
+            // Load SheetJS library dynamically
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+            document.head.appendChild(script);
+            
+            script.onload = function() {
+                const table = document.querySelector('.inventory-table');
+                const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+                
+                if (rows.length === 0) {
+                    alert('No data to export');
+                    return;
+                }
+                
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const data = [];
+                
+                // Add headers
+                data.push(["Product Name", "Category", "Price", "Current Stock", "Stock Value"]);
+                
+                // Add rows
+                rows.forEach(row => {
+                    if (!row.querySelector('h6')) return; // Skip empty rows
+                    
+                    const productName = row.querySelector('h6').textContent;
+                    const category = row.dataset.category;
+                    const price = row.querySelector('td:nth-child(4)').textContent.trim();
+                    const stock = row.querySelector('td:nth-child(5) .badge').textContent.match(/\d+/)[0];
+                    const stockValue = row.querySelector('td:nth-child(6)').textContent.trim();
+                    
+                    data.push([productName, category, price, stock, stockValue]);
+                });
+                
+                // Create worksheet and add to workbook
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+                
+                // Generate Excel file and trigger download
+                XLSX.writeFile(wb, "inventory_data.xlsx");
+            };
+        }
+        
+        // Function to export inventory data to PDF
+        function exportToPDF() {
+            // Show loading indicator
+            const loadingBtn = document.getElementById('pdfExportBtn');
+            const originalText = loadingBtn.innerHTML;
+            loadingBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating PDF...';
+            loadingBtn.disabled = true;
+            
+            // Create a form to submit the request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "export_inventory_pdf" %}';
+            form.target = '_blank'; // Open in new tab
+            
+            // Add CSRF token
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            form.appendChild(csrfInput);
+            
+            // Get filter values if any
+            const searchQuery = document.getElementById('searchInput').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const stockLevelFilter = document.getElementById('stockFilter').value;
+            
+            // Add filters to form
+            if (searchQuery) {
+                const searchInput = document.createElement('input');
+                searchInput.type = 'hidden';
+                searchInput.name = 'search';
+                searchInput.value = searchQuery;
+                form.appendChild(searchInput);
+            }
+            
+            if (categoryFilter) {
+                const categoryInput = document.createElement('input');
+                categoryInput.type = 'hidden';
+                categoryInput.name = 'category';
+                categoryInput.value = categoryFilter;
+                form.appendChild(categoryInput);
+            }
+            
+            if (stockLevelFilter) {
+                const stockInput = document.createElement('input');
+                stockInput.type = 'hidden';
+                stockInput.name = 'stock_level';
+                stockInput.value = stockLevelFilter;
+                form.appendChild(stockInput);
+            }
+            
+            // Append form to body, submit it, then remove
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+            
+            // Reset button after a delay
+            setTimeout(() => {
+                loadingBtn.innerHTML = originalText;
+                loadingBtn.disabled = false;
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

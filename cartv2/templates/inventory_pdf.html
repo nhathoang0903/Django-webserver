@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <style>
+        @page {
+            size: landscape;
+            margin: 1.5cm;
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                top: 0.5cm;
+                margin-left: 1.5cm;
+                margin-right: 1.5cm;
+                height: 3cm;
+            }
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                bottom: 0.5cm;
+                margin-left: 1.5cm;
+                margin-right: 1.5cm;
+                height: 1cm;
+            }
+        }
+        body {
+            font-family: "Helvetica", "Arial", sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #2c5282 0%, #4299e1 100%);
+            padding: 40px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 0 0 15px 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .company-name {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .header p {
+            margin: 8px 0 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+        .summary-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 30px;
+            background-color: #ffffff; /* White background for clarity */
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* More prominent shadow */
+            border-radius: 12px;
+        }
+        .summary-section {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .summary-box {
+            width: 30%;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            border-left: 5px solid #4f90ce;
+        }
+        .summary-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .summary-subtitle {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        .stock-low {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+        .stock-medium {
+            color: #f59e0b;
+            border-color: #f59e0b;
+        }
+        .stock-high {
+            color: #10b981;
+            border-color: #10b981;
+        }
+        .summary-box.stock-low-box {
+            border-left-color: #ef4444;
+        }
+        .summary-box.stock-medium-box {
+            border-left-color: #f59e0b;
+        }
+        .summary-box.stock-high-box {
+            border-left-color: #10b981;
+        }
+        .distribution-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c5282;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .distribution-box {
+            width: 100%;
+            margin-top: 15px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .progress-container {
+            margin-bottom: 12px;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+        .progress-label-text {
+            font-weight: bold;
+        }
+        .progress-bar {
+            height: 12px;
+            background-color: #f1f5f9;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .progress-bar-inner {
+            height: 12px;
+            border-radius: 6px;
+        }
+        .progress-high {
+            background-color: #10b981;
+        }
+        .progress-medium {
+            background-color: #f59e0b;
+        }
+        .progress-low {
+            background-color: #ef4444;
+        }
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 35px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .title-cartsy {
+            font-size: 24px;
+            font-weight: bold;
+            color: #507849;
+            letter-spacing: 1px;
+        }
+        .inventory-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c5282;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0; /* Remove margin since it's handled by title-row */
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin: 20px 0;
+        }
+        thead {
+            background: linear-gradient(90deg, #2c5282 0%, #4299e1 100%);
+        }
+        th {
+            padding: 16px 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            color: white;
+        }
+        td {
+            padding: 14px 12px;
+            font-size: 12px;
+            background: white;
+        }
+        tbody tr {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 11px;
+            color: #64748b;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 25px;
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge-low {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+        }
+        .badge-medium {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #d97706;
+        }
+        .badge-high {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #059669;
+        }
+        .price-column {
+            text-align: right;
+        }
+        .quantity-column {
+            text-align: center;
+        }
+        .date-column {
+            font-size: 10px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div id="header_content">
+        <div class="header">
+            <div class="company-name">Cartsy</div>
+            <h1>{{ title }}</h1>
+            <p>Generated on: {{ generated_date }}</p>
+        </div>
+    </div>
+    
+    <div class="title-row">
+        <div class="title-cartsy">CARTSY</div>
+        <div class="inventory-title">Inventory Details</div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th width="5%">#</th>
+                <th width="25%", style="color: #333;">Product Name</th>
+                <th width="12%", style="color: #333;">Category</th>
+                <th width="12%" class="price-column", style="color: #333;">Price (VND)</th>
+                <th width="12%" class="quantity-column", style="color: #333;">Stock</th>
+                <th width="15%" class="price-column", style="color: #333;">Stock Value (VND)</th>
+                <th width="19%" class="date-column", style="color: #333;">Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ product.display_name }}</td>
+                <td>{{ product.category }}</td>
+                <td class="price-column">{{ product.price|floatformat:0 }}</td>
+                <td class="quantity-column">
+                    {% if product.stock_level == 'low' %}
+                    <span class="badge badge-low">{{ product.quantity }}</span>
+                    {% elif product.stock_level == 'medium' %}
+                    <span class="badge badge-medium">{{ product.quantity }}</span>
+                    {% else %}
+                    <span class="badge badge-high">{{ product.quantity }}</span>
+                    {% endif %}
+                </td>
+                <td class="price-column">{{ product.stock_value|floatformat:0 }}</td>
+                <td class="date-column">{% if product.last_updated %}{{ product.last_updated|date:"d/m/Y H:i" }}{% else %}N/A{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px;">No products available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div id="footer_content">
+        <div class="footer">
+            <p>This report was generated automatically by the inventory management system.</p>
+            <p>Page <pdf:pagenumber/> of <pdf:pagecount/></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1304 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products Management - Smart Shopping Cart</title>
+    <link rel="shortcut icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <style>
+        /* General Styles */
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .container-fluid {
+            max-width: 1920px;
+        }
+        
+        /* Card & Element Styles */
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: none;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: 6px;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .page-link {
+            border-radius: 0.5rem;
+            margin: 0 0.2rem;
+        }
+        
+        /* Product Card Styles */
+        .product-card {
+            transition: transform 0.3s;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Button Styles */
+        .btn-light {
+            border: 1px solid #e5e7eb;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-light:hover {
+            background: var(--bs-primary);
+            color: white;
+            transform: translateX(-5px);
+        }
+        
+        /* Back Button Styles */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            padding: 0;
+            font-weight: 500;
+            color: var(--bs-primary);
+            background: transparent;
+            border: none;
+            transition: all 0.3s ease;
+            animation: slideRight 0.3s ease-out;
+        }
+        
+        .btn-back:hover {
+            transform: translateX(-5px);
+            color: var(--bs-primary);
+        }
+        
+        .btn-back-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background: var(--bs-primary);
+            border-radius: 8px;
+            margin-right: 12px;
+        }
+        
+        .btn-back-icon i {
+            color: white;
+            font-size: 14px;
+        }
+        
+        .btn-back-text {
+            font-size: 0.95rem;
+        }
+        
+        .btn-back:hover .btn-back-icon {
+            background: #4338ca;
+            box-shadow: 0 4px 12px rgba(67, 56, 202, 0.15);
+        }
+        
+        /* Show All Button Styles */
+        .show-all-btn {
+            border-radius: 20px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            background: linear-gradient(45deg, var(--bs-primary), #4338ca);
+            border: none;
+            color: white;
+        }
+        
+        .show-all-btn:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(67, 56, 202, 0.15);
+        }
+        
+        .show-all-btn i {
+            transition: transform 0.2s ease;
+        }
+        
+        .show-all-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* No results message */
+        .no-results {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        /* Search result counter */
+        .results-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+        
+        /* Loading spinner */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideRight {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid px-4 py-3">
+        <!-- Navigation -->
+        <nav class="mb-4 mt-3">
+            <a href="{% url 'dashboard' %}" class="btn btn-back">
+                <span class="btn-back-icon">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span class="btn-back-text">Back to Dashboard</span>
+            </a>
+        </nav>
+
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+            <div>
+                <h2 class="text-primary fw-bold mb-0">
+                    <i class="fas fa-box-open me-2"></i>Products Management
+                </h2>
+                <p class="text-muted mb-0">Manage your store's product catalog</p>
+                {% if total_products_count %}
+                {% comment %} <div class="mt-2 badge bg-info text-white">
+                    <i class="fas fa-info-circle me-1"></i> Hiển thị {{ items_per_page }} sản phẩm mỗi trang (tổng số {{ total_products_count }} sản phẩm)
+                </div> {% endcomment %}
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'inventory_management' %}" class="btn btn-info me-2">
+                    <i class="fas fa-warehouse me-2"></i>Inventory Management
+                </a>
+                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#bulkAddStockModal">
+                    <i class="fas fa-boxes me-2"></i>Bulk Add Stock
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="fas fa-plus me-2"></i>Add New Product
+                </button>
+            </div>
+        </div>
+
+        <!-- Search & Filter Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="search-box">
+                            <i class="fas fa-search text-muted position-absolute ms-3" style="top: 50%; transform: translateY(-50%);"></i>
+                            <input type="text" id="searchInput" class="form-control ps-5" placeholder="Search products...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="categoryFilter" class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="Beverage">Beverages</option>
+                            <option value="Snack">Snacks</option>
+                            <option value="Food">Food</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="sortBy" class="form-select">
+                            <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Sort by Name</option>
+                            <option value="price-asc" {% if current_sort == 'price-asc' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="price-desc" {% if current_sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="stock" {% if current_sort == 'stock' %}selected{% endif %}>Stock Level</option>
+                            <option value="rating-desc" {% if current_sort == 'rating-desc' %}selected{% endif %}>Rating: High to Low</option>
+                            <option value="rating-asc" {% if current_sort == 'rating-asc' %}selected{% endif %}>Rating: Low to High</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="refreshBtn" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-sync-alt me-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results count indicator -->
+        <div class="results-count mb-2" id="resultsCount"></div>
+
+        <!-- Products Grid - Default server-side view -->
+        <div class="row g-4" id="serverProductsContainer">
+            {% for product in products %}
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 product-card" 
+                 data-category="{{ product.category }}" 
+                 data-name="{{ product.name|lower }}"
+                 data-price="{{ product.price }}"
+                 data-quantity="{{ product.quantity }}"
+                 data-product-id="{{ product.product_id }}">
+                <div class="card h-100">
+                    <!-- Product Image -->
+                    <div class="position-relative">
+                        <img src="{{ product.image_url|default:'https://via.placeholder.com/300x200' }}" 
+                             class="card-img-top" 
+                             alt="{{ product.description }}"
+                             style="height: 220px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 p-2">
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-star text-white"></i> {{ product.avg_rating|floatformat:1 }} ({{ product.rating_count }})
+                            </span>
+                        </div>
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm rounded-circle shadow-sm" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editModal{{ product.product_id }}">
+                                            <i class="fas fa-edit me-2 text-primary"></i>Edit
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.product_id }}">
+                                            <i class="fas fa-trash-alt me-2 text-danger"></i>Delete
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addStockModal{{ product.product_id }}">
+                                            <i class="fas fa-boxes me-2 text-success"></i>Add Stock
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0 pe-2">{{ product.name }}</h5>
+                            <span class="badge bg-{{ product.quantity|yesno:'success,danger' }}">
+                                {{ product.quantity }} in stock
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-2">Category: {{ product.category }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="text-primary mb-0">{{ product.price|intcomma }} VNĐ</h4>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewModal{{ product.product_id }}">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Modals -->
+            {% with current_product=product %}
+                {% include "includes/product_modals.html" with product=current_product %}
+            {% endwith %}
+            
+            {% empty %}
+            <!-- Empty State -->
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No products available</h5>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                        Add First Product
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Client-side filtered products container (initially hidden) -->
+        <div class="row g-4" id="clientProductsContainer" style="display: none;"></div>
+
+        <!-- No Results Message (Initially Hidden) -->
+        <div id="noResultsMessage" class="no-results" style="display: none;">
+            <i class="fas fa-search mb-3"></i>
+            <h5 class="text-muted">No products found matching your criteria</h5>
+            <button id="clearFiltersBtn" class="btn btn-outline-primary mt-3">
+                <i class="fas fa-times me-2"></i>Clear Filters
+            </button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="text-primary">Loading all products...</h5>
+                <p class="text-muted small">The search/sort function will look at all products from all pages.</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container mt-4 mb-5" id="serverPagination">
+            {% if is_paginated %}
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if current_sort != 'name' %}&sort={{ current_sort }}{% endif %}" aria-label="First">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_sort != 'name' %}&sort={{ current_sort }}{% endif %}" aria-label="Previous">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if current_sort != 'name' %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_sort != 'name' %}&sort={{ current_sort }}{% endif %}" aria-label="Next">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_sort != 'name' %}&sort={{ current_sort }}{% endif %}" aria-label="Last">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            {% endif %}
+        </div>
+
+        <!-- Client-side pagination -->
+        <div id="clientPagination" class="mt-4 mb-3" style="display: none;">
+            <nav aria-label="Product pagination">
+                <ul class="pagination justify-content-center" id="clientPaginationList"></ul>
+            </nav>
+        </div>
+
+        <!-- Bulk Add Stock Modal -->
+        {% include "includes/bulk_add_stock_modal.html" %}
+
+        <!-- Add Product Modal -->
+        <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="addProductForm" method="POST" action="/products/" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <!-- Product Name -->
+                                <div class="col-md-6">
+                                    <label for="productName" class="form-label">Product Name*</label>
+                                    <input type="text" class="form-control" id="productName" name="name" 
+                                           placeholder="Example: Pepsi_Zero_Sugar" required
+                                           minlength="1" maxlength="255">
+                                    <div class="form-text">Use underscore (_) to separate words in product name</div>
+                                </div>
+                                
+                                <!-- Category -->
+                                <div class="col-md-6">
+                                    <label for="productCategory" class="form-label">Category*</label>
+                                    <select class="form-select" id="productCategory" name="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Beverage">Beverage</option>
+                                        <option value="Snack">Snack</option>
+                                        <option value="Food">Food</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Price -->
+                                <div class="col-md-6">
+                                    <label for="productPrice" class="form-label">Price (VNĐ)*</label>
+                                    <input type="number" class="form-control" id="productPrice" name="price" 
+                                           min="0" step="0.01" required>
+                                </div>
+                                
+                                <!-- Quantity -->
+                                <div class="col-md-6">
+                                    <label for="productQuantity" class="form-label">Quantity*</label>
+                                    <input type="number" class="form-control" id="productQuantity" name="quantity" 
+                                           min="0" max="2147483647" required>
+                                </div>
+                                
+                                <!-- Description -->
+                                <div class="col-12">
+                                    <label for="productDescription" class="form-label">Description</label>
+                                    <textarea class="form-control" id="productDescription" name="description" rows="3"></textarea>
+                                </div>
+                                
+                                <!-- Image Upload -->
+                                <div class="col-12">
+                                    <label for="productImage" class="form-label">Product Image</label>
+                                    <input type="file" class="form-control" id="productImage" name="image" accept="image/*">
+                                    <div class="form-text">Upload a product image (optional)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Notification -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Product added successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Success Notification -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="stockSuccessToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Stock added successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Preview Modal -->
+        <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Image Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="imagePreview" src="" class="img-fluid" style="max-height: 500px;">
+                        <div class="mt-3">
+                            <div class="spinner-border text-primary" role="status" id="processingSpinner" style="display: none;">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <p id="processingText" class="text-muted" style="display: none;">Processing image...</p>
+                            <div id="successMessage" class="alert alert-success" style="display: none;">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Image processed successfully!
+                            </div>
+                            <button id="backToFormBtn" class="btn btn-primary mt-3" style="display: none;">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Form
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Stock Modal -->
+        {% for product in products %}
+        <div class="modal fade" id="addStockModal{{ product.product_id }}" tabindex="-1" aria-labelledby="addStockModalLabel{{ product.product_id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addStockModalLabel{{ product.product_id }}">Add Stock to {{ product.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addStockForm{{ product.product_id }}">
+                            <div class="mb-3">
+                                <label for="quantity{{ product.product_id }}" class="form-label">Quantity to Add</label>
+                                <input type="number" class="form-control" id="quantity{{ product.product_id }}" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="notes{{ product.product_id }}" class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="notes{{ product.product_id }}" rows="2"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="addStock({{ product.product_id }})">
+                            <i class="fas fa-plus me-2"></i>Add Stock
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/bulk_add_stock.js' %}"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize elements
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const sortBy = document.getElementById('sortBy');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        const resultsCount = document.getElementById('resultsCount');
+        const serverProductsContainer = document.getElementById('serverProductsContainer');
+        const clientProductsContainer = document.getElementById('clientProductsContainer');
+        const serverPagination = document.getElementById('serverPagination');
+        const clientPagination = document.getElementById('clientPagination');
+        const clientPaginationList = document.getElementById('clientPaginationList');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Format product names
+        document.querySelectorAll('.card-title').forEach(title => {
+            title.textContent = title.textContent.replace(/_/g, ' ');
+        });
+
+        // All products storage
+        let allProducts = [];
+        let filteredProducts = [];
+        let isFiltering = false;
+        
+        // Pagination settings
+        const itemsPerPage = {% if items_per_page %}{{ items_per_page }}{% else %}8{% endif %}; // Số lượng cố định 8 sản phẩm mỗi trang
+        let currentPage = 1;
+        let totalPages = 1;
+        
+        // Load saved sort state
+        loadSortState();
+        
+        // Store the current sort option and category in localStorage
+        function saveSortState() {
+            localStorage.setItem('sortBy', sortBy.value);
+            localStorage.setItem('categoryFilter', categoryFilter.value);
+        }
+        
+        // Load the saved sort option and category from localStorage
+        function loadSortState() {
+            const savedSort = localStorage.getItem('sortBy');
+            const savedCategory = localStorage.getItem('categoryFilter');
+            
+            if (savedSort) {
+                sortBy.value = savedSort;
+            }
+            
+            if (savedCategory) {
+                categoryFilter.value = savedCategory;
+            }
+        }
+        
+        // Fetch all products from server
+        async function fetchAllProducts() {
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                const response = await fetch('{% url "product_list" %}?all_products=true', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                allProducts = data.products;
+                
+                // Format product names in fetched data
+                allProducts.forEach(product => {
+                    product.name = product.name.replace(/_/g, ' ');
+                    
+                    // Fetch rating data for each product
+                    fetchProductRating(product);
+                });
+                
+                loadingOverlay.style.display = 'none';
+                return allProducts;
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                loadingOverlay.style.display = 'none';
+                return [];
+            }
+        }
+        
+        // Function to fetch product rating
+        async function fetchProductRating(product) {
+            try {
+                const response = await fetch(`/api/product/rating/?product_name=${encodeURIComponent(product.name)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    product.average_rating = data.average_rating;
+                    product.total_ratings = data.total_ratings;
+                } else {
+                    // Set default values if API call fails
+                    product.average_rating = 0;
+                    product.total_ratings = 0;
+                }
+                
+                // Refresh display if product is already visible
+                if (isFiltering) {
+                    displayProductsForPage(currentPage);
+                }
+            } catch (error) {
+                console.error(`Error fetching rating for ${product.name}:`, error);
+                // Set default values if there's an error
+                product.average_rating = 0;
+                product.total_ratings = 0;
+            }
+        }
+        
+        // Create product card HTML
+        function createProductCard(product) {
+            // Always show rating badge
+            const ratingBadge = `<div class="position-absolute top-0 start-0 p-2">
+                <span class="badge bg-warning text-dark">
+                    <i class="fas fa-star text-white"></i> ${product.average_rating || 0} (${product.total_ratings || 0})
+                </span>
+            </div>`;
+                
+            return `
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 product-card" data-product-id="${product.product_id}">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img src="${product.image_url || 'https://via.placeholder.com/300x200'}" 
+                             class="card-img-top" 
+                             alt="${product.description || product.name}"
+                             style="height: 220px; object-fit: cover;">
+                        ${ratingBadge}
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm rounded-circle shadow-sm" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{% url 'edit_product' 0 %}".replace('0', product.product_id) class="dropdown-item">
+                                            <i class="fas fa-edit me-2 text-primary"></i>Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" onclick="if(confirm('Are you sure you want to delete this product?')) window.location.href='{% url 'delete_product' 0 %}'.replace('0', product.product_id)">
+                                            <i class="fas fa-trash-alt me-2 text-danger"></i>Delete
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addStockModal${product.product_id}">
+                                            <i class="fas fa-boxes me-2 text-success"></i>Add Stock
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0 pe-2">${product.name}</h5>
+                            <span class="badge bg-${product.quantity > 0 ? 'success' : 'danger'}">
+                                ${product.quantity} in stock
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-2">Category: ${product.category}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="text-primary mb-0">${product.price.toLocaleString()} VNĐ</h4>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewProductDetails(${product.product_id})">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+        
+        // View product details
+        window.viewProductDetails = function(productId) {
+            const product = allProducts.find(p => p.product_id === productId);
+            if (product) {
+                alert(`Product: ${product.name}\nCategory: ${product.category}\nPrice: ${product.price} VNĐ\nQuantity: ${product.quantity}`);
+            }
+        };
+        
+        // Filter and sort products
+        function filterAndSortProducts() {
+            if (allProducts.length === 0) {
+                fetchAllProducts().then(() => {
+                    performFilterAndSort();
+                });
+            } else {
+                performFilterAndSort();
+            }
+        }
+        
+        function performFilterAndSort() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value.toLowerCase();
+            const sortValue = sortBy.value;
+            
+            isFiltering = searchTerm !== '' || selectedCategory !== '';
+            
+            if (isFiltering) {
+                // Switch to client-side mode
+                serverProductsContainer.style.display = 'none';
+                clientProductsContainer.style.display = 'flex';
+                serverPagination.style.display = 'none';
+                clientPagination.style.display = 'block';
+                
+                // Filter products
+                filteredProducts = allProducts.filter(product => {
+                    const name = product.name.toLowerCase();
+                    const category = product.category.toLowerCase();
+                    return name.includes(searchTerm) && 
+                           (!selectedCategory || category === selectedCategory);
+                });
+                
+                // Sort products
+                filteredProducts.sort((a, b) => {
+                    switch(sortValue) {
+                        case 'name':
+                            return a.name.localeCompare(b.name);
+                        case 'price-asc':
+                            return a.price - b.price;
+                        case 'price-desc':
+                            return b.price - a.price;
+                        case 'stock':
+                            return b.quantity - a.quantity;
+                        case 'rating-desc': {
+                            // Get rating categories (1=positive, 2=zero, 3=no ratings)
+                            const aRating = a.average_rating || 0;
+                            const bRating = b.average_rating || 0;
+                            const aCount = a.total_ratings || 0;
+                            const bCount = b.total_ratings || 0;
+                            
+                            const aCat = aRating > 0 ? 1 : (aCount > 0 ? 2 : 3);
+                            const bCat = bRating > 0 ? 1 : (bCount > 0 ? 2 : 3);
+                            
+                            // First compare categories
+                            if (aCat !== bCat) return aCat - bCat;
+                            
+                            // If same category, compare ratings (high to low)
+                            if (bRating !== aRating) return bRating - aRating;
+                            
+                            // If same rating, sort alphabetically
+                            return a.name.localeCompare(b.name);
+                        }
+                        case 'rating-asc': {
+                            // Get rating categories (1=positive, 2=zero, 3=no ratings)
+                            const aRating = a.average_rating || 0;
+                            const bRating = b.average_rating || 0;
+                            const aCount = a.total_ratings || 0;
+                            const bCount = b.total_ratings || 0;
+                            
+                            const aCat = aRating > 0 ? 1 : (aCount > 0 ? 2 : 3);
+                            const bCat = bRating > 0 ? 1 : (bCount > 0 ? 2 : 3);
+                            
+                            // First compare categories (reversed for asc)
+                            if (aCat !== bCat) return bCat - aCat;
+                            
+                            // If same category, compare ratings (low to high)
+                            if (aRating !== bRating) return aRating - bRating;
+                            
+                            // If same rating, sort alphabetically
+                            return a.name.localeCompare(b.name);
+                        }
+                        default:
+                            return 0;
+                    }
+                });
+                
+                // Update result count
+                resultsCount.innerHTML = `
+                    <strong>Find ${filteredProducts.length} / ${allProducts.length} products</strong>
+                    <span class="ms-2 text-success">
+                        <i class="fas fa-info-circle"></i> 
+                        Search is looking at all products from all pages
+                    </span>
+                `;
+                resultsCount.style.display = 'block';
+                
+                // Check for no results
+                if (filteredProducts.length === 0) {
+                    noResultsMessage.style.display = 'block';
+                    clientProductsContainer.style.display = 'none';
+                    clientPagination.style.display = 'none';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                    renderClientPagination();
+                    displayProductsForPage(currentPage);
+                }
+            } else {
+                // Switch back to server-side mode
+                serverProductsContainer.style.display = 'flex';
+                clientProductsContainer.style.display = 'none';
+                if (document.getElementById('serverPagination')) {
+                    serverPagination.style.display = 'block';
+                }
+                clientPagination.style.display = 'none';
+                resultsCount.style.display = 'none';
+                noResultsMessage.style.display = 'none';
+            }
+        }
+        
+        // Display products for current page
+        function displayProductsForPage(page) {
+            if (!isFiltering) return;
+            
+            // Calculate start and end indices
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+            const displayProducts = filteredProducts.slice(startIndex, endIndex);
+            
+            // Clear container
+            clientProductsContainer.innerHTML = '';
+            
+            // Add product cards
+            displayProducts.forEach(product => {
+                clientProductsContainer.innerHTML += createProductCard(product);
+            });
+        }
+        
+        // Render client-side pagination
+        function renderClientPagination() {
+            totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+            clientPaginationList.innerHTML = '';
+            
+            if (totalPages <= 1) {
+                clientPagination.style.display = 'none';
+                return;
+            }
+            
+            clientPagination.style.display = 'block';
+            
+            // Previous button
+            if (currentPage > 1) {
+                clientPaginationList.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${1}" aria-label="First">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                `;
+            }
+            
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                clientPaginationList.innerHTML += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                clientPaginationList.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${totalPages}" aria-label="Last">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                `;
+            }
+            
+            // Add click event listeners
+            document.querySelectorAll('#clientPaginationList .page-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = parseInt(e.target.closest('a').dataset.page);
+                    displayProductsForPage(currentPage);
+                    renderClientPagination();
+                    // Maintain the current sort option
+                    saveSortState();
+                });
+            });
+        }
+        
+        // Clear all filters and reload page to go back to server-side mode
+        function clearFilters() {
+            // Store the current sort option
+            const currentSort = sortBy.value;
+            
+            // Reset search parameters
+            searchInput.value = '';
+            categoryFilter.value = '';
+            
+            // Set URL parameters to maintain sort option
+            const url = new URL('{% url "product_list" %}', window.location.origin);
+            if (currentSort !== 'name') {
+                url.searchParams.set('sort', currentSort);
+            }
+            
+            // Reload the page with the sort parameter
+            window.location.href = url.toString();
+        }
+        
+        // Event listeners
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                if (allProducts.length === 0) {
+                    // First search - find all products
+                    fetchAllProducts().then(() => {
+                        performFilterAndSort();
+                    });
+                } else {
+                    performFilterAndSort();
+                }
+            }, 300);
+        });
+        
+        categoryFilter.addEventListener('change', () => {
+            currentPage = 1;
+            saveSortState();
+            if (allProducts.length === 0) {
+                // Lần đầu lọc - tải tất cả sản phẩm
+                fetchAllProducts().then(() => {
+                    performFilterAndSort();
+                });
+            } else {
+                performFilterAndSort();
+            }
+        });
+        
+        sortBy.addEventListener('change', () => {
+            currentPage = 1;
+            saveSortState();
+            if (allProducts.length === 0) {
+                // Lần đầu sắp xếp - tải tất cả sản phẩm
+                fetchAllProducts().then(() => {
+                    performFilterAndSort();
+                });
+            } else {
+                performFilterAndSort();
+            }
+        });
+        
+        refreshBtn.addEventListener('click', clearFilters);
+        clearFiltersBtn.addEventListener('click', clearFilters);
+        
+        // Handle form submission
+        document.getElementById('addProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const imageFile = formData.get('image');
+            
+            // Disable submit button and show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+            
+            // If there's an image, process and upload it first
+            if (imageFile) {
+                // Show processing indicators
+                const processingSpinner = document.getElementById('processingSpinner');
+                const processingText = document.getElementById('processingText');
+                processingSpinner.style.display = 'inline-block';
+                processingText.style.display = 'block';
+                
+                // Create FormData for image upload
+                const imageFormData = new FormData();
+                imageFormData.append('image', imageFile);
+                
+                // First upload image to get URL
+                fetch('/upload_image/', {
+                    method: 'POST',
+                    body: imageFormData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to upload image');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Add image_url to form data
+                    formData.set('image_url', data.url);
+                    
+                    // Now submit product data
+                    submitProductData(formData);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to upload image. Please try again.');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Add Product';
+                    processingSpinner.style.display = 'none';
+                    processingText.style.display = 'none';
+                });
+            } else {
+                // If no image, just submit product data
+                submitProductData(formData);
+            }
+        });
+
+        // Function to submit product data
+        function submitProductData(formData) {
+            // Convert form data to JSON
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                if (key !== 'image') { // Skip the image file
+                    jsonData[key] = value;
+                }
+            });
+
+            // Send POST request to API
+            return fetch('/products/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.detail || 'Failed to add product');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Show success toast
+                const toast = new bootstrap.Toast(document.getElementById('successToast'));
+                toast.show();
+                
+                // Reset form and close modal
+                document.getElementById('addProductForm').reset();
+                bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+                
+                // Hide processing indicators
+                const processingSpinner = document.getElementById('processingSpinner');
+                const processingText = document.getElementById('processingText');
+                processingSpinner.style.display = 'none';
+                processingText.style.display = 'none';
+                
+                // Reload page after 1.5 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message || 'An error occurred while adding the product. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable submit button
+                const submitButton = document.querySelector('#addProductForm button[type="submit"]');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Add Product';
+            });
+        }
+
+        // Image preview and processing
+        const imageInput = document.getElementById('productImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const processingSpinner = document.getElementById('processingSpinner');
+        const processingText = document.getElementById('processingText');
+        const successMessage = document.getElementById('successMessage');
+        const backToFormBtn = document.getElementById('backToFormBtn');
+        const imagePreviewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewModal.show();
+                    
+                    // Show processing indicators
+                    processingSpinner.style.display = 'inline-block';
+                    processingText.style.display = 'block';
+                    successMessage.style.display = 'none';
+                    backToFormBtn.style.display = 'none';
+                    
+                    // Simulate processing time
+                    setTimeout(() => {
+                        processingSpinner.style.display = 'none';
+                        processingText.style.display = 'none';
+                        successMessage.style.display = 'block';
+                        backToFormBtn.style.display = 'block';
+                    }, 2000);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Back to form button handler
+        backToFormBtn.addEventListener('click', function() {
+            imagePreviewModal.hide();
+        });
+
+        // Add stock function
+        window.addStock = function(productId) {
+            const quantity = document.getElementById(`quantity${productId}`).value;
+            const notes = document.getElementById(`notes${productId}`).value;
+            
+            if (!quantity || quantity < 1) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+            
+            // Show loading state
+            const submitButton = document.querySelector(`#addStockModal${productId} .btn-success`);
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+            
+            // Send request to add stock
+            fetch('/api/product/add-stock/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: parseInt(quantity),
+                    notes: notes
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Failed to add stock');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Show success toast
+                const toast = new bootstrap.Toast(document.getElementById('stockSuccessToast'));
+                toast.show();
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById(`addStockModal${productId}`)).hide();
+                
+                // Reset form
+                document.getElementById(`addStockForm${productId}`).reset();
+                
+                // Update product quantity in the UI
+                const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+                if (productCard) {
+                    const badge = productCard.querySelector('.badge');
+                    if (badge) {
+                        badge.textContent = `${data.new_quantity} in stock`;
+                        badge.className = `badge bg-${data.new_quantity > 0 ? 'success' : 'danger'}`;
+                    }
+                }
+                
+                // Reload page after 1.5 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message || 'An error occurred while adding stock. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            });
+        };
+
+        // Bulk Add Stock Functionality
+        // This has been moved to bulk_add_stock.js
+
+    });
+    </script>
+</body>
+</html>

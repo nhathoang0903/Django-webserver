@@ -1,0 +1,1163 @@
+{% extends 'base.html' %}
+{% block title %}Device Status - Smart Shopping Cart{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 mx-auto overflow-hidden" style="max-width: 1800px;">
+    <div class="content-wrapper">
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary fw-bold"><i class="fas fa-server me-2"></i>Device Status Management</h2>
+                <div>
+                    <button id="refreshData" class="btn btn-outline-primary">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh
+                    </button>
+                    <div class="form-check form-switch d-inline-block ms-3">
+                        <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                        <label class="form-check-label text-muted" for="autoRefreshToggle">Auto-refresh</label>
+                    </div>
+                    <small class="text-muted ms-2">Last updated: <span id="lastUpdated"></span></small>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-header bg-light py-3">
+                    <h5 class="mb-0 fw-bold text-primary">Connected Devices</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <div class="loading-spinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Device ID</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>IP Address</th>
+                                    <th>Status</th>
+                                    <th>Usage Status</th>
+                                    <th>App Status</th>
+                                    <th>Last Connected</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deviceTableBody">
+                                {% for device in devices %}
+                                <tr data-device-id="{{ device.device_id }}">
+                                    <td><span class="fw-semibold">{{ device.device_id }}</span></td>
+                                    <td>{{ device.device_name }}</td>
+                                    <td><span class="badge bg-info text-white">{{ device.device_type }}</span></td>
+                                    <td>{{ device.ip_address }}</td>
+                                    <td>
+                                        <span class="status-indicator {% if device.is_active %}active{% else %}inactive{% endif %}">
+                                            <i class="fas fa-circle me-1"></i>
+                                            {{ device.is_active|yesno:"Online,Offline" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-indicator {% if device.devicestatus.status == 'in_use' %}in-use{% else %}available{% endif %}">
+                                            <i class="fas fa-circle me-1"></i>
+                                            {{ device.devicestatus.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-indicator {% if device.app_running %}running{% else %}stopped{% endif %}">
+                                            <i class="fas fa-circle me-1"></i>
+                                            {{ device.app_running|yesno:"Running,Stopped" }}
+                                        </span>
+                                    </td>
+                                    <td>{{ device.last_connected|date:"Y-m-d H:i:s" }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary toggle-device" 
+                                                    data-device-id="{{ device.device_id }}"
+                                                    data-current-status="{{ device.is_active|yesno:'true,false' }}"
+                                                    data-bs-toggle="tooltip"
+                                                    title="{{ device.is_active|yesno:'Turn Off Device,Turn On Device' }}">
+                                                <i class="fas fa-power-off"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info toggle-app" 
+                                                    data-device-id="{{ device.device_id }}"
+                                                    data-current-status="{{ device.app_running|yesno:'true,false' }}"
+                                                    data-bs-toggle="tooltip"
+                                                    title="{{ device.app_running|yesno:'Stop App,Start App' }}">
+                                                <i class="fas fa-play-circle"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger delete-device"
+                                                    data-device-id="{{ device.device_id }}"
+                                                    data-device-name="{{ device.device_name }}"
+                                                    data-bs-toggle="tooltip"
+                                                    title="Delete Device">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info check-shopping" 
+                                                    data-device-id="{{ device.device_id }}"
+                                                    data-bs-toggle="tooltip"
+                                                    title="Check Shopping Monitor">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <i class="fas fa-robot fa-3x mb-3"></i>
+                                        <p>No devices connected</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals with improved design -->
+<div class="modal fade" id="deleteDeviceModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Device</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete device "<span id="deviceNameToDelete"></span>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="passwordVerificationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-lock me-2"></i>Verify Management Password</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="verificationPassword">Enter Management Password:</label>
+                    <input type="password" class="form-control" id="verificationPassword">
+                </div>
+                <div id="passwordError" class="alert alert-danger d-none">
+                    Invalid password!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="verifyPassword">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--shopping monitor -->
+<div class="modal fade" id="shoppingMonitorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-shopping-cart me-2"></i>Shopping Monitor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        <h6 class="mb-0 me-4">Device: <span id="monitorDeviceName"></span></h6>
+                        <h6 class="mb-0">Customer: <span id="monitorCustomerName" class="text-primary"></span></h6>
+                    </div>
+                    <button id="refreshMonitor" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div id="shoppingData">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price (VNĐ)</th>
+                                    <th>Total (VNĐ)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productList"></tbody>
+                            <tfoot>
+                                <tr style="color: #dc3545;">
+                                    <td colspan="3" class="text-end fw-bold">Total Bill:</td>
+                                    <td id="totalBill" class="fw-bold"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add error modal -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 bg-warning text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-circle me-2"></i>Cart Status</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage" class="text-center mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.status-indicator {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.status-indicator.active {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.status-indicator.inactive {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.status-indicator.running {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.status-indicator.stopped {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.status-indicator.in-use {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.status-indicator.available {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.status-indicator i {
+    font-size: 0.5rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.status-indicator.active i { color: #28a745; }
+.status-indicator.inactive i { color: #dc3545; }
+.status-indicator.in-use i { color: #ffc107; }
+.status-indicator.available i { color: #17a2b8; }
+.status-indicator.running i { color: #28a745; }
+.status-indicator.stopped i { color: #dc3545; }
+
+.btn-group .btn {
+    margin: 0 2px;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.table td, .table th {
+    padding: 1rem;
+}
+
+/* Animation for newly updated rows */
+@keyframes highlight {
+    0% { background-color: rgba(13, 110, 253, 0.15); }
+    100% { background-color: transparent; }
+}
+
+.highlight-update {
+    animation: highlight 2s ease-out;
+}
+
+/* Fade-in animation for table rows */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.table tr {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Auto-refresh toggle styling */
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Loading spinner styles */
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: none;
+}
+
+.table-responsive.loading .loading-spinner {
+    display: block;
+}
+
+.table-responsive.loading .table {
+    opacity: 0.6;
+}
+
+@media (min-width: 1400px) {
+    .container-fluid {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+}
+
+@media (max-width: 1399px) {
+    .container-fluid {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* Existing styles */
+body {
+    overflow-x: hidden;
+}
+
+.content-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.table-responsive {
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.table-responsive::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.table {
+    width: 100%;
+    min-width: 800px; 
+}
+
+/* Thêm styles mới cho table */
+.table th {
+    white-space: nowrap;
+    padding: 1rem 0.75rem;
+}
+
+.table td {
+    white-space: nowrap;
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+.table td span {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-indicator {
+    min-width: 90px;
+    justify-content: center;
+}
+
+/* Điều chỉnh độ rộng tối thiểu cho bảng */
+.table {
+    width: 100%;
+    min-width: 1000px; /* Tăng min-width để đảm bảo không bị xuống dòng */
+}
+
+/* Đảm bảo các cột có độ rộng phù hợp */
+.table th:nth-child(1), /* Device ID */
+.table td:nth-child(1) {
+    min-width: 100px;
+}
+
+.table th:nth-child(2), /* Name */
+.table td:nth-child(2) {
+    min-width: 150px;
+}
+
+.table th:nth-child(7), /* Last Connected */
+.table td:nth-child(7) {
+    min-width: 160px;
+}
+
+.table th:nth-child(8), /* Actions */
+.table td:nth-child(8) {
+    min-width: 140px;
+}
+
+/* Add these styles */
+.check-shopping {
+    margin-left: 4px;
+}
+
+#shoppingMonitorModal .table {
+    margin-bottom: 0;
+}
+
+#shoppingMonitorModal .modal-body {
+    padding: 1.5rem;
+}
+
+#refreshMonitor {
+    padding: 0.25rem 0.5rem;
+}
+
+#refreshMonitor i {
+    margin-right: 0.25rem;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+#monitorCustomerName {
+    font-weight: 600;
+}
+
+.modal-header h6 {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Update table styles for more compact layout */
+.table {
+    width: 100%;
+    min-width: auto; /* Remove fixed min-width */
+    table-layout: fixed; /* Add fixed table layout */
+}
+
+/* Adjust column widths */
+.table th,
+.table td {
+    padding: 0.75rem 0.5rem; /* Reduce padding */
+    font-size: 0.9rem; /* Slightly smaller font */
+}
+
+/* Set specific widths for each column */
+.table th:nth-child(1), /* Device ID */
+.table td:nth-child(1) {
+    width: 8%;
+}
+
+.table th:nth-child(2), /* Name */
+.table td:nth-child(2) {
+    width: 12%;
+}
+
+.table th:nth-child(3), /* Type */
+.table td:nth-child(3) {
+    width: 10%;
+}
+
+.table th:nth-child(4), /* IP Address */
+.table td:nth-child(4) {
+    width: 12%;
+}
+
+.table th:nth-child(5), /* Status */
+.table td:nth-child(5) {
+    width: 10%;
+}
+
+.table th:nth-child(6), /* Usage Status */
+.table td:nth-child(6) {
+    width: 10%;
+}
+
+.table th:nth-child(7), /* App Status */
+.table td:nth-child(7) {
+    width: 10%;
+}
+
+.table th:nth-child(8), /* Last Connected */
+.table td:nth-child(8) {
+    width: 15%;
+}
+
+.table th:nth-child(9), /* Actions */
+.table td:nth-child(9) {
+    width: 13%;
+}
+
+/* Adjust status indicators to be more compact */
+.status-indicator {
+    padding: 0.25rem 0.5rem;
+    min-width: 80px;
+    font-size: 0.8rem;
+}
+
+/* Make buttons in action column more compact */
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    margin: 0 1px;
+}
+
+/* Update table-responsive styles */
+.table-responsive {
+    overflow-x: visible; /* Change from auto to visible */
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Add container max-width */
+.container-fluid {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Make sure content doesn't overflow */
+.content-wrapper {
+    overflow-x: hidden;
+    padding: 0 1rem;
+}
+
+/* Adjust card body padding */
+.card-body {
+    padding: 1rem;
+}
+
+/* Add styles for shopping monitor table */
+#shoppingMonitorModal .table th:nth-child(2), /* Quantity column */
+#shoppingMonitorModal .table td:nth-child(2) {
+    text-align: center;
+}
+
+#shoppingMonitorModal .table th:nth-child(3), /* Price column */
+#shoppingMonitorModal .table td:nth-child(3),
+#shoppingMonitorModal .table th:nth-child(4), /* Total column */
+#shoppingMonitorModal .table td:nth-child(4) {
+    text-align: right;
+}
+
+/* Add fade effect for table rows */
+.table tbody tr {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.table tbody tr.updating {
+    opacity: 0.7;
+}
+</style>
+
+<script>
+// Auto-refresh configuration
+let autoRefreshEnabled = true;
+let refreshInterval = 5000; // 5 seconds
+let refreshTimer = null;
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+    // Update timestamp
+    updateTimestamp();
+
+    // Setup auto-refresh toggle
+    const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+    autoRefreshToggle.addEventListener('change', function() {
+        autoRefreshEnabled = this.checked;
+        if (autoRefreshEnabled) {
+            startAutoRefresh();
+        } else {
+            stopAutoRefresh();
+        }
+    });
+
+    // Start auto-refresh by default
+    startAutoRefresh();
+
+    // Refresh button handler - FIXED to properly reload data
+    document.getElementById('refreshData').addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        icon.classList.add('fa-spin');
+        
+        // Option 1: Full page reload
+        window.location.reload();
+        
+        // Option 2: Just refresh data without page reload
+        // fetchDeviceStatus();
+        // setTimeout(() => {
+        //     icon.classList.remove('fa-spin');
+        // }, 1000);
+    });
+
+    // Toggle device status
+    document.querySelectorAll('.toggle-device').forEach(button => {
+        button.addEventListener('click', function() {
+            const deviceId = this.dataset.deviceId;
+            const currentStatus = this.dataset.currentStatus === 'true';
+            updateDeviceStatus(deviceId, !currentStatus, 'is_active');
+        });
+    });
+
+    // Toggle app status
+    document.querySelectorAll('.toggle-app').forEach(button => {
+        button.addEventListener('click', function() {
+            const deviceId = this.dataset.deviceId;
+            const currentStatus = this.dataset.currentStatus === 'true';
+            updateDeviceStatus(deviceId, !currentStatus, 'app_running');
+        });
+    });
+
+    // Store device ID for deletion
+    let deviceIdToDelete = null;
+
+    // Delete device handler
+    document.querySelectorAll('.delete-device').forEach(button => {
+        button.addEventListener('click', function() {
+            deviceIdToDelete = this.dataset.deviceId;
+            const deviceName = this.dataset.deviceName;
+            document.getElementById('deviceNameToDelete').textContent = deviceName;
+            $('#passwordVerificationModal').modal('show');
+        });
+    });
+
+    // Handle delete confirmation
+    document.getElementById('confirmDelete').addEventListener('click', function() {
+        if (deviceIdToDelete && passwordVerified) {
+            fetch(`/api/devices/${deviceIdToDelete}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    $('#deleteDeviceModal').modal('hide');
+                    // Remove the row without page reload
+                    const row = document.querySelector(`tr[data-device-id="${deviceIdToDelete}"]`);
+                    if (row) {
+                        row.style.opacity = 0;
+                        setTimeout(() => row.remove(), 300);
+                    }
+                } else {
+                    throw new Error('Failed to delete device');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete device');
+            });
+        }
+    });
+
+    // Enhanced update function with smooth transitions
+    function updateDeviceStatus(deviceId, newStatus, field) {
+        const data = {};
+        data[field] = newStatus;
+
+        fetch(`/api/devices/${deviceId}/status/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update UI directly without page reload
+            updateDeviceUI(deviceId, data);
+            updateTimestamp();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update device status');
+        });
+    }
+
+    // Function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Password verification
+    let passwordVerified = false;
+
+    // Handle verification button click
+    document.getElementById('verifyPassword').addEventListener('click', function() {
+        const password = document.getElementById('verificationPassword').value;
+        
+        if (password === '{{ settings.DEVICE_MANAGEMENT_PASSWORD }}') {
+            passwordVerified = true;
+            $('#passwordVerificationModal').modal('hide');
+            
+            setTimeout(() => {
+                $('#deleteDeviceModal').modal('show');
+            }, 500);
+        } else {
+            document.getElementById('passwordError').classList.remove('d-none');
+        }
+    });
+
+    // Reset verification state when modal is closed
+    $('#passwordVerificationModal').on('hidden.bs.modal', function () {
+        document.getElementById('verificationPassword').value = '';
+        document.getElementById('passwordError').classList.add('d-none');
+        if (!passwordVerified) {
+            deviceIdToDelete = null;
+        }
+    });
+    
+    // Reset everything when delete modal is closed
+    $('#deleteDeviceModal').on('hidden.bs.modal', function () {
+        deviceIdToDelete = null;
+        passwordVerified = false;
+    });
+
+    // Handle shopping monitor check
+    document.querySelectorAll('.check-shopping').forEach(button => {
+        button.addEventListener('click', function() {
+            const deviceId = this.dataset.deviceId;
+            const deviceName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+            checkShoppingMonitor(deviceId, deviceName);
+        });
+    });
+});
+
+// Start auto-refresh timer
+function startAutoRefresh() {
+    console.log("Starting auto-refresh timer with interval:", refreshInterval, "ms"); // Debug logging
+    
+    // Clear existing timer if any
+    if (refreshTimer !== null) {
+        clearInterval(refreshTimer);
+    }
+    
+    // Initial fetch
+    fetchDeviceStatus();
+    
+    // Setup interval
+    refreshTimer = setInterval(() => {
+        if (autoRefreshEnabled) {
+            console.log("Auto-refresh triggered"); // Debug logging
+            fetchDeviceStatus();
+        }
+    }, refreshInterval);
+}
+
+// Stop auto-refresh timer
+function stopAutoRefresh() {
+    console.log("Stopping auto-refresh timer"); // Debug logging
+    if (refreshTimer !== null) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+    }
+}
+
+// Update timestamp display
+function updateTimestamp() {
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent = now.toLocaleTimeString();
+}
+
+// Improved fetchDeviceStatus with more comprehensive data retrieval
+function fetchDeviceStatus() {
+    const tableContainer = document.querySelector('.table-responsive');
+    tableContainer.classList.add('loading');
+    
+    // First try to use all-status endpoint which includes all device data in one request
+    fetch('/api/devices/all-status/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('All-status endpoint failed');
+            }
+            return response.json();
+        })
+        .then(allDevices => {
+            console.log("All devices status:", allDevices);
+            
+            // Debug log for date formats
+            allDevices.forEach(device => {
+                if (device.last_connected) {
+                    console.log(`Device ${device.device_id} last_connected:`, device.last_connected, 
+                                `(type: ${typeof device.last_connected})`);
+                }
+            });
+            
+            // Update each device UI
+            allDevices.forEach(deviceData => {
+                if (deviceData.device_id) {
+                    updateDeviceUI(deviceData.device_id, deviceData);
+                }
+            });
+            
+            tableContainer.classList.remove('loading');
+            updateTimestamp();
+        })
+        .catch(error => {
+            console.error("Error fetching all devices:", error);
+            
+            // Fallback to individual device requests
+            Promise.all(
+                Array.from(document.querySelectorAll('tr[data-device-id]')).map(row => {
+                    const deviceId = row.dataset.deviceId;
+                    return fetch(`/api/devices/${deviceId}/status/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(`Device ${deviceId} status response:`, data);
+                            
+                            // Debug log for date format
+                            if (data.last_connected || (data.device && data.device.last_connected)) {
+                                const dateStr = data.last_connected || (data.device && data.device.last_connected);
+                                console.log(`Device ${deviceId} last_connected:`, dateStr, 
+                                           `(type: ${typeof dateStr})`);
+                            }
+                            
+                            // Handle different response formats
+                            if (data.success && data.device) {
+                                updateDeviceUI(deviceId, data.device);
+                            } else if (data.device_id) {
+                                updateDeviceUI(deviceId, data);
+                            } else {
+                                updateDeviceUI(deviceId, data);
+                            }
+                            return true;
+                        })
+                        .catch(error => {
+                            console.error(`Error fetching device ${deviceId}:`, error);
+                            return false;
+                        });
+                })
+            ).finally(() => {
+                tableContainer.classList.remove('loading');
+                updateTimestamp();
+            });
+        });
+}
+
+// Enhanced updateDeviceUI function with smoother animations
+function updateDeviceUI(deviceId, data) {
+    const row = document.querySelector(`tr[data-device-id="${deviceId}"]`);
+    if (!row) return;
+    
+    console.log("Updating device UI with data:", data); // Debug logging
+    
+    // Add highlight effect to show updated row
+    row.classList.add('highlight-update');
+    setTimeout(() => {
+        row.classList.remove('highlight-update');
+    }, 2000);
+    
+    // Update Device Status
+    if (data.hasOwnProperty('is_active')) {
+        const statusCell = row.querySelector('td:nth-child(5) .status-indicator');
+        statusCell.className = `status-indicator ${data.is_active ? 'active' : 'inactive'}`;
+        statusCell.innerHTML = `<i class="fas fa-circle me-1"></i>${data.is_active ? 'Online' : 'Offline'}`;
+        
+        const toggleBtn = row.querySelector('.toggle-device');
+        toggleBtn.dataset.currentStatus = String(data.is_active);
+        toggleBtn.setAttribute('data-bs-original-title', data.is_active ? 'Turn Off Device' : 'Turn On Device');
+        
+        // Refresh tooltip
+        const tooltip = bootstrap.Tooltip.getInstance(toggleBtn);
+        if (tooltip) {
+            tooltip.dispose();
+            new bootstrap.Tooltip(toggleBtn);
+        }
+    }
+    
+    // Update Usage Status
+    // Check for status in both data.devicestatus and directly in data
+    let deviceStatus = null;
+    if (data.hasOwnProperty('devicestatus') && data.devicestatus) {
+        deviceStatus = data.devicestatus.status;
+    } else if (data.hasOwnProperty('status')) {
+        deviceStatus = data.status;
+    }
+    
+    if (deviceStatus) {
+        const usageCell = row.querySelector('td:nth-child(6) .status-indicator');
+        const isInUse = deviceStatus === 'in_use';
+        usageCell.className = `status-indicator ${isInUse ? 'in-use' : 'available'}`;
+        usageCell.innerHTML = `<i class="fas fa-circle me-1"></i>${deviceStatus.charAt(0).toUpperCase() + deviceStatus.slice(1)}`;
+    }
+    
+    // Update App Status
+    if (data.hasOwnProperty('app_running')) {
+        const appStatusCell = row.querySelector('td:nth-child(7) .status-indicator');
+        appStatusCell.className = `status-indicator ${data.app_running ? 'running' : 'stopped'}`;
+        appStatusCell.innerHTML = `<i class="fas fa-circle me-1"></i>${data.app_running ? 'Running' : 'Stopped'}`;
+        
+        const toggleBtn = row.querySelector('.toggle-app');
+        toggleBtn.dataset.currentStatus = String(data.app_running);
+        toggleBtn.setAttribute('data-bs-original-title', data.app_running ? 'Stop App' : 'Start App');
+        
+        // Refresh tooltip
+        const tooltip = bootstrap.Tooltip.getInstance(toggleBtn);
+        if (tooltip) {
+            tooltip.dispose();
+            new bootstrap.Tooltip(toggleBtn);
+        }
+    }
+    
+    // Update Last Connected
+    if (data.hasOwnProperty('last_connected')) {
+        const lastConnectedCell = row.querySelector('td:nth-child(8)');
+        
+        try {
+            // Use our robust date parser
+            const dateObj = parseDate(data.last_connected);
+            
+            if (dateObj) {
+                lastConnectedCell.textContent = formatDateTime(dateObj);
+            } else {
+                // If parsing failed, show original string or N/A
+                lastConnectedCell.textContent = typeof data.last_connected === 'string' ? 
+                    data.last_connected : "N/A";
+            }
+        } catch (error) {
+            console.error("Error handling last_connected:", error);
+            lastConnectedCell.textContent = "N/A";
+        }
+    }
+}
+
+// Helper function to parse date strings in various formats
+function parseDate(dateStr) {
+    if (!dateStr) return null;
+    
+    // If it's already a Date object
+    if (dateStr instanceof Date) {
+        return isNaN(dateStr.getTime()) ? null : dateStr;
+    }
+    
+    // Handle string formats
+    if (typeof dateStr === 'string') {
+        dateStr = dateStr.trim();
+        
+        // Try various date formats
+        let dateObj;
+        
+        // Try common formats one by one
+        const formats = [
+            // Try ISO format: "2023-05-18T12:34:56.789Z"
+            () => new Date(dateStr),
+            
+            // Try format: "2023-05-18 12:34:56"
+            () => new Date(dateStr.replace(' ', 'T')),
+            
+            // Try format: "18/05/2023 12:34:56"
+            () => {
+                const parts = dateStr.split(/[\/\s:]/);
+                if (parts.length >= 6) {
+                    return new Date(
+                        parseInt(parts[2]), // year
+                        parseInt(parts[1]) - 1, // month (0-based)
+                        parseInt(parts[0]), // day
+                        parseInt(parts[3]), // hour
+                        parseInt(parts[4]), // minute
+                        parseInt(parts[5])  // second
+                    );
+                }
+                return null;
+            },
+            
+            // Try format: "May 18, 2023 12:34:56"
+            () => new Date(dateStr)
+        ];
+        
+        // Try each format until one works
+        for (const formatFn of formats) {
+            try {
+                dateObj = formatFn();
+                if (dateObj && !isNaN(dateObj.getTime())) {
+                    return dateObj;
+                }
+            } catch (e) {
+                // Continue to next format
+            }
+        }
+    }
+    
+    // If all parsing attempts failed
+    console.error("Failed to parse date:", dateStr);
+    return null;
+}
+
+// Format date-time for display
+function formatDateTime(date) {
+    // Parse the date if it's a string
+    if (typeof date === 'string') {
+        date = parseDate(date);
+    }
+    
+    // Check if date is valid
+    if (!date || isNaN(date.getTime())) {
+        console.error("Invalid date:", date);
+        return "N/A"; // Return N/A instead of invalid date formatting
+    }
+    
+    try {
+        return date.getFullYear() + '-' + 
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0') + ' ' +
+            String(date.getHours()).padStart(2, '0') + ':' +
+            String(date.getMinutes()).padStart(2, '0') + ':' +
+            String(date.getSeconds()).padStart(2, '0');
+    } catch (error) {
+        console.error("Error formatting date:", error);
+        return "N/A";
+    }
+}
+
+// Existing functions for shopping monitor
+function checkShoppingMonitor(deviceId, deviceName) {
+    // Check cart status first before showing any modal
+    fetch(`/api/shopping/monitor/?device_id=${deviceId}`)
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 400) {
+                    // Show only cart status modal for unavailable cart
+                    document.getElementById('errorMessage').textContent = 'This cart is currently not in use.';
+                    $('#errorModal').modal('show');
+                    throw new Error('Cart is not in use');
+                }
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Only show shopping monitor and fetch data if cart is available
+            document.getElementById('monitorDeviceName').textContent = deviceName;
+            displayShoppingData(data);
+            $('#shoppingMonitorModal').modal('show');
+            
+            // Setup refresh button
+            document.getElementById('refreshMonitor').onclick = () => fetchShoppingData(deviceId);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Don't show shopping monitor for errors
+        });
+}
+
+function fetchShoppingData(deviceId) {
+    fetch(`/api/shopping/monitor/?device_id=${deviceId}`) 
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 400) {
+                    $('#shoppingMonitorModal').modal('hide');
+                    document.getElementById('errorMessage').textContent = 'This cart is currently not in use.';
+                    $('#errorModal').modal('show');
+                    throw new Error('Cart is not in use');
+                }
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayShoppingData(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (error.message !== 'Cart is not in use') {
+                $('#shoppingMonitorModal').modal('hide');
+            }
+        });
+}
+
+// Helper function to display shopping data
+function displayShoppingData(data) {
+    const productList = document.getElementById('productList');
+    const customerName = document.getElementById('monitorCustomerName');
+    const totalBillElement = document.getElementById('totalBill');
+    
+    productList.innerHTML = '';
+    customerName.textContent = data.customer_name || 'Guest';
+    
+    if (data.detected_products?.length > 0) {
+        data.detected_products.forEach(product => {
+            // Calculate unit price by dividing total by quantity
+            const unitPrice = product.quantity ? product.price / product.quantity : 0;
+            productList.innerHTML += `
+                <tr>
+                    <td>${product.product_name.replace(/_/g, ' ')}</td>
+                    <td>${product.quantity}</td>
+                    <td>${formatCurrency(unitPrice)} VNĐ</td>
+                    <td>${formatCurrency(product.price)} VNĐ</td>
+                </tr>
+            `;
+        });
+        
+        totalBillElement.textContent = data.total_bill !== undefined 
+            ? `${formatCurrency(data.total_bill)} VNĐ` 
+            : '0 VNĐ';
+    } else {
+        productList.innerHTML = '<tr><td colspan="4" class="text-center">No products detected</td></tr>';
+        totalBillElement.textContent = '0 VNĐ';
+    }
+}
+
+// Clear shopping modal data when closed
+$('#shoppingMonitorModal').on('hidden.bs.modal', function () {
+    document.getElementById('productList').innerHTML = '';
+    document.getElementById('monitorCustomerName').textContent = '';
+    document.getElementById('totalBill').textContent = '';
+});
+
+// Format currency for display
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN').format(amount);
+}
+</script>
+{% endblock %} 
+

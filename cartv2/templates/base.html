@@ -1,0 +1,855 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta Info -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Smart Shopping Cart System">
+    <meta name="author" content="Shoddy Engineers">
+    <title>{% block title %}Smart Shopping Cart System{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+
+    <!-- CSS Links -->
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <link href="{% static 'vendor/datatables/dataTables.bootstrap4.css' %}" rel="stylesheet">
+    <link href="{% static 'css/sb-admin.css' %}" rel="stylesheet"> {% block stylesheet %}{% endblock %}
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <style>
+        .invalid {
+            color: #dc3545;
+            font-size: 80%;
+        }
+        
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .preloader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3F61BF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Body Styles */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #67B26F;
+            --accent-color: #FF9F43;
+            --text-light: #FFFFFF;
+            --text-dark: #2D3436;
+            --hover-color: #FFD93D;
+        }
+
+        /* Enhanced Navbar Styles */
+        .navbar-main {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 0.8rem 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-right: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .brand-section:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-light) !important;
+            letter-spacing: 1px;
+            text-decoration: none !important;
+        }
+
+        .brand-logo img {
+            height: 35px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .brand-text {
+            background: linear-gradient(45deg, #FFD93D, #FF9F43);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Enhanced Navigation Items */
+        .nav-item {
+            margin: 0 0.5rem;
+            position: relative;
+        }
+
+        .nav-link {
+            color: var(--text-light) !important;
+            font-size: 1.1rem;
+            padding: 0.7rem 1.2rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link i {
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .nav-link:hover i {
+            color: var(--hover-color);
+            transform: scale(1.2);
+        }
+
+        /* Active Link Styles */
+        .nav-link.active-page {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .nav-link.active-page i,
+        .nav-link.active-page span {
+            color: var(--hover-color);
+            font-weight: 600;
+        }
+
+        /* User Section */
+        .user-section {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-left: 1rem;
+        }
+
+        .user-section img {
+            width: 35px;
+            height: 35px;
+            border: 2px solid var(--text-light);
+        }
+
+        /* Additional Animations */
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+            50% { text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+            100% { text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        }
+
+        .brand-logo:hover {
+            animation: pulseGlow 1.5s infinite;
+            transform: scale(1.05);
+        }
+
+        /* Selection Highlighting Styles */
+        .selected-item {
+            animation: highlightSelection 0.5s ease;
+            background-color: rgba(63, 97, 191, 0.1);
+            border-left: 4px solid #3F61BF;
+        }
+
+        .row-selected {
+            background-color: rgba(63, 97, 191, 0.1) !important;
+            transition: background-color 0.3s ease;
+        }
+
+        .row-selected td {
+            position: relative;
+        }
+
+        .row-selected td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #3F61BF;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes highlightSelection {
+            from {
+                background-color: transparent;
+                transform: translateX(-5px);
+            }
+            to {
+                background-color: rgba(63, 97, 191, 0.1);
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        /* Hover effect for selectable items */
+        .selectable-row {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .selectable-row:hover {
+            background-color: rgba(63, 97, 191, 0.05);
+            transform: translateX(5px);
+        }
+
+        /* Enhanced Active Menu Item Styles */
+        .navbar-nav .nav-item .nav-link.active-page {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-weight: 600;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .navbar-nav .nav-item .nav-link.active-page i {
+            color: #ffd700; 
+        }
+
+        .navbar-nav .nav-item .nav-link.active-page::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #ffd700;
+            animation: slideIn 0.3s ease;
+        }
+    </style>
+    {% block stylesheets %}{% endblock stylesheets %}
+</head>
+
+<body id="page-top">
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="preloader-spinner"></div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-main">
+        <!-- Brand Section -->
+        <div class="brand-section">
+            <a class="brand-logo" href="{% url 'dashboard' %}">
+                <img src="{% static 'img/icon2_fixed.png' %}" alt="Logo">
+                <span class="brand-text">CARTSY</span>
+            </a>
+        </div>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active-page{% endif %}" 
+                       href="{% url 'dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'statistic' %}active-page{% else %}text-white{% endif %}" href="{% url 'statistic' %}">
+                        <i class="fa fa-line-chart"></i>
+                        <span> Statistic</span>
+                    </a>
+                </li>
+
+                <!-- History Link -->
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'history_list' %}active-page{% else %}text-white{% endif %}" href="{% url 'history_list' %}">
+                        <i class="fa fa-history"></i>
+                        <span> History</span>
+                    </a>
+                </li>
+
+                <!-- Device Status Link -->
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'device_status' %}active-page{% else %}text-white{% endif %}" href="{% url 'device_status' %}">
+                        <i class="fa fa-desktop"></i>
+                        <span> Devices</span>
+                    </a>
+                </li>
+                
+                <!-- Notification Icon -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="notificationIcon" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                        <span class="badge bg-danger rounded-pill" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationIcon" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                        <h6 class="dropdown-header">Notifications</h6>
+                        <div id="notificationDropdownContent">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading notifications...</p>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-center" href="#" id="viewAllNotifications">
+                            <i class="fas fa-list"></i> View All Notifications
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- User Section -->
+        <div class="user-section">
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" data-toggle="dropdown">
+                    <img src="{% static 'img/admin_dropdown.png' %}" alt="User" class="rounded-circle">
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <span class="dropdown-item">Hello {{ user.username }}</span>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content-wrapper" style="padding-top: 70px;">
+        {% block body %}{% endblock %} {% block content %}{% endblock %}
+    </div>
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Links -->
+    <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block scripts %}
+    <script>
+        // Preloader
+        $(window).on('load', function() {
+            $('.preloader').fadeOut(500);
+        });
+
+        // Navbar Animation
+        $(document).ready(function() {
+            // Active link highlighting
+            $('.nav-link').each(function() {
+                if ($(this).attr('href') === window.location.pathname) {
+                    $(this).addClass('active');
+                }
+            });
+
+            // Smooth scroll
+            $('a[href^="#"]').on('click', function(e) {
+                e.preventDefault();
+                $('html, body').animate({
+                    scrollTop: $($(this).attr('href')).offset().top
+                }, 500, 'linear');
+            });
+
+            // Add selectable class to table rows
+            $('table tbody tr').addClass('selectable-row');
+
+            // Handle row selection
+            $(document).on('click', '.selectable-row', function() {
+                // Toggle selection
+                $(this).toggleClass('row-selected');
+                
+                // Optional: Store selected items
+                let selectedIds = [];
+                $('.row-selected').each(function() {
+                    selectedIds.push($(this).data('id'));
+                });
+
+                // Optional: Update any counters or status
+                updateSelectionStatus(selectedIds.length);
+            });
+
+            // Clear selection when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('table').length) {
+                    $('.row-selected').removeClass('row-selected');
+                    updateSelectionStatus(0);
+                }
+            });
+
+            function updateSelectionStatus(count) {
+                // You can create a selection status element in your template
+                if($('#selection-status').length) {
+                    if(count > 0) {
+                        $('#selection-status').html(`${count} item(s) selected`).show();
+                    } else {
+                        $('#selection-status').hide();
+                    }
+                }
+            }
+
+            // Optional: Keyboard support
+            $(document).on('keydown', function(e) {
+                if(e.key === 'Escape') {
+                    $('.row-selected').removeClass('row-selected');
+                    updateSelectionStatus(0);
+                }
+            });
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // Check for low stock products
+            function checkLowStockProducts(forceRefresh = false) {
+                const timestamp = new Date().getTime();
+                $.ajax({
+                    url: `/api/inventory/low-stock/?t=${timestamp}`,
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    success: function(data) {
+                        if (data && data.data && data.data.length > 0) {
+                            const lowStockProducts = data.data;
+                            $('#notificationCount').text(lowStockProducts.length).show();
+                            $('#notificationIcon').attr('title', `${lowStockProducts.length} products with low stock`);
+                            
+                            // Update dropdown content
+                            updateNotificationDropdown(lowStockProducts);
+                            
+                            // Add click event to show low stock products modal
+                            $('#viewAllNotifications').off('click').on('click', function(e) {
+                                e.preventDefault();
+                                showLowStockProducts(lowStockProducts);
+                            });
+                            
+                            // If modal is open and this is a force refresh, update the modal content
+                            if (forceRefresh && $('#lowStockModal').is(':visible')) {
+                                showLowStockProducts(lowStockProducts);
+                            }
+                        } else {
+                            $('#notificationCount').hide();
+                            $('#notificationDropdownContent').html(`
+                                <div class="text-center py-3">
+                                    <i class="fas fa-check-circle text-success fa-2x"></i>
+                                    <p class="mt-2">No notifications</p>
+                                </div>
+                            `);
+                            
+                            // If modal is open and this is a force refresh, close it if no more low stock products
+                            if (forceRefresh && $('#lowStockModal').is(':visible')) {
+                                bootstrap.Modal.getInstance(document.getElementById('lowStockModal')).hide();
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Failed to fetch notifications:', error);
+                        $('#notificationDropdownContent').html(`
+                            <div class="text-center py-3">
+                                <i class="fas fa-exclamation-circle text-danger fa-2x"></i>
+                                <p class="mt-2">Failed to load notifications</p>
+                            </div>
+                        `);
+                    }
+                });
+            }
+            
+            // Function to get CSRF token from cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+            // Update notification dropdown content
+            function updateNotificationDropdown(products) {
+                let dropdownContent = '';
+                
+                products.forEach(function(product) {
+                    const formattedName = product.name.replace(/_/g, ' ');
+                    const lastUpdated = product.last_updated ? new Date(product.last_updated).toLocaleString() : 'N/A';
+                    dropdownContent += `
+                        <a class="dropdown-item notification-item" href="/product_list/edit/${product.product_id}/">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${formattedName}</strong>
+                                    <div class="small text-muted">${product.category || 'No category'}</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-danger">${product.current_quantity}/${product.low_stock_threshold}</span>
+                                    <div class="small text-muted">${lastUpdated}</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 d-flex justify-content-end">
+                                <button class="btn btn-sm btn-outline-primary edit-stock-btn me-2" data-product-id="${product.product_id}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-outline-success add-stock-btn" data-product-id="${product.product_id}" data-product-name="${formattedName}">
+                                    <i class="fas fa-plus"></i> Add Stock
+                                </button>
+                            </div>
+                        </a>
+                    `;
+                });
+                
+                $('#notificationDropdownContent').html(dropdownContent);
+                
+                // Add hover effect
+                $('.notification-item').hover(
+                    function() { $(this).addClass('bg-light'); },
+                    function() { $(this).removeClass('bg-light'); }
+                );
+                
+                // Add click handlers for the buttons
+                $('.edit-stock-btn').off('click').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const productId = $(this).data('product-id');
+                    window.location.href = `/product_list/edit/${productId}/`;
+                });
+                
+                $('.add-stock-btn').off('click').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const productId = $(this).data('product-id');
+                    const productName = $(this).data('product-name');
+                    showAddStockModal(productId, productName);
+                });
+            }
+            
+            // Show low stock products in a modal
+            function showLowStockProducts(products) {
+                // Create modal if it doesn't exist
+                if (!$('#lowStockModal').length) {
+                    $('body').append(`
+                        <div class="modal fade" id="lowStockModal" tabindex="-1" aria-labelledby="lowStockModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="lowStockModalLabel">Low Stock Products</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Category</th>
+                                                        <th>Current Quantity</th>
+                                                        <th>Last Updated</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="lowStockTableBody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary" id="refreshLowStockData">
+                                            <i class="fas fa-sync-alt"></i> Refresh Data
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Add event listener for refresh button
+                    $(document).on('click', '#refreshLowStockData', function() {
+                        checkLowStockProducts(true);
+                    });
+                }
+                
+                // Populate table
+                let tableBody = $('#lowStockTableBody');
+                tableBody.empty();
+                
+                products.forEach(function(product) {
+                    const formattedName = product.name.replace(/_/g, ' ');
+                    const lastUpdated = product.last_updated ? new Date(product.last_updated).toLocaleString() : 'N/A';
+                    tableBody.append(`
+                        <tr>
+                            <td>${formattedName}</td>
+                            <td>${product.category || 'No category'}</td>
+                            <td><span class="badge bg-danger">${product.current_quantity}</span></td>
+                            <td>${lastUpdated}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="/product_list/edit/${product.product_id}/" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button class="btn btn-sm btn-success add-stock-btn" data-product-id="${product.product_id}" data-product-name="${formattedName}">
+                                        <i class="fas fa-plus"></i> Add Stock
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                });
+                
+                // Add click event for add stock buttons
+                $('.add-stock-btn').off('click').on('click', function() {
+                    const productId = $(this).data('product-id');
+                    const productName = $(this).data('product-name');
+                    showAddStockModal(productId, productName);
+                });
+                
+                // Show modal
+                var lowStockModal = new bootstrap.Modal(document.getElementById('lowStockModal'));
+                lowStockModal.show();
+            }
+            
+            // Function to show add stock modal
+            function showAddStockModal(productId, productName) {
+                // Hide low stock modal
+                $('#lowStockModal').modal('hide');
+                
+                // Create add stock modal if it doesn't exist
+                if (!$('#quickAddStockModal').length) {
+                    $('body').append(`
+                        <div class="modal fade" id="quickAddStockModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Add Stock</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="quickAddStockForm">
+                                            <input type="hidden" id="quickAddStockProductId">
+                                            <div class="mb-3">
+                                                <label class="form-label">Product</label>
+                                                <input type="text" class="form-control" id="quickAddStockProductName" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="quickAddStockQuantity" class="form-label">Quantity to Add</label>
+                                                <input type="number" class="form-control" id="quickAddStockQuantity" min="1" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="quickAddStockNotes" class="form-label">Notes (Optional)</label>
+                                                <textarea class="form-control" id="quickAddStockNotes" rows="2"></textarea>
+                                            </div>
+                                        </form>
+                                        <div id="quickAddStockStatus" class="alert" style="display: none;"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" id="backToLowStockBtn">Exit</button>
+                                        <button type="button" class="btn btn-success" id="confirmQuickAddStock">
+                                            <i class="fas fa-plus me-2"></i>Add Stock
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Add event listeners
+                    $(document).on('click', '#backToLowStockBtn', function() {
+                        $('#quickAddStockModal').modal('hide');
+                        $('#lowStockModal').modal('show');
+                    });
+                    
+                    $(document).on('click', '#confirmQuickAddStock', function() {
+                        const productId = $('#quickAddStockProductId').val();
+                        const quantity = $('#quickAddStockQuantity').val();
+                        const notes = $('#quickAddStockNotes').val();
+                        
+                        if (!quantity || quantity < 1) {
+                            $('#quickAddStockStatus').removeClass('alert-success').addClass('alert-danger')
+                                .text('Please enter a valid quantity').show();
+                            return;
+                        }
+                        
+                        // Show loading state
+                        const btn = $(this);
+                        const originalText = btn.html();
+                        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...');
+                        
+                        // Send request to add stock
+                        $.ajax({
+                            url: '/api/product/add-stock/',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                product_id: parseInt(productId),
+                                quantity: parseInt(quantity),
+                                notes: notes
+                            }),
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            success: function(response) {
+                                $('#quickAddStockStatus').removeClass('alert-danger').addClass('alert-success')
+                                    .html(`<i class="fas fa-check-circle me-2"></i>Successfully added ${quantity} units to inventory. New quantity: ${response.new_quantity}`).show();
+                                
+                                // Clear form fields
+                                $('#quickAddStockQuantity').val('');
+                                $('#quickAddStockNotes').val('');
+                                
+                                // Update low stock data in the background
+                                setTimeout(function() {
+                                    checkLowStockProducts(true);
+                                }, 1000);
+                                
+                                // Enable button after 2 seconds
+                                setTimeout(function() {
+                                    btn.prop('disabled', false).html(originalText);
+                                }, 2000);
+                            },
+                            error: function(xhr) {
+                                let errorMsg = 'Failed to add stock';
+                                if (xhr.responseJSON && xhr.responseJSON.error) {
+                                    errorMsg = xhr.responseJSON.error;
+                                }
+                                $('#quickAddStockStatus').removeClass('alert-success').addClass('alert-danger')
+                                    .html(`<i class="fas fa-exclamation-circle me-2"></i>${errorMsg}`).show();
+                                
+                                // Enable button
+                                btn.prop('disabled', false).html(originalText);
+                            }
+                        });
+                    });
+                }
+                
+                // Set product data and show modal
+                $('#quickAddStockProductId').val(productId);
+                $('#quickAddStockProductName').val(productName);
+                $('#quickAddStockQuantity').val('');
+                $('#quickAddStockNotes').val('');
+                $('#quickAddStockStatus').hide();
+                
+                const quickAddStockModal = new bootstrap.Modal(document.getElementById('quickAddStockModal'));
+                quickAddStockModal.show();
+            }
+            
+            // Preload alert sound
+            preloadAlertSound();
+            
+            // Check for low stock products on page load
+            checkLowStockProducts();
+            
+            // Set up periodic check for low stock products (every 3 secs)
+            setInterval(function() {
+                checkLowStockProducts();
+            }, 3000); // 3secs
+            
+            // Function to preload alert sound
+            function preloadAlertSound() {
+                try {
+                    // Create an audio element for notifications if needed
+                    if (!window.notificationSound) {
+                        window.notificationSound = new Audio('{% static "sounds/notification.mp3" %}');
+                        // Attempt to load the sound file (might fail silently if the file doesn't exist)
+                        window.notificationSound.load();
+                    }
+                } catch (e) {
+                    console.log("Alert sound preloading failed:", e);
+                    // Silently fail if audio preloading is not supported
+                }
+            }
+        });
+    </script>
+    {% endblock %} {% block extrascripts %}{% endblock extrascripts %}
+</body>
+
+</html>

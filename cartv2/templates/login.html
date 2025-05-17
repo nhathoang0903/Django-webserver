@@ -1,0 +1,457 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Shopping Cart System</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --primary-hover: #4338CA;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --bg-light: #F9FAFB;
+            --success-color: #10B981;
+            --success-bg: #DCFCE7;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+        }
+
+        .brand-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .brand-content {
+            max-width: 400px;
+        }
+
+        .brand-logo {
+            width: 140px;
+            margin-bottom: 2rem;
+        }
+
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-features {
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .feature-item:hover {
+            transform: translateX(8px);
+        }
+
+        .login-section {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .login-form {
+            max-width: 360px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .login-footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .login-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-error {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .alert-success {
+            background: var(--success-bg);
+            color: var(--success-color);
+        }
+
+        /* Auth Required Dialog Styles */
+        .auth-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-dialog-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        .auth-dialog-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .auth-dialog-title {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .auth-dialog-message {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-dialog-button {
+            padding: 0.75rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-dialog-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                margin: 1rem;
+            }
+
+            .brand-section {
+                padding: 2rem;
+                text-align: center;
+            }
+
+            .brand-content {
+                margin: 0 auto;
+            }
+
+            .login-section {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="brand-section">
+            <div class="brand-content">
+                <img src="{% static 'img/icon2_fixed.png' %}" alt="Logo" class="brand-logo">
+                <h1 class="brand-title">Welcome to Smart Shopping Cart System</h1>
+                <p>Experience the future of retail management with our innovative solutions.</p>
+                
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Smart inventory tracking</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Real-time analytics</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure management system</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-section">
+            <div class="login-header">
+                <h2>Sign in to your account</h2>
+                <p>Enter your credentials to access the dashboard</p>
+            </div>
+
+            <form method="POST" action="{% url 'login' %}" class="login-form">
+                {% csrf_token %}
+                {% if next_url %}
+                <input type="hidden" name="next_url" value="{{ next_url }}">
+                {% endif %}
+                
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                        <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Sign in
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>Having trouble? <a href="#">Contact support</a></p>
+                <p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a> | <a href="{% url 'index' %}">Back to Home</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Required Dialog -->
+    <div id="authDialog" class="auth-dialog">
+        <div class="auth-dialog-content">
+            <div class="auth-dialog-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h3 class="auth-dialog-title">Authentication Required</h3>
+            <p class="auth-dialog-message">Please sign in to continue</p>
+            <button class="auth-dialog-button" onclick="closeAuthDialog()">OK</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Show auth dialog based on server-side flag and URL conditions
+        window.onload = function() {
+            const shouldShowDialog = {{ show_auth_dialog|yesno:"true,false" }};
+            const currentPath = window.location.pathname;
+            const nextUrl = new URLSearchParams(window.location.search).get('next');
+            const referrer = document.referrer;
+            
+            // Define login-related paths that should not show dialog
+            const loginPaths = ['/', '/login/'];
+            const protectedPaths = ['/history_list/', '/dashboard/', '/products/', '/statistics/'];
+            
+            // Check current conditions
+            const isLoginPath = loginPaths.includes(currentPath);
+            const isRefresh = loginPaths.some(path => referrer.includes(path));
+            const isProtectedPath = protectedPaths.some(path => referrer.includes(path));
+            const isDirectAccess = !referrer;
+
+            if (shouldShowDialog && !isRefresh && !isDirectAccess && (isProtectedPath || nextUrl)) {
+                document.getElementById('authDialog').style.display = 'flex';
+            }
+        }
+
+        // Handle browser navigation
+        window.onpopstate = function(event) {
+            const protectedPaths = ['/history_list/', '/dashboard/', '/products/', '/statistics/'];
+            const loginPaths = ['/', '/login/'];
+            const currentPath = window.location.pathname;
+            
+            if (!loginPaths.includes(currentPath) && protectedPaths.some(path => currentPath.includes(path))) {
+                document.getElementById('authDialog').style.display = 'flex';
+            }
+        };
+
+        function closeAuthDialog() {
+            document.getElementById('authDialog').style.display = 'none';
+        }
+
+        // Prevent going back if not authenticated
+        const currentPath = window.location.pathname;
+        const protectedPaths = ['/history_list/', '/dashboard/', '/products/', '/statistics/'];
+        const loginPaths = ['/', '/login/'];
+        
+        if (!loginPaths.includes(currentPath) && protectedPaths.some(path => currentPath.includes(path))) {
+            history.pushState(null, null, location.href);
+            window.onpopstate = function(event) {
+                history.go(1);
+                document.getElementById('authDialog').style.display = 'flex';
+            };
+        }
+
+        // Close dialog when clicking outside
+        document.getElementById('authDialog').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAuthDialog();
+            }
+        });
+
+        // Add ESC key support to close dialog
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAuthDialog();
+            }
+        });
+
+        // Enhanced form submission with validation
+        document.querySelector('.login-form').addEventListener('submit', function(e) {
+            const username = this.querySelector('input[name="username"]').value;
+            const password = this.querySelector('input[name="password"]').value;
+
+            // Remove any existing alerts
+            const existingAlert = this.querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            if (!username || !password) {
+                e.preventDefault();
+                const alert = document.createElement('div');
+                alert.className = 'alert';
+                alert.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Please fill in all required fields</span>
+                `;
+                this.insertBefore(alert, this.firstChild);
+            }
+        });
+    </script>
+</body>
+
+</html>

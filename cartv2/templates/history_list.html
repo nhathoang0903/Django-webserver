@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load tz %}
+
+{% block title %}Purchase History - Smart Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 mx-auto overflow-hidden" style="max-width: 1800px;">
+    <div class="content-wrapper">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+            <h2 class="text-primary fw-bold">
+                <i class="fas fa-history me-2"></i>Purchase History
+            </h2>
+            <button id="refreshBtn" class="btn btn-outline-primary">
+                <i class="fas fa-sync-alt me-1"></i> Refresh
+                <small class="ms-2 text-muted" id="lastUpdated"></small>
+            </button>
+        </div>
+
+        <!-- Search Section -->
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <form id="searchForm" method="GET" action="{% url 'history_list' %}">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-search text-primary"></i>
+                                </span>
+                                <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search by ID, customer, date, or note..." value="{{ search_term }}">
+                                <input type="hidden" id="searchFilterInput" name="filter" value="{{ search_filter }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                {% if is_search %}
+                                <a href="{% url 'history_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="dropdown-filter">
+                            <select id="searchFilter" class="form-select">
+                                <option value="all" {% if search_filter == 'all' %}selected{% endif %}>
+                                    <i class="fas fa-filter"></i> All Fields
+                                </option>
+                                <option value="id" {% if search_filter == 'id' %}selected{% endif %}>
+                                    <i class="fas fa-hashtag"></i> Purchase ID
+                                </option>
+                                <option value="customer" {% if search_filter == 'customer' %}selected{% endif %}>
+                                    <i class="fas fa-user"></i> Customer Name
+                                </option>
+                                <option value="date" {% if search_filter == 'date' %}selected{% endif %}>
+                                    <i class="fas fa-calendar"></i> Date
+                                </option>
+                                <option value="note" {% if search_filter == 'note' %}selected{% endif %}>
+                                    <i class="fas fa-sticky-note"></i> Note
+                                </option>
+                            </select>
+                            <i class="fas fa-chevron-down dropdown-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Card -->
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-light py-3">
+                <h5 class="mb-0 fw-bold text-primary">Transaction Records</h5>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center my-4 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">No</th>
+                                <th>Purchase ID</th>
+                                <th>Customer</th>
+                                <th>Date & Time</th>
+                                <th class="text-end">Total Amount (VNĐ)</th>
+                                <th>Product Details</th>
+                                <th>Note</th>
+                                <th class="text-center">Invoice</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for history in history_list %}
+                            <tr>
+                                <td class="text-center fw-semibold">{{ forloop.counter }}</td>
+                                <td><span class="text-primary">{{ history.random_id }}</span></td>
+                                <td>
+                                    {% if history.customer %}
+                                        <span class="fw-semibold">{{ history.fullname }}</span>
+                                    {% else %}
+                                        <span class="text-muted fst-italic">Dsoft-member</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% timezone "Asia/Ho_Chi_Minh" %}
+                                        {{ history.timestamp|date:"Y-m-d H:i" }}
+                                    {% endtimezone %}
+                                </td>
+                                <td class="text-end fw-bold">{{ history.total_amount|intcomma }}</td>
+                                <td>
+                                    <div class="product-details">
+                                        {% for product in history.product_details %}
+                                        <div class="product-item">
+                                            <span class="product-name">{{ product.name }}</span>
+                                            <span class="product-quantity">x {{ product.quantity }}</span>
+                                            <span class="product-price">{{ product.price|intcomma }} VNĐ</span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if history.history.note %}
+                                        <div class="history-note" data-bs-toggle="tooltip" title="{{ history.history.note }}">
+                                            {{ history.history.note }}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted fst-italic">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if history.random_id %}
+                                        <a href="{% url 'generate_invoice' history.random_id %}" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-primary"
+                                           data-bs-toggle="tooltip"
+                                           title="View Invoice PDF">
+                                            <i class="fas fa-receipt"></i>
+                                            Invoice
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-secondary">No Invoice</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="fas fa-receipt fa-3x mb-3 text-muted"></i>
+                                        <p class="text-muted mb-0">No purchase history available</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="card-footer bg-light py-3">
+                <nav aria-label="Purchase history pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="First">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="Previous">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="Next">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="Last">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Base styles */
+.table th {
+    white-space: nowrap;
+    padding: 1rem;
+    font-weight: 600;
+}
+
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* Product details styling */
+.product-details {
+    max-height: 100px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+    font-size: 0.875rem;
+}
+
+.product-name {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.product-quantity {
+    color: #6c757d;
+    margin-right: 1rem;
+}
+
+.product-price {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Note styling */
+.history-note {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-note:hover {
+    white-space: normal;
+    word-wrap: break-word;
+    cursor: pointer;
+}
+
+/* Button styling */
+#refreshBtn {
+    transition: all 0.3s ease;
+}
+
+#refreshBtn:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+#refreshBtn i.fa-spin {
+    transition: transform 1s ease;
+}
+
+/* Empty state styling */
+.empty-state {
+    padding: 2rem;
+    color: #6c757d;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.table tbody tr {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Smooth transition for table updates */
+.table-responsive {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.table-responsive.updating {
+    position: relative;
+}
+
+.table-responsive.updating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Responsive table */
+.table-responsive {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Enhanced dropdown styling */
+.dropdown-filter {
+    position: relative;
+}
+
+.dropdown-filter select {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dropdown-filter select:hover {
+    background-color: #edf2ff;
+    border-color: var(--bs-primary);
+}
+
+.dropdown-filter select:focus {
+    background-color: #edf2ff;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.1);
+}
+
+.dropdown-filter select option {
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    background-color: white;
+}
+
+.dropdown-filter select option:checked,
+.dropdown-filter select option:hover {
+    background: linear-gradient(0deg, #edf2ff 0%, #f8f9fa 100%);
+    color: var(--bs-primary);
+}
+
+.dropdown-filter select option:active {
+    background: linear-gradient(0deg, #dbe4ff 0%, #edf2ff 100%);
+    color: var(--bs-primary);
+}
+
+/* Add hover effect for options */
+.dropdown-filter select option:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .dropdown-filter select {
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-details {
+        max-height: 80px;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Search section styles */
+#searchInput:focus {
+    background-color: #fff;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.1);
+}
+
+#searchFilter:focus {
+    background-color: #edf2ff;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.1);
+}
+
+/* Pagination styling */
+.pagination {
+    gap: 0.25rem;
+}
+
+.page-link {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--bs-primary);
+    border: 1px solid #dee2e6;
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background-color: var(--bs-primary);
+    color: white;
+    border-color: var(--bs-primary);
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(45deg, #4338ca, #4f46e5);
+    border-color: #4338ca;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.page-item:not(.active) .page-link:hover {
+    background: #edf2ff;
+    color: var(--bs-primary);
+    border-color: #c7d2fe;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+}
+
+/* Selected row highlight */
+.table tbody tr.selected {
+    background-color: #edf2ff;
+    border-color: #c7d2fe;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
+
+    // Function to update last updated timestamp
+    function updateTimestamp() {
+        const now = new Date();
+        document.getElementById('lastUpdated').textContent = 
+            `Last updated: ${now.toLocaleTimeString()}`;
+    }
+    updateTimestamp();
+
+    // Function to compare two HTML strings to check if they're different
+    function isContentDifferent(oldContent, newContent) {
+        // Simple string comparison - if they're different, content has changed
+        return oldContent !== newContent;
+    }
+
+    // Function to update history table with smooth transition
+    async function updateHistoryTable() {
+        try {
+            // Store current URL parameters
+            const currentUrl = new URL(window.location.href);
+            
+            // Show loading indicator in a non-intrusive way
+            const tableContainer = document.querySelector('.table-responsive');
+            tableContainer.classList.add('updating');
+            
+            const response = await fetch(currentUrl.toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Get new table content
+            const newTable = doc.querySelector('.table-responsive');
+            const newPagination = doc.querySelector('.card-footer');
+            
+            // Get current table content
+            const currentTable = document.querySelector('.table-responsive');
+            const currentPagination = document.querySelector('.card-footer');
+            
+            // Check if table content has changed
+            const tableHasChanged = isContentDifferent(
+                currentTable.innerHTML, 
+                newTable.innerHTML
+            );
+            
+            // Check if pagination has changed
+            const paginationHasChanged = newPagination && currentPagination && 
+                isContentDifferent(
+                    currentPagination.innerHTML, 
+                    newPagination.innerHTML
+                );
+            
+            // Only update if content has actually changed
+            if (tableHasChanged) {
+                // Apply a subtle fade effect to the entire table
+                currentTable.style.transition = 'opacity 0.3s ease';
+                currentTable.style.opacity = '0.7';
+                
+                // Wait for the fade effect to be noticeable
+                setTimeout(() => {
+                    // Update the content
+                    currentTable.innerHTML = newTable.innerHTML;
+                    
+                    // Fade back in
+                    currentTable.style.opacity = '1';
+                    
+                    // Remove updating class after transition completes
+                    setTimeout(() => {
+                        tableContainer.classList.remove('updating');
+                        currentTable.style.transition = '';
+                    }, 300);
+                }, 150);
+            } else {
+                // If no changes, just remove the updating class
+                tableContainer.classList.remove('updating');
+            }
+            
+            // Update pagination if exists and has changed
+            if (paginationHasChanged) {
+                // Apply a subtle fade effect
+                currentPagination.style.transition = 'opacity 0.3s ease';
+                currentPagination.style.opacity = '0.7';
+                
+                // Wait for the fade effect to be noticeable
+                setTimeout(() => {
+                    // Update the content
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                    
+                    // Fade back in
+                    currentPagination.style.opacity = '1';
+                    
+                    // Remove transition after it completes
+                    setTimeout(() => {
+                        currentPagination.style.transition = '';
+                    }, 300);
+                }, 150);
+            }
+            
+            // Always update timestamp
+            updateTimestamp();
+            
+            // Re-initialize tooltips if content changed
+            if (tableHasChanged || paginationHasChanged) {
+                const newTooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                newTooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
+            }
+            
+        } catch (error) {
+            console.error('Error updating history:', error);
+            // Remove updating class in case of error
+            document.querySelector('.table-responsive').classList.remove('updating');
+        }
+    }
+
+    // Refresh functionality for manual refresh button
+    const refreshBtn = document.getElementById('refreshBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    refreshBtn.addEventListener('click', async () => {
+        try {
+            refreshBtn.disabled = true;
+            refreshBtn.querySelector('i').classList.add('fa-spin');
+            loadingSpinner.classList.remove('d-none');
+
+            await updateHistoryTable();
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to refresh data');
+        } finally {
+            refreshBtn.disabled = false;
+            refreshBtn.querySelector('i').classList.remove('fa-spin');
+            loadingSpinner.classList.add('d-none');
+        }
+    });
+
+    // Set up auto-refresh every 5 seconds
+    const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
+    setInterval(updateHistoryTable, AUTO_REFRESH_INTERVAL);
+
+    // Handle search filter changes
+    const searchFilter = document.getElementById('searchFilter');
+    const searchFilterInput = document.getElementById('searchFilterInput');
+    
+    searchFilter.addEventListener('change', function() {
+        searchFilterInput.value = this.value;
+    });
+});
+</script>
+{% endblock %}

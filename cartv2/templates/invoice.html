@@ -1,0 +1,416 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Purchase Invoice - Smart Shopping Cart</title>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'img/icon.png' %}" type="image/x-icon">
+
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <style>
+        .invoice-box {
+            position: relative;
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: #555;
+            background-color: white;
+        }
+
+        .invoice-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .company-info {
+            flex: 0 0 auto;
+        }
+
+        .qr-and-details {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;  
+            text-align: center;
+        }
+
+        .qr-code-container {
+            margin-bottom: 20px;
+            width: 110px;  
+            position: relative;
+        }
+
+        .qr-code-id {
+            position: static;
+            transform: none; 
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px; 
+        }
+
+        #qrcode {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .invoice-details {
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .invoice-box table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+        }
+
+        .invoice-box table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .invoice-box table tr td:nth-child(2) {
+            text-align: right;
+        }
+
+        .invoice-box table tr.top table td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.top table td.title {
+            font-size: 45px;
+            line-height: 45px;
+            color: #333;
+        }
+
+        .invoice-box table tr.information table td {
+            padding-bottom: 40px;
+        }
+
+        .invoice-box table tr.heading td {
+            background: #eee;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        .invoice-box table tr.details td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+        }
+
+        .invoice-box table tr.item.last td {
+            border-bottom: none;
+        }
+
+        .invoice-box table tr.total td:nth-child(2) {
+            border-top: 2px solid #eee;
+            font-weight: bold;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        .invoice-box {
+            background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+            border-radius: 15px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .company-info {
+            color: #2c3e50;
+        }
+
+        .company-info h2 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            color: #0066cc;
+        }
+
+        .company-info p {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .invoice-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .invoice-details h3 {
+            color: #0066cc;
+            margin-bottom: 15px;
+        }
+
+        table tr.heading td {
+            background: #0066cc;
+            color: white;
+            padding: 12px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        table tr.item td {
+            padding: 12px 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tr.item:hover {
+            background-color: #f8f9fa;
+        }
+
+        table tr.total {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        table tr.total td {
+            padding: 15px 5px;
+            color: #0066cc;
+        }
+
+        .thank-you-message {
+            margin-top: 50px;
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #2c3e50;
+            font-size: 16px;
+            border: 1px dashed #0066cc;
+        }
+
+        .print-button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .print-button:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .invoice-footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        /* Thêm border cho từng dòng sản phẩm */
+        .item td {
+            border: 1px solid #eee;
+        }
+
+        /* Định dạng số lượng */
+        .quantity-cell {
+            font-weight: bold;
+            color: #0066cc;
+        }
+
+        /* Định dạng giá */
+        .price-cell {
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Hiệu ứng hover cho nút in */
+        .print-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .print-button:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transition: width 0.3s ease, height 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .print-button:hover:after {
+            width: 200%;
+            height: 200%;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .heading td {
+            background: #1a53ff !important; 
+            color: #ffffff;
+            padding: 15px !important;
+            font-weight: 600;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #1a53ff;
+            border-bottom: 1px solid #1a53ff;
+        }
+
+        .item td {
+            background: #ffffff;
+            padding: 12px 15px !important;
+            border-bottom: 1px solid #dddddd;
+            transition: all 0.3s ease;
+        }
+
+        .item:hover td {
+            background-color: #f8f9ff;
+        }
+
+        .quantity-cell {
+            font-weight: 600;
+            color: #1a53ff !important;
+            text-align: center;
+        }
+
+        .price-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .total td {
+            background: #f8f9ff !important;
+            font-weight: 700;
+            color: #1a53ff;
+            border-top: 2px solid #1a53ff !important;
+            padding: 15px !important;
+        }
+        
+        @media (max-width: 768px) {
+            .product-table {
+                font-size: 14px;
+            }
+            
+            .heading td {
+                padding: 12px 10px !important;
+            }
+            
+            .item td {
+                padding: 10px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="no-print" style="text-align: center; margin: 20px;">
+        <button class="print-button" onclick="window.print()">
+            <i class="fas fa-print"></i> Print Invoice
+        </button>
+    </div>
+    
+    <div class="invoice-box">
+        <!-- Main content -->
+        <div class="invoice-content">
+            <div class="invoice-header">
+                <div class="company-info">
+                    <h2>CARTSY-Smart Shopping Cart</h2>
+                    <p>Pick & Go System<br/>
+                    D-Soft Join Stock Company</p>
+                </div>
+                
+                <div class="qr-and-details">
+                    <div class="qr-code-container">
+                        <div id="qrcode"></div>
+                        <div class="qr-code-id">ID: {{ history.random_id }}</div>
+                    </div>
+
+                    <div class="invoice-details">
+                        <h3>INVOICE</h3>
+                        Date: {{ history.timestamp|date:"Y-m-d H:i" }}<br />
+                        Customer: {% if history.customer_name %}{{ history.customer_name }}{% elif history.guest_name %}{{ history.guest_name }}{% else %}Guest{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <table cellpadding="0" cellspacing="0" class="product-table">
+                <tr class="heading">
+                    <td style="width: 40%;">PRODUCT NAME</td>
+                    <td style="width: 15%; text-align: center;">QUANTITY</td>
+                    <td style="width: 20%; text-align: right;">UNIT PRICE</td>
+                    <td style="width: 25%; text-align: right;">TOTAL</td>
+                </tr>
+
+                {% for product in history.product_details %}
+                <tr class="item {% if forloop.last %}last{% endif %}">
+                    <td class="product-name">{{ product.name }}</td>
+                    <td class="quantity-cell">{{ product.quantity }}</td>
+                    <td class="price-cell" style="text-align: right;">{{ product.unit_price|intcomma }} ₫</td>
+                    <td class="price-cell" style="text-align: right;">{{ product.total_price|intcomma }} ₫</td>
+                </tr>
+                {% endfor %}
+
+                <tr class="total">
+                    <td colspan="3" style="text-align: right;"><strong>TOTAL AMOUNT:</strong></td>
+                    <td class="price-cell" style="text-align: right;"><strong>{{ history.total_amount|intcomma }} ₫</strong></td>
+                </tr>
+            </table>
+            
+            <div class="thank-you-message">
+                <strong>Thank you for shopping with Smart Shopping Cart!</strong>
+                <br>
+                <small>We appreciate your business</small>
+            </div>
+
+            <div class="invoice-footer">
+                <p>For any questions about this invoice, please contact our customer service</p>
+                <p>Email: support@smartshoppingcart.com | Phone: (84) 123-456-789</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Generate QR code
+        window.onload = function() {
+            var qrcode = new QRCode(document.getElementById("qrcode"), {
+                text: "{{ history.random_id }}",
+                width: 100,
+                height: 100,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        };
+    </script>
+</body>
+</html>

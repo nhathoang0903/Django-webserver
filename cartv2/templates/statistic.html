@@ -1,0 +1,2349 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Statistics - Smart Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 mx-auto overflow-hidden" style="max-width: 1800px;">
+    <div class="content-wrapper">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+            <h2 class="text-primary fw-bold">
+                <i class="fas fa-chart-line me-2"></i>Statistics Dashboard
+            </h2>
+        </div>
+
+        <!-- Summary Cards Row -->
+        <div class="row g-4 mb-4">
+            <!-- Combined Revenue Card -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-primary">
+                                <i class="fas fa-money-bill-wave fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-primary text-primary">Revenue Dashboard</span>
+                        </div>
+                        <div class="revenue-container">
+                            <div class="revenue-section mb-3">
+                                <h6 class="text-muted mb-2">Today's Revenue</h6>
+                                <h3 class="mb-0" id="today-revenue">{{ total_revenue|floatformat:2 }} VNĐ</h3>
+                            </div>
+                            <div class="revenue-section mt-2 pt-3 border-top">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h6 class="text-muted mb-0 period-name">Today</h6>
+                                    <span class="badge bg-light text-secondary ms-2 period-label">Selected Period</span>
+                                </div>
+                                <h3 class="mb-0" id="period-revenue">{{ total_revenue|floatformat:2 }} VNĐ</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Peak Hour Card -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-warning">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-warning text-warning">Peak Time</span>
+                        </div>
+                        <h6 class="text-muted mb-2">Peak Hour</h6>
+                        <h3 class="mb-0">{{ peak_hour }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Customers Card -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-info">
+                                <i class="fas fa-crown fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-info text-info">Top Customer</span>
+                        </div>
+                        <h6 class="text-muted mb-2">Most Valuable Customer</h6>
+                        <h3 class="mb-0" id="top-customer-name">Loading...</h3>
+                        <small class="text-muted" id="top-customer-spent"></small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Products Card -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-purple">
+                                <i class="fas fa-star fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-purple text-purple">Top Items</span>
+                        </div>
+                        <h6 class="text-muted mb-2">Today's Top-Selling Products</h6>
+                        <div class="top-products">
+                            {% for product in top_sales %}
+                            <span class="badge bg-soft-info text-info me-2 mb-2">{{ product.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Row 2 -->
+        <div class="row g-4 mb-4">
+            <!-- Mini Stats Card: Total Products -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-success">
+                                <i class="fas fa-box-open fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-success text-success">Inventory</span>
+                        </div>
+                        <h6 class="text-muted mb-2">Total Products</h6>
+                        <h3 class="mb-0">{{ total_products_count }}</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mini Stats Card: Orders Count -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-info">
+                                <i class="fas fa-receipt fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-info text-info">Orders</span>
+                        </div>
+                        <h6 class="text-muted mb-2">Total Orders</h6>
+                        <h3 class="mb-0">{{ orders_count }}</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mini Stats Card: Customers Count -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-purple">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-purple text-purple">Users</span>
+                        </div>
+                        <h6 class="text-muted mb-2">Total Customers</h6>
+                        <h3 class="mb-0">{{ customers_count }}</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mini Stats Card: Low Stock Products -->
+            <div class="col-md-3">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-danger">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                            <span class="badge bg-soft-danger text-danger">Alert</span>
+                        </div>
+                        <h6 class="text-muted mb-2">Low Stock Products</h6>
+                        <h3 class="mb-0">{{ low_stock_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4">
+            <!-- Revenue Chart -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Revenue Over Time</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="date-range-picker me-3">
+                                    <div class="input-group input-group-sm">
+                                        <input type="date" id="start-date" class="form-control form-control-sm">
+                                        <span class="input-group-text">to</span>
+                                        <input type="date" id="end-date" class="form-control form-control-sm">
+                                        <button id="apply-date-range" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-check me-1"></i> Apply
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="time-range" class="btn-group">
+                                    <button onclick="updateChart('today')" class="btn btn-sm btn-outline-primary active" id="btn-today">
+                                        <i class="fas fa-calendar-day me-1"></i> Today
+                                    </button>
+                                    <button onclick="updateChart('yesterday')" class="btn btn-sm btn-outline-primary" id="btn-yesterday">
+                                        <i class="fas fa-calendar-minus me-1"></i> Yesterday
+                                    </button>
+                                    <button onclick="updateChart('this_week')" class="btn btn-sm btn-outline-primary" id="btn-this_week">
+                                        <i class="fas fa-calendar-week me-1"></i> Last 7 Days
+                                    </button>
+                                    <button onclick="updateChart('this_month')" class="btn btn-sm btn-outline-primary" id="btn-this_month">
+                                        <i class="fas fa-calendar-alt me-1"></i> This Month
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body position-relative">
+                        <!-- Period Revenue Overlay -->
+                        <div class="period-revenue-overlay">
+                            <div class="period-display">
+                                <span id="period-date-range" class="period-date-range">Today</span>
+                                <div class="period-amount">
+                                    <span class="period-label">Period Revenue:</span>
+                                    <span id="period-total-revenue" class="period-value">{{ total_revenue }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="line" class="chart-container"></div>
+                        <div id="revenue-summary" class="mt-3 d-flex justify-content-between">
+                            <div class="text-center p-2 border rounded">
+                                <small class="text-muted d-block">Total Revenue</small>
+                                <span class="fw-bold text-primary" id="chart-total-revenue">-</span>
+                            </div>
+                            <div class="text-center p-2 border rounded">
+                                <small class="text-muted d-block">Average Per Day</small>
+                                <span class="fw-bold text-success" id="chart-avg-revenue">-</span>
+                            </div>
+                            <div class="text-center p-2 border rounded">
+                                <small class="text-muted d-block">Highest Day</small>
+                                <span class="fw-bold text-info" id="chart-max-revenue">-</span>
+                            </div>
+                            <div class="text-center p-2 border rounded">
+                                <small class="text-muted d-block">Period</small>
+                                <span class="fw-bold text-secondary" id="chart-period">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day Part Analysis -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Day-Part Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="day-part-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Charts Row -->
+        <div class="row g-4 mt-4">
+            <!-- Top Sales Chart -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Top Sales Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="donut" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Hours Chart -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Trading Hours Analysis</hhe>
+                    </div>
+                    <div class="card-body">
+                        <div id="trading-donut" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Customers Row -->
+        <div class="row g-4 mt-4">
+            <!-- Top Customers Summary -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-crown text-warning me-2"></i>Top Customers
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" id="top-customers-list">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Customers Chart -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Customer Spending Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="customer-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Chart Row -->
+        <div class="row g-4 mt-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Period Comparison Analysis</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="date-range-picker me-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-light">Period 1</span>
+                                        <input type="date" id="period1-start-date" class="form-control form-control-sm">
+                                        <span class="input-group-text">to</span>
+                                        <input type="date" id="period1-end-date" class="form-control form-control-sm">
+                                    </div>
+                                </div>
+                                <div class="date-range-picker me-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-light">Period 2</span>
+                                        <input type="date" id="period2-start-date" class="form-control form-control-sm">
+                                        <span class="input-group-text">to</span>
+                                        <input type="date" id="period2-end-date" class="form-control form-control-sm">
+                                    </div>
+                                </div>
+                                <button id="compare-periods" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-chart-line me-1"></i> Compare
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="comparison-chart" class="chart-container" style="height: 400px;">
+                            <div id="period-legend-overlay" class="period-legend-overlay">
+                                <div class="period-legend-item period-1">
+                                    <span class="period-legend-color" style="background-color: #0d6efd;"></span>
+                                    <span class="period-legend-text" id="period-1-text">Period 1</span>
+                                </div>
+                                <div class="period-legend-item period-2">
+                                    <span class="period-legend-color" style="background-color: #20c997;"></span>
+                                    <span class="period-legend-text" id="period-2-text">Period 2</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="comparison-summary" class="mt-3">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Period 1 Total:</span>
+                                            <span class="fw-bold text-primary" id="period1-total">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Period 2 Total:</span>
+                                            <span class="fw-bold text-success" id="period2-total">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Difference:</span>
+                                            <span class="fw-bold" id="period-diff">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Growth Rate:</span>
+                                            <span class="fw-bold" id="growth-rate">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Charts Row - New Charts -->
+        <div class="row g-4 mt-4">
+            <!-- Average Order Value Chart -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Average Order Value By Day</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="avg-order-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Time Chart -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Average Transaction Time</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="transaction-time-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- More New Charts Row -->
+        <div class="row g-4 mt-4">
+            <!-- Payment Status Ratio Chart -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Payment Status Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="payment-status-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock Products Table -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>Products Requiring Restock
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light sticky-top">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Current Stock</th>
+                                        <th>Threshold</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="low-stock-table">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Suggestion Chart Row -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Inventory Restock Suggestions (Based on Sales Trends)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="restock-suggestion-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekday Revenue Comparison Row -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Weekday vs Weekend Revenue</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="weekday-comparison-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Status Chart -->
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Device Status Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="device-status-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Ratings Row -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Average Product Ratings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="product-ratings-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">Most Rated Products</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="most-rated-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Soft background colors for badges */
+.bg-soft-primary {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.bg-soft-success {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.bg-soft-info {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+/* Add purple color classes */
+.bg-soft-purple {
+    background-color: rgba(111, 66, 193, 0.1) !important;
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+/* Card animations and styling */
+.stat-card {
+    transition: all 0.3s ease;
+    border-radius: 15px;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Chart containers */
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+    height: 450px; 
+}
+
+/* Button group styling */
+#time-range {
+    background: white;
+    padding: 3px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#time-range .btn {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+    margin: 0 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+#time-range .btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(13, 110, 253, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+#time-range .btn.active::before {
+    width: 200%;
+    height: 200%;
+}
+
+#time-range .btn:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: rgba(13, 110, 253, 0.4);
+}
+
+#time-range .btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+}
+
+#time-range .btn i {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+#time-range .btn.active i {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .row {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Chart sizes */
+#line, #day-part-chart, #donut, #trading-donut {
+    width: 100%;
+    min-height: 300px;
+}
+
+/* Animation cho cards khi thay đổi dữ liệu */
+.stat-card {
+    transform-origin: center;
+}
+
+.stat-card.updating {
+    animation: pulse 1s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+}
+
+/* Animation cho charts */
+.chart-container {
+    position: relative;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 100%;
+}
+
+.chart-container.updating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.card.updating {
+    position: relative;
+}
+
+.card.updating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 1;
+}
+
+#time-range {
+    z-index: 2;
+    position: relative;
+}
+
+#time-range .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+#time-range .btn-outline-primary:not(.active):hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: rgba(13, 110, 253, 0.4);
+}
+
+/* Điều chỉnh kích thước cho Revenue Chart */
+#line {
+    width: 100%;
+    min-height: 400px; /* Tăng chiều cao tối thiểu */
+}
+
+/* Điều chỉnh kích thước cho charts */
+.col-md-8 .card-body, 
+.col-md-4 .card-body {
+    height: 500px;  /* Đồng bộ chiều cao của cả hai chart */
+    padding: 1.5rem;
+}
+
+#line, 
+#day-part-chart {
+    width: 100%;
+    height: 100%;  /* Sử dụng full height của container */
+    min-height: 450px;
+}
+
+.chart-container {
+    height: 100%;  /* Đảm bảo chart container cũng full height */
+}
+
+/* Điều chỉnh container cho Trading Hours chart */
+#trading-donut {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.apexcharts-canvas {
+    margin: 0 auto;  /* Căn giữa canvas của chart */
+}
+
+/* Điều chỉnh kích thước cho Summary Cards */
+.stat-card .card-body {
+    padding: 1rem;
+    height: auto;  /* Thay đổi từ height cố định */
+}
+
+.stat-card .fa-2x {
+    font-size: 1.5rem;  /* Giảm kích thước icon */
+}
+
+.stat-card h3 {
+    font-size: 1.5rem;  /* Giảm kích thước text */
+    margin-bottom: 0;
+}
+
+.stat-card h6 {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .badge {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+}
+
+.stat-card .top-products {
+    margin-top: 0.5rem;
+}
+
+.stat-card .top-products .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Đảm bảo spacing nhất quán */
+.row.g-4.mb-4 {
+    margin-bottom: 1rem !important;
+}
+
+/* Date range picker styling */
+.date-range-picker .input-group {
+    width: auto;
+}
+.date-range-picker input[type="date"] {
+    max-width: 140px;
+}
+#revenue-summary .border {
+    border-color: #e9ecef !important;
+}
+@media (max-width: 992px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .date-range-picker {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    .date-range-picker .input-group {
+        width: 100%;
+    }
+    #time-range {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Additional styles for period total revenue display */
+.total-revenue-display {
+    display: inline-block;
+    background-color: rgba(13, 110, 253, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border-left: 3px solid #0d6efd;
+}
+
+#period-total-revenue {
+    transition: all 0.3s ease;
+}
+
+#period-total-revenue.highlight {
+    color: #0d6efd;
+    transform: scale(1.05);
+    text-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+}
+
+@media (max-width: 992px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .total-revenue-display {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    .date-range-picker {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    .date-range-picker .input-group {
+        width: 100%;
+    }
+    #time-range {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Updated styles for integrated period revenue display */
+.period-revenue-overlay {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 6px 15px;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(3px);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(13, 110, 253, 0.2);
+    text-align: center;
+}
+
+.period-date-range {
+    display: block;
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 3px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.period-date-range.highlight {
+    color: #0d6efd;
+    font-weight: 600;
+    transform: scale(1.05);
+}
+
+.period-amount {
+    font-size: 1.1rem;
+}
+
+.period-label {
+    color: #495057;
+    margin-right: 5px;
+    font-weight: 400;
+}
+
+.period-value {
+    color: #0d6efd;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.period-value.highlight {
+    color: #0d6efd;
+    transform: scale(1.1);
+    text-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+}
+
+/* Remove old styles */
+.period-revenue-container,
+.period-revenue-badge,
+.period-revenue-inner,
+.period-revenue-label,
+.period-revenue-value {
+    /* These will be replaced by the new overlay styles */
+}
+
+.period-name {
+    transition: all 0.3s ease;
+}
+
+.period-name.highlight {
+    color: #198754;
+    font-weight: 600;
+}
+
+.revenue-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.revenue-section {
+    position: relative;
+}
+
+.revenue-section h3 {
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.revenue-section h3.highlight {
+    color: #0d6efd;
+    transform: scale(1.05);
+}
+
+.period-label {
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+
+/* Comparison chart styles */
+#comparison-chart {
+    min-height: 350px;
+}
+
+.comparison-summary-item {
+    transition: all 0.3s ease;
+}
+
+.comparison-summary-item.highlight {
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.1);
+    transform: translateY(-2px);
+}
+
+#comparison-summary .text-success {
+    color: #20c997 !important;
+}
+
+#comparison-summary .text-danger {
+    color: #dc3545 !important;
+}
+
+/* Responsive styles for period comparison */
+@media (max-width: 1200px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .card-header .date-range-picker {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    #compare-periods {
+        margin-top: 0.5rem;
+    }
+}
+
+/* Period legend overlay styles */
+.period-legend-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.period-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.period-legend-color {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.period-legend-text {
+    white-space: nowrap;
+}
+
+@media (max-width: 992px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .date-range-picker {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    .date-range-picker .input-group {
+        width: 100%;
+    }
+    #time-range {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+{% endblock content %}
+
+{% block extrascripts %}
+<script>
+    const revenueData = JSON.parse('{{ revenue_data_json|safe }}');
+    const topSalesData = JSON.parse('{{ top_sales_json|safe }}');
+    const tradingHoursData = JSON.parse('{{ trading_hours_json|safe }}');
+    const dayPartData = JSON.parse('{{ day_part_data_json|safe }}');
+    const avgOrderData = JSON.parse('{{ avg_order_data_json|safe }}');
+    const sessionDurationData = JSON.parse('{{ session_duration_json|safe }}');
+    const paymentStatusData = JSON.parse('{{ payment_status_json|safe }}');
+    const lowStockData = JSON.parse('{{ low_stock_json|safe }}');
+    const restockSuggestionData = JSON.parse('{{ restock_suggestion_json|safe }}');
+    const weekdayComparisonData = JSON.parse('{{ weekday_comparison_json|safe }}');
+    const deviceStatusData = JSON.parse('{{ device_status_json|safe }}');
+    const productRatingsData = JSON.parse('{{ product_ratings_json|safe }}');
+    const mostRatedData = JSON.parse('{{ most_rated_json|safe }}');
+</script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    const revenueOptions = {
+        chart: {
+            type: 'line', // Loại biểu đồ
+            height: 350, // Chiều cao biểu đồ
+            width: '100%',
+            toolbar: {
+                show: true // Hiển thị thanh công cụ
+            },
+            background: 'transparent' 
+        },
+        series: [{
+            name: 'Revenue', // Tên chuỗi dữ liệu
+            data: revenueData.map(item => item.total_amount)
+        }],
+        xaxis: {
+            categories: revenueData.map(item => item.date),
+            labels: {
+                style: {
+                    fontSize: '14px',
+                    colors: ['#6c757d']
+                }
+            }
+        },
+        grid: {
+            borderColor: '#e9ecef'
+        },
+        colors: ['#0d6efd'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shade: 'dark',
+                gradientToColors: ['#FDD835'],
+                shadeIntensity: 1,
+                type: 'horizontal',
+                opacityFrom: 1,
+                opacityTo: 1,
+                stops: [0, 100]
+            }
+        }
+    };
+
+    const revenueChart = new ApexCharts(document.querySelector("#line"), revenueOptions);
+    revenueChart.render();
+
+    const topSalesOptions = {
+        chart: {
+            type: 'donut',
+            height: 380
+        },
+        series: topSalesData.map(item => item.quantity),
+        labels: topSalesData.map(item => item.name),
+        colors: ['#0d6efd', '#ffc107', '#28a745', '#dc3545', '#6610f2'],
+        legend: {
+            position: 'bottom',
+            fontSize: '14px'
+        }
+    };
+
+    const donutChart = new ApexCharts(document.querySelector("#donut"), topSalesOptions);
+    donutChart.render();
+
+    const tradingHoursOptions = {
+        chart: {
+            type: 'pie',
+            height: 340,
+            width: '100%',  // Thay đổi width cố định thành responsive
+            events: {
+                mounted: function(chartContext, config) {
+                    // Căn giữa biểu đồ sau khi nó được render
+                    const chart = document.querySelector("#trading-donut");
+                    if (chart) {
+                        chart.style.display = 'flex';
+                        chart.style.justifyContent = 'center';
+                    }
+                }
+            }
+        },
+        series: tradingHoursData.map(item => item.total_amount),
+        labels: tradingHoursData.map(item => item.hour),
+        colors: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6610f2'],
+        legend: {
+            position: 'top',
+            fontSize: '14px',
+            horizontalAlign: 'center'  // Căn giữa legend
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '70%'  // Điều chỉnh kích thước lỗ giữa của pie chart
+                },
+                offsetX: 0,  // Đảm bảo không có offset
+                offsetY: 0
+            }
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 280  // Điều chỉnh kích thước cho màn hình nhỏ
+                },
+                legend: { show: false,
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+
+    const tradingDonutChart = new ApexCharts(document.querySelector("#trading-donut"), tradingHoursOptions);
+    tradingDonutChart.render();
+
+    const dayPartOptions = {
+        chart: {
+            type: 'bar',
+            height: 450,  // Tăng chiều cao
+            width: '100%'  // Sử dụng full width
+        },
+        series: [{
+            name: 'Revenue',
+            data: dayPartData.map(item => item.total_amount)
+        }],
+        xaxis: {
+            categories: dayPartData.map(item => item.part),
+        },
+        colors: ['#0d6efd'],
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,  // Chuyển thành bar dọc
+                columnWidth: '50%'  // Điều chỉnh độ rộng của bar
+            }
+        }
+    };
+    const dayPartChart = new ApexCharts(document.querySelector("#day-part-chart"), dayPartOptions);
+    dayPartChart.render();
+
+    function updateChart(filter, customDates = null) {
+        // Cập nhật active state cho buttons với animation
+        var buttons = document.querySelectorAll('.btn-group .btn');
+        buttons.forEach(function(button) {
+            button.classList.remove('active');
+            button.style.transition = 'all 0.3s ease';
+        });
+        
+        if (filter) {
+            var button = document.querySelector('#btn-' + filter);
+            button.classList.add('active');
+            
+            // Thêm hiệu ứng loading
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+        }
+
+        // Thêm class updating cho cards và charts
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.add('updating');
+        });
+        document.querySelectorAll('.chart-container').forEach(chart => {
+            chart.classList.add('updating');
+        });
+
+        // Build URL based on filter type
+        let url = '/statistic/?';
+        if (filter) {
+            url += `filter=${filter}`;
+        } else if (customDates) {
+            url += `start_date=${customDates.start}&end_date=${customDates.end}`;
+        }
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Restore button text if using predefined filter
+            if (filter) {
+                updateButtonText(document.querySelector('#btn-' + filter), filter);
+            }
+            
+            // Update period date range display text
+            const periodDateRange = document.getElementById('period-date-range');
+            if (periodDateRange) {
+                // Always update the date range based on the current request, not based on filter name
+                if (customDates) {
+                    // Format the custom date range nicely
+                    const startDate = new Date(customDates.start);
+                    const endDate = new Date(customDates.end);
+                    
+                    const formattedStart = startDate.toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    
+                    const formattedEnd = endDate.toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    
+                    periodDateRange.textContent = `${formattedStart} - ${formattedEnd}`;
+                } else if (filter === 'today') {
+                    periodDateRange.textContent = 'Today';
+                } else if (filter === 'yesterday') {
+                    periodDateRange.textContent = 'Yesterday';
+                } else if (filter === 'this_week') {
+                    periodDateRange.textContent = 'Last 7 Days';
+                } else if (filter === 'this_month') {
+                    periodDateRange.textContent = 'This Month';
+                }
+                
+                // Add visual highlight to the date range
+                periodDateRange.classList.add('highlight');
+                setTimeout(() => {
+                    periodDateRange.classList.remove('highlight');
+                }, 1000);
+            }
+            
+            // Update revenue chart data
+            revenueChart.updateSeries([{
+                data: data.revenue_data.map(item => item.total_amount)
+            }]);
+            revenueChart.updateOptions({
+                xaxis: {
+                    categories: data.revenue_data.map(item => item.time)
+                }
+            });
+
+            // Update revenue statistics summary
+            updateRevenueStatistics(data.revenue_data);
+            
+            // Also update the revenue display for both today and selected period
+            if (data.total_revenue !== undefined) {
+                // Update the selected period revenue card
+                const periodRevenueElement = document.getElementById('period-revenue');
+                const periodNameElement = document.querySelector('.period-name');
+                
+                if (periodRevenueElement) {
+                    periodRevenueElement.textContent = formatCurrency(data.total_revenue);
+                    
+                    // Add a highlight animation effect
+                    periodRevenueElement.classList.add('highlight');
+                    setTimeout(() => {
+                        periodRevenueElement.classList.remove('highlight');
+                    }, 1000);
+                }
+                
+                // Update the period name in the card
+                if (periodNameElement) {
+                    if (filter === 'today') {
+                        periodNameElement.textContent = 'Today';
+                    } else if (filter === 'yesterday') {
+                        periodNameElement.textContent = 'Yesterday';
+                    } else if (filter === 'this_week') {
+                        periodNameElement.textContent = 'Last 7 Days';
+                    } else if (filter === 'this_month') {
+                        periodNameElement.textContent = 'This Month';
+                    } else if (customDates) {
+                        const startDate = new Date(customDates.start);
+                        const endDate = new Date(customDates.end);
+                        
+                        const formattedStart = startDate.toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                        
+                        const formattedEnd = endDate.toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                        
+                        periodNameElement.textContent = `${formattedStart} - ${formattedEnd}`;
+                    }
+                    
+                    // Add a highlight animation effect
+                    periodNameElement.classList.add('highlight');
+                    setTimeout(() => {
+                        periodNameElement.classList.remove('highlight');
+                    }, 1000);
+                }
+                
+                // Update today's revenue if provided
+                if (data.today_revenue !== undefined) {
+                    const todayRevenueElement = document.getElementById('today-revenue');
+                    if (todayRevenueElement) {
+                        todayRevenueElement.textContent = formatCurrency(data.today_revenue);
+                        
+                        // Add a highlight animation effect
+                        todayRevenueElement.classList.add('highlight');
+                        setTimeout(() => {
+                            todayRevenueElement.classList.remove('highlight');
+                        }, 1000);
+                    }
+                }
+                
+                // Update the period total revenue display in the Revenue Over Time chart
+                const periodTotalRevenueElement = document.getElementById('period-total-revenue');
+                if (periodTotalRevenueElement) {
+                    periodTotalRevenueElement.textContent = formatCurrency(data.total_revenue);
+                    
+                    // Add a highlight animation effect
+                    periodTotalRevenueElement.classList.add('highlight');
+                    setTimeout(() => {
+                        periodTotalRevenueElement.classList.remove('highlight');
+                    }, 1000);
+                }
+            }
+            
+            // Cập nhật thông tin thống kê
+            updateStatistics(data);
+            
+            // Cập nhật các biểu đồ với animation
+            updateCharts(data);
+            
+            // Remove updating classes sau khi hoàn tất
+            setTimeout(() => {
+                document.querySelectorAll('.stat-card, .chart-container').forEach(el => {
+                    el.classList.remove('updating');
+                });
+            }, 300);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Restore button text on error if using predefined filter
+            if (filter) {
+                updateButtonText(document.querySelector('#btn-' + filter), filter);
+            }
+            // Remove updating classes nếu có lỗi
+            document.querySelectorAll('.stat-card, .chart-container').forEach(el => {
+                el.classList.remove('updating');
+            });
+        });
+    }
+
+    function updateButtonText(button, filter) {
+        const icons = {
+            'today': 'calendar-day',
+            'yesterday': 'calendar-minus',
+            'this_week': 'calendar-week',
+            'this_month': 'calendar-alt'
+        };
+        const texts = {
+            'today': 'Today',
+            'yesterday': 'Yesterday',
+            'this_week': 'Last 7 Days',
+            'this_month': 'This Month'
+        };
+        button.innerHTML = `<i class="fas fa-${icons[filter]} me-1"></i> ${texts[filter]}`;
+    }
+
+    function updateStatistics(data) {
+        // Cập nhật các thẻ thống kê
+        const totalRevenue = document.querySelector('.total-revenue');
+        const peakHour = document.querySelector('.peak-hour');
+        const topProducts = document.querySelector('.top-products');
+        
+        if (totalRevenue) totalRevenue.textContent = formatCurrency(data.total_revenue);
+        if (peakHour) peakHour.textContent = data.peak_hour;
+        if (topProducts) {
+            topProducts.innerHTML = data.top_sales.map(product => 
+                `<span class="badge bg-soft-info text-info me-2 mb-2">${product.name}</span>`
+            ).join('');
+        }
+    }
+
+    function updateCharts(data) {
+        // Cập nhật Revenue Chart với animation
+        revenueChart.updateOptions({
+            chart: {
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800,
+                    dynamicAnimation: {
+                        enabled: true,
+                        speed: 350
+                    }
+                }
+            }
+        });
+        revenueChart.updateSeries([{
+            data: data.revenue_data.map(item => item.total_amount)
+        }]);
+        
+        // Cập nhật các biểu đồ khác với animation tương tự
+        donutChart.updateSeries(data.top_sales.map(item => item.quantity));
+        tradingDonutChart.updateSeries(data.trading_hours.map(item => item.total_amount));
+        dayPartChart.updateSeries([{
+            data: data.day_part_data.map(item => item.total_amount)
+        }]);
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            currencyDisplay: 'code'
+        }).format(amount).replace('VND', '').trim() + ' VNĐ';
+    }
+
+    function updateRevenueStatistics(revenueData) {
+        if (revenueData.length === 0) {
+            document.getElementById('chart-total-revenue').textContent = '-';
+            document.getElementById('chart-avg-revenue').textContent = '-';
+            document.getElementById('chart-max-revenue').textContent = '-';
+            document.getElementById('chart-period').textContent = '-';
+            return;
+        }
+        
+        // Calculate statistics
+        const totalRevenue = revenueData.reduce((sum, item) => sum + item.total_amount, 0);
+        const avgRevenue = totalRevenue / revenueData.length;
+        
+        const maxRevenue = Math.max(...revenueData.map(item => item.total_amount));
+        const maxDay = revenueData.find(item => item.total_amount === maxRevenue);
+        
+        const startDate = revenueData[0].time;
+        const endDate = revenueData[revenueData.length - 1].time;
+        
+        // Update UI
+        document.getElementById('chart-total-revenue').textContent = formatCurrency(totalRevenue);
+        document.getElementById('chart-avg-revenue').textContent = formatCurrency(avgRevenue);
+        document.getElementById('chart-max-revenue').textContent = `${formatCurrency(maxRevenue)} (${maxDay.time})`;
+        document.getElementById('chart-period').textContent = revenueData.length > 1 ? `${startDate} - ${endDate}` : startDate;
+    }
+
+    // Update chart options for better visuals
+    const commonChartOptions = {
+        chart: {
+            fontFamily: 'inherit',
+            toolbar: {
+                show: false
+            },
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 800,
+                animateGradually: {
+                    enabled: true,
+                    delay: 150
+                },
+                dynamicAnimation: {
+                    enabled: true,
+                    speed: 350
+                }
+            }
+        },
+        colors: ['#0d6efd', '#20c997', '#fd7e14', '#dc3545'],
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        grid: {
+            borderColor: '#e9ecef',
+            strokeDashArray: 4
+        }
+    };
+
+    // Merge common options with specific chart options
+    revenueOptions.chart = { ...revenueOptions.chart, ...commonChartOptions.chart };
+    revenueOptions.colors = commonChartOptions.colors;
+    revenueOptions.stroke = commonChartOptions.stroke;
+    revenueOptions.grid = commonChartOptions.grid;
+
+    const topCustomersData = JSON.parse('{{ top_customers_json|safe }}');
+
+    // Debug logs for customer data
+    console.log('Raw top customers data:', topCustomersData);
+    console.log('Parsed spending values:', topCustomersData.map(c => ({
+        name: c.name,
+        raw_value: c.total_spent,
+        parsed_value: parseFloat(c.total_spent),
+        type: typeof c.total_spent
+    })));
+
+    const customerChartOptions = {
+        series: [{
+            name: 'Total Spent',
+            data: topCustomersData.map(c => {
+                console.log('Processing customer:', c.name, 'value:', c.total_spent);
+                return parseFloat(c.total_spent) || 0;
+            })
+        }],
+        chart: {
+            type: 'bar',
+            height: 400,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: true,
+                distributed: true,
+            }
+        },
+        dataLabels: {
+            enabled: false  // Tắt data labels mặc định
+        },
+        tooltip: {
+            enabled: true,
+            y: {
+                formatter: function(val) {
+                    val = parseFloat(val) || 0;
+                    return new Intl.NumberFormat('vi-VN', { 
+                        style: 'currency', 
+                        currency: 'VND',
+                        maximumFractionDigits: 0
+                    }).format(val);
+                }
+            }
+        },
+        yaxis: {
+            labels: {
+                show: false  // Ẩn labels trục Y
+            }
+        },
+        grid: {
+            show: false  // Ẩn grid
+        },
+        xaxis: {
+            categories: topCustomersData.map(c => c.name + (c.isGuest ? ' (Guest)' : '')),
+            labels: {
+                style: {
+                    fontSize: '12px'
+                }
+            },
+            position: 'bottom'
+        },
+        {% comment %} yaxis: {
+            labels: {
+                formatter: function(val) {
+                    console.log('Y-axis formatting value:', val);
+                    val = parseFloat(val) || 0;
+                    if (val === 0) return '0 VNĐ';
+                    return new Intl.NumberFormat('vi-VN', { 
+                        style: 'currency', 
+                        currency: 'VND',
+                        maximumFractionDigits: 0
+                    }).format(val);
+                },
+                show: true,
+                align: 'left'
+            }
+        }, {% endcomment %}
+        grid: {
+            xaxis: {
+                lines: {
+                    show: false
+                }
+            },
+            yaxis: {
+                lines: {
+                    show: true
+                }
+            }
+        }
+    };
+
+    const customerChart = new ApexCharts(document.querySelector("#customer-chart"), customerChartOptions);
+    console.log('Chart configuration:', customerChartOptions);
+    customerChart.render();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date pickers with default values
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+        
+        document.getElementById('start-date').valueAsDate = lastWeek;
+        document.getElementById('end-date').valueAsDate = today;
+        
+        // Set up date range picker button
+        document.getElementById('apply-date-range').addEventListener('click', function() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            // Reset active buttons
+            document.querySelectorAll('#time-range .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            updateChart(null, { start: startDate, end: endDate });
+        });
+        
+        // Call updateChart with 'today' when the page loads
+        updateChart('today');
+    });
+
+    // Populate top customers list
+    const customersList = document.getElementById('top-customers-list');
+    topCustomersData.forEach((customer, index) => {
+        const badge = index < 3 ? 
+            `<span class="badge bg-${index === 0 ? 'warning' : index === 1 ? 'secondary' : 'bronze'} me-2">
+                <i class="fas fa-trophy"></i>
+            </span>` : '';
+        
+        customersList.innerHTML += `
+            <div class="list-group-item border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        ${badge}
+                        <span class="fw-medium">${customer.name}</span>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold text-primary">${formatCurrency(customer.total_spent)}</div>
+                        <small class="text-muted">${customer.visit_count} visits</small>
+                    </div>
+                </div>
+                <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar" style="width: ${(customer.total_spent / topCustomersData[0].total_spent) * 100}%"></div>
+                </div>
+            </div>
+        `;
+    });
+
+    // Update top customer card
+    if (topCustomersData.length > 0) {
+        document.getElementById('top-customer-name').textContent = topCustomersData[0].name;
+        document.getElementById('top-customer-spent').textContent = 
+            `Total spent: ${formatCurrency(topCustomersData[0].total_spent)}`;
+    }
+
+    // Add bronze badge color
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .bg-bronze {
+                background-color: #cd7f32;
+                color: white;
+            }
+        </style>
+    `);
+
+    // Add soft warning background color
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .bg-soft-warning {
+                background-color: rgba(255, 193, 7, 0.1) !important;
+            }
+            .text-warning {
+                color: #ffc107 !important;
+            }
+        </style>
+    `);
+
+    // Initialize comparison chart
+    let comparisonChart;
+    
+    // Initialize dates for comparison
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default dates for period comparison
+        const today = new Date();
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(today.getMonth() - 1);
+        
+        const twoMonthsAgo = new Date();
+        twoMonthsAgo.setMonth(today.getMonth() - 2);
+        
+        // Current month (period 1)
+        document.getElementById('period1-start-date').valueAsDate = oneMonthAgo;
+        document.getElementById('period1-end-date').valueAsDate = today;
+        
+        // Previous month (period 2)
+        document.getElementById('period2-start-date').valueAsDate = twoMonthsAgo;
+        document.getElementById('period2-end-date').valueAsDate = oneMonthAgo;
+        
+        // Setup comparison chart
+        const comparisonOptions = {
+            series: [
+                {
+                    name: 'Period 1',
+                    data: []
+                },
+                {
+                    name: 'Period 2',
+                    data: []
+                }
+            ],
+            chart: {
+                height: 400,
+                type: 'line',
+                toolbar: {
+                    show: true
+                },
+                zoom: {
+                    enabled: true
+                }
+            },
+            colors: ['#0d6efd', '#20c997'],
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                width: [3, 3],
+                curve: 'smooth',
+                dashArray: [0, 0]
+            },
+            legend: { show: false,
+                position: 'top',
+                horizontalAlign: 'right',
+                tooltipHoverFormatter: function(val, opts) {
+                    return val + ' - ' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + ' VNĐ';
+                }
+            },
+            markers: {
+                size: 4,
+                hover: {
+                    sizeOffset: 3
+                }
+            },
+            xaxis: {
+                categories: [],
+                labels: {
+                    style: {
+                        colors: '#777'
+                    }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return formatCurrency(val);
+                    }
+                }
+            },
+            grid: {
+                borderColor: '#e9ecef'
+            },
+            noData: {
+                text: 'No data available'
+            }
+        };
+        
+        comparisonChart = new ApexCharts(document.querySelector("#comparison-chart"), comparisonOptions);
+        comparisonChart.render();
+        
+        // Add compare button event listener
+        document.getElementById('compare-periods').addEventListener('click', fetchComparisonData);
+    });
+    
+    // Function to fetch and display comparison data
+    function fetchComparisonData() {
+        const period1Start = document.getElementById('period1-start-date').value;
+        const period1End = document.getElementById('period1-end-date').value;
+        const period2Start = document.getElementById('period2-start-date').value;
+        const period2End = document.getElementById('period2-end-date').value;
+        
+        if (!period1Start || !period1End || !period2Start || !period2End) {
+            alert('Please select dates for both periods');
+            return;
+        }
+        
+        // Show loading state
+        document.getElementById('comparison-chart').classList.add('updating');
+        document.getElementById('compare-periods').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+        
+        // Reset summary data
+        document.getElementById('period1-total').textContent = '-';
+        document.getElementById('period2-total').textContent = '-';
+        document.getElementById('period-diff').textContent = '-';
+        document.getElementById('growth-rate').textContent = '-';
+        
+        // Fetch data for period 1
+        fetch(`/statistic/?start_date=${period1Start}&end_date=${period1End}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(period1Data => {
+            // Fetch data for period 2
+            fetch(`/statistic/?start_date=${period2Start}&end_date=${period2End}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(period2Data => {
+                updateComparisonChart(period1Data, period2Data);
+            })
+            .catch(error => {
+                console.error('Error fetching period 2 data:', error);
+                document.getElementById('comparison-chart').classList.remove('updating');
+                document.getElementById('compare-periods').innerHTML = '<i class="fas fa-chart-line me-1"></i> Compare';
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching period 1 data:', error);
+            document.getElementById('comparison-chart').classList.remove('updating');
+            document.getElementById('compare-periods').innerHTML = '<i class="fas fa-chart-line me-1"></i> Compare';
+        });
+    }
+    
+    // Function to update comparison chart with fetched data
+    function updateComparisonChart(period1Data, period2Data) {
+        // Format date ranges for display
+        const period1Start = new Date(document.getElementById('period1-start-date').value);
+        const period1End = new Date(document.getElementById('period1-end-date').value);
+        const period2Start = new Date(document.getElementById('period2-start-date').value);
+        const period2End = new Date(document.getElementById('period2-end-date').value);
+        
+        const formatDate = (date) => {
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        };
+        
+        // Normalize data for comparison (same number of data points)
+        const normalizedData = normalizeComparisonData(period1Data.revenue_data, period2Data.revenue_data);
+        
+        // Update chart series with normalized data
+        comparisonChart.updateOptions({
+            series: [
+                {
+                    name: `Period 1 (${formatDate(period1Start)} - ${formatDate(period1End)})`,
+                    data: normalizedData.period1Values
+                },
+                {
+                    name: `Period 2 (${formatDate(period2Start)} - ${formatDate(period2End)})`,
+                    data: normalizedData.period2Values
+                }
+            ],
+            xaxis: {
+                categories: normalizedData.labels
+            }
+        });
+        
+        // Update the period legend overlay
+        document.getElementById('period-1-text').textContent = `Period 1 (${formatDate(period1Start)} - ${formatDate(period1End)})`;
+        document.getElementById('period-2-text').textContent = `Period 2 (${formatDate(period2Start)} - ${formatDate(period2End)})`;
+        
+        // Calculate and display summary statistics
+        const period1Total = period1Data.total_revenue;
+        const period2Total = period2Data.total_revenue;
+        const difference = period1Total - period2Total;
+        const growthRate = period2Total > 0 ? ((period1Total - period2Total) / period2Total * 100) : 0;
+        
+        document.getElementById('period1-total').textContent = formatCurrency(period1Total);
+        document.getElementById('period2-total').textContent = formatCurrency(period2Total);
+        document.getElementById('period-diff').textContent = formatCurrency(difference);
+        
+        const growthRateElement = document.getElementById('growth-rate');
+        growthRateElement.textContent = growthRate.toFixed(2) + '%';
+        
+        if (growthRate > 0) {
+            growthRateElement.classList.add('text-success');
+            growthRateElement.classList.remove('text-danger');
+        } else if (growthRate < 0) {
+            growthRateElement.classList.add('text-danger');
+            growthRateElement.classList.remove('text-success');
+        } else {
+            growthRateElement.classList.remove('text-success', 'text-danger');
+        }
+        
+        // Remove loading state
+        document.getElementById('comparison-chart').classList.remove('updating');
+        document.getElementById('compare-periods').innerHTML = '<i class="fas fa-chart-line me-1"></i> Compare';
+    }
+    
+    // Function to normalize data for comparison
+    function normalizeComparisonData(period1Data, period2Data) {
+        // For daily data: normalize to "Day 1", "Day 2", etc.
+        const maxLength = Math.max(period1Data.length, period2Data.length);
+        const labels = [];
+        const period1Values = [];
+        const period2Values = [];
+        
+        for (let i = 0; i < maxLength; i++) {
+            const dayNum = i + 1;
+            labels.push(`Day ${dayNum}`);
+            
+            period1Values.push(i < period1Data.length ? period1Data[i].total_amount : 0);
+            period2Values.push(i < period2Data.length ? period2Data[i].total_amount : 0);
+        }
+        
+        return {
+            labels,
+            period1Values,
+            period2Values
+        };
+    }
+
+    // New charts setup
+    // Average Order Value Chart
+    const avgOrderOptions = {
+        series: [{
+            name: 'Average Order Value',
+            data: avgOrderData.map(item => item.avg_amount)
+        }],
+        chart: {
+            type: 'line',
+            height: 350,
+            toolbar: {
+                show: true
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        colors: ['#20c997'],
+        xaxis: {
+            categories: avgOrderData.map(item => item.day)
+        },
+        yaxis: {
+            title: {
+                text: 'Amount (VNĐ)'
+            },
+            labels: {
+                formatter: function(val) {
+                    return formatCurrency(val).replace(' VNĐ', '');
+                }
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return formatCurrency(val);
+                }
+            }
+        }
+    };
+    const avgOrderChart = new ApexCharts(document.querySelector("#avg-order-chart"), avgOrderOptions);
+    avgOrderChart.render();
+
+    // Transaction Time Chart
+    const transactionTimeOptions = {
+        series: [{
+            name: 'Average Duration (minutes)',
+            data: sessionDurationData.map(item => item.avg_duration)
+        }],
+        chart: {
+            type: 'line',
+            height: 350,
+            toolbar: {
+                show: true
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        colors: ['#6f42c1'],
+        xaxis: {
+            categories: sessionDurationData.map(item => item.day)
+        },
+        yaxis: {
+            title: {
+                text: 'Duration (minutes)'
+            }
+        }
+    };
+    const transactionTimeChart = new ApexCharts(document.querySelector("#transaction-time-chart"), transactionTimeOptions);
+    transactionTimeChart.render();
+
+    // Payment Status Chart - Use custom colors from data
+    const paymentStatusOptions = {
+        series: paymentStatusData.map(item => item.count),
+        chart: {
+            type: 'donut',
+            height: 350
+        },
+        labels: paymentStatusData.map(item => item.status),
+        colors: paymentStatusData.map(item => item.color || '#6c757d'),  // Use provided colors or default gray
+        legend: {
+            position: 'bottom',
+            formatter: function(seriesName, opts) {
+                return [seriesName, ": ", opts.w.globals.series[opts.seriesIndex]].join('')
+            }
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total Orders',
+                            formatter: function(w) {
+                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return val + " orders";
+                }
+            }
+        },
+        dataLabels: {
+            formatter: function(val, opts) {
+                return opts.w.config.series[opts.seriesIndex];
+            }
+        }
+    };
+    const paymentStatusChart = new ApexCharts(document.querySelector("#payment-status-chart"), paymentStatusOptions);
+    paymentStatusChart.render();
+
+    // Populate Low Stock Table
+    const lowStockTable = document.getElementById('low-stock-table');
+    lowStockData.forEach(product => {
+        const percentStock = (product.quantity / product.low_stock_threshold) * 100;
+        const statusClass = percentStock <= 30 ? 'danger' : percentStock <= 70 ? 'warning' : 'success';
+        const displayName = product.name.replace(/_/g, ' ');
+        
+        lowStockTable.innerHTML += `
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="ms-3">
+                            <p class="fw-bold mb-1">${displayName}</p>
+                            <p class="text-muted mb-0">${product.category}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>${product.quantity}</td>
+                <td>${product.low_stock_threshold}</td>
+                <td>
+                    <div class="progress" style="width: 120px; height: 6px;">
+                        <div class="progress-bar bg-${statusClass}" role="progressbar" 
+                             style="width: ${percentStock}%" 
+                             aria-valuenow="${percentStock}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100"></div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    // Restock Suggestion Chart - Update to highlight the difference
+    const restockOptions = {
+        series: [{
+            name: 'Current Stock',
+            data: restockSuggestionData.map(item => item.current_quantity)
+        }, {
+            name: 'Suggested Restock',
+            data: restockSuggestionData.map(item => item.suggested_quantity)
+        }, {
+            name: 'Sales (Last 30 Days)',
+            data: restockSuggestionData.map(item => item.sales_last_30days || 0)
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            stacked: false,
+            toolbar: {
+                show: true
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                borderRadius: 2,
+                dataLabels: {
+                    position: 'top',
+                }
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: restockSuggestionData.map(item => item.product_name),
+            labels: {
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 400
+                },
+                rotate: -45,
+                rotateAlways: false,
+                trim: true
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Quantity'
+            }
+        },
+        fill: {
+            opacity: 1
+        },
+        colors: ['#20c997', '#0d6efd', '#fd7e14'],
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + " units";
+                }
+            }
+        },
+        legend: {
+            position: 'top'
+        }
+    };
+    const restockChart = new ApexCharts(document.querySelector("#restock-suggestion-chart"), restockOptions);
+    restockChart.render();
+
+    // Weekday Comparison Chart
+    const weekdayOptions = {
+        series: [{
+            name: 'Revenue',
+            data: weekdayComparisonData.map(item => item.total_amount)
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                columnWidth: '60%'
+            }
+        },
+        colors: ['#0d6efd'],
+        dataLabels: {
+            enabled: false
+        },
+        xaxis: {
+            categories: weekdayComparisonData.map(item => item.day_name),
+            group: {
+                style: {
+                    fontSize: '10px',
+                    fontWeight: 700
+                },
+                groups: [
+                    { title: 'Weekdays', cols: 5 },
+                    { title: 'Weekend', cols: 2 }
+                ]
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Revenue (VNĐ)'
+            },
+            labels: {
+                formatter: function(val) {
+                    return formatCurrency(val).replace(' VNĐ', '');
+                }
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return formatCurrency(val);
+                }
+            }
+        }
+    };
+    const weekdayChart = new ApexCharts(document.querySelector("#weekday-comparison-chart"), weekdayOptions);
+    weekdayChart.render();
+
+    // Device Status Chart
+    const deviceStatusOptions = {
+        series: deviceStatusData.map(item => item.count),
+        chart: {
+            type: 'pie',
+            height: 350
+        },
+        labels: deviceStatusData.map(item => item.status),
+        colors: ['#28a745', '#dc3545', '#ffc107', '#6c757d'],
+        legend: {
+            position: 'bottom'
+        }
+    };
+    const deviceStatusChart = new ApexCharts(document.querySelector("#device-status-chart"), deviceStatusOptions);
+    deviceStatusChart.render();
+
+    // Product Ratings Chart
+    const ratingsOptions = {
+        series: [{
+            name: 'Average Rating',
+            data: productRatingsData.map(item => item.avg_star)
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                borderRadius: 2
+            },
+        },
+        colors: ['#ffc107'],
+        dataLabels: {
+            enabled: true,
+            formatter: function(val) {
+                return val.toFixed(1) + ' ⭐';
+            },
+            offsetY: -20,
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            }
+        },
+        xaxis: {
+            categories: productRatingsData.map(item => item.product_name)
+        },
+        yaxis: {
+            title: {
+                text: 'Rating (0-5)'
+            },
+            min: 0,
+            max: 5
+        }
+    };
+    const ratingsChart = new ApexCharts(document.querySelector("#product-ratings-chart"), ratingsOptions);
+    ratingsChart.render();
+
+    // Most Rated Products Chart
+    const mostRatedOptions = {
+        series: [{
+            name: 'Number of Ratings',
+            data: mostRatedData.map(item => item.count)
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                borderRadius: 4,
+                dataLabels: {
+                    position: 'top',
+                },
+            }
+        },
+        colors: ['#6f42c1'],
+        dataLabels: {
+            enabled: true,
+            offsetX: -6,
+            style: {
+                fontSize: '12px',
+                colors: ['#fff']
+            }
+        },
+        xaxis: {
+            categories: mostRatedData.map(item => item.product_name),
+        }
+    };
+    const mostRatedChart = new ApexCharts(document.querySelector("#most-rated-chart"), mostRatedOptions);
+    mostRatedChart.render();
+</script>
+{% endblock extrascripts %}

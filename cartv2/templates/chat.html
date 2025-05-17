@@ -1,0 +1,608 @@
+{% extends 'base.html' %}
+{% block title %}Chat - Smart Shopping Cart{% endblock %}
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Customer List Column -->
+        <div class="col-md-3 border-end">
+            <div class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h5 class="mb-0 fw-bold">Messages</h5>
+                    <div class="input-group mt-3">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" id="searchCustomer" class="form-control border-0 shadow-none" placeholder="Search...">
+                    </div>
+                </div>
+                <div class="chat-sidebar-content" id="customerList">
+                    <!-- Customers will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Window Column -->
+        <div class="col-md-9">
+            <div class="chat-main">
+                <div class="chat-header" id="chatHeader">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Select a customer to start chatting</h5>
+                        <small class="text-muted" id="lastSeen"></small>
+                    </div>
+                </div>
+                <div class="chat-body" id="messageArea">
+                    <!-- Messages will be populated here -->
+                </div>
+                <div class="chat-footer" id="chatInput" style="display: none;">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" class="form-control" placeholder="Message...">
+                        <button class="btn btn-primary" id="sendButton">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --ig-primary: #0095f6;
+    --ig-secondary: #fafafa;
+    --ig-border: #dbdbdb;
+    --ig-text-primary: #262626;
+    --ig-text-secondary: #8e8e8e;
+    --ig-highlight: #efefef;
+}
+
+/* Main Layout */
+.container-fluid {
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sidebar Styles */
+.chat-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: white;
+}
+
+.chat-sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--ig-border);
+}
+
+.chat-sidebar-header h5 {
+    color: var(--ig-text-primary);
+    font-size: 18px;
+}
+
+.chat-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Customer Item Styles */
+.customer-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid var(--ig-border);
+}
+
+.customer-item:hover {
+    background-color: var(--ig-secondary);
+}
+
+.customer-item.active {
+    background-color: var(--ig-highlight);
+}
+
+.customer-avatar {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #888;
+}
+
+.customer-info {
+    flex-grow: 1;
+    overflow: hidden;
+    padding-right: 5px;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: var(--ig-text-primary);
+    margin-bottom: 2px;
+    font-size: 13px;
+}
+
+.last-message {
+    color: var(--ig-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-size: 12px;
+}
+
+.message-time {
+    font-size: 10px;
+    margin-top: 2px;
+    color: var(--ig-text-secondary);
+}
+
+.unread-badge {
+    background-color: var(--ig-primary);
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Chat Main Area */
+.chat-main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: white;
+}
+
+.chat-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--ig-border);
+    background-color: white;
+}
+
+.chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background-color: white;
+}
+
+.chat-footer {
+    padding: 16px;
+    border-top: 1px solid var(--ig-border);
+    background-color: white;
+}
+
+/* Message Styles */
+.message {
+    margin-bottom: 6px;
+    max-width: 55%;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-bubble {
+    padding: 6px 10px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    line-height: 1.3;
+    font-size: 13px;
+    max-width: 100%;
+}
+
+.customer-message {
+    align-self: flex-start;
+}
+
+.customer-message .message-bubble {
+    background-color: var(--ig-highlight);
+    color: var(--ig-text-primary);
+    border-top-left-radius: 4px;
+}
+
+.admin-message {
+    align-self: flex-end;
+}
+
+.admin-message .message-bubble {
+    background-color: var(--ig-primary);
+    color: white;
+    border-top-right-radius: 4px;
+}
+
+.message-time {
+    font-size: 10px;
+    margin-top: 2px;
+    color: var(--ig-text-secondary);
+}
+
+.message-date {
+    text-align: center;
+    margin: 16px 0;
+    font-size: 12px;
+    color: var(--ig-text-secondary);
+}
+
+/* Input Styles */
+.chat-footer .input-group {
+    background-color: var(--ig-highlight);
+    border-radius: 24px;
+    padding: 4px;
+}
+
+#messageInput {
+    border: none;
+    background-color: transparent;
+    padding: 8px 12px;
+}
+
+#messageInput:focus {
+    box-shadow: none;
+}
+
+#sendButton {
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ig-primary);
+    border: none;
+}
+
+#sendButton i {
+    font-size: 14px;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c7c7c7;
+    border-radius: 4px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .message {
+        max-width: 75%;
+    }
+}
+</style>
+
+<script>
+let currentCustomer = null;
+let customersData = new Map();
+const messageArea = document.getElementById('messageArea');
+const chatInput = document.getElementById('chatInput');
+const messageInput = document.getElementById('messageInput');
+const sendButton = document.getElementById('sendButton');
+const customerList = document.getElementById('customerList');
+const chatHeader = document.getElementById('chatHeader');
+const searchInput = document.getElementById('searchCustomer');
+
+// Load customers and their last messages
+function loadCustomers() {
+    fetch('/api/chat/admin/')
+        .then(response => response.json())
+        .then(customers => {
+            customersData.clear();
+            customers.forEach(customer => {
+                if (!customersData.has(customer.phone_number)) {
+                    customersData.set(customer.phone_number, {
+                        lastMessage: customer.last_message,
+                        timestamp: customer.created_at,
+                        unreadCount: 1
+                    });
+                }
+            });
+            updateCustomerList();
+        });
+}
+
+// Create a cache to store customer data and avoid unnecessary updates
+let customerCache = new Map();
+
+// Get initials from phone number for avatar
+function getInitials(phoneNumber) {
+    return phoneNumber.substring(0, 2);
+}
+
+// Modified updateCustomerList function
+function updateCustomerList() {
+    const searchTerm = searchInput.value.toLowerCase();
+    
+    fetch('/api/customers/')
+        .then(response => response.json())
+        .then(allCustomers => {
+            fetch('/api/chat/admin/')
+                .then(response => response.json())
+                .then(chatData => {
+                    const unreadMessages = new Map(
+                        chatData.map(m => [m.phone_number, m])
+                    );
+
+                    allCustomers.forEach(customer => {
+                        const phoneNumber = customer.phone_number;
+                        if (!phoneNumber.toLowerCase().includes(searchTerm)) return;
+
+                        // Check if we need to update this customer's data
+                        const cached = customerCache.get(phoneNumber);
+                        const unread = unreadMessages.get(phoneNumber);
+                        
+                        if (cached && !unread && 
+                            cached.el && cached.el.parentNode === customerList) {
+                            return; // Skip update if no changes
+                        }
+
+                        // Create or update customer element
+                        fetch(`/api/chat/customer/?phone_number=${phoneNumber}`)
+                            .then(response => response.json())
+                            .then(messages => {
+                                const lastMessage = messages.length > 0 ? 
+                                    messages[messages.length - 1] : null;
+                                const unreadCount = messages.filter(
+                                    m => !m.read && !m.is_from_admin
+                                ).length;
+
+                                // Only update DOM if data changed
+                                if (cached && 
+                                    cached.lastMessageId === lastMessage?.id && 
+                                    cached.unreadCount === unreadCount) {
+                                    return;
+                                }
+
+                                const customerEl = cached?.el || document.createElement('div');
+                                customerEl.className = `customer-item d-flex align-items-center ${
+                                    currentCustomer === phoneNumber ? 'active' : ''
+                                }`;
+                                customerEl.innerHTML = `
+                                    <div class="customer-avatar">${getInitials(phoneNumber)}</div>
+                                    <div class="customer-info">
+                                        <div class="customer-name">${phoneNumber}</div>
+                                        <div class="last-message">
+                                            ${lastMessage ? (lastMessage.is_from_admin ? 'You: ' : '') + lastMessage.message : 'No messages yet'}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end ms-2">
+                                        <small class="message-time">
+                                            ${lastMessage ? formatTimestamp(lastMessage.created_at) : ''}
+                                        </small>
+                                        ${unreadCount > 0 ? `
+                                            <span class="unread-badge mt-1">${unreadCount}</span>
+                                        ` : ''}
+                                    </div>
+                                `;
+                                
+                                if (!customerEl.onclick) {
+                                    customerEl.onclick = () => selectCustomer(phoneNumber);
+                                }
+
+                                // Update cache
+                                customerCache.set(phoneNumber, {
+                                    el: customerEl,
+                                    lastMessageId: lastMessage?.id,
+                                    unreadCount,
+                                    timestamp: lastMessage?.created_at
+                                });
+
+                                // Add to DOM if needed
+                                if (!customerEl.parentNode) {
+                                    customerList.appendChild(customerEl);
+                                }
+                            });
+                    });
+
+                    // Sort customer list without rebuilding DOM
+                    const sortedElements = Array.from(customerList.children);
+                    sortedElements.sort((a, b) => {
+                        const aCache = customerCache.get(
+                            a.querySelector('.customer-name').textContent
+                        );
+                        const bCache = customerCache.get(
+                            b.querySelector('.customer-name').textContent
+                        );
+                        return (bCache?.timestamp || 0) - (aCache?.timestamp || 0);
+                    });
+
+                    // Reorder elements only if needed
+                    let needsReorder = false;
+                    for (let i = 0; i < sortedElements.length; i++) {
+                        if (sortedElements[i] !== customerList.children[i]) {
+                            needsReorder = true;
+                            break;
+                        }
+                    }
+                    
+                    if (needsReorder) {
+                        sortedElements.forEach(el => customerList.appendChild(el));
+                    }
+                });
+        });
+}
+
+// Format timestamp to relative time
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return 'now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+    if (diff < 604800) return date.toLocaleDateString('en-US', {weekday: 'short'});
+    return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+}
+
+// Select customer and load chat history
+function selectCustomer(phone) {
+    currentCustomer = phone;
+    updateCustomerList();
+    chatHeader.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="customer-avatar me-2">${getInitials(phone)}</div>
+                <div>
+                    <h5 class="mb-0 fw-bold">${phone}</h5>
+                    <small class="text-muted" id="lastSeen">Active now</small>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-light rounded-circle" title="View customer info">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    chatInput.style.display = 'block';
+    
+    if (customersData.has(phone)) {
+        customersData.get(phone).unreadCount = 0;
+    }
+    
+    loadChatHistory(phone);
+}
+
+// Load and display chat history
+function loadChatHistory(phone) {
+    fetch(`/api/chat/customer/?phone_number=${phone}`)
+        .then(response => response.json())
+        .then(messages => {
+            messageArea.innerHTML = '';
+            
+            let currentDate = '';
+            let previousSender = null;
+            
+            messages.forEach((message, index) => {
+                const messageDate = new Date(message.created_at).toLocaleDateString();
+                
+                // Add date separator if needed
+                if (messageDate !== currentDate) {
+                    currentDate = messageDate;
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = 'message-date';
+                    dateDiv.innerHTML = formatMessageDate(message.created_at);
+                    messageArea.appendChild(dateDiv);
+                }
+                
+                // Check if new message group is needed
+                const currentSender = message.is_from_admin ? 'admin' : 'customer';
+                const needsNewGroup = currentSender !== previousSender;
+                previousSender = currentSender;
+                
+                // Create message element
+                const messageEl = createMessageElement(message, needsNewGroup);
+                messageArea.appendChild(messageEl);
+            });
+            
+            messageArea.scrollTop = messageArea.scrollHeight;
+        });
+}
+
+// Format date for message groups
+function formatMessageDate(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    
+    if (date.toDateString() === now.toDateString()) {
+        return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+    } else {
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+        });
+    }
+}
+
+// Create message element
+function createMessageElement(message, isNewGroup) {
+    const messageEl = document.createElement('div');
+    messageEl.className = `message ${message.is_from_admin ? 'admin-message' : 'customer-message'}`;
+    
+    // Add more spacing if it's a new message group
+    if (isNewGroup) {
+        messageEl.style.marginTop = '16px';
+    }
+    
+    messageEl.innerHTML = `
+        <div class="message-bubble">
+            ${message.message}
+        </div>
+        <div class="message-time">
+            ${new Date(message.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+        </div>
+    `;
+    return messageEl;
+}
+
+// Send message handler
+sendButton.onclick = () => {
+    if (!currentCustomer || !messageInput.value.trim()) return;
+
+    fetch('/api/chat/admin/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            phone_number: currentCustomer,
+            message: messageInput.value.trim()
+        })
+    })
+    .then(response => response.json())
+    .then(message => {
+        const messageEl = createMessageElement(message, false);
+        messageArea.appendChild(messageEl);
+        messageInput.value = '';
+        messageArea.scrollTop = messageArea.scrollHeight;
+        
+        if (customersData.has(currentCustomer)) {
+            customersData.get(currentCustomer).lastMessage = message.message;
+            customersData.get(currentCustomer).timestamp = message.created_at;
+        }
+        updateCustomerList();
+    });
+};
+
+// Search handler
+searchInput.addEventListener('input', updateCustomerList);
+
+// Enter key handler
+messageInput.onkeypress = (e) => {
+    if (e.key === 'Enter') sendButton.click();
+};
+
+// Initial load
+loadCustomers();
+// Poll for updates every 5 seconds
+setInterval(updateCustomerList, 5000);
+</script>
+{% endblock %} 
+

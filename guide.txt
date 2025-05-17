@@ -1,0 +1,33 @@
+# Hướng dẫn chạy Django và truy cập từ xa
+
+## 1. Chạy server Django mặc định
+python manage.py runserver
+- Chạy server trên `localhost:8000`.
+- Truy cập trình duyệt tại `http://127.0.0.1:8000/`.
+## 2. Chạy server Django với IP và PORT tùy chỉnh
+python manage.py runserver IP:PORT
+Ví dụ:
+python manage.py runserver 0.0.0.0:8080
+- `0.0.0.0` cho phép truy cập từ các thiết bị khác trong mạng.
+- `8080` là cổng có thể thay đổi.
+## 3. Tạo đường hầm Cloudflare để truy cập từ xa
+cloudflared tunnel --url http://IP:PORT
+Ví dụ:
+cloudflared tunnel --url http://127.0.0.1:8000
+### Cài đặt Cloudflared (nếu chưa có):
+# Tải binary cloudflared
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+
+# Cấp quyền chạy
+chmod +x cloudflared-linux-amd64
+
+# Di chuyển vào thư mục hệ thống
+sudo mv cloudflared-linux-amd64 /usr/local/bin/cloudflared
+
+# Kiểm tra cài đặt thành công chưa
+cloudflared --version
+
+- Sau khi chạy lệnh tunnel,  nhận được một URL như:
+    https://randomsubdomain.trycloudflare.com
+  - Truy cập URL để vào server Django từ bất kỳ đâu.
+

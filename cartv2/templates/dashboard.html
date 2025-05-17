@@ -1,0 +1,1018 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Dashboard - Smart Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 mx-auto overflow-hidden" style="max-width: 1800px;">
+    <div class="content-wrapper">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+            <h2 class="text-primary fw-bold">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard Overview
+            </h2>
+            <div class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                Last Updated: <span id="lastUpdated"></span>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Total Products Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Products</h6>
+                                <h3 class="mb-2 fw-bold">{{ total_products }}</h3>
+                                <a href="{% url 'product_list' %}" class="show-all-btn btn">
+                                    View All Products
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <div class="icon-circle bg-primary">
+                                <i class="fas fa-boxes text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Sales Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Sales</h6>
+                                <h3 class="mb-0 fw-bold">{{ total_sales|intcomma }} VND</h3>
+                            </div>
+                            <div class="icon-circle bg-success">
+                                <i class="fas fa-dollar-sign text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Customers Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Transaction</h6>
+                                <h3 class="mb-0 fw-bold">{{ total_customers }}</h3>
+                                <small class="text-muted">{{ registered_customers }} registered</small>
+                            </div>
+                            <div class="icon-circle bg-info">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Stats Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">New Customers Today</h6>
+                                <h3 class="mb-0 fw-bold">{{ new_customers_today }}</h3>
+                                <small class="text-muted">{{ new_customers_week }} this week</small>
+                            </div>
+                            <div class="icon-circle bg-warning">
+                                <i class="fas fa-chart-line text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- NEW MINI CARDS -->
+        <div class="row g-4 mb-4">
+            <!-- Weekly Revenue Prediction Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Predicted Weekly Revenue</h6>
+                                <h3 class="mb-0 fw-bold">{{ predicted_week_revenue|intcomma }} VND</h3>
+                            </div>
+                            <div class="icon-circle bg-primary">
+                                <i class="fas fa-chart-pie text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Time Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Transaction Times</h6>
+                                <p class="mb-0"><span class="text-success fw-bold">{{ fastest_transaction_time }}m</span> fastest</p>
+                                <p class="mb-0"><span class="text-danger fw-bold">{{ slowest_transaction_time }}m</span> slowest</p>
+                            </div>
+                            <div class="icon-circle bg-info">
+                                <i class="fas fa-stopwatch text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Warning Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100 {% if revenue_warning %}bg-soft-danger{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Today's Revenue Status</h6>
+                                {% if revenue_warning %}
+                                <p class="mb-0 text-danger fw-bold">WARNING: Low Revenue</p>
+                                <small class="text-danger">{{ revenue_percentage }}% of average</small>
+                                {% else %}
+                                <p class="mb-0 text-success fw-bold">Revenue On Track</p>
+                                <small class="text-success">{{ revenue_percentage }}% of average</small>
+                                {% endif %}
+                            </div>
+                            <div class="icon-circle {% if revenue_warning %}bg-danger{% else %}bg-success{% endif %}">
+                                <i class="fas fa-exclamation-triangle text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock Products Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Low Stock Products</h6>
+                                <h3 class="mb-2 fw-bold">{{ low_stock_products|length }}</h3>
+                                <a href="{% url 'inventory_management' %}" class="show-all-btn btn">
+                                    Inventory Management
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <div class="icon-circle bg-warning">
+                                <i class="fas fa-box-open text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW TABLES - LEFT COLUMN -->
+        <div class="row g-4 mb-4">
+            <!-- Low Stock Products Table -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <h5 class="mb-0 fw-bold text-primary">Products Almost Out of Stock</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th class="text-end">Quantity</th>
+                                        <th class="text-end">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in low_stock_products %}
+                                    <tr>
+                                        <td class="fw-medium">{{ product.name }}</td>
+                                        <td>{{ product.category }}</td>
+                                        <td class="text-end {% if product.quantity <= 5 %}text-danger fw-bold{% endif %}">{{ product.quantity }}</td>
+                                        <td class="text-end">{{ product.price|intcomma }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                                <p class="mb-0">All products are well-stocked</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Adjustment Suggestions -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <h5 class="mb-0 fw-bold text-primary">Price Adjustment Suggestions</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-center">Weekly Sales</th>
+                                        <th>Suggestion</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in pricing_suggestions %}
+                                    <tr>
+                                        <td class="fw-medium">{{ item.name }}</td>
+                                        <td class="text-end">{{ item.current_price|intcomma }}</td>
+                                        <td class="text-center">{{ item.weekly_sales }}</td>
+                                        <td>
+                                            {% if item.action == 'increase' %}
+                                            <span class="badge bg-success">{{ item.suggestion }}</span>
+                                            {% elif item.action == 'maintain' %}
+                                            <span class="badge bg-info">{{ item.suggestion }}</span>
+                                            {% elif item.action == 'discount_small' %}
+                                            <span class="badge bg-warning">{{ item.suggestion }}</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">{{ item.suggestion }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                                                <p class="mb-0">No price adjustment suggestions</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Deadstock Products Table -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <h5 class="mb-0 fw-bold text-primary">Products Not Sold in 30+ Days</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Quantity</th>
+                                        <th class="text-end">Days Without Sale</th>
+                                        <th class="text-end">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in deadstock_products %}
+                                    <tr>
+                                        <td class="fw-medium">{{ product.name }}</td>
+                                        <td class="text-end">{{ product.quantity }}</td>
+                                        <td class="text-end text-danger">{{ product.days_without_sale }}+</td>
+                                        <td class="text-end">{{ product.price|intcomma }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-thumbs-up fa-2x mb-2"></i>
+                                                <p class="mb-0">All products sold within last 30 days</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Failed Transaction Table -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <h5 class="mb-0 fw-bold text-primary">Recent Cancel Shopping</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Time</th>
+                                        <th>Error Type</th>
+                                        <th>Customer</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in failed_transactions %}
+                                    <tr>
+                                        <td class="fw-medium">{{ transaction.id }}</td>
+                                        <td>{{ transaction.timestamp }}</td>
+                                        <td>
+                                            <span class="text-danger">{{ transaction.error }}</span>
+                                        </td>
+                                        <td>{{ transaction.customer }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                                <p class="mb-0">No cancelled transactions found</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bestsellers and Activity Row -->
+        <div class="row g-4 mb-4">
+            <!-- Best Selling Products -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <h5 class="mb-0 fw-bold text-primary">Best Selling Products</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for product in best_sellers %}
+                            <div class="list-group-item border-0 py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-medium">{{ product.name }}</span>
+                                        <small class="d-block text-muted">{{ product.category }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-success">{{ product.quantity }} sold</div>
+                                        <small class="text-muted">{{ product.revenue|intcomma }} VND</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Activity -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <h5 class="mb-0 fw-bold text-primary">Customer Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">Peak Hours</h6>
+                            <div class="progress" style="height: 25px;">
+                                {% for hour in peak_hours %}
+                                <div class="progress-bar bg-{{ hour.color }}" 
+                                     role="progressbar" 
+                                     style="width: {{ hour.percentage }}%"
+                                     title="{{ hour.hour }}:00 - {{ hour.count }} visits">
+                                    {{ hour.hour }}h
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h3 class="mb-1">{{ avg_bill_value|intcomma }}</h3>
+                                <small class="text-muted d-block">Avg. Bill (VND)</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 class="mb-1">{{ repeat_customers }}</h3>
+                                <small class="text-muted d-block">Repeat Customers</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 class="mb-1">{{ avg_items_per_bill }}</h3>
+                                <small class="text-muted d-block">Avg. Items/Bill</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <h5 class="mb-0 fw-bold text-primary">Customer Demographics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">Customer Types</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Registered</span>
+                                        <span>{{ registered_percentage }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: {{ registered_percentage }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Guest</span>
+                                        <span>{{ guest_percentage }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-info" style="width: {{ guest_percentage }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <h6 class="text-muted mb-3">Customer Loyalty</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h3 class="mb-1">{{ loyal_customers }}</h3>
+                                    <small class="text-muted d-block">Loyal Customers</small>
+                                </div>
+                                <div class="col-6">
+                                    <h3 class="mb-1">{{ customer_retention }}%</h3>
+                                    <small class="text-muted d-block">Retention Rate</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and History Row -->
+        <div class="row g-4">
+            <!-- Recent Bill History -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold text-primary">Recent Bills</h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshHistory()">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>ID</th>
+                                        <th>Time</th>
+                                        <th class="text-end">Amount</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for history in purchase_history %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ forloop.counter }}</td>
+                                        <td><span class="text-primary">{{ history.random_id }}</span></td>
+                                        <td>{{ history.timestamp|date:"H:i" }}</td>
+                                        <td class="text-end fw-bold">{{ history.total_amount|intcomma }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-link p-0" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#details{{ forloop.counter }}">
+                                                View Details
+                                            </button>
+                                            <div class="collapse" id="details{{ forloop.counter }}">
+                                                <div class="mt-2">
+                                                    {% for product in history.product_details %}
+                                                    <div class="d-flex justify-content-between small text-muted">
+                                                        <span>{{ product.name }} x {{ product.quantity }}</span>
+                                                        <span>{{ product.price|intcomma }}</span>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-receipt fa-2x mb-2"></i>
+                                                <p class="mb-0">No recent bills</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Overview -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold text-primary">Customer Overview</h5>
+                            <a href="{% url 'customer_list' %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-users me-1"></i> View All
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Recent Customers -->
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Recent Customers</h6>
+                                {% for customer in recent_customers %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-circle bg-soft-primary text-primary">
+                                        {{ customer.firstname|first }}{{ customer.surname|first }}
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-1">{{ customer.fullname }}</h6>
+                                        <small class="text-muted">
+                                            {{ customer.created_at|date:"d M Y" }} • 
+                                            {{ customer.total_spent|intcomma }} VND
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Customer Stats -->
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Demographics</h6>
+                                <div class="d-flex justify-content-around text-center">
+                                    <div>
+                                        <h3 class="mb-1">{{ new_customers_today }}</h3>
+                                        <small class="text-muted">New Today</small>
+                                    </div>
+                                    <div>
+                                        <h3 class="mb-1">{{ new_customers_week }}</h3>
+                                        <small class="text-muted">This Week</small>
+                                    </div>
+                                    <div>
+                                        <h3 class="mb-1">{{ active_customers }}</h3>
+                                        <small class="text-muted">Active</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW TABLES - RIGHT COLUMN -->
+<div class="row g-4 mb-4">
+    <!-- Golden Hour Sales Table -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent py-3">
+                <h5 class="mb-0 fw-bold text-primary">Golden Hours for Sales</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Time Period</th>
+                                <th class="text-end">Transactions</th>
+                                <th class="text-end">Revenue</th>
+                                <th class="text-end">Avg. Transaction</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hour in golden_hours %}
+                            <tr {% if forloop.first %}class="table-warning"{% endif %}>
+                                <td class="fw-medium">{{ hour.start_time }} - {{ hour.end_time }}</td>
+                                <td class="text-end">{{ hour.sales_count }}</td>
+                                <td class="text-end">{{ hour.revenue|intcomma }}</td>
+                                <td class="text-end">{{ hour.avg_transaction|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-clock fa-2x mb-2"></i>
+                                        <p class="mb-0">No sales data available</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue by Category Table -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent py-3">
+                <h5 class="mb-0 fw-bold text-primary">Revenue by Category</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-end">Quantity Sold</th>
+                                <th class="text-end">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in category_stats %}
+                            <tr>
+                                <td class="fw-medium">{{ category.category }}</td>
+                                <td class="text-end">{{ category.quantity }}</td>
+                                <td class="text-end">{{ category.revenue|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                        <p class="mb-0">No category data available</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Card styling */
+.stat-card {
+    transition: all 0.3s ease;
+    border-radius: 15px;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Table styling */
+.table th {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Chart styling */
+#revenueChart {
+    min-height: 400px;
+    width: 100% !important;
+}
+
+.google-visualization-tooltip {
+    background-color: white !important;
+    padding: 8px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.3s ease-out;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+}
+
+/* Xử lý overflow */
+.content-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.table-responsive {
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.table-responsive::-webkit-scrollbar {
+    display: none;
+}
+
+/* Thêm styles cho chart */
+#revenueChart {
+    width: 100% !important;
+    min-height: 400px;
+    position: relative;
+}
+
+.google-visualization-tooltip {
+    background-color: white !important;
+    padding: 8px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    border: 1px solid #e9ecef !important;
+}
+
+/* Fix container size */
+.card-body {
+    height: auto !important;
+    min-height: 100px; /* Giảm chiều cao tối thiểu */
+    padding: 1rem;
+}
+
+/* Điều chỉnh kích thước cho Statistics Cards */
+.stat-card {
+    transition: all 0.3s ease;
+    border-radius: 15px;
+}
+
+.stat-card .card-body {
+    padding: 0.75rem;  /* Giảm padding */
+    min-height: 80px; /* Giảm chiều cao cho statistics cards */
+}
+
+.stat-card h3 {
+    font-size: 1.5rem;  /* Giảm kích thước chữ */
+    margin-bottom: 0;
+}
+
+.stat-card h6 {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.icon-circle {
+    width: 40px;  /* Giảm kích thước icon */
+    height: 40px;
+    font-size: 1.25rem;
+}
+
+/* Điều chỉnh spacing cho Statistics Row */
+.row.g-4.mb-4 {
+    margin-bottom: 1rem !important;
+}
+
+/* Thêm transition mượt mà */
+.stat-card:hover {
+    transform: translateY(-3px);  /* Giảm độ nâng khi hover */
+}
+
+/* Điều chỉnh chiều cao cho tất cả các container */
+.card-body {
+    height: auto !important;
+    min-height: 100px; /* Giảm chiều cao tối thiểu */
+    padding: 1rem;
+}
+
+/* Điều chỉnh cho charts */
+.chart-container {
+    height: 300px; /* Giảm chiều cao của charts */
+}
+
+#revenueChart, 
+#day-part-chart {
+    height: 300px;
+    min-height: unset;
+}
+
+/* Điều chỉnh cho Recent Bills */
+.table-responsive {
+    max-height: 300px; /* Giới hạn chiều cao của bảng */
+    overflow-y: auto;
+}
+
+/* Điều chỉnh card chứa thống kê */
+.stat-card .card-body {
+    min-height: 80px; /* Giảm chiều cao cho statistics cards */
+    padding: 0.75rem;
+}
+
+.row.g-4 {
+    margin-bottom: 1rem; /* Giảm khoảng cách giữa các hàng */
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.bg-soft-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.bg-soft-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+</style>
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    updateTimestamp();
+    initializeChart();
+    
+    // Initialize all collapse elements
+    var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+    collapseElements.forEach(function(el) {
+        new bootstrap.Collapse(el);
+    });
+});
+
+function updateTimestamp() {
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent = now.toLocaleTimeString();
+}
+
+function refreshHistory() {
+    location.reload();
+}
+
+function initializeChart() {
+    google.charts.load('current', {'packages': ['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+}
+
+function drawChart() {
+    try {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Date');
+        data.addColumn('number', 'Revenue');
+
+        var chartData = JSON.parse('{{ chart_data|safe }}');
+        
+        // Validate data
+        if (!Array.isArray(chartData) || chartData.length === 0) {
+            console.error('Invalid or empty chart data');
+            return;
+        }
+
+        chartData.forEach(function(row) {
+            if (row.date && row.total_amount !== undefined) {
+                data.addRow([row.date, Number(row.total_amount)]);
+            }
+        });
+
+        var options = {
+            title: 'Daily Revenue Trend',
+            curveType: 'function',
+            legend: { position: 'none' },
+            colors: ['#0d6efd'],
+            backgroundColor: 'transparent',
+            chartArea: {
+                width: '85%',
+                height: '75%', // Điều chỉnh tỷ lệ vùng hiển thị
+                left: '10%'
+            },
+            vAxis: {
+                format: 'short',
+                gridlines: {
+                    color: '#f0f0f0'
+                },
+                minValue: 0,
+                textPosition: 'in'
+            },
+            hAxis: {
+                gridlines: {
+                    color: 'transparent'
+                },
+                slantedText: true,
+                slantedTextAngle: 45,
+                textPosition: 'out'
+            },
+            tooltip: {
+                trigger: 'focus',
+                isHtml: true,
+                textStyle: {
+                    fontSize: 13
+                }
+            },
+            animation: {
+                startup: true,
+                duration: 1000,
+                easing: 'out'
+            },
+            height: 300, // Giảm chiều cao chart
+            width: '100%',
+            chartArea: {
+                width: '80%',
+                height: '70%'
+            }
+        };
+
+        var chartDiv = document.getElementById('revenueChart');
+        if (!chartDiv) {
+            console.error('Chart container not found');
+            return;
+        }
+
+        var chart = new google.visualization.LineChart(chartDiv);
+        
+        // Handle resize
+        window.addEventListener('resize', function() {
+            chart.draw(data, options);
+        });
+
+        chart.draw(data, options);
+
+    } catch (error) {
+        console.error('Error drawing chart:', error);
+    }
+}
+
+// Load Google Charts với callback rõ ràng
+google.charts.load('current', {
+    'packages': ['corechart'],
+    'language': 'vi'
+});
+
+google.charts.setOnLoadCallback(function() {
+    // Đảm bảo DOM đã load
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        drawChart();
+    } else {
+        document.addEventListener('DOMContentLoaded', drawChart);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,398 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Smart Shopping Cart System</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --primary-hover: #4338CA;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --bg-light: #F9FAFB;
+            --success-color: #10B981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signup-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+        }
+
+        .brand-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .brand-content {
+            max-width: 400px;
+        }
+
+        .brand-logo {
+            width: 140px;
+            margin-bottom: 2rem;
+        }
+
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-features {
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .feature-item:hover {
+            transform: translateX(8px);
+        }
+
+        .signup-section {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .signup-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .signup-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            outline: none;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .signup-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .signup-footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .signup-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-danger {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .alert-info {
+            background: #E0F2FE;
+            color: #0369A1;
+        }
+
+        .alert-success {
+            background: #DCFCE7;
+            color: #047857;
+        }
+
+        /* Privacy Policy checkbox */
+        .form-check {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check-input {
+            margin-right: 0.5rem;
+        }
+
+        .form-check-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle .toggle-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            .signup-container {
+                grid-template-columns: 1fr;
+                margin: 1rem;
+            }
+
+            .brand-section {
+                padding: 2rem;
+                text-align: center;
+            }
+
+            .brand-content {
+                margin: 0 auto;
+            }
+
+            .signup-section {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <div class="brand-section">
+            <div class="brand-content">
+                <img src="{% static 'img/icon2_fixed.png' %}" alt="Logo" class="brand-logo">
+                <h1 class="brand-title">Join Our Smart Shopping Cart System</h1>
+                <p>Create an administrator account to manage the system with full control over the retail management functions.</p>
+                
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Secure admin privileges</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Complete system access</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-cogs"></i>
+                        <span>Full configuration control</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="signup-section">
+            <div class="signup-header">
+                <h2>Create Admin Account</h2>
+                <p>Fill in the required information to register</p>
+            </div>
+
+            <form method="POST" action="{% url 'signup' %}" class="signup-form">
+                {% csrf_token %}
+                
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                        <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email address</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+
+                <div class="form-group password-toggle">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" id="password" class="form-control" required>
+                    <span class="toggle-icon" onclick="togglePassword('password')">
+                        <i class="far fa-eye"></i>
+                    </span>
+                </div>
+
+                <div class="form-group password-toggle">
+                    <label class="form-label">Password (again)</label>
+                    <input type="password" name="password_again" id="password_again" class="form-control" required>
+                    <span class="toggle-icon" onclick="togglePassword('password_again')">
+                        <i class="far fa-eye"></i>
+                    </span>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="agree_terms" id="agree_terms" required>
+                    <label class="form-check-label" for="agree_terms">
+                        I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="signup-btn">
+                    Create Admin Account
+                </button>
+            </form>
+
+            <div class="signup-footer">
+                <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+                <p><a href="{% url 'index' %}">Back to Home</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const toggleIcon = passwordField.nextElementSibling.querySelector('i');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Form validation
+        document.querySelector('.signup-form').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const passwordAgain = document.getElementById('password_again').value;
+            const agreeTerms = document.getElementById('agree_terms').checked;
+            
+            // Remove any existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            let isValid = true;
+            
+            if (password !== passwordAgain) {
+                e.preventDefault();
+                
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger';
+                alert.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Passwords do not match</span>
+                `;
+                this.insertBefore(alert, this.firstChild);
+                isValid = false;
+            }
+            
+            if (!agreeTerms) {
+                e.preventDefault();
+                
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger';
+                alert.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>You must agree to the Terms of Service and Privacy Policy</span>
+                `;
+                this.insertBefore(alert, this.firstChild);
+                isValid = false;
+            }
+            
+            return isValid;
+        });
+    </script>
+</body>
+
+</html> 
