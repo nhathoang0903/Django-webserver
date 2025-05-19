@@ -6,7 +6,7 @@
     "backToHome": "Back to Home"
   },
   "welcomePage": {
-    "welcome": "Welcome to Cartsy!",
+    "welcome": "Welcome to Cartsy !",
     "tagline": "\"Shop smart, live better\"",
     "getStarted": "GET STARTED"
   },
@@ -50,7 +50,7 @@
   "productModal": {
     "cancel": "Cancel",
     "addToCart": "Add to cart",
-    "alreadyInCart": "PRODUCT ALREADY IN\nYOUR CART"
+    "alreadyInCart": "PRODUCT ALREADY IN YOUR CART"
   },
   "cancelShoppingModal": {
     "title": "Are you sure you want to cancel?",
@@ -64,7 +64,7 @@
     "accountNumber": "Account number: ",
     "accountName": "Account holder: NGUYEN THE NGO",
     "bankName": "Bank: Military Commercial JS Bank",
-    "charityMessage": "\"Money may be limited,\nbut love is infinite.\"",
+    "charityMessage": "\"Money may be limited, but love is infinite.\"",
     "cancelPayment": "Cancel Payment",
     "heartfeltSupport": "Heartfelt support",
     "qrExpired": "QR Code expired",

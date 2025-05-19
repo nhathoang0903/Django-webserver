@@ -16,8 +16,8 @@ class BasePage(QWidget):
             Qt.WindowStaysOnTopHint   # Always on top
         )
         
-        # Set fixed size for 5-inch display
-        self.setFixedSize(800, 480)
+        # Set fixed size for 10.1-inch display
+        self.setFixedSize(1920, 1080)
         
     def eventFilter(self, obj, event):
         # Handle Ctrl+X for emergency exit

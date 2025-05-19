@@ -3,13 +3,13 @@ import socket
 import logging
 import netifaces
 from requests.exceptions import RequestException
-from config import BASE_URL, DEVICE_ID
+from config import BASE_URL, DEVICE_ID, CART_STATUS_API
 
 class DeviceController:
     def __init__(self):
         self.BASE_URL = BASE_URL
         self.DEVICE_ID = DEVICE_ID
-        self.STATUS_URL = f"{self.BASE_URL}/devices/{self.DEVICE_ID}/status/"
+        self.STATUS_URL = CART_STATUS_API
 
     def get_device_ip(self):
         try:
@@ -43,6 +43,7 @@ class DeviceController:
     def update_status(self, is_active=True, app_running=False):
         try:
             status_data = {
+                "device_id": self.DEVICE_ID,
                 "ip_address": self.get_device_ip(),
                 "is_active": is_active,
                 "app_running": app_running
@@ -60,7 +61,7 @@ class DeviceController:
 
     def check_remote_commands(self):
         try:
-            response = requests.get(self.STATUS_URL, timeout=5)
+            response = requests.get(f"{self.STATUS_URL}?device_id={self.DEVICE_ID}", timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 return data.get("is_active"), data.get("app_running")

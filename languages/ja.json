@@ -50,7 +50,7 @@
   "productModal": {
     "cancel": "キャンセル",
     "addToCart": "カートに追加",
-    "alreadyInCart": "この商品は\nカートに既に追加されています"
+    "alreadyInCart": "カートにあります"
   },
   "cancelShoppingModal": {
     "title": "本当にキャンセルしますか？",
@@ -64,7 +64,7 @@
     "accountNumber": "口座番号: ",
     "accountName": "口座名義: NGUYEN THE NGO",
     "bankName": "銀行: 軍事商業合資銀行",
-    "charityMessage": "\"お金に限りがあっても、\n愛には限りがありません。\"",
+    "charityMessage": "\"限りあるお金、尽きない愛\"",
     "cancelPayment": "決済をキャンセル",
     "heartfeltSupport": "心からの支援",
     "qrExpired": "QRコードの有効期限が切れました",

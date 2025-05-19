@@ -7,6 +7,12 @@ import logging
 import requests
 from config import BASE_URL, DEVICE_ID
 
+# Thêm các biến môi trường trước khi import bất kỳ thư viện QT nào
+os.environ['DISPLAY'] = ':0.0'
+os.environ['XAUTHORITY'] = '/home/mtech/.Xauthority'
+os.environ['QT_QPA_PLATFORM'] = 'xcb' 
+os.environ['XDG_RUNTIME_DIR'] = '/run/user/1000'
+
 # Update app path
 APP_DIR = os.path.join(os.path.dirname(__file__), 'app')
 LOG_DIR = os.path.join(APP_DIR, 'logs')
@@ -54,6 +60,21 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+# Log thông tin môi trường
+logging.info(f"Environment: DISPLAY={os.environ.get('DISPLAY')}")
+logging.info(f"Environment: XAUTHORITY={os.environ.get('XAUTHORITY')}")
+logging.info(f"Environment: QT_QPA_PLATFORM={os.environ.get('QT_QPA_PLATFORM')}")
+logging.info(f"Environment: XDG_RUNTIME_DIR={os.environ.get('XDG_RUNTIME_DIR')}")
+logging.info(f"Current user: {os.getuid()}")
+logging.info(f"Current working directory: {os.getcwd()}")
+
+# Kiểm tra X server có hoạt động không
+try:
+    result = subprocess.run(['xset', 'q'], capture_output=True)
+    logging.info(f"X server status: {'OK' if result.returncode == 0 else 'Failed'}")
+except Exception as e:
+    logging.error(f"Error checking X server: {e}")
 
 from device_controller import DeviceController
 

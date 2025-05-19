@@ -1,31 +1,39 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QFrame
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QFrame, QGraphicsDropShadowEffect
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap, QFont, QFontDatabase
-from page3_productsinfo import SimpleImageLoader  # Import SimpleImageLoader
+from page3_productsinfo import SimpleImageLoader
 import os
-from utils.translation import _, get_current_language  # Add translation import
+from utils.translation import _, get_current_language 
 
 class ProductModal(QFrame):
     add_to_cart = pyqtSignal(dict, int)  
-    cancel_clicked = pyqtSignal()  # Add new signal for cancel button
+    cancel_clicked = pyqtSignal()  
 
 
     def __init__(self, parent=None, camera_height=None, camera_width=None):
         super().__init__(parent)
         self.quantity = 1
         self.current_product = None
-        self.setFixedWidth(330)  # Tăng từ 320 lên 330
-        self.setFixedHeight(280)  # Tăng từ 260 lên 280
+        self.setFixedWidth(700)
+        self.setFixedHeight(550) 
         self.setStyleSheet("""
             QFrame {
                 background-color: #FFFFFF;
-                border-radius: 20px;
-                border: none;
+                border-radius: 30px;
+                border: none; 
             }
         """)
-        self.existing_message = None  # Add this line
-        self.controls_container = None  # Add this line
-        self.init_ui()  # Remove warning_widget
+        
+        # Thêm hiệu ứng đổ bóng thay vì dùng box-shadow CSS
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setColor(Qt.gray)
+        shadow.setOffset(0, 6)
+        self.setGraphicsEffect(shadow)
+        
+        self.existing_message = None
+        self.controls_container = None
+        self.init_ui()
 
     def load_fonts(self):
         # Register necessary fonts
@@ -42,18 +50,20 @@ class ProductModal(QFrame):
     def init_ui(self):
         # Main layout là VBoxLayout
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(10, 10, 10, 10)
-        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(30, 30, 30, 30)  
+        main_layout.setSpacing(15) 
 
-        # Top section container
+        # ========= TOP SECTION =========
+        # Top section container for image and product info
         top_container = QWidget()
+        top_container.setStyleSheet("background-color: transparent; border: none;")
         top_layout = QHBoxLayout(top_container)
         top_layout.setContentsMargins(0, 0, 0, 0)
-        top_layout.setSpacing(10)
+        top_layout.setSpacing(30)
 
         # Left section - Image
         self.image_label = QLabel()
-        self.image_label.setFixedSize(105, 105)
+        self.image_label.setFixedSize(280, 280)
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setStyleSheet("""
             QLabel {
@@ -61,90 +71,85 @@ class ProductModal(QFrame):
                 border: none; 
             }
         """)
-        top_layout.addWidget(self.image_label)
+        top_layout.addWidget(self.image_label, 0, Qt.AlignCenter)
 
-        # Right section
+        # Right section - Product Info
         right_widget = QWidget()
+        right_widget.setStyleSheet("background-color: transparent; border: none;")
         self.right_layout = QVBoxLayout(right_widget)
-        self.right_layout.setContentsMargins(0, 0, 0, 0)
-        self.right_layout.setSpacing(5)
+        self.right_layout.setContentsMargins(30, 0, 15, 0)
+        self.right_layout.setSpacing(15)
 
         # Product name
         self.name_label = QLabel()
-        self.name_label.setFont(QFont("Inria Sans", 18, QFont.Bold))
+        self.name_label.setFont(QFont("Inria Sans", 30, QFont.Bold))
         self.name_label.setWordWrap(True)
-        self.name_label.setMinimumHeight(55)
+        self.name_label.setMinimumHeight(100)
         self.name_label.setStyleSheet("""
             QLabel {
-                qproperty-alignment: AlignCenter;
-                padding: 0 10px;
+                qproperty-alignment: 'AlignLeft | AlignVCenter';
+                padding-left: 15px;
             }
         """)
         self.right_layout.addWidget(self.name_label)
 
+        # Warning label
         self.warning_label = QLabel()
         self.warning_label.setStyleSheet("""
             QLabel {
                 color: #D32F2F;
-                font-size: 11px;
+                font-size: 16px;
                 font-weight: bold;
                 background-color: #FFEBEE;
                 border: 1px solid #FFCDD2;
-                border-radius: 4px;
-                padding: 4px;
+                border-radius: 8px;
+                padding: 8px;
             }
         """)
         self.warning_label.setAlignment(Qt.AlignCenter)
         self.warning_label.hide()
-        
-        # Add warning label to right_layout after name_label
         self.right_layout.insertWidget(1, self.warning_label)
 
         # Price with more space above
-        self.right_layout.addSpacing(10)
+        self.right_layout.addSpacing(20)
         self.price_label = QLabel()
-        self.price_label.setFont(QFont("Inria Sans", 14, QFont.Bold))
+        self.price_label.setFont(QFont("Inria Sans", 26, QFont.Bold))
         self.price_label.setStyleSheet("""
             QLabel {
                 color: #D32F2F;
-                qproperty-alignment: AlignCenter;
-                margin-bottom: 15px;  
+                qproperty-alignment: 'AlignLeft | AlignVCenter';
+                margin-bottom: 25px;
+                padding-left: 15px;
             }
         """)
-        self.price_label.setAlignment(Qt.AlignCenter)
+        self.price_label.setAlignment(Qt.AlignLeft)
         self.right_layout.addWidget(self.price_label)
         
-        self.right_layout.addSpacing(15)  
+        self.right_layout.addSpacing(25)
 
-        # Create controls container to hold quantity and buttons
-        self.controls_container = QWidget()
-        controls_layout = QVBoxLayout(self.controls_container)
-        controls_layout.setContentsMargins(0, 0, 0, 0)
-        controls_layout.setSpacing(5)
-
-        # Move quantity controls and buttons into controls_container
         # Quantity controls
         self.quantity_widget = QWidget()
+        self.quantity_widget.setStyleSheet("background-color: transparent; border: none;")
         quantity_layout = QHBoxLayout(self.quantity_widget)
         quantity_layout.setContentsMargins(0, 0, 0, 0)
-        quantity_layout.setSpacing(0)  
+        quantity_layout.setSpacing(0)
 
-        # Increase control size
-        control_size = 36 
+        # Control size
+        control_size = 74
 
         self.minus_btn = QPushButton("-")
-        self.minus_btn.setFont(QFont("Inria Sans", 18, QFont.Bold))
+        self.minus_btn.setFont(QFont("Inria Sans", 28, QFont.Bold))
         self.quantity_label = QLabel("1")
-        self.quantity_label.setFont(QFont("Inria Sans", 20, QFont.Bold))
+        self.quantity_label.setFont(QFont("Inria Sans", 30, QFont.Bold))
         self.plus_btn = QPushButton("+")
-        self.plus_btn.setFont(QFont("Inria Sans", 18, QFont.Bold))
+        self.plus_btn.setFont(QFont("Inria Sans", 28, QFont.Bold))
 
         # Set equal fixed size for all elements
         for widget in [self.minus_btn, self.plus_btn]:
             widget.setFixedSize(control_size, control_size)
         
         # Make quantity label wider to accommodate larger numbers
-        self.quantity_label.setFixedSize(control_size + 15, control_size)
+        self.quantity_label.setFixedSize(control_size + 30, control_size)
 
         # Style the minus button with left border radius
         self.minus_btn.setStyleSheet("""
@@ -152,8 +157,8 @@ class ProductModal(QFrame):
                 background-color: #D8D8D8;
                 color: #000000;
                 border: none;
-                border-radius: 12px;
-                font-size: 22px;
+                border-radius: 20px;
+                font-size: 46px;
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -181,8 +186,8 @@ class ProductModal(QFrame):
                 background-color: #D8D8D8;
                 color: #000000;
                 border: none;
-                border-radius: 12px;
-                font-size: 22px;
+                border-radius: 20px;
+                font-size: 46px;
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -200,106 +205,113 @@ class ProductModal(QFrame):
         quantity_layout.addWidget(self.quantity_label)
         quantity_layout.addWidget(self.plus_btn)
         
-        # Center the quantity controls
+        # Add quantity widget with some left margin
         quantity_container = QHBoxLayout()
-        quantity_container.addStretch()
+        quantity_container.setContentsMargins(20, 0, 0, 0)
         quantity_container.addWidget(self.quantity_widget)
         quantity_container.addStretch()
-        controls_layout.addLayout(quantity_container)
-
-        # Center the quantity controls with more spacing
-        controls_layout.addSpacing(25)
-
-        # Before buttons section, add more vertical space
+        self.right_layout.addLayout(quantity_container)
+        
+        # Add stretch to push content up
         self.right_layout.addStretch(1)
-        
-        # Điều chỉnh spacing trước buttons
-        self.right_layout.addSpacing(10)
 
-        # Buttons section 
-        self.buttons_widget = QWidget()
-        btn_layout = QHBoxLayout(self.buttons_widget)
-        btn_layout.setContentsMargins(0, 0, 0, 10) 
-        btn_layout.setSpacing(20)  # Tăng khoảng cách giữa các buttons từ 5 thành 20
+        # Add right widget to top layout
+        top_layout.addWidget(right_widget)
         
-        # Center the buttons
-        btn_layout.setAlignment(Qt.AlignCenter)
+        # Add top container to main layout
+        main_layout.addWidget(top_container)
+        
+        # Add spacing between top and bottom sections
+        main_layout.addSpacing(20)
+        
+        # ========= BOTTOM SECTION =========
+        # Buttons section with centered buttons
+        buttons_container = QWidget()
+        buttons_container.setStyleSheet("background-color: transparent; border: none;")
+        buttons_layout = QHBoxLayout(buttons_container)
+        buttons_layout.setContentsMargins(0, 10, 0, 10)
+        buttons_layout.setSpacing(30)  # Increased spacing between buttons
+        buttons_layout.setAlignment(Qt.AlignCenter)  # Center the buttons
 
-        # Cancel button - increased size and font
-        cancel_btn = QPushButton(_("productModal.cancel"))
-        cancel_btn.setFixedSize(90, 40)
-        cancel_btn.setFont(QFont("Inria Sans", 12, QFont.Bold))
-        cancel_btn.setStyleSheet("""
+        # Cancel button
+        self.cancel_btn = QPushButton(_("productModal.cancel"))
+        self.cancel_btn.setFixedSize(200, 80)
+        self.cancel_btn.setFont(QFont("Inria Sans", 19, QFont.Bold))
+        self.cancel_btn.setStyleSheet("""
             QPushButton {
                 background-color: white;
                 color: #D32F2F;
-                border: 1px solid #D30E11;
-                border-radius: 15px;
+                border: 3px solid #D30E11;
+                border-radius: 38px;
             }
             QPushButton:hover {
                 background-color: #D30E11;
                 color: white;
             }
+            QPushButton:disabled {
+                background-color: #CCCCCC;
+                color: #666666;
+                border: 3px solid #999999;
+            }
         """)
-        cancel_btn.clicked.connect(self.handle_cancel)
+        self.cancel_btn.clicked.connect(self.handle_cancel)
 
         # Add to cart button
-        add_btn = QPushButton(_("productModal.addToCart"))
-        add_btn.setFixedSize(90, 40)
-        add_btn.setFont(QFont("Inria Sans", 12, QFont.Bold))
-        add_btn.setStyleSheet("""
+        self.add_btn = QPushButton(_("productModal.addToCart"))
+        self.add_btn.setFixedSize(200, 80)
+        self.add_btn.setFont(QFont("Inria Sans", 19, QFont.Bold))
+        self.add_btn.setStyleSheet("""
             QPushButton {
                 background-color: white;
                 color: #507849;
-                border-radius: 15px;
-                border: 1px solid #507849;
+                border-radius: 38px;
+                border: 3px solid #507849;
             }
             QPushButton:hover {
                 background-color: #507849;
                 color: white;
             }
+            QPushButton:disabled {
+                background-color: #CCCCCC;
+                color: #666666;
+                border: 3px solid #999999;
+            }
         """)
-        add_btn.clicked.connect(self.add_item_to_cart)
+        self.add_btn.clicked.connect(self.add_item_to_cart)
 
-        btn_layout.addWidget(cancel_btn)
-        btn_layout.addWidget(add_btn)
-
-        # Đảm bảo buttons được căn giữa trong container
-        btn_container = QHBoxLayout()
-        btn_container.addStretch()
-        btn_container.addWidget(self.buttons_widget)
-        btn_container.addStretch()
-        controls_layout.addLayout(btn_container)
-
-        # Add controls container to right layout
-        self.right_layout.addWidget(self.controls_container)
-
-        # Thêm phần từ trên vào top_layout
-        top_layout.addWidget(right_widget)
-        main_layout.addWidget(top_container)
+        # Add buttons to layout
+        buttons_layout.addWidget(self.cancel_btn)
+        buttons_layout.addWidget(self.add_btn)
         
-        # Warning message container - di chuyển xuống dưới cùng
+        # Add buttons container to main layout
+        main_layout.addWidget(buttons_container)
+        
+        # Add stretch to push buttons up
+        main_layout.addStretch(1)
+        
+        # ========= WARNING CONTAINER (BOTTOM) =========
+        # Warning message container
         self.warning_container = QWidget()
         warning_layout = QHBoxLayout(self.warning_container)
-        warning_layout.setContentsMargins(5, 5, 5, 5)
-        warning_layout.setSpacing(10)
+        warning_layout.setContentsMargins(15, 15, 15, 15)
+        warning_layout.setSpacing(20)
         warning_layout.setAlignment(Qt.AlignCenter)
 
         # Create warning icon and text
         warning_icon = QLabel()
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'warning.png')
-        warning_pixmap = QPixmap(icon_path).scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        warning_pixmap = QPixmap(icon_path).scaled(80, 80, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         warning_icon.setPixmap(warning_pixmap)
-        warning_icon.setFixedSize(45, 45)
+        warning_icon.setFixedSize(80, 80)
         warning_icon.setAlignment(Qt.AlignCenter)
         warning_layout.addWidget(warning_icon)
 
         warning_text = QLabel(_("productModal.alreadyInCart"))
-        warning_text.setFont(QFont("Inria Sans", 12, QFont.Bold))
+        warning_text.setFont(QFont("Inria Sans", 22, QFont.Bold))
         warning_text.setStyleSheet("color: black; background: transparent;")
         warning_text.setContentsMargins(0, 0, 0, 0)
-        warning_text.setMinimumWidth(170)
-        warning_text.setFixedWidth(170)
+        warning_text.setMinimumWidth(320)
+        warning_text.setFixedWidth(320)
         warning_text.setAlignment(Qt.AlignCenter)
         warning_text.setWordWrap(True)
         warning_layout.addWidget(warning_text)
@@ -308,14 +320,13 @@ class ProductModal(QFrame):
             QWidget {
                 background-color: #F68003;
                 border: none;
-                border-radius: 15px;
+                border-radius: 25px;
             }
         """)
         self.warning_container.hide()
         
-        # Thêm warning container vào cuối layout
+        # Add warning container to main layout
         main_layout.addWidget(self.warning_container, 0, Qt.AlignCenter)
-        main_layout.addStretch()
 
     def reset_warning_state(self):
         """Reset warning state has been removed since we're recreating the modal instead"""
@@ -340,16 +351,16 @@ class ProductModal(QFrame):
         price_text = f'<span style="color: #D30E11;"><b>{formatted_price} vnđ / item</b></span>'
         self.price_label.setText(price_text)
 
-        # Get image size based on category
+        # Get image size based on category - increased sizes
         category = product.get('category', '')
         if category == "Snack":
-            image_size = (95, 140)  
+            image_size = (280, 330)
         elif category == "Food":
-            image_size = (95, 160)  
+            image_size = (280, 360)
         elif category == "Beverage":
-            image_size = (95, 145) 
+            image_size = (280, 350)
         else:
-            image_size = (95, 95) 
+            image_size = (280, 280)
             
         self.image_label.setFixedSize(*image_size)
 
@@ -383,19 +394,23 @@ class ProductModal(QFrame):
         # Toggle visibility
         if existing_quantity is not None:
             # Trường hợp có warning (sản phẩm đã có trong giỏ hàng)
-            self.controls_container.hide()
+            self.quantity_widget.hide()
             self.warning_label.hide()
             
-            # Hiển thị warning container
+            # Hiển thị warning container và ẩn các nút
             self.warning_container.show()
             self.warning_container.raise_()
+            self.cancel_btn.hide()
+            self.add_btn.hide()
         else:
             # Trường hợp bình thường
-            self.controls_container.show()
+            self.quantity_widget.show()
             self.warning_label.hide()
             
-            # Ẩn warning container
+            # Ẩn warning container và hiện các nút
             self.warning_container.hide()
+            self.cancel_btn.show()
+            self.add_btn.show()
 
     def increase_quantity(self):
         self.quantity += 1

@@ -176,79 +176,84 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
 
-        # Main layout với style giống page5
+        # Main layout with adjusted margins to prevent cutting off
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setContentsMargins(80, 10, 80, 20)  # Reduced top and bottom margins
 
-        # Logo section with left alignment
+        # Logo section with much larger size to match page1
         logo_section = QWidget()
-        logo_layout = QVBoxLayout(logo_section)
+        logo_layout = QHBoxLayout(logo_section)  # Changed to HBoxLayout like page1
         logo_layout.setContentsMargins(0, 0, 0, 0)
-        logo_layout.setSpacing(0)
+        logo_layout.setSpacing(40)  # Match spacing from page1
 
-        # Logo 
+        # Logo with much larger size to match page1
         logo_label = QLabel()
         logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'logo.png')
         logo_pixmap = QPixmap(logo_path)
-        logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio))
-        logo_layout.addWidget(logo_label, alignment=Qt.AlignLeft)
+        if not logo_pixmap.isNull():
+            logo_label.setPixmap(logo_pixmap.scaled(400, 166, Qt.KeepAspectRatio, Qt.SmoothTransformation))  # Slightly reduced to prevent cut-off
+        logo_label.setAlignment(Qt.AlignLeft)
+        logo_layout.addWidget(logo_label)
+        
+        # Add stretch to push logo to left like page1
+        logo_layout.addStretch()
+        
+        # Add logo section to main layout
         main_layout.addWidget(logo_section)
 
-        # Center content với margin top nhỏ hơn
+        # Center content with adjusted spacing
         center_widget = QWidget()
         center_layout = QVBoxLayout(center_widget)
         center_layout.setAlignment(Qt.AlignCenter)
-        center_layout.setContentsMargins(0, -20, 0, 0)  # Negative top margin to move content up
-        center_layout.setSpacing(10)  # Reduced spacing between elements
+        center_layout.setContentsMargins(0, 10, 0, 0)  # Reduced top margin to prevent cut-off
+        center_layout.setSpacing(30)  # Slightly reduced spacing to fit everything
         
-        # Success image
+        # Success image with adjusted size
         success_label = QLabel()
         success_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'paymentsuccess.png')
         success_pixmap = QPixmap(success_path)
         
         if success_pixmap.isNull():
-            # print(f"Error: Could not load image from {success_path}")
-            # Tạo một placeholder label nếu không load được hình
             success_label.setText(_("successPage.placeholder"))
-            success_label.setStyleSheet("font-size: 30px; color: #2BA616;")
+            success_label.setStyleSheet("font-size: 50px; color: #2BA616;")  # Slightly reduced font size
         else:
             print(f"Successfully loaded image from {success_path}")
-            success_label.setPixmap(success_pixmap.scaled(137, 117, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            success_label.setPixmap(success_pixmap.scaled(250, 213, Qt.KeepAspectRatio, Qt.SmoothTransformation))  # Slightly reduced size
             
         success_label.setAlignment(Qt.AlignCenter)
         center_layout.addWidget(success_label)
 
-        # Text sections with reduced spacing
+        # Text sections with adjusted fonts
         thank_label = QLabel(_("successPage.thankYou"))
-        thank_label.setFont(QFont("Inria Sans", 30, QFont.Bold))
+        thank_label.setFont(QFont("Inria Sans", 54, QFont.Bold))  # Slightly reduced font size
         thank_label.setStyleSheet("color: #2BA616;")
         thank_label.setAlignment(Qt.AlignCenter)
         center_layout.addWidget(thank_label)
 
         success_msg = QLabel(_("successPage.paymentSuccess"))
-        success_msg.setFont(QFont("Inria Sans", 20))
+        success_msg.setFont(QFont("Inria Sans", 40))  # Slightly reduced font size
         success_msg.setAlignment(Qt.AlignCenter)
         center_layout.addWidget(success_msg)
 
         redirect_msg = QLabel(_("successPage.redirectMessage"))
-        redirect_msg.setFont(QFont("Inria Sans", 10))
+        redirect_msg.setFont(QFont("Inria Sans", 24))  # Slightly reduced font size
         redirect_msg.setAlignment(Qt.AlignCenter)
         center_layout.addWidget(redirect_msg)
 
-        # Add stretch before button to push it down
-        center_layout.addStretch()
+        # Reduced stretch to allow more room for content
+        center_layout.addStretch(1)
 
-        # Home button với style giống button SCAN page3
+        # Home button with adjusted size
         home_btn = QPushButton(_("successPage.homeButton"))
-        home_btn.setFixedSize(158, 42)  # Kích thước giống button SCAN
-        home_btn.setFont(QFont("Inter", 13, QFont.Bold))
+        home_btn.setFixedSize(350, 90)  # Slightly reduced button size
+        home_btn.setFont(QFont("Inter", 28, QFont.Bold))  # Slightly reduced font size
         home_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4E8F5F;
                 color: white;
                 border: none;
-                border-radius: 20px;
-                padding: 10px 20px;
+                border-radius: 30px;
+                padding: 10px 25px;
                 text-transform: uppercase;
             }
             QPushButton:hover {
@@ -261,7 +266,11 @@ class SuccessPage(BasePage):  # Changed from QWidget to BasePage
         home_btn.clicked.connect(self.go_home)
         center_layout.addWidget(home_btn, alignment=Qt.AlignCenter)
 
-        main_layout.addWidget(center_widget)
+        # Reduced bottom spacing
+        center_layout.addSpacing(20)
+
+        # Add center widget to main layout with stretch
+        main_layout.addWidget(center_widget, 1)
 
         # No longer initializing timer here - moved to showEvent
 

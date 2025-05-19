@@ -10,10 +10,11 @@ import json
 import urllib.request
 from urllib.error import URLError
 import threading
+import subprocess
 from page_timing import PageTiming
 from cart_state import CartState
 import requests
-from config import CART_END_SESSION_API, DEVICE_ID
+from config import CART_END_SESSION_API, DEVICE_ID, PRODUCTS_CHECK_NEW_API
 import importlib
 import sys
 from utils.translation import _, get_current_language
@@ -108,7 +109,7 @@ class ProductCard(QFrame):
         
     def load_image_async(self):
         def load():
-            pixmap = SimpleImageLoader.load_image(self.product['image_url'])
+            pixmap = SimpleImageLoader.load_image(self.product['image_url'], size=(150, 150))  # Increased from 120x120
             if pixmap:
                 self.cached_image = pixmap  # Cache the image
                 self.image_label.setPixmap(pixmap)
@@ -118,31 +119,31 @@ class ProductCard(QFrame):
         threading.Thread(target=load, daemon=True).start()
 
     def setup_ui(self):
-        self.setFixedSize(140, 180)  # Reduced card width from 160 to 140
+        self.setFixedSize(270, 370)  # Tăng từ 350 lên 370 để thêm không gian cho các phần tử lớn hơn
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
-                border-radius: 12px;
-                padding: 5px;
+                border-radius: 20px;
+                padding: 10px;
             }
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(5, 5, 5, 5)
-        layout.setSpacing(1)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(3)
         layout.setSizeConstraint(QLayout.SetFixedSize)
 
         # Image placeholder
         self.image_label = QLabel()
-        self.image_label.setFixedSize(65, 65)  # Reduced image size from 75 to 65
+        self.image_label.setFixedSize(150, 150)  
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setText("Loading...")
-        self.image_label.setStyleSheet("color: #3D6F4A;")
+        self.image_label.setStyleSheet("color: #3D6F4A; font-size: 16px;")
         layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
 
         # Name container with fixed size
         name_container = QWidget()
-        name_container.setFixedSize(130, 40)  # Reduced width from 150 to 130
+        name_container.setFixedSize(260, 65)  # Increased width from 230 to 260
         name_layout = QVBoxLayout(name_container)
         name_layout.setContentsMargins(0, 0, 0, 0)
         name_layout.setSpacing(0)
@@ -150,10 +151,10 @@ class ProductCard(QFrame):
         # Name
         name = self.product['name'].replace('_', ' ')
         name_label = QLabel(name)
-        name_label.setFont(QFont("Josefin Sans", 10))
+        name_label.setFont(QFont("Josefin Sans", 20))  # Tăng từ 17 lên 19
         name_label.setWordWrap(True)
         name_label.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
-        name_label.setFixedWidth(120)  # Reduced width from 140 to 120
+        name_label.setFixedWidth(245)  # Increased from 220 to 245
         name_label.setStyleSheet("""
             QLabel {
                 color: black;
@@ -163,28 +164,28 @@ class ProductCard(QFrame):
         name_layout.addWidget(name_label)
         layout.addWidget(name_container)
 
-        # Price
+        # Price - MADE LARGER
         price = "{:,.0f}".format(float(self.product['price'])).replace(',', '.')
         price_label = QLabel(f"{price} vnd")
-        price_label.setFont(QFont("Josefin Sans", 8))
+        price_label.setFont(QFont("Josefin Sans", 24, QFont.Bold))  # Tăng từ 18 lên 24 và thêm Bold
         price_label.setAlignment(Qt.AlignCenter)
-        price_label.setStyleSheet("color: #E72225;")
+        price_label.setStyleSheet("color: #E72225; margin-top: 5px;")
         layout.addWidget(price_label)
 
-        # Add to Cart button - use translation
+        # Add to Cart button - MADE LARGER
         self.add_to_cart_btn = QPushButton(_("productPage.addToCart"))
-        self.add_to_cart_btn.setFont(QFont("Josefin Sans", 10))
+        self.add_to_cart_btn.setFont(QFont("Josefin Sans", 22, QFont.Bold))  # Tăng từ 18 lên 22 và thêm Bold
         self.add_to_cart_btn.setCursor(Qt.PointingHandCursor)
-        self.add_to_cart_btn.setFixedWidth(132)
-        self.add_to_cart_btn.setFixedHeight(32)
+        self.add_to_cart_btn.setFixedWidth(250)  # Giữ nguyên width 250
+        self.add_to_cart_btn.setFixedHeight(70)  # Tăng từ 50 lên 60
         self.add_to_cart_btn.setStyleSheet("""
             QPushButton {
                 background-color: #507849;
                 color: white;
                 border: none;
-                border-radius: 10px;
-                padding: 3px 8px;
-                margin: 1px 10px;
+                border-radius: 18px;
+                padding: 8px 12px;
+                margin: 5px 10px;
             }
             QPushButton:hover {
                 background-color: #3D6F4A;
@@ -263,19 +264,19 @@ class LoadProductsThread(QThread):
 class CategoryDropdown(QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(140, 40)
+        self.setFixedSize(280, 70)
         self.current_category = "All Categories"  # Lưu category tiếng Anh hiện tại
         self.setText(_("productPage.categories.All Categories"))
-        self.setFont(QFont("Josefin Sans", 11))
+        self.setFont(QFont("Josefin Sans", 22))  
         self.setCursor(Qt.PointingHandCursor)
         
         # Style for main button
         self.setStyleSheet("""
             QPushButton {
                 background-color: white;
-                border: 2px solid #3D6F4A;
-                border-radius: 8px;
-                padding: 5px 15px;
+                border: 3px solid #3D6F4A;
+                border-radius: 15px;
+                padding: 10px 25px;
                 color: #3D6F4A;
                 text-align: left;
             }
@@ -289,17 +290,17 @@ class CategoryDropdown(QPushButton):
         self.menu.setStyleSheet("""
             QMenu {
                 background-color: white;
-                border: 2px solid #3D6F4A;
-                border-radius: 8px;
-                padding: 5px;
-                min-width: 140px;
+                border: 3px solid #3D6F4A;
+                border-radius: 15px;
+                padding: 10px;
+                min-width: 280px;
             }
             QMenu::item {
-                padding: 8px 15px;
-                border-radius: 4px;
+                padding: 15px 25px;
+                border-radius: 8px;
                 color: #3D6F4A;
                 font-family: 'Josefin Sans';
-                font-size: 11pt;
+                font-size: 24pt;  /* Increased from 18pt to 24pt */
             }
             QMenu::item:selected {
                 background-color: #EEF5F0;
@@ -367,6 +368,10 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             print(f"[Page3] Initial cart count: {len(self.cart_state.cart_items)}")
             print(f"[Page3] Initial cart items: {self.cart_state.cart_items}")
             self.cart_state.register_change_callback(self.update_cart_count)  # Register callback
+            
+            # Check for new products before initializing UI
+            self.check_for_new_products()
+            
             self.init_ui()
             
             # Initialize transition overlay
@@ -381,12 +386,125 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             # Set application icon
             icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
             self.setWindowIcon(QIcon(icon_path))
+            
+            # Setup timer for frequent product updates (check every 5 seconds)
+            self.update_timer = QTimer(self)
+            self.update_timer.timeout.connect(self.check_for_new_products)
+            self.update_timer.start(5000)  # 5000 ms = 5 seconds
+            print("[Page3] Started product update timer (5-second interval)")
         
         # Always update translations when the page is initialized or shown again
         self.update_translations()
         
         # Update cart count when initializing or shown again
         self.update_cart_count()
+
+    def check_for_new_products(self):
+        """Check for new products directly from the API and update the display if found - optimized for speed"""
+        try:
+            # Get current products from cache to be faster
+            if not ProductPage._products_cache:
+                # If cache is empty, we're already loading products elsewhere
+                return
+                
+            current_products = ProductPage._products_cache
+            
+            # Get existing product IDs - use set for faster lookups
+            existing_product_ids = {product["product_id"] for product in current_products}
+            
+            # Fetch new products from API with short timeout
+            try:
+                response = requests.get(PRODUCTS_CHECK_NEW_API, timeout=2)  # Shorter timeout for faster response
+                if response.status_code != 200:
+                    return
+                    
+                api_data = response.json()
+                new_products_data = api_data.get("products", [])
+                
+                # Check for new products - optimize by checking if any match first
+                new_products_found = []
+                for product in new_products_data:
+                    product_id = product.get("product_id")
+                    if product_id and product_id not in existing_product_ids:
+                        # Remove low_stock_threshold field if present
+                        if "low_stock_threshold" in product:
+                            del product["low_stock_threshold"]
+                        new_products_found.append(product)
+                
+                # If we found new products, update everything
+                if new_products_found:
+                    print(f"[Page3] Adding {len(new_products_found)} new products to display")
+                    
+                    # Add to current products
+                    current_products.extend(new_products_found)
+                    
+                    # Update the products cache
+                    ProductPage._products_cache = current_products
+                    
+                    # Save updated product list to file in a non-blocking way
+                    threading.Thread(target=self._save_product_json, 
+                                   args=(current_products,), 
+                                   daemon=True).start()
+                    
+                    # Create new product cards for the new products
+                    self.add_new_product_cards(new_products_found)
+                    
+                    # Reapply the current category filter
+                    if hasattr(self, 'category_dropdown') and hasattr(self.category_dropdown, 'current_category'):
+                        current_category = self.category_dropdown.current_category
+                        self.filter_products(current_category)
+                    
+            except requests.exceptions.Timeout:
+                # Skip silently if timeout - don't log to avoid filling logs
+                pass
+            except Exception as e:
+                # Only log other errors
+                print(f"[Page3] Error fetching or processing new products: {e}")
+                
+        except Exception as e:
+            print(f"[Page3] Error in check_for_new_products: {e}")
+            
+    def _save_product_json(self, products):
+        """Save products to JSON file in a separate thread to not block UI"""
+        try:
+            json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                   'json', 'products.json')
+            with open(json_path, 'w', encoding='utf-8') as file:
+                json.dump(products, file, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"[Page3] Error saving products.json: {e}")
+
+    def add_new_product_cards(self, new_products):
+        """Create product cards for new products and add them to the cache"""
+        if not new_products:
+            return
+            
+        try:
+            print(f"[Page3] Creating cards for {len(new_products)} new products")
+            
+            # Calculate starting position for new cards
+            start_index = len(ProductPage._cards_cache)
+            
+            # Create new cards
+            for i, product in enumerate(new_products):
+                card = ProductCard(product, self.cart_count_text)
+                
+                # Calculate grid position
+                idx = start_index + i
+                row = (idx // 5) * 2  # 5 products per row
+                col = idx % 5
+                
+                # Store position in card
+                card.grid_pos = (row, col)
+                
+                # Add to cache
+                ProductPage._cards_cache.append(card)
+                print(f"[Page3] Created card for {product['name']} at position ({row}, {col})")
+                
+            print(f"[Page3] Added {len(new_products)} cards to cache. Total cards: {len(ProductPage._cards_cache)}")
+            
+        except Exception as e:
+            print(f"[Page3] Error adding new product cards: {e}")
 
     def reload_current_page(self):
         """Reload the current page"""
@@ -417,8 +535,8 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         """Đảm bảo tất cả cards đều có thuộc tính grid_pos"""
         for i, card in enumerate(ProductPage._cards_cache):
             if not hasattr(card, 'grid_pos'):
-                row = (i // 4) * 2
-                col = i % 4
+                row = (i // 5) * 2  # Changed from 4 to 5 products per row
+                col = i % 5  # Changed from 4 to 5 columns
                 card.grid_pos = (row, col)
                 print(f"[Page3] Added missing grid_pos ({row}, {col}) to card {i}")
 
@@ -462,20 +580,25 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Create and cache all product cards with fixed positions
         ProductPage._cards_cache = []
         for i, product in enumerate(products):
-            row = (i // 4) * 2
-            col = i % 4
+            row = (i // 5) * 2  # Changed from 4 to 5 products per row
+            col = i % 5  # Changed from 4 to 5 columns
             card = ProductCard(product, self.cart_count_text)  # Pass cart_count_text reference
             card.font_family = font_family
             # Store original position
             card.grid_pos = (row, col)
             self.grid_layout.addWidget(card, row, col)
             ProductPage._cards_cache.append(card)
-            if (i + 1) % 4 == 0:
+            if (i + 1) % 5 == 0:  # Changed from 4 to 5
                 QApplication.processEvents()
 
     def closeEvent(self, event):
         """Clean up when closing"""
         try:
+            # Stop the update timer if it exists
+            if hasattr(self, 'update_timer') and self.update_timer.isActive():
+                self.update_timer.stop()
+                print("[Page3] Stopped product update timer")
+                
             # Unregister callback
             self.cart_state.unregister_change_callback(self.update_cart_count)
             
@@ -522,42 +645,46 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
 
         # Main layout
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(30, 0, 30, 8)  # Reduced top margin to 0
-        main_layout.setSpacing(0)  # Remove all spacing between elements
+        main_layout.setContentsMargins(80, 0, 80, 20)  # Giảm top margin xuống 0
+        main_layout.setSpacing(0)  # Giảm spacing xuống 0 để các phần tử sát nhau hơn
 
         # Top section with logo and header
         top_layout = QHBoxLayout()
-        top_layout.setSpacing(20)
+        top_layout.setSpacing(40)
+        top_layout.setContentsMargins(0, 0, 0, 0)  # Giảm margin xuống 0
         
-        # Logo
+        # Logo - use exact same size as page1 (350x146)
         logo_label = QLabel()
         logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'logo.png')
         logo_pixmap = QPixmap(logo_path)
         if not logo_pixmap.isNull():
-            logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            logo_label.setPixmap(logo_pixmap.scaled(350, 146, Qt.KeepAspectRatio, Qt.SmoothTransformation))  # Matched with page1
         logo_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         top_layout.addWidget(logo_label)
 
-        # Header - use translation
+        # Header - use translation with larger font
         self.header_label = QLabel(_("productPage.title"))  # Store reference to header label
-        self.header_label.setFont(QFont("Inria Sans", 28))
+        self.header_label.setFont(QFont("Inria Sans", 64))  # Increased from 40 to 64 to match page1
         self.header_label.setStyleSheet("color: #3D6F4A;")
         self.header_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         top_layout.addWidget(self.header_label)
         
-        # Category dropdown
+        # Add spacing to push category dropdown and home button to the right
+        top_layout.addStretch(1)
+        
+        # Category dropdown - larger size
         self.category_dropdown = CategoryDropdown(self)
         top_layout.addWidget(self.category_dropdown)
         
-        # Add home button
+        # Add home button - larger size
         home_button = QPushButton()
-        home_button.setFixedSize(40, 40)  
+        home_button.setFixedSize(80, 80)  # Increased from 60x60 to 80x80 to match page1
         home_button.setCursor(Qt.PointingHandCursor)
         home_button.setStyleSheet("""
             QPushButton {
                 background-color: #507849;
                 border: none;
-                border-radius: 20px;
+                border-radius: 40px;
                 padding: 0px;
             }
             QPushButton:hover {
@@ -565,12 +692,12 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             }
         """)
         
-        # Add home icon
+        # Add home icon - larger
         home_icon = QLabel()
         home_icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'home.png')
         home_pixmap = QPixmap(home_icon_path)
         if not home_pixmap.isNull():
-            home_icon.setPixmap(home_pixmap.scaled(35, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            home_icon.setPixmap(home_pixmap.scaled(60, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation))  # Increased from 50x50
         home_icon.setStyleSheet("""
             QLabel {
                 background: transparent;
@@ -581,12 +708,12 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         
         # Create container for icon
         icon_container = QWidget()
-        icon_container.setFixedSize(30, 30) 
+        icon_container.setFixedSize(60, 60)  # Increased from 50x50
         icon_container.setStyleSheet("""
             QWidget {
                 background: transparent;
                 border: none;
-                border-radius: 15px; 
+                border-radius: 30px; 
             }
         """)
         icon_layout = QVBoxLayout(icon_container)
@@ -597,19 +724,13 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Connect home button to return to page1
         home_button.clicked.connect(self.return_to_welcome)
         top_layout.addWidget(home_button)
-        
-        # Add stretch to push everything to the left
-        top_layout.addStretch()
 
         main_layout.addLayout(top_layout)
         
-        # Add minimal spacing between top layout and scroll area
-        main_layout.addSpacing(-12)  
-
-        # Scroll Area for products
+        # Scroll Area for products - larger height
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setFixedHeight(390)  # Increased from 380 to 390
+        scroll_area.setFixedHeight(820)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setStyleSheet("""
@@ -617,24 +738,24 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 border: none;
                 background-color: transparent;
                 margin-right: 0px;
-                margin-top: -12px;
-                margin-bottom: 5px;  
+                margin-top: 0px;
+                margin-bottom: 10px;
             }
             QScrollBar:vertical {
                 border: none;
                 background: white;
-                border-radius: 10px;
-                width: 30px;
-                margin: 8px 0px 8px 0px;  /* Increased from 5px to 8px */
-                height: 364px;  /* Adjusted to accommodate increased margins */
+                border-radius: 15px;
+                width: 40px;
+                margin: 12px 0px 12px 0px;
+                height: 696px;
                 subcontrol-origin: margin;
                 subcontrol-position: top;
             }
             QScrollBar::handle:vertical {
                 background: #D9D9D9;
-                border-radius: 10px;
-                min-height: 30px;
-                margin: 2px;  /* Added margin all around handle */
+                border-radius: 15px;
+                min-height: 50px;
+                margin: 3px;
             }
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 height: 0px;
@@ -653,7 +774,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 height: 0px;
                 background: transparent;
                 border: none;
-                display: none;
+                /* Removed unsupported property: display: none; */
             }
         """)
 
@@ -676,7 +797,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                     # Only process vertical movement
                     if abs(dy) > self.min_distance:
                         # Calculate scroll amount based on vertical movement
-                        scroll_amount = dy * 0.5  # Adjust sensitivity
+                        scroll_amount = dy * 2.5# Adjust sensitivity
                         scroll_area.verticalScrollBar().setValue(
                             scroll_area.verticalScrollBar().value() - int(scroll_amount)
                         )
@@ -691,20 +812,28 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         gesture_filter = GestureFilter(scroll_area)
         scroll_area.viewport().installEventFilter(gesture_filter)
 
-        # Container widget for the grid
+        # Container widget for the grid - wider
         self.container = QWidget()
         self.container.setStyleSheet("background-color: transparent;")
-        self.container.setFixedWidth(600)
-        self.container.setMinimumHeight(380)  # Increased from 360 to 380
+        self.container.setFixedWidth(1800) 
+        self.container.setMinimumHeight(720) 
         
-        # Grid layout for products
+        # Grid layout for products - adjust spacing
         self.grid_layout = QGridLayout(self.container)
-        self.grid_layout.setSpacing(25)  
-        self.grid_layout.setContentsMargins(10, 10, 60, 20)  # Increased bottom margin from 10 to 20
+        self.grid_layout.setSpacing(30)  # Giảm spacing xuống để các card gần nhau hơn
+        self.grid_layout.setContentsMargins(20, 0, 150, 30)
         self.grid_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
 
         scroll_area.setWidget(self.container)
-        main_layout.addWidget(scroll_area)
+        
+        # Create a wrapper layout to properly align the scroll area
+        scroll_wrapper = QHBoxLayout()
+        scroll_wrapper.setContentsMargins(0, 0, 0, 0)
+        scroll_wrapper.addWidget(scroll_area)
+        
+        main_layout.addLayout(scroll_wrapper)
+
+        main_layout.addSpacing(20) 
 
         # Create a horizontal layout for the bottom section
         bottom_layout = QHBoxLayout()
@@ -712,9 +841,9 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         
         # Create container for the entire bottom section with fixed height 
         bottom_container = QWidget()
-        bottom_container.setFixedHeight(45)  # Reduced from 50 to 45
+        bottom_container.setFixedHeight(80)  # Increased from 45 to 80
         bottom_container_layout = QHBoxLayout(bottom_container)
-        bottom_container_layout.setContentsMargins(20, 0, 20, 0)
+        bottom_container_layout.setContentsMargins(40, 0, 40, 0)  # Increased left/right margins
         
         # Create 3 equal width sections
         left_widget = QWidget()  # Empty left widget for spacing
@@ -733,34 +862,33 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Create SCAN button
         button_container = QWidget()
         button_container.setCursor(Qt.PointingHandCursor)
-        button_container.setFixedSize(200, 40)  # Increased width from 160 to 200
+        button_container.setFixedSize(375, 80)  
         button_container.setStyleSheet("""
             QWidget {
                 background-color: #507849;
-                border-radius: 20px;
+                border-radius: 35px;
             }
         """)
         
         # Create button content layout
         button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(20, 0, 10, 0)
-        button_layout.setSpacing(10)
-        
-        # Add cart icon with both normal and hover states
+        button_layout.setContentsMargins(40, 0, 30, 0) 
+        button_layout.setSpacing(15) 
+
         cart_icon = QLabel()
         cart_icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'yourcarticon.png')
-        self.normal_pixmap = QPixmap(cart_icon_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.hover_pixmap = QPixmap(cart_icon_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.normal_pixmap = QPixmap(cart_icon_path).scaled(42, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation)  # Tăng từ 36x36 lên 42x42
+        self.hover_pixmap = QPixmap(cart_icon_path).scaled(42, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation)  # Tăng từ 36x36 lên 42x42
         cart_icon.setPixmap(self.normal_pixmap)
         
-        # Add cart text and count
-        self.cart_text = QLabel(_("productPage.yourCart") + " ")  # Store reference to cart text
-        self.cart_text.setFont(QFont("Inter", 12, QFont.Bold))
+        # Add cart text and count - larger font
+        self.cart_text = QLabel(_("productPage.yourCart") + " ")  
+        self.cart_text.setFont(QFont("Inter", 22, QFont.Bold)) 
         self.cart_text.setStyleSheet("color: white;")
         
-        # Add cart count with red color
+        # Add cart count with red color - larger font
         self.cart_count_text = QLabel("(0)")
-        self.cart_count_text.setFont(QFont("Inter", 12, QFont.Bold))
+        self.cart_count_text.setFont(QFont("Inter", 22, QFont.Bold))  # Tăng từ 18 lên 22 để khớp với cart_text
         self.cart_count_text.setStyleSheet("color: #FFFF00;")
         
         # Create a container for cart text and count
@@ -820,12 +948,14 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
 
     def setup_loading_indicator(self):
         self.loading_widget = QWidget(self)
+        self.loading_widget.setGeometry(0, 0, self.width(), self.height())
         loading_layout = QVBoxLayout(self.loading_widget)
-        loading_layout.setSpacing(10)  # Thêm khoảng cách giữa các widget
+        loading_layout.setSpacing(20)  # Increased spacing
+        loading_layout.setAlignment(Qt.AlignCenter)  # Center alignment
         
         # Create loading text
         loading_text = QLabel("Loading products...")
-        loading_text.setFont(QFont("Poppins", 11))
+        loading_text.setFont(QFont("Poppins", 18))  # Increased from 11 to 18
         loading_text.setStyleSheet("color: #3D6F4A;")
         loading_text.setAlignment(Qt.AlignCenter)
         
@@ -833,15 +963,14 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         loading_gif = QLabel()
         loading_gif_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'loading_gif.gif')
         self.gif_movie = QMovie(loading_gif_path)
-        self.gif_movie.setScaledSize(QSize(100, 100))  
+        self.gif_movie.setScaledSize(QSize(200, 200))  # Increased from 100x100 to 200x200
         loading_gif.setMovie(self.gif_movie)
         self.gif_movie.start()
         
         loading_layout.addWidget(loading_text, alignment=Qt.AlignCenter)
         loading_layout.addWidget(loading_gif, alignment=Qt.AlignCenter)
         
-        # Position the loading widget in the center of the page
-        self.loading_widget.setGeometry(300, 150, 200, 200)
+        # Position the loading widget in the center
         self.loading_widget.show()
 
     def start_loading_products(self):
@@ -857,20 +986,46 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         self.grid_layout.addWidget(error_label, 0, 0)
 
     def show_shopping_page(self):
-        """Enhanced transition to shopping page"""
-        def switch_page():
+        """Cải tiến chuyển đổi sang trang shopping"""
+        if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
+            self.transition_in_progress = True
+            
+            # Xử lý các sự kiện đang chờ trước
+            QApplication.processEvents()
+            
+            # Tạo overlay màu xanh toàn màn hình trước
+            background_overlay = QWidget(self)
+            background_overlay.setGeometry(self.rect())
+            background_overlay.setStyleSheet("background-color: #3D6F4A;")  # Giữ màu sắc app
+            background_overlay.show()
+            background_overlay.raise_()
+            
+            # Đảm bảo overlay hiển thị ngay lập tức
+            QApplication.processEvents()
+            
+            # Bắt đầu tính thời gian
             start_time = PageTiming.start_timing()
+            
+            # Tạo trang ShoppingPage
             from page4_shopping import ShoppingPage
             self.shopping_page = ShoppingPage()
             
-            def show_new_page():
-                self.shopping_page.show()
-                self.transition_overlay.fadeOut(lambda: self.hide())
-                PageTiming.end_timing(start_time, "ProductPage", "ShoppingPage")
-                
-            self.transition_overlay.fadeIn(show_new_page)
+            # Tạo transition overlay với loading
+            from components.PageTransitionOverlay import PageTransitionOverlay
+            loading_overlay = PageTransitionOverlay(self, show_loading_text=True)
             
-        switch_page()
+            def show_new_page():
+                # Hiển thị trang shopping
+                self.shopping_page.show()
+                # Sau đó fade out overlay và ẩn trang hiện tại
+                loading_overlay.fadeOut(lambda: self.hide())
+                background_overlay.deleteLater()  # Xóa overlay nền
+                # Ghi nhận thời gian và reset cờ
+                PageTiming.end_timing(start_time, "ProductPage", "ShoppingPage")
+                self.transition_in_progress = False
+            
+            # Hiện overlay trước, sau đó gọi hàm show_new_page khi overlay đã hiện
+            loading_overlay.fadeIn(show_new_page)
 
     @staticmethod
     def debug_cache():
@@ -929,10 +1084,10 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             sorted_cards = sorted(valid_cards, 
                                 key=lambda card: card.product['name'].replace('_', ' '))
             
-            # Sắp xếp lại các sản phẩm
+            # Sắp xếp lại các sản phẩm - display 5 per row
             for i, card in enumerate(sorted_cards):
-                row = (i // 4) * 2
-                col = i % 4
+                row = (i // 5) * 2  # Changed from 4 to 5 products per row
+                col = i % 5  # Changed from 4 to 5 columns
                 self.grid_layout.addWidget(card, row, col)
                 card.show()
                 displayed_count += 1
@@ -945,10 +1100,10 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             sorted_filtered_cards = sorted(filtered_cards, 
                                          key=lambda card: card.product['name'].replace('_', ' '))
             
-            # Thêm sản phẩm đã lọc và sắp xếp vào vị trí mới
+            # Thêm sản phẩm đã lọc và sắp xếp vào vị trí mới - display 5 per row
             for i, card in enumerate(sorted_filtered_cards):
-                row = (i // 4) * 2
-                col = i % 4
+                row = (i // 5) * 2  # Changed from 4 to 5 products per row
+                col = i % 5  # Changed from 4 to 5 columns
                 self.grid_layout.addWidget(card, row, col)
                 card.show()
                 displayed_count += 1
@@ -1026,6 +1181,16 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         """Xử lý sự kiện khi trang được hiển thị"""
         super().showEvent(event)
         
+        # Đảm bảo trang hiển thị đầy đủ
+        self.setWindowOpacity(1.0)
+        
+        # Check for new products when the page is shown
+        self.check_for_new_products()
+        
+        # Check if we're transitioning from page1
+        coming_from_page1 = (hasattr(self, 'from_page') and self.from_page == "page1") or (hasattr(self, 'from_page1') and self.from_page1)
+        print(f"[Page3] showEvent - coming_from_page1: {coming_from_page1}")
+        
         # In thông tin debug về cache hiện tại
         self.debug_cache()
             
@@ -1092,8 +1257,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             print(f"[Page3] Warning: 'cart_btn' attribute not found, using fallback method")
         
         # Reset vị trí cuộn nếu đến từ page1
-        # Kiểm tra cả from_page và from_page1 để đảm bảo tương thích
-        if (hasattr(self, 'from_page') and self.from_page == "page1") or (hasattr(self, 'from_page1') and self.from_page1):
+        if coming_from_page1:
             print(f"[Page3] Resetting scroll position, coming from page1")
             scroll = self.findChild(QScrollArea)
             if scroll:
@@ -1207,61 +1371,61 @@ class ProductCardDialog(QDialog):
         self.setup_ui()
         
     def setup_ui(self):
-        self.setFixedSize(400, 500)  # Increased dialog size
+        self.setFixedSize(600, 750)  # Increased from 400x500 to 600x750
         self.setStyleSheet("""
             QDialog {
                 background-color: white;
-                border-radius: 15px;
+                border-radius: 20px;
             }
         """)
         
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(30, 30, 30, 30)  # Increased margins
+        layout.setSpacing(25)  # Increased spacing
         
-        # Image
+        # Image - larger
         image_label = QLabel()
         if self.image:
-            image_label.setPixmap(self.image.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            image_label.setPixmap(self.image.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation))  # Increased from 200x200
         image_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(image_label)
         
-        # Name
+        # Name - larger font
         name = self.product['name'].replace('_', ' ')
         name_label = QLabel(name)
-        name_label.setFont(QFont("Josefin Sans", 14, QFont.Bold))
+        name_label.setFont(QFont("Josefin Sans", 22, QFont.Bold))  # Increased from 14 to 22
         name_label.setWordWrap(True)
         name_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(name_label)
         
-        # Price
+        # Price - larger font
         price = "{:,.0f}".format(float(self.product['price'])).replace(',', '.')
         price_label = QLabel(f"{price} vnd")
-        price_label.setFont(QFont("Josefin Sans", 12))
+        price_label.setFont(QFont("Josefin Sans", 18))  # Increased from 12 to 18
         price_label.setStyleSheet("color: #E72225;")
         price_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(price_label)
         
-        # Description
+        # Description - larger font
         desc_label = QLabel(self.product.get('description', 'No description available'))
-        desc_label.setFont(QFont("Josefin Sans", 10))
+        desc_label.setFont(QFont("Josefin Sans", 16))  # Increased from 10 to 16
         desc_label.setWordWrap(True)
         desc_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(desc_label)
         
-        # Add to Cart button - use translation
+        # Add to Cart button - larger
         add_to_cart_btn = QPushButton(_("productPage.addToCart"))
-        add_to_cart_btn.setFont(QFont("Josefin Sans", 12))
+        add_to_cart_btn.setFont(QFont("Josefin Sans", 18))  # Increased from 12 to 18
         add_to_cart_btn.setCursor(Qt.PointingHandCursor)
-        add_to_cart_btn.setFixedHeight(30)
+        add_to_cart_btn.setFixedHeight(50)  # Increased from 30 to 50
         add_to_cart_btn.setStyleSheet("""
             QPushButton {
                 background-color: #507849;
                 color: white;
                 border: none;
-                border-radius: 10px;
-                padding: 5px 10px;
-                margin: 10px 20px;
+                border-radius: 15px;
+                padding: 8px 15px;
+                margin: 15px 30px;
             }
             QPushButton:hover {
                 background-color: #3D6F4A;
@@ -1273,19 +1437,19 @@ class ProductCardDialog(QDialog):
         add_to_cart_btn.clicked.connect(lambda: self.parent().add_to_cart(self.product))
         layout.addWidget(add_to_cart_btn)
         
-        # Close button - use "Close" as it's common across UIs
+        # Close button - larger
         close_btn = QPushButton("Close")
-        close_btn.setFont(QFont("Josefin Sans", 12))
+        close_btn.setFont(QFont("Josefin Sans", 18))  # Increased from 12 to 18
         close_btn.setCursor(Qt.PointingHandCursor)
-        close_btn.setFixedHeight(30)
+        close_btn.setFixedHeight(50)  # Increased from 30 to 50
         close_btn.setStyleSheet("""
             QPushButton {
                 background-color: #E72225;
                 color: white;
                 border: none;
-                border-radius: 10px;
-                padding: 5px 10px;
-                margin: 10px 20px;
+                border-radius: 15px;
+                padding: 8px 15px;
+                margin: 15px 30px;
             }
             QPushButton:hover {
                 background-color: #C41E3A;

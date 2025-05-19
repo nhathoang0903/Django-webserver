@@ -55,8 +55,8 @@ class InstructionPage(BasePage):
 
     def init_ui(self):
         self.setWindowTitle('Instructions - Smart Shopping Cart')
-        self.setGeometry(100, 100, 800, 480)
-        self.setFixedSize(800, 480)
+        self.setGeometry(100, 100, 1024, 600)
+        self.setFixedSize(1024, 600)
         
         # Main layout
         layout = QHBoxLayout()

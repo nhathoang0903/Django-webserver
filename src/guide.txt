@@ -2,6 +2,7 @@
 python3 -m venv venv --system-site-packages
 source venv/bin/activate
 sudo apt-get install tesseract-ocr  (cài tesseract vào hệ thống)
+sudo apt-get install -y unclutter
 
 # 2. Cài đặt các thư viện cần thiết
 pip install -r requirements.txt
@@ -22,11 +23,11 @@ After=network.target
 Type=simple
 User=pi
 Group=pi
-WorkingDirectory=/home/pi/smartcart/Pick-and-go-CS/src
+WorkingDirectory=/home/mtech/Workspace/Pick-and-go-CS/src
 Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/pi/.Xauthority
+Environment=XAUTHORITY=/home/mtech/.Xauthority
 Environment=QT_QPA_PLATFORM=xcb
-ExecStart=/home/pi/smartcart/Pick-and-go-CS/venv/bin/python3 service_controller.py
+ExecStart=/home/mtech/Workspace/Pick-and-go-CS/venv/bin/python3 service_controller.py
 Restart=always
 RestartSec=2
 
@@ -60,3 +61,7 @@ tail -f app/logs/service.log
 
 #10. Kiểm tra list device của v4l2
 v4l2-ctl --list-devices
+
+#11. Kích hoạt products-update.service
+sudo systemctl enable products-update.service
+sudo systemctl start products-update.service

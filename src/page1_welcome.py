@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QWidget,
                            QGraphicsDropShadowEffect, QSizePolicy, QGraphicsBlurEffect)
 import requests
 import json
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QSize
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QSize, QPropertyAnimation
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QColor, QMovie
 from page3_productsinfo import ProductPage  
 import os
@@ -132,8 +132,6 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
     def init_ui(self):
         # Sử dụng translation cho tiêu đề
         self.setWindowTitle(_('app.title'))
-        self.setGeometry(100, 100, 800, 480)
-        self.setFixedSize(800, 480)
         
         # Update stylesheet for full coverage
         self.setStyleSheet("""
@@ -143,62 +141,65 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
             QPushButton {
                 background-color: #507849;
                 color: white;
-                border-radius: 24px;
-                padding: 15px 10px;
-                font-size: 14px;
+                border-radius: 35px;
+                padding: 25px 30px;
+                font-size: 20px;
                 border: none;
                 text-transform: uppercase;
                 font-weight: bold;
-                width: 145px;
-                height: 18px;
+                width: 250px;
+                height: 30px;
             }
             QPushButton:hover {
                 background-color: #3e5c38;
             }
             #languageButton {
                 background-color: #F5F9F7;
-                border: 2px solid #000000;
+                border: 3px solid #000000;
                 padding: 0px;
-                width: 40px;
-                height: 40px;
-                border-radius: 20px;
+                width: 80px;
+                height: 80px;
+                border-radius: 40px;
             }
             #languageButton:hover {
                 background-color: #E8F0EB;
+            }
+            #startButton {
+                font-size: 48px;
             }
         """)
 
         # Main layout
         layout = QHBoxLayout()
-        layout.setContentsMargins(30, 8, 50, 50)  # Reduced top margin from 20 to 10
-        layout.setSpacing(30)
+        layout.setContentsMargins(80, 30, 80, 80)  # Further increased margins
+        layout.setSpacing(40)  # Adjusted spacing
 
         # Left side content
         left_container = QWidget()
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)  # Changed to AlignTop
-        left_layout.setSpacing(10)  # Reduced spacing from 15 to 10
+        left_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        left_layout.setSpacing(30)  # Further increased spacing
 
         # Top bar with logo and language button
         top_bar = QWidget()
         top_bar_layout = QHBoxLayout(top_bar)
         top_bar_layout.setContentsMargins(0, 0, 0, 0)
-        top_bar_layout.setSpacing(15)  # Add spacing between logo and language button
+        top_bar_layout.setSpacing(40)  # Further increased spacing
         
-        # Logo at the top left
+        # Logo at the top left - much larger size
         logo_label = QLabel()
         logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'logo.png')
         logo_pixmap = QPixmap(logo_path)
         if not logo_pixmap.isNull():
-            logo_label.setPixmap(logo_pixmap.scaled(154, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            logo_label.setPixmap(logo_pixmap.scaled(450, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setAlignment(Qt.AlignLeft)
         top_bar_layout.addWidget(logo_label)
         
-        # Add language button
+        # Add language button - larger size
         self.language_btn = QPushButton()
         self.language_btn.setObjectName("languageButton")
-        self.language_btn.setFixedSize(40, 40)
+        self.language_btn.setFixedSize(80, 80)
         self.language_btn.setCursor(Qt.PointingHandCursor)
         self.language_btn.clicked.connect(self.show_language_modal)
         
@@ -206,27 +207,27 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
         self.update_language_icon(get_current_language())
         
         top_bar_layout.addWidget(self.language_btn)
-        top_bar_layout.addStretch()  # Add stretch to push language button to the left
+        top_bar_layout.addStretch()
         left_layout.addWidget(top_bar)
 
-        # Welcome text using Inria Sans
+        # Welcome text using Inria Sans - even larger font
         self.welcome_label = QLabel(_("welcomePage.welcome"))
         
         # Xử lý font đặc biệt cho tiếng Việt ở welcome_label
         if get_current_language() == "vi":
-            VietnameseFontHelper.optimize_title_font(self.welcome_label, "Inria Sans", 30)
+            VietnameseFontHelper.optimize_title_font(self.welcome_label, "Inria Sans", 90)
         else:
-            self.configure_font_for_label(self.welcome_label, "Inria Sans", 30, True)
+            self.configure_font_for_label(self.welcome_label, "Inria Sans", 90, True)
             
         self.welcome_label.setStyleSheet("color: #3D6F4A;")
         left_layout.addWidget(self.welcome_label)
 
-        # Tagline using Poppins Italic
+        # Tagline using Poppins Italic - even larger font
         self.tagline_label = QLabel(_("welcomePage.tagline"))
         if get_current_language() == "vi":
-            VietnameseFontHelper.optimize_vietnamese_font(self.tagline_label, "Poppins", 15, bold=False, italic=True)
+            VietnameseFontHelper.optimize_vietnamese_font(self.tagline_label, "Poppins", 40, bold=False, italic=True)
         else:
-            self.configure_font_for_label(self.tagline_label, "Poppins", 15, False, True)
+            self.configure_font_for_label(self.tagline_label, "Poppins", 40, False, True)
             
         self.tagline_label.setStyleSheet("""
             color: #E72225;
@@ -234,36 +235,43 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
         """)
         left_layout.addWidget(self.tagline_label)
 
-        # Add less spacing before button
-        left_layout.addSpacing(10) 
+        # Add spacing before button
+        left_layout.addSpacing(50) 
 
-        # Get Started button using Inter Bold
+        # Get Started button - much larger size
         self.start_button = QPushButton(_("welcomePage.getStarted"))
-        self.configure_font_for_button(self.start_button, "Inter", QFont.Bold)
+        self.start_button.setObjectName("startButton")
+        self.configure_font_for_button(self.start_button, "Inter", QFont.Bold, 41)
         self.start_button.setCursor(Qt.PointingHandCursor)
+        self.start_button.setStyleSheet("""
+            font-size: 41px;
+            padding: 25px 30px;
+        """)
+        self.start_button.setMinimumWidth(470)
+        self.start_button.setMinimumHeight(105)
         self.start_button.clicked.connect(self.start_shopping)
         left_layout.addWidget(self.start_button, alignment=Qt.AlignLeft)
 
         # Reduce stretch factor
         left_layout.addStretch(1) 
 
-        # Right side image
+        # Right side image - much larger size and shifted left
         right_container = QWidget()
         right_layout = QVBoxLayout(right_container)
-        right_layout.setContentsMargins(10, 0, 0, 0) 
-        right_layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # Keep VCenter alignment for instruction image
+        right_layout.setContentsMargins(0, 0, 0, 0)  # Reduced left margin to shift image left
+        right_layout.setAlignment(Qt.AlignCenter)  # Center alignment instead of right
         
         welcome_img_label = QLabel()
         img_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'welcome-instruction.png')
         img_pixmap = QPixmap(img_path)
         if not img_pixmap.isNull():
-            welcome_img_label.setPixmap(img_pixmap.scaled(370, 345, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        welcome_img_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter) # Keep VCenter alignment
+            welcome_img_label.setPixmap(img_pixmap.scaled(700, 910, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        welcome_img_label.setAlignment(Qt.AlignCenter)
         right_layout.addWidget(welcome_img_label)
 
-        # Add containers to main layout
-        layout.addWidget(left_container, 1)
-        layout.addWidget(right_container, 1)
+        # Add containers to main layout with adjusted proportions
+        layout.addWidget(left_container, 5)  # Increased proportion for left side
+        layout.addWidget(right_container, 6)  # Increased proportion for right side with image
 
         self.setLayout(layout)
 
@@ -297,9 +305,9 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
             
         label.setFont(font)
 
-    def configure_font_for_button(self, button, family, weight=QFont.Normal):
+    def configure_font_for_button(self, button, family, weight=QFont.Normal, size=48):
         """Configure font for button with better Vietnamese support"""
-        font = QFont(family)
+        font = QFont(family, size)
         # Use specific weight for Vietnamese
         if get_current_language() == "vi":
             font.setWeight(65 if weight == QFont.Bold else 53)  # Tăng độ đậm cho chữ tiếng Việt
@@ -341,16 +349,33 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
     # Add signal handlers
     def on_switch_page(self, page_number):
         if page_number == 3:  # Changed from 2 to 3
+            # Process any pending events first
+            QApplication.processEvents()
+            
+            # Start timing
             start_time = PageTiming.start_timing()
+            
+            # Import and create ProductPage
+            from page3_productsinfo import ProductPage  
             self.product_page = ProductPage()
             self.product_page.from_page1 = True  # Set flag to indicate coming from page1
             
+            # Create transition overlay (full-screen)
+            from components.PageTransitionOverlay import PageTransitionOverlay
+            loading_overlay = PageTransitionOverlay(self, show_loading_text=True)
+            
             def show_new_page():
+                # Show the product page normally
                 self.product_page.show()
-                self.transition_overlay.fadeOut(lambda: self.hide())
-                PageTiming.end_timing(start_time, "WelcomePage", "ProductPage")
                 
-            self.transition_overlay.fadeIn(show_new_page)
+                # Fade out the overlay and hide current page
+                loading_overlay.fadeOut(lambda: self.hide())
+                
+                # Complete timing
+                PageTiming.end_timing(start_time, "WelcomePage", "ProductPage")
+            
+            # Fade in the overlay (will call show_new_page when fully visible)
+            loading_overlay.fadeIn(show_new_page)
 
     # def show_welcome_message(self, customer_name):
     #     """Show welcome message with blurred background"""
@@ -422,7 +447,7 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
                                    'assets', flag_mapping[language])
             flag_icon = QIcon(flag_path)
             self.language_btn.setIcon(flag_icon)
-            self.language_btn.setIconSize(QSize(30, 30))
+            self.language_btn.setIconSize(QSize(60, 60))  # Further increased icon size
             
             # Set language in translator if language code exists in mapping
             if language in language_code_mapping:
@@ -446,7 +471,7 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
         flag_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', flag_file)
         flag_icon = QIcon(flag_path)
         self.language_btn.setIcon(flag_icon)
-        self.language_btn.setIconSize(QSize(30, 30))
+        self.language_btn.setIconSize(QSize(60, 60))  # Further increased icon size
 
     def update_translations(self):
         """Update all UI texts with current language"""
@@ -460,13 +485,19 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
         
         # Cập nhật font dựa trên ngôn ngữ hiện tại, sử dụng helper class cho tiếng Việt
         if get_current_language() == "vi":
-            VietnameseFontHelper.optimize_title_font(self.welcome_label, "Inria Sans", 30)
-            VietnameseFontHelper.optimize_vietnamese_font(self.tagline_label, "Poppins", 15, bold=False, italic=True)
+            VietnameseFontHelper.optimize_title_font(self.welcome_label, "Inria Sans", 90)
+            VietnameseFontHelper.optimize_vietnamese_font(self.tagline_label, "Poppins", 40, bold=False, italic=True)
         else:
-            self.configure_font_for_label(self.welcome_label, "Inria Sans", 30, True)
-            self.configure_font_for_label(self.tagline_label, "Poppins", 15, False, True)
+            self.configure_font_for_label(self.welcome_label, "Inria Sans", 90, True)
+            self.configure_font_for_label(self.tagline_label, "Poppins", 40, False, True)
             
-        self.configure_font_for_button(self.start_button, "Inter", QFont.Bold)
+        self.configure_font_for_button(self.start_button, "Inter", QFont.Bold, 41)
+        # Đảm bảo font size được giữ nguyên khi đổi ngôn ngữ
+        self.start_button.setStyleSheet("""
+            font-size: 48px;
+            padding: 25px 30px;
+            border-radius: 50px;
+        """)
 
 if __name__ == '__main__':
     import sys

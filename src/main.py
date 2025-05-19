@@ -8,6 +8,9 @@ from page1_welcome import WelcomePage
 import subprocess
 from utils.translation import set_language
 
+# Bỏ qua cảnh báo CSS không hỗ trợ
+os.environ["QT_LOGGING_RULES"] = "qt.qpa.xcb.pci.propertymatch=false;*.debug=false;qt.qpa.xcb=false;qt.css.*=false"
+
 # Create logs directory if it doesn't exist
 LOG_DIR = os.path.join(os.path.dirname(__file__), 'app', 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)

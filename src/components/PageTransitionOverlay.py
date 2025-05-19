@@ -1,22 +1,46 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
-from PyQt5.QtCore import Qt, QPropertyAnimation, QParallelAnimationGroup, QRect
-from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QProgressBar, QApplication
+from PyQt5.QtCore import Qt, QPropertyAnimation, QParallelAnimationGroup, QRect, QTimer, QEasingCurve
+from PyQt5.QtGui import QPainter, QColor, QFont
 
 class PageTransitionOverlay(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, parent=None, show_loading_text=True):
+        # Create as a top-level widget instead of child widget
+        super().__init__(None)  # No parent - standalone window
+        self.parent_widget = parent  # Store reference to parent
         self.setObjectName("transitionOverlay")
         
-        # Set overlay to top and full screen
+        # Set as frameless window that stays on top of everything
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
+        
+        # Remove flags that might interfere with interaction
+        # self.setAttribute(Qt.WA_NoSystemBackground)
+        # self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        
+        # Set overlay to cover the entire screen
+        self.cover_full_screen()
+        
+        # Style the overlay
         self.setAttribute(Qt.WA_StyledBackground)
         self.setStyleSheet("""
             #transitionOverlay {
-                background-color: black;
+                background-color: #3D6F4A;
             }
             QLabel {
                 color: white;
                 font-family: 'Inria Sans';
-                font-size: 16px;
+            }
+            QProgressBar {
+                background-color: #3D6F4A;
+                border: 2px solid white;
+                border-radius: 15px;
+                height: 30px;
+                text-align: center;
+            }
+            QProgressBar::chunk {
+                background-color: #FFFFFF;
+                border-radius: 13px;
             }
         """)
         
@@ -26,9 +50,29 @@ class PageTransitionOverlay(QWidget):
         self.layout.setAlignment(Qt.AlignCenter)
         self.layout.setContentsMargins(0, 0, 0, 0)
         
-        # Loading indicator
-        self.loadingLabel = QLabel("Loading...")
-        self.layout.addWidget(self.loadingLabel)
+        # Add progress bar for loading
+        if show_loading_text:
+            # Add progress bar
+            self.progressBar = QProgressBar()
+            self.progressBar.setFixedSize(500, 30)  # Larger, more visible progress bar
+            self.progressBar.setMinimum(0)
+            self.progressBar.setMaximum(100)
+            self.progressBar.setValue(0)
+            self.progressBar.setTextVisible(False)  # Hide percentage text
+            self.layout.addWidget(self.progressBar)
+            
+            # Setup animation for progress bar
+            self.progressAnim = QPropertyAnimation(self.progressBar, b"value")
+            self.progressAnim.setDuration(1500)  # 1.5 seconds for one cycle
+            self.progressAnim.setStartValue(0)
+            self.progressAnim.setEndValue(100)
+            self.progressAnim.setEasingCurve(QEasingCurve.InOutSine)  # Smooth animation
+            
+            # Connect animation finished to restart
+            self.progressAnim.finished.connect(self.restart_progress_anim)
+        else:
+            self.progressBar = None
+            self.progressAnim = None
         
         # Set up animation
         self.fadeAnimation = QPropertyAnimation(self, b"windowOpacity")
@@ -37,23 +81,48 @@ class PageTransitionOverlay(QWidget):
         # Hidden by default
         self.hide()
         self._callbacks = []
+
+    def cover_full_screen(self):
+        """Cover the entire screen or screens"""
+        desktop = QApplication.desktop()
+        screen_rect = desktop.screenGeometry()
+        self.setGeometry(screen_rect)
         
-        # Ensure the overlay is always on top
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
+    def restart_progress_anim(self):
+        """Restart the progress bar animation"""
+        if hasattr(self, 'progressAnim') and self.progressAnim:
+            self.progressBar.setValue(0)
+            self.progressAnim.start()
 
     def fadeIn(self, callback=None):
-        if self.parent():
-            # Set exact size of parent
-            self.setGeometry(self.parent().rect())
+        """Hiển thị overlay với hiệu ứng mờ dần"""
+        # Đảm bảo overlay phủ toàn màn hình
+        self.cover_full_screen()
+        
+        # Đảm bảo overlay nằm trên cùng
         self.show()
-        self.raise_()  # Ensure overlay is on top
+        self.raise_()
+        
+        # Cài đặt animation mờ dần
         self.fadeAnimation.setStartValue(0)
         self.fadeAnimation.setEndValue(1)
         
+        # Khởi động animation progress bar nếu có
+        if hasattr(self, 'progressAnim') and self.progressAnim:
+            self.progressBar.setValue(0)
+            self.progressAnim.start()
+        
         if callback:
             self._callbacks.append(callback)
-            self.fadeAnimation.finished.connect(self._handleFadeInFinished)
+            
+            # Xử lý khi fadeIn hoàn tất
+            def on_fade_in_finished():
+                # Ngắt kết nối để tránh gọi nhiều lần
+                self.fadeAnimation.finished.disconnect(on_fade_in_finished)
+                # Gọi callback ngay lập tức
+                self._handleFadeInFinished()
+                
+            self.fadeAnimation.finished.connect(on_fade_in_finished)
             
         self.fadeAnimation.start()
 
@@ -62,15 +131,30 @@ class PageTransitionOverlay(QWidget):
         for callback in self._callbacks:
             callback()
         self._callbacks.clear()
-        self.fadeAnimation.finished.disconnect(self._handleFadeInFinished)
 
     def fadeOut(self, callback=None):
+        """Ẩn overlay với hiệu ứng mờ dần"""
+        # Đảm bảo overlay nằm trên cùng
+        self.raise_()
+        
+        # Cài đặt animation mờ dần
         self.fadeAnimation.setStartValue(1)
         self.fadeAnimation.setEndValue(0)
         
+        # Dừng animation progress bar
+        if hasattr(self, 'progressAnim') and self.progressAnim:
+            self.progressAnim.stop()
+        
         if callback:
             self._callbacks.append(callback)
-            self.fadeAnimation.finished.connect(self._handleFadeOutFinished)
+            
+            def on_fade_out_finished():
+                # Ngắt kết nối để tránh gọi nhiều lần
+                self.fadeAnimation.finished.disconnect(on_fade_out_finished)
+                # Gọi hàm cleanup ngay lập tức
+                self._handleFadeOutFinished()
+                
+            self.fadeAnimation.finished.connect(on_fade_out_finished)
             
         self.fadeAnimation.start()
 
@@ -80,18 +164,11 @@ class PageTransitionOverlay(QWidget):
         for callback in self._callbacks:
             callback()
         self._callbacks.clear()
-        self.fadeAnimation.finished.disconnect(self._handleFadeOutFinished)
-
-    def resizeEvent(self, event):
-        # Keep overlay matched to parent size
-        if self.parent():
-            self.setGeometry(self.parent().rect())
-        super().resizeEvent(event)
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         
-        # Draw background with transparency - slightly larger to avoid gaps
-        painter.fillRect(self.rect().adjusted(-1, -1, 1, 1), QColor(0, 0, 0, 127))
+        # Draw solid background without transparency
+        painter.fillRect(self.rect(), QColor(61, 111, 74, 255))  # #3D6F4A
         super().paintEvent(event)

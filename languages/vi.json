@@ -6,9 +6,9 @@
     "backToHome": "Về trang chủ"
   },
   "welcomePage": {
-    "welcome": "Cartsy đã đến!",
-    "tagline": "\"Sắm thạo, sống vui\"",
-    "getStarted": "BẮT ĐẦU"
+    "welcome": "Xin chào từ Cartsy!",
+    "tagline": "\"Mua đúng cách, sống đậm chất\"",
+    "getStarted": "BẮT ĐẦU NHÉ"
   },
   "languageModal": {
     "title": "Chọn Ngôn Ngữ",
@@ -42,7 +42,7 @@
     "scan": "QUÉT",
     "productInfo": "THÔNG TIN SP",
     "yourCart": "Giỏ Hàng",
-    "cancelShopping": "Hủy mua",
+    "cancelShopping": "Hủy mua sắm",
     "total": "Tổng",
     "payment": "THANH TOÁN",
     "emptyCartMessage": "Giỏ hàng trống! Vui lòng thêm sản phẩm."
@@ -50,7 +50,7 @@
   "productModal": {
     "cancel": "Hủy",
     "addToCart": "Thêm vào giỏ",
-    "alreadyInCart": "ĐÃ CÓ\nTRONG GIỎ"
+    "alreadyInCart": "ĐÃ CÓ TRONG GIỎ"
   },
   "cancelShoppingModal": {
     "title": "Bạn muốn hủy?",
@@ -64,7 +64,7 @@
     "accountNumber": "Số tài khoản: ",
     "accountName": "Tên chủ tài khoản: NGUYEN THE NGO",
     "bankName": "Ngân hàng: TMCP Quân Đội",
-    "charityMessage": "\"Tiền bạc có hạn,\nTình yêu vô biên.\"",
+    "charityMessage": "\"Tiền bạc có hạn, còn tình yêu thì vô biên.\"",
     "cancelPayment": "Hủy Thanh Toán",
     "heartfeltSupport": "Trợ Tâm",
     "qrExpired": "Mã QR đã hết hạn",

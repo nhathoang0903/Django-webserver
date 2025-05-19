@@ -1,6 +1,6 @@
 import json
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget, QDialog
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QFontDatabase, QFont
 import os
 from components.PageTransitionOverlay import PageTransitionOverlay
@@ -14,11 +14,12 @@ class CancelShoppingModal(QFrame):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(460, 310)  
+        self.setFixedSize(580, 420)  # Increased from 460x310 to 580x420
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
-                border: 1px solid #000000;
+                border: 2px solid #000000;
+                border-radius: 15px;
             }
         """)
 
@@ -39,21 +40,21 @@ class CancelShoppingModal(QFrame):
 
     def init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(0, 0, 0, 30)
+        layout.setSpacing(30)  # Increased from 20 to 30
+        layout.setContentsMargins(0, 0, 0, 40)  # Increased bottom margin from 30 to 40
 
         # Header container with adjusted width
         header_container = QFrame()
-        header_container.setFixedHeight(55)
-        header_container.setFixedWidth(410)  # Reduced from 450 to 410 to match reduced modal width
+        header_container.setFixedHeight(70)  # Increased from 55 to 70
+        header_container.setFixedWidth(530)  # Increased from 410 to 530
         header_container.setStyleSheet("background-color: #F5F75C;")
         header_container_layout = QHBoxLayout(header_container)
-        header_container_layout.setContentsMargins(20, 0, 0, 0)
+        header_container_layout.setContentsMargins(30, 0, 0, 0)  # Increased left margin from 20 to 30
         header_container_layout.setSpacing(0)
 
         # Fix title styling with larger font
         title = QLabel(_("cancelShoppingModal.title"))
-        title.setFont(QFont("Inria Sans", 16, QFont.Bold))
+        title.setFont(QFont("Inria Sans", 22, QFont.Bold))  # Increased from 16 to 22
         title.setStyleSheet("""
             QLabel {
                 color: #000000;
@@ -64,18 +65,18 @@ class CancelShoppingModal(QFrame):
 
         # Update close button position and border
         close_btn = QPushButton("X")
-        close_btn.setFixedSize(50, 55)
-        close_btn.setFont(QFont("Inria Sans", 18, QFont.Bold))
+        close_btn.setFixedSize(70, 70)  # Increased from 50x55 to 70x70
+        close_btn.setFont(QFont("Inria Sans", 24, QFont.Bold))  # Increased from 18 to 24
         close_btn.setStyleSheet("""
             QPushButton {
-                border: 1px solid #000000;
+                border: 2px solid #000000;
                 border-right: none;  
                 color: #F50A0A;
                 background: white;
                 margin: 0;
                 padding: 0;
                 text-align: center;
-                line-height: 55px;
+                line-height: 70px;
             }
             QPushButton:hover {
                 color: #666666;
@@ -98,24 +99,24 @@ class CancelShoppingModal(QFrame):
 
         # Message container with increased height and no border
         message_container = QWidget()
-        message_container.setFixedHeight(100)
+        message_container.setFixedHeight(150)  # Increased from 100 to 150
         message_container.setStyleSheet("border: none; background: transparent;")
         message_layout = QVBoxLayout(message_container)
-        message_layout.setContentsMargins(25, 15, 25, 10)
-        message_layout.setSpacing(12)
+        message_layout.setContentsMargins(40, 20, 40, 20)  # Increased from 25,15,25,10 to 40,20,40,20
+        message_layout.setSpacing(15)  # Increased from 12 to 15
 
         # Update message font with larger size
         message = QLabel()
         message.setText(_("cancelShoppingModal.message"))
-        message.setFont(QFont("Josefin Sans", 15))
+        message.setFont(QFont("Josefin Sans", 20))  # Increased from 15 to 20
         message.setWordWrap(True)
         message.setStyleSheet("""
             QLabel {
                 color: #000000;
                 background: transparent;
-                padding: 18px 12px 20px 12px;  
+                padding: 25px 20px 25px 20px;  /* Increased padding */
                 qproperty-alignment: AlignLeft | AlignVCenter; 
-                line-height: 1.6; 
+                line-height: 1.8;  /* Increased line height */
                 border: none;
             }
         """)
@@ -127,36 +128,43 @@ class CancelShoppingModal(QFrame):
         layout.addWidget(message_container)
 
         # Add spacing before buttons
-        layout.addSpacing(13)
+        layout.addSpacing(20)  # Increased from 13 to 20
 
         # Buttons container
         button_container = QWidget()
         button_layout = QHBoxLayout(button_container)
-        button_layout.setSpacing(35)
+        button_layout.setSpacing(50)  # Increased from 35 to 50
 
         # Update button fonts and sizes
         not_now_btn = QPushButton(_("cancelShoppingModal.notNow"))
-        not_now_btn.setFixedSize(170, 50)
-        not_now_btn.setFont(QFont("Inria Sans", 13, QFont.Bold))
+        not_now_btn.setFixedSize(220, 70)  # Increased from 170x50 to 220x70
+        not_now_btn.setFont(QFont("Inria Sans", 18, QFont.Bold))  # Increased from 13 to 18
         not_now_btn.setStyleSheet("""
             QPushButton {
                 background-color: #CAF7B2;
                 border: none;
-                border-radius: 14px;
+                border-radius: 20px;  /* Increased from 14px to 20px */
                 color: black;
+            }
+            QPushButton:hover {
+                background-color: #A5E68E;
             }
         """)
         not_now_btn.clicked.connect(self.handle_not_now)
 
         cancel_btn = QPushButton(_("cancelShoppingModal.cancelPayment"))
-        cancel_btn.setFixedSize(170, 50)
-        cancel_btn.setFont(QFont("Inria Sans", 13, QFont.Bold))
+        cancel_btn.setFixedSize(220, 70)  # Increased from 170x50 to 220x70
+        cancel_btn.setFont(QFont("Inria Sans", 18, QFont.Bold))  # Increased from 13 to 18
         cancel_btn.setStyleSheet("""
             QPushButton {
                 background-color: #FB595C;
                 border: none;
-                border-radius: 14px;
+                border-radius: 20px;  /* Increased from 14px to 20px */
                 color: #000000;
+            }
+            QPushButton:hover {
+                background-color: #D32F2F;
+                color: white;
             }
         """)
         cancel_btn.clicked.connect(self.handle_cancel_shopping)
@@ -207,8 +215,20 @@ class CancelShoppingModal(QFrame):
             print(f"Error calling end session API: {e}")
         
         # Emit signal to close modal and return to home
+        print("CRITICAL: Emitting cancelled signal to transition to home page")
         self.cancelled.emit()
         self.hide()
+        
+        # Force transition to home page if the parent can handle it directly
+        if self.parent() and hasattr(self.parent(), 'handle_cancel_payment'):
+            print("CRITICAL: Directly calling parent's handle_cancel_payment")
+            QTimer.singleShot(200, self.parent().handle_cancel_payment)
+        else:
+            print("CRITICAL: Parent does not have handle_cancel_payment method or parent is None")
+        
+        # Ensure signals are processed immediately
+        from PyQt5.QtWidgets import QApplication
+        QApplication.processEvents()
 
     def handle_cancel(self):
         # Emit signal only once and hide

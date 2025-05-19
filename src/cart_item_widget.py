@@ -28,15 +28,16 @@ class CartItemWidget(QFrame):
         self.unit_price = float(product['price'])
         self.current_price = self.unit_price * quantity
         
-        self.setFixedHeight(120)  # Increased from 110 to 120
-        self.setFixedWidth(370)   # Increased from 350 to 370 to give more space
+        self.setFixedHeight(280) 
+        self.setFixedWidth(780)   
         
         # Main frame styling
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
-                border-radius: 15px;
-                padding: 5px;
+                border-radius: 30px;
+                padding: 18px;
+                border: none;
             }
         """)
         
@@ -47,29 +48,22 @@ class CartItemWidget(QFrame):
         
         # Main horizontal layout
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(15, 5, 5, 5)  # Further reduced right margin
-        layout.setSpacing(3)  # Reduced spacing from 8 to 3
+        layout.setContentsMargins(5, 20, 15, 20)
+        layout.setSpacing(15) 
         
-        # Left: Image
+        # Left: Image - push further left but ensure not cut
         image_container = QWidget()
         image_container.setStyleSheet("background-color: transparent;")
-        image_container.setFixedWidth(60)  # Reduced from 65 to 60
+        image_container.setFixedWidth(140)  # Increased from 130 to 140 to avoid cutting
         
         image_layout = QVBoxLayout(image_container)
         image_layout.setContentsMargins(0, 0, 0, 0)
         image_layout.setSpacing(0)
         
         self.image_label = QLabel()
-        # Set image size based on category - increased size
+        # Set image size based on category - with consistent sizes
         category = product.get('category', '')
-        if (category == "Snack"):
-            image_size = (75, 95)  
-        elif (category == "Beverage"):
-            image_size = (75, 95) 
-        elif (category == "Food"):
-            image_size = (75, 95) 
-        else:
-            image_size = (75, 95) 
+        image_size = (140, 160) 
             
         self.image_label.setFixedSize(*image_size)
         self.image_label.setStyleSheet("""
@@ -105,54 +99,97 @@ class CartItemWidget(QFrame):
 
         self.image_label.setAlignment(Qt.AlignCenter)
         
-        # Simpler layout - center the image vertically
+        # Simpler layout - center the image vertically and ensure visible
         image_layout.addStretch(1)
-        image_layout.addWidget(self.image_label, 0, Qt.AlignCenter)
+        image_layout.addWidget(self.image_label, 0, Qt.AlignCenter)  # Removed AlignRight to prevent cutting
         image_layout.addStretch(1)
         
         layout.addWidget(image_container)
+
+        spacer_widget = QWidget()
+        spacer_widget.setFixedWidth(10)
+        spacer_widget.setStyleSheet("background-color: transparent;")
+        layout.addWidget(spacer_widget)
         
-        # Middle: Name and Quantity Controls
+        # Middle: Name and Quantity Controls 
         middle_widget = QWidget()
         middle_widget.setStyleSheet("background-color: white;")
         middle_layout = QVBoxLayout(middle_widget)
-        middle_layout.setContentsMargins(0, 0, 0, 0)  # Remove all margins 
-        middle_layout.setSpacing(2)
+        middle_layout.setContentsMargins(15, 0, 0, 0)
+        middle_layout.setSpacing(15)
         
-        # Product name container with more content space
+        # Product name container
         name_container = QWidget()
-        name_container.setFixedWidth(195)  
+        name_container.setFixedWidth(390)  # Increased from 380 to 390
         name_container.setStyleSheet("background-color: white; border: none;")
         name_layout = QVBoxLayout(name_container)
-        name_layout.setContentsMargins(0, 0, 0, 5)
+        name_layout.setContentsMargins(0, 0, 0, 15)
         name_layout.setSpacing(0)
         
-        # Format name with custom line breaks
         raw_name = product['name'].replace('_', ' ')
         words = raw_name.split()
-        if len(words) > 2:
-            # Format with line breaks based on character length, not just word count
-            first_line = words[0]
-            current_line = first_line
-            
-            for word in words[1:]:
-                if len(current_line + " " + word) <= 15:  # Adjust character threshold as needed
-                    current_line += " " + word
+        
+        # Print original name information for debugging
+        print(f"Processing name: '{raw_name}' - Length: {len(raw_name)}, Word count: {len(words)}")
+        
+        # Intelligent line break algorithm based on word count and length
+        if len(words) >= 2:
+            # For 4 or more words, typically break after word 2 or 3
+            if len(words) >= 4:
+                # Check if first 3 words aren't too long
+                first_three = ' '.join(words[:3])
+                if len(first_three) <= 16:  # More conservative limit for longer names
+                    first_line = first_three
+                    second_line = ' '.join(words[3:])
+                    print(f"4+ words: Breaking after word 3 - First line: '{first_line}' ({len(first_line)} chars)")
                 else:
-                    if first_line == current_line:
-                        first_line = current_line
-                        current_line = word
-                    else:
-                        break
+                    # First 3 words too long, break after word 2
+                    first_two = ' '.join(words[:2])
+                    first_line = first_two
+                    second_line = ' '.join(words[2:])
+                    print(f"4+ words: Breaking after word 2 - First line: '{first_line}' ({len(first_line)} chars)")
             
-            # Join remaining words for second line
-            remaining_words = words[len(first_line.split()):]
-            formatted_name = first_line + '\n' + ' '.join(remaining_words)
-        else:
+            # For exactly 3 words
+            elif len(words) == 3:
+                # Check if first 2 words aren't too long
+                first_two = ' '.join(words[:2])
+                if len(first_two) <= 16:
+                    first_line = first_two
+                    second_line = words[2]
+                    print(f"3 words: Breaking after word 2 - First line: '{first_line}' ({len(first_line)} chars)")
+                else:
+                    # First 2 words too long, break after word 1
+                    first_line = words[0]
+                    second_line = ' '.join(words[1:])
+                    print(f"3 words: Breaking after word 1 - First line: '{first_line}' ({len(first_line)} chars)")
+            
+            # For exactly 2 words
+            else:
+                total_length = len(' '.join(words))
+                if total_length <= 18:  # If total is short enough, keep on one line
+                    first_line = ' '.join(words)
+                    second_line = ""
+                    print(f"2 words: Keeping on one line - '{first_line}' ({len(first_line)} chars)")
+                else:
+                    # Split into two lines
+                    first_line = words[0]
+                    second_line = words[1]
+                    print(f"2 words: Breaking after word 1 - First line: '{first_line}' ({len(first_line)} chars)")
+            
+            # Build final formatted name
+            if second_line:
+                formatted_name = first_line + '\n' + second_line
+                print(f"Final format: Two lines - '{first_line}' and '{second_line}'")
+            else:
+                formatted_name = first_line
+                print(f"Final format: Single line - '{first_line}'")
+        
+        else:  # Single word
             formatted_name = raw_name
-            
+            print(f"Single word name: '{formatted_name}'")
+        
         name_label = QLabel(formatted_name)
-        name_label.setFont(QFont("Inria Sans", 12, QFont.Bold))
+        name_label.setFont(QFont("Inria Sans", 24, QFont.Bold))
         name_label.setWordWrap(True)
         name_label.setStyleSheet("""
             QLabel {
@@ -161,45 +198,46 @@ class CartItemWidget(QFrame):
                 border: none;
                 qproperty-alignment: AlignVCenter;
                 margin: 0px;
-                padding-left: 8px;
+                padding-left: 0px; 
                 padding-right: 0px;
-                min-height: 50px;
-                line-height: 1.3;
+                min-height: 100px;
+                line-height: 1.5;
             }
         """)
         
         # Modify the name_layout to be proper for the name_label
         name_layout.addWidget(name_label, 1, Qt.AlignLeft | Qt.AlignVCenter)
-        middle_layout.addWidget(name_container, 1, Qt.AlignLeft)  # Removed AlignTop to center it
-        middle_layout.addStretch(1)  # Reduced stretch ratio to accommodate taller name container
+        middle_layout.addWidget(name_container, 1, Qt.AlignLeft)
+        middle_layout.addStretch(1)
 
-        # Quantity controls with larger size
-        control_size = 32  # Increased from 24 to 32
+        # Quantity controls
+        control_size = 74
 
         # Quantity controls with center alignment
         quantity_container = QWidget()
         quantity_container.setFixedHeight(control_size)
         quantity_layout = QHBoxLayout(quantity_container)
         quantity_layout.setContentsMargins(0, 0, 0, 0)
-        quantity_layout.setSpacing(0)  # Ensure no spacing between buttons
+        quantity_layout.setSpacing(0)
 
-        # Create a horizontal container to align controls 
         quantity_controls = QHBoxLayout()
         quantity_controls.setContentsMargins(0, 0, 0, 0)
-        quantity_controls.setSpacing(0)  # No spacing between buttons
-        quantity_controls.addStretch(1)  # Push controls to center
+        quantity_controls.setSpacing(0) 
+        
+        # Don't add stretch here to align with name
+        # quantity_controls.addStretch(1)  # Push controls to center
 
         # Decrease button
         decrease_btn = QPushButton("-")
         decrease_btn.setFixedSize(control_size, control_size)
-        decrease_btn.setFont(QFont("Inria Sans", 16, QFont.Bold))  # Increased font size
+        decrease_btn.setFont(QFont("Inria Sans", 24, QFont.Bold))
         decrease_btn.setStyleSheet("""
             QPushButton {
                 background-color: #D8D8D8;
                 color: #000000;
                 border: none;
-                border-radius: 10px;
-                font-size: 20px;
+                border-radius: 18px;  
+                font-size: 46px;  
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -213,8 +251,8 @@ class CartItemWidget(QFrame):
         
         # Quantity label with larger font and red color
         self.quantity_label = QLabel(str(quantity))
-        self.quantity_label.setFixedSize(control_size + 15, control_size)  # Wider for larger numbers
-        self.quantity_label.setFont(QFont("Inria Sans", 18, QFont.Bold))  # Increased font size
+        self.quantity_label.setFixedSize(control_size + 30, control_size)
+        self.quantity_label.setFont(QFont("Inria Sans", 28, QFont.Bold))
         self.quantity_label.setStyleSheet("""
             QLabel {
                 background-color: transparent;
@@ -228,14 +266,14 @@ class CartItemWidget(QFrame):
         # Increase button
         increase_btn = QPushButton("+")
         increase_btn.setFixedSize(control_size, control_size)
-        increase_btn.setFont(QFont("Inria Sans", 16, QFont.Bold))  # Increased font size
+        increase_btn.setFont(QFont("Inria Sans", 24, QFont.Bold))
         increase_btn.setStyleSheet("""
             QPushButton {
                 background-color: #D8D8D8;
                 color: #000000;
                 border: none;
-                border-radius: 10px;
-                font-size: 20px;
+                border-radius: 18px; 
+                font-size: 46px;  
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -251,75 +289,71 @@ class CartItemWidget(QFrame):
         quantity_controls.addWidget(decrease_btn)
         quantity_controls.addWidget(self.quantity_label)
         quantity_controls.addWidget(increase_btn)
-        quantity_controls.addStretch(1)  # Push controls to center
+        quantity_controls.addStretch(1)  # Push controls to the left
         
         quantity_layout.addLayout(quantity_controls)
         
-        # Use a proper QHBoxLayout for quantity controls centered
-        middle_layout.addSpacing(1)  # Reduced from 3 to 1
-        middle_layout.addWidget(quantity_container, 0, Qt.AlignCenter)  # Centered alignment
-        middle_layout.addSpacing(0)  # Reduced from 2 to 0
+        # Use a proper QHBoxLayout for quantity controls aligned with name
+        middle_layout.addSpacing(5)
+        middle_layout.addWidget(quantity_container, 0, Qt.AlignLeft)  # Changed from AlignCenter to AlignLeft
+        middle_layout.addSpacing(5)
         
-        layout.addWidget(middle_widget, 2)  # Give middle section more proportion (changed from 1 to 2)
+        layout.addWidget(middle_widget, 3)
         
-        # Right side: Price and Remove button
+        # Right side: Price and Remove button - adjust width
         right_widget = QWidget()
+        right_widget.setFixedWidth(240)  # Increased from 230 to 240
         right_widget.setStyleSheet("background-color: white;")
         right_layout = QVBoxLayout(right_widget)
-        right_layout.setContentsMargins(2, 5, 5, 0)  # Reduced left margin to 2
-        right_layout.setSpacing(3)
+        right_layout.setContentsMargins(5, 10, 15, 10)
+        right_layout.setSpacing(5)
         
-        # Modify price label to show total price
+        # Price container with fixed alignment
+        price_container = QWidget()
+        price_layout = QVBoxLayout(price_container)
+        price_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Price label
         self.price_label = QLabel()
-        self.price_label.setFont(QFont("Istok Web", 14))  # Increased from 12 to 14
-        self.price_label.setFixedHeight(35)  # Increased from 30 to 35
-        self.price_label.setStyleSheet("""
-            background-color: white;
-            color: #FF0000;
-            padding-right: 5px;
-        """)
-        self.price_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # Ensure vertical centering
-        self.update_price_display()  # Update initial price display
-        right_layout.addWidget(self.price_label)
+        self.price_label.setFont(QFont("Istok Web", 24))
+        self.price_label.setStyleSheet("color: #FF0000; background-color: white;")
+        self.price_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.update_price_display()
+        price_layout.addWidget(self.price_label)
         
-        # Remove button container to center it horizontally
+        # Add price_container to right_layout
+        right_layout.addWidget(price_container, 1, Qt.AlignTop | Qt.AlignRight)
+        
+        # Add spacer to push elements apart
+        right_layout.addStretch(1)
+        
+        # Container for remove button to align with price - adjusted position
         remove_container = QWidget()
-        remove_container.setStyleSheet("background-color: white;")
-        remove_layout = QHBoxLayout(remove_container)
-        remove_layout.setContentsMargins(0, 0, 0, 0)
+        remove_container_layout = QHBoxLayout(remove_container)
+        remove_container_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Remove button with larger icon
+        # Remove button
         remove_btn = QPushButton()
-        remove_btn.setFixedSize(36, 36)  # Increased from 30x30 to 36x36
+        remove_btn.setFixedSize(60, 60)
         remove_icon = QPixmap(os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                       'assets', 'remove.png'))
-        scaled_icon = remove_icon.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation)  # Increased icon size
-        remove_btn.setIconSize(scaled_icon.size())  # Set icon size independently
+                                      'assets', 'remove.png'))
+        scaled_icon = remove_icon.scaled(60, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        remove_btn.setIconSize(scaled_icon.size())
         remove_btn.setIcon(QIcon(scaled_icon))
-        remove_btn.setStyleSheet("""
-            QPushButton {
-                border: none;
-                background-color: transparent;
-                padding: 0px;
-            }
-            QPushButton:hover {
-                background-color: #f0f0f0;
-                border-radius: 15px;  /* Increased from 12px to 15px */
-            }
-        """)
+        remove_btn.setStyleSheet("QPushButton {border: none; background-color: transparent;} QPushButton:hover {background-color: #f0f0f0; border-radius: 30px;}")
         remove_btn.clicked.connect(self.remove_item)
         
-        # Add equal stretch on both sides to center the button
-        remove_layout.addStretch(1)
-        remove_layout.addWidget(remove_btn)
-        remove_layout.addStretch(1)
+        # Add button to container layout, adjusted to align with price
+        remove_container_layout.addStretch(1)  # Push button to match price alignment
+        remove_container_layout.addWidget(remove_btn)
+        remove_container_layout.addSpacing(5)  # Small right spacing
         
         # Add remove container to right layout
-        right_layout.addWidget(remove_container)
+        right_layout.addWidget(remove_container, 0, Qt.AlignBottom)
         
         layout.addWidget(right_widget)
         
-        # Setup animation properties - thay đổi phần này
+        # Setup animation properties
         self.slide_animation = QPropertyAnimation(self, b"pos")
         self.slide_animation.setDuration(300)
         self.slide_animation.setEasingCurve(QEasingCurve.InOutQuad)
@@ -331,8 +365,14 @@ class CartItemWidget(QFrame):
         """Update the price display based on current quantity"""
         self.current_price = self.unit_price * self.quantity
         price_str = "{:,.0f}".format(self.current_price).replace(',', '.')
-        # Use HTML to add bold styling and increase size
-        self.price_label.setText(f"<span style='font-weight: bold; font-size: 14pt;'>{price_str} vnđ</span>")
+        
+        # Adjust font size based on price length to prevent overflow
+        if len(price_str) > 7:
+            font_size = 19
+        else:
+            font_size = 21
+            
+        self.price_label.setText(f"<span style='font-weight: bold; font-size: {font_size}pt;'>{price_str} vnđ</span>")
 
     def increase_quantity(self):
         self.quantity += 1
@@ -368,8 +408,9 @@ class CartItemWidget(QFrame):
         self.setStyleSheet("""
             QFrame {
                 background-color: #F8FFAA;
-                border-radius: 15px;
-                padding: 5px;
+                border-radius: 20px;  
+                padding: 8px;
+                border: 1px solid #E0E0E0;
             }
         """)
         
@@ -394,8 +435,9 @@ class CartItemWidget(QFrame):
                 self_widget.setStyleSheet("""
                     QFrame {
                         background-color: white;
-                        border-radius: 15px;
-                        padding: 5px;
+                        border-radius: 20px;  /* Increased from 15px to 20px */
+                        padding: 8px;  /* Increased from 5px to 8px */
+                        border: 1px solid #E0E0E0;
                     }
                 """)
                 

@@ -5,3 +5,6 @@ Pillow
 onnxruntime
 qrcode
 vietqr-generator
+mbbank-lib
+pyttsx3
+netifaces

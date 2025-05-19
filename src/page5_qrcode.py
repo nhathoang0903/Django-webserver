@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
 from mbbank import MBBank 
 from PyQt5.QtCore import Qt, QTimer, QDateTime, pyqtSignal, QUrl
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QImage, QColor, QBitmap, QFontDatabase, QFontMetrics
-from PyQt5.QtMultimedia import QSoundEffect  # Ensure QSoundEffect is used
+from PyQt5.QtMultimedia import QSoundEffect 
 import os
 import requests
 import cv2
@@ -35,7 +35,7 @@ import pyttsx3
 import qrcode
 from vietqr.VietQR import genQRString, getBincode
 from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
-from utils.translation import _, get_current_language  # Add translation import if not already there
+from utils.translation import _, get_current_language
 
 class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     switch_to_success = pyqtSignal()  # Signal for page switching
@@ -55,8 +55,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         super().__init__()
         print(f"[QR_TIMING] BasePage initialized at: {time.time() - init_start_time:.4f}s")
         
-        # Define common size for QR code and charity image - moved to class level
-        self.common_size = 250  # Reduced size for better display
+        # Define common size for QR code and charity image - Greatly increased for 1900x1080 window
+        self.common_size = 550  # Massively increased from 400 for better display on larger screen
         
         # Disable sound functionality (lightweight)
         self.sound_enabled = False
@@ -114,7 +114,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Setup timers and connect signals
         self.countdown_timer = QTimer()
         self.countdown_timer.timeout.connect(self.update_countdown)
-        self.countdown_seconds = 60  # Reduced to 1 minute
+        self.countdown_seconds = 90  # Reduced to 1.5minute
         self.target_time = datetime.now()
         
         # Connect signals - đã khai báo ở mức lớp, chỉ connect ở đây
@@ -168,37 +168,43 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
 
-        # Use class-level common_size variable
-        # Define common button size
-        button_width = 200
-        button_height = 60  # Increased from 50
+        # Define common button size - Greatly increased for 1900x1080 window
+        button_width = 400  # Massively increased from 300
+        button_height = 100  # Massively increased from 80
 
         # Main layout
         main_layout = QHBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(30, 30, 30, 30)  # Further increased margins
 
         # Left Section - Will now contain QR code and information
         left_section = QWidget()
         left_layout = QVBoxLayout(left_section)
-        # Reduce all margins to minimize lost space
-        left_layout.setContentsMargins(10, 0, 10, 5)
-        left_layout.setSpacing(0)  # Set minimal spacing to control precisely
+        # Adjust margins for larger components
+        left_layout.setContentsMargins(30, 20, 30, 20)  # Further increased margins
+        left_layout.setSpacing(20)  # Further increased spacing for larger screen
+
+        # QR Code Section - Create a separate section for QR code with good spacing
+        qr_section = QWidget()
+        qr_section_layout = QVBoxLayout(qr_section)
+        qr_section_layout.setContentsMargins(0, 0, 0, 0)
+        qr_section_layout.setAlignment(Qt.AlignCenter)
 
         # QR Code Container - create a separate container with custom size
         qr_container = QWidget()
-        # Set fixed height to ensure it doesn't get compressed
-        qr_container.setFixedHeight(self.common_size)
+        # Make the container more flexible to accommodate the full QR image
+        qr_container.setMinimumHeight(self.common_size)
         qr_container_layout = QVBoxLayout(qr_container)
         qr_container_layout.setContentsMargins(0, 0, 0, 0)
         qr_container_layout.setSpacing(0)
-        qr_container_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        qr_container_layout.setAlignment(Qt.AlignCenter)
 
         # QR Code Frame with adjusted size
         self.qr_frame = QFrame()
-        self.qr_frame.setFixedSize(self.common_size, self.common_size)  # Use common size
+        # Make the frame more flexible to accommodate the full image
+        self.qr_frame.setMinimumSize(self.common_size, self.common_size)
         self.qr_frame.setStyleSheet("""
             QFrame {
-                background-color: #F5F9F7;
+                background-color: transparent;
                 border: none;
             }
         """)
@@ -206,25 +212,24 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # QR Code Label
         self.qr_label = QLabel(self.qr_frame)
         self.qr_label.setAlignment(Qt.AlignCenter)
-        self.qr_label.setFixedSize(self.common_size, self.common_size)  # Use common size
+        # Don't set a fixed size for the QR label to allow flexible sizing based on image content
         self.qr_label.setText(_("qrCodePage.loading"))
-        self.qr_label.setStyleSheet("background-color: transparent;")
+        self.qr_label.setStyleSheet("background-color: transparent; font-size: 32px;")  # Further increased font size
         
-        # Add QR code to container with top alignment
-        qr_container_layout.addWidget(self.qr_frame, 0, Qt.AlignTop | Qt.AlignHCenter)
+        # Add QR code to container with center alignment
+        qr_container_layout.addWidget(self.qr_frame, 0, Qt.AlignCenter)
         
-        # QR container to main layout with top margin
-        left_layout.addSpacing(20)  # Add space at the top
-        left_layout.addWidget(qr_container, 0, Qt.AlignTop | Qt.AlignHCenter)
+        # Add QR container to QR section
+        qr_section_layout.addWidget(qr_container, 1, Qt.AlignCenter)
         
-        # Add flexible stretch to push everything else to the bottom
-        left_layout.addStretch(2)
-
-        # Bottom container for all info and buttons
+        # Add QR section to main layout - QR now dominates the upper part
+        left_layout.addWidget(qr_section, 4)  # QR takes 4/6 of vertical space
+        
+        # Bottom container for all info and buttons - takes less space now
         bottom_container = QWidget()
         bottom_layout = QVBoxLayout(bottom_container)
-        bottom_layout.setContentsMargins(0, 0, 0, 0)
-        bottom_layout.setSpacing(5)  # Small space between elements
+        bottom_layout.setContentsMargins(0, 10, 0, 10)  # Added top/bottom padding
+        bottom_layout.setSpacing(15)  # Reduced spacing slightly to fit everything
         
         # Payment Details Container - smaller and compact
         details_frame = QFrame()
@@ -233,11 +238,11 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         """)
         details_layout = QVBoxLayout(details_frame)
         details_layout.setContentsMargins(0, 0, 0, 0)  # Remove internal margins
-        details_layout.setSpacing(2)  # Slightly increased spacing between detail items
+        details_layout.setSpacing(10)  # Slightly reduced spacing
 
-        # Amount with slightly increased font
+        # Amount with increased font
         self.amount_label = QLabel()
-        self.amount_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
+        self.amount_label.setFont(QFont("Inria Sans", 22, QFont.Bold))  # Slightly reduced font size
         amount_text = sum(float(product['price']) * quantity 
                          for product, quantity in self.cart_state.cart_items)
         self.amount_label.setText(f"{_('qrCodePage.amount')}{'{:,.0f}'.format(amount_text).replace(',', '.')} vnđ")
@@ -245,14 +250,14 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Account number - new information
         account_number = "0375712517"
         account_label = QLabel(f"{_('qrCodePage.accountNumber')}{account_number}")
-        account_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
+        account_label.setFont(QFont("Inria Sans", 22, QFont.Bold))  # Slightly reduced font size
         
         # Account Details - increased font
         acc_name_label = QLabel(_("qrCodePage.accountName"))
-        acc_name_label.setFont(QFont("Inria Sans", 10))  # Increased font size
+        acc_name_label.setFont(QFont("Inria Sans", 22))  # Slightly reduced font size
         
         bank_label = QLabel(_("qrCodePage.bankName"))
-        bank_label.setFont(QFont("Inria Sans", 10))  # Increased font size
+        bank_label.setFont(QFont("Inria Sans", 22))  # Slightly reduced font size
 
         # Add all labels to details layout
         for label in [self.amount_label, account_label, acc_name_label, bank_label]:
@@ -262,52 +267,54 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Add details frame to bottom layout
         bottom_layout.addWidget(details_frame, alignment=Qt.AlignCenter)
         
-        # Zero spacing between info and time
-        bottom_layout.addSpacing(0)
+        # Minimal spacing between info and time
+        bottom_layout.addSpacing(15)  # Increased spacing
         
-        # Countdown and generation time
+        # Countdown and generation time - change back to vertical layout
         time_container = QWidget()
-        time_layout = QVBoxLayout(time_container)
+        time_layout = QVBoxLayout(time_container)  # Changed back to vertical layout
         time_layout.setContentsMargins(0, 0, 0, 0)
-        time_layout.setSpacing(1)  # Minimal spacing
+        time_layout.setSpacing(10)  # Spacing between countdown and generation time
         
         # Countdown label
         self.countdown_label = QLabel()
-        self.countdown_label.setFont(QFont("Inria Sans", 10, QFont.Bold))  # Use QFont.Bold
+        self.countdown_label.setFont(QFont("Inria Sans", 22, QFont.Bold))
         self.countdown_label.setStyleSheet("color: #D30E11;")
         self.countdown_label.setAlignment(Qt.AlignCenter)
         self.countdown_label.hide()
 
         # Generation time label
         self.gen_time_label = QLabel()
-        italic_font = QFont("Inria Sans", 10)
-        italic_font.setItalic(True)  # Proper way to set italic
+        italic_font = QFont("Inria Sans", 22)
+        italic_font.setItalic(True)
         self.gen_time_label.setFont(italic_font)
         self.gen_time_label.setAlignment(Qt.AlignCenter)
         self.gen_time_label.hide()
         
-        # Add labels to time container
+        # Add labels to time container vertically (one below the other)
         time_layout.addWidget(self.countdown_label, alignment=Qt.AlignCenter)
         time_layout.addWidget(self.gen_time_label, alignment=Qt.AlignCenter)
         
         # Add time container to bottom layout
         bottom_layout.addWidget(time_container, alignment=Qt.AlignCenter)
         
-        # Add buttons to bottom layout
+        # Add more spacing to push button down
+        bottom_layout.addSpacing(15)
+        
         # Cancel Payment button - use common button size
         self.cancel_button = QPushButton(_("qrCodePage.cancelPayment"))
-        self.cancel_button.setFont(QFont("Josefin Sans", 15, QFont.Bold))  # Use QFont.Bold
-        self.cancel_button.setFixedSize(button_width, button_height)  # Use common button size
+        self.cancel_button.setFont(QFont("Josefin Sans", 28, QFont.Bold))
+        self.cancel_button.setFixedSize(button_width, button_height)
         self.cancel_button.setStyleSheet("""
             background-color: #416FFA;
             color: white;
-            border-radius:15px;
+            border-radius:25px;
         """)
         self.cancel_button.clicked.connect(self.cancel_payment)
         bottom_layout.addWidget(self.cancel_button, alignment=Qt.AlignCenter)
         
         # Add the bottom container to main layout
-        left_layout.addWidget(bottom_container, 0, Qt.AlignBottom)
+        left_layout.addWidget(bottom_container, 2)  # Takes 2/6 of vertical space
 
         # Add left section to main layout
         main_layout.addWidget(left_section)
@@ -315,17 +322,27 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Right Section - Will now contain charity image and message
         right_section = QWidget()
         right_layout = QVBoxLayout(right_section)
-        right_layout.setContentsMargins(10, 0, 10, 5)  # Match left section margins
-        right_layout.setSpacing(0)  # Match left section spacing
-        right_layout.setAlignment(Qt.AlignTop)
+        right_layout.setContentsMargins(30, 0, 30, 20)  # Giảm top margin từ 20 xuống 0
+        right_layout.setSpacing(5)  # Giảm spacing từ 10 xuống 5
+        
+        # Thêm spacer phía trên để đẩy ảnh lên cao hơn
+        right_layout.addSpacing(90)  # Tăng từ 60 lên 90
+        
+        # Charity image section - takes most of the space
+        charity_section = QWidget()
+        charity_section.setContentsMargins(0, 0, 0, 0)  # Set margins trực tiếp cho widget
+        charity_section_layout = QVBoxLayout(charity_section)
+        charity_section_layout.setContentsMargins(0, 0, 0, 0)
+        charity_section_layout.setSpacing(0)  # Giảm spacing xuống 0
+        charity_section_layout.setAlignment(Qt.AlignCenter | Qt.AlignTop)  # Thêm AlignTop để đẩy lên cao
         
         # Charity image container - match QR code container
         charity_container = QWidget()
-        charity_container.setFixedHeight(self.common_size)  # Match QR container height
+        charity_container.setFixedHeight(self.common_size)  # Giảm chiều cao xuống
         charity_layout = QVBoxLayout(charity_container)
-        charity_layout.setContentsMargins(0, 0, 0, 0)
+        charity_layout.setContentsMargins(0, 0, 0, 40)  # Tăng bottom margin từ 30 lên 40
         charity_layout.setSpacing(0)
-        charity_layout.setAlignment(Qt.AlignCenter)
+        charity_layout.setAlignment(Qt.AlignCenter | Qt.AlignTop)  # Thêm AlignTop
 
         # Charity image
         charity_label = QLabel()
@@ -336,140 +353,191 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             charity_label.setPixmap(charity_pixmap.scaled(self.common_size, self.common_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         else:
             charity_label.setText("Charity Image")
-            charity_label.setStyleSheet("font-size: 24px; color: #507849;")
+            charity_label.setStyleSheet("font-size: 32px; color: #507849;")
             
-        charity_label.setAlignment(Qt.AlignCenter)
+        charity_label.setAlignment(Qt.AlignCenter | Qt.AlignTop)  # Thêm AlignTop
         charity_label.setFixedSize(self.common_size, self.common_size)  # Match QR code size
-        charity_layout.addWidget(charity_label, alignment=Qt.AlignCenter)
+        charity_layout.addWidget(charity_label, 0, Qt.AlignCenter | Qt.AlignTop)  # Thêm 0 làm stretch và AlignTop
         
-        # Add charity container to right layout with top margin
-        right_layout.addSpacing(20)  # Add space at the top
-        right_layout.addWidget(charity_container, alignment=Qt.AlignCenter | Qt.AlignTop)
+        # Add charity container to charity section
+        charity_section_layout.addWidget(charity_container, 0, Qt.AlignCenter | Qt.AlignTop)  # Thêm 0 làm stretch
         
-        # Message container moved below charity image
+        # Add charity section to right layout - charity image dominates upper part
+        right_layout.addWidget(charity_section, 7)  # Tăng từ 6 lên 7 để ưu tiên phần ảnh hơn nữa
+        
+        # Message and button container - takes less space now
+        message_button_container = QWidget()
+        message_button_layout = QVBoxLayout(message_button_container)
+        message_button_layout.setContentsMargins(0, 0, 0, 5)  # Giảm bottom padding từ 10 xuống 5
+        message_button_layout.setSpacing(5)  # Giảm spacing từ 10 xuống 5
+        
+        # Message container with charity message
         message_container = QWidget()
-        message_container.setFixedWidth(self.common_size)  # Match common size
         message_layout = QVBoxLayout(message_container)
-        message_layout.setContentsMargins(0, 10, 0, 0)  # Add top margin
+        message_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Charity message with larger font size
-        message_label = QLabel(_("qrCodePage.charityMessage"))
-        message_font = QFont("Josefin Sans", 15)
-        message_font.setItalic(True)  # Proper way to set italic
-        message_label.setFont(message_font)
-        message_label.setAlignment(Qt.AlignCenter)
-        message_label.setWordWrap(True) 
-        message_label.setStyleSheet("""
+        # Charity message với kích thước phù hợp cho 2 dòng
+        self.message_label = QLabel(_("qrCodePage.charityMessage"))
+        message_font = QFont("Josefin Sans", 26)
+        message_font.setItalic(True)
+        self.message_label.setFont(message_font)
+        self.message_label.setAlignment(Qt.AlignCenter)
+        self.message_label.setWordWrap(True)
+        
+        # Cách tính chiều cao chính xác cho 2 dòng
+        fm = QFontMetrics(message_font)
+        line_spacing = fm.lineSpacing()  # Khoảng cách giữa các dòng
+        text_height = line_spacing * 2  # Chiều cao cho 2 dòng
+        
+        # Tính toán chiều rộng tối thiểu để đảm bảo hiển thị đủ nội dung
+        text = _("qrCodePage.charityMessage")
+        text_width = fm.horizontalAdvance(text)
+        
+        # Thêm padding cho đủ không gian hiển thị
+        padding_height = 16
+        padding_width = 40  # Thêm padding cho chiều rộng
+        
+        # Set kích thước cố định cho label để đảm bảo hiển thị đủ nội dung
+        self.message_label.setMinimumHeight(text_height + padding_height)
+        self.message_label.setMaximumHeight(text_height + padding_height)
+        
+        # Đặt chiều rộng tối thiểu cho label (ít nhất 80% chiều rộng của text)
+        min_width = max(800, int(text_width * 0.8))
+        self.message_label.setMinimumWidth(min_width + padding_width)
+        
+        # Đặt chiều rộng tối đa để tránh quá rộng
+        max_width = 900  # Điều chỉnh nếu cần
+        self.message_label.setMaximumWidth(max_width)
+        
+        self.message_label.setStyleSheet("""
             color: #D30E11; 
             margin: 0px; 
-            padding: 0px;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
         """)
         
-        message_layout.addWidget(message_label, alignment=Qt.AlignCenter)
-        right_layout.addWidget(message_container, alignment=Qt.AlignCenter)
+        message_layout.addWidget(self.message_label, alignment=Qt.AlignCenter)
+        message_button_layout.addWidget(message_container, 1, Qt.AlignCenter)
         
-        # Add stretch to push button to bottom
-        right_layout.addStretch(2) 
+        # Add more spacing to push No Banking button down
+        message_button_layout.addSpacing(30)
         
         # No Banking button 
         self.no_banking_button = QPushButton(_("qrCodePage.heartfeltSupport"))
-        self.no_banking_button.setFont(QFont("Josefin Sans", 15, QFont.Bold)) 
-        self.no_banking_button.setFixedSize(button_width, button_height) 
+        self.no_banking_button.setFont(QFont("Josefin Sans", 28, QFont.Bold))
+        self.no_banking_button.setFixedSize(button_width, button_height)
         self.no_banking_button.setStyleSheet("""
-            background-color: #CC95BA;
+            background-color: #EB1CBA;
             color: white;
-            border-radius:15px;
+            border-radius:25px;
         """)
         self.no_banking_button.clicked.connect(self.no_banking)
-        right_layout.addWidget(self.no_banking_button, alignment=Qt.AlignCenter)
+        message_button_layout.addWidget(self.no_banking_button, alignment=Qt.AlignCenter)
+        
+        # Add message and button container to right layout
+        right_layout.addWidget(message_button_container, 2)  # Takes 2/6 of vertical space
         
         # Add right section to main layout
         main_layout.addWidget(right_section)
 
     def load_qr_code(self):
-        """Optimized QR code generation"""
+        """Optimized QR code loading from static image"""
         qr_start = time.time()
-        print(f"[QR_TIMING] Starting QR code generation at: {qr_start}")
+        print(f"[QR_TIMING] Starting QR code loading at: {qr_start}")
         
         try:
-            # Set the start time when QR is generated
+            # Set the start time when QR is shown
             self.qr_start_time = datetime.now()
+            self.target_time = datetime.now() + timedelta(seconds=self.countdown_seconds)
             
-            # Generate QR directly in main thread to fix UI update issues
             try:
-                # VietQR configuration
-                bank_name = "MB"  # MB Bank
-                account_number = "0375712517"  #account number 
-                bank_code = getBincode(bank_name)
-                print(f"[QR_TIMING] Got bank code at: {time.time() - qr_start:.4f}s")
-
-                # Generate VietQR string with proper format
-                vietqr_string = genQRString(
-                    merchant_id=account_number,
-                    acq=bank_code,
-                    # amount=str(self.total_amount), 
-                    merchant_name="NGUYEN THE NGO",
-                    service_code="QRIBFTTA",  
-                    currency="704",            # VND currency code
-                    country_code="VN",         # Vietnam country code
-                    merchant_city="HO CHI MINH",
-                    merchant_category="5499",  # 5499 is for Misc Food Stores
-                    bill_number="SC" + datetime.now().strftime("%Y%m%d%H%M%S")  # Generate a unique bill number
-                )
-                print(f"[QR_TIMING] Generated VietQR string at: {time.time() - qr_start:.4f}s")
+                # Load static QR code image instead of generating one
+                qr_image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'qr-code-banking.png')
+                print(f"[QR_TIMING] Loading QR code from: {qr_image_path}")
                 
-                # Create QR code with custom styling
-                qr = qrcode.QRCode(
-                    version=6,  # Increased version for better compatibility
-                    error_correction=qrcode.constants.ERROR_CORRECT_H,
-                    box_size=10,  # Reduced box size for better fit
-                    border=4
-                )
+                # Load QR image
+                qr_pixmap = QPixmap(qr_image_path)
+                if qr_pixmap.isNull():
+                    raise Exception(f"Failed to load QR code image from {qr_image_path}")
                 
-                qr.add_data(vietqr_string)
-                qr.make(fit=True)
-                print(f"[QR_TIMING] QR code created at: {time.time() - qr_start:.4f}s")
+                print(f"[QR_TIMING] QR image loaded at: {time.time() - qr_start:.4f}s")
                 
-                # Create QR image with custom colors matching button color #507849
-                qr_img = qr.make_image(fill_color="#507849", back_color="#F5F9F7").convert("RGBA")
-                print(f"[QR_TIMING] QR image generated at: {time.time() - qr_start:.4f}s")
-                
-                # Convert PIL Image to QPixmap using BytesIO
-                img_byte_array = io.BytesIO()
-                qr_img.save(img_byte_array, format='PNG')
-                img_byte_array.seek(0)
-                print(f"[QR_TIMING] Converted to bytes at: {time.time() - qr_start:.4f}s")
-                
-                # Create QPixmap from bytes and update UI directly
-                qr_pixmap = QPixmap()
-                qr_pixmap.loadFromData(img_byte_array.getvalue())
-                
-                # Update UI with properly scaled QR code - match to common_size
+                # Update UI with properly scaled QR code - ensure entire image is visible
                 print(f"[QR_TIMING] About to update UI at: {time.time() - qr_start:.4f}s")
-                self.qr_label.setPixmap(qr_pixmap.scaled(self.common_size, self.common_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                
+                # Get original dimensions
+                original_width = qr_pixmap.width()
+                original_height = qr_pixmap.height()
+                print(f"[QR_TIMING] Original image dimensions: {original_width}x{original_height}")
+                
+                display_size = self.common_size * 0.97 
+                scale_factor = min(display_size / original_width, display_size / original_height)
+                new_width = int(original_width * scale_factor)
+                new_height = int(original_height * scale_factor)
+                
+                # Scale the image
+                scaled_pixmap = qr_pixmap.scaled(new_width, new_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                
+                # Adjust the QR label size to match the scaled image size exactly
+                self.qr_label.setFixedSize(new_width, new_height)
+                
+                # Set the scaled image
+                self.qr_label.setPixmap(scaled_pixmap)
                 self.qr_label.setAlignment(Qt.AlignCenter)
+                print(f"[QR_TIMING] QR image displayed at scaled size: {new_width}x{new_height}")
                 print(f"[QR_TIMING] QR image displayed at: {time.time() - qr_start:.4f}s")
                 
                 # Update date/time display
                 current_time = QDateTime.currentDateTime()
                 time_str = current_time.toString('hh:mm:ss')
-                month_str = current_time.toString('MMM')
                 day = current_time.date().day()
-                year_str = current_time.toString('yyyy')
+                month = current_time.date().month()
+                year = current_time.date().year()
                 
-                # Get ordinal suffix
-                if day in [1, 21, 31]:
-                    suffix = "st"
-                elif day in [2, 22]:
-                    suffix = "nd"
-                elif day in [3, 23]:
-                    suffix = "rd"
+                # Format date based on language
+                current_language = get_current_language()
+                
+                if current_language == "en":
+                    month_str = current_time.toString('MMM')
+                    
+                    # Get ordinal suffix
+                    if day in [1, 21, 31]:
+                        suffix = "st"
+                    elif day in [2, 22]:
+                        suffix = "nd"
+                    elif day in [3, 23]:
+                        suffix = "rd"
+                    else:
+                        suffix = "th"
+                    
+                    date_str = f"{month_str} {day}<sup>{suffix}</sup>, {year}"
+                
+                elif current_language == "vi":
+                    date_str = f"{day} tháng {month} năm {year}"
+                
+                elif current_language == "ja":
+                    date_str = f"{year}年{month}月{day}日"
+                
+                elif current_language == "fr":
+                    months_fr = ["janvier", "février", "mars", "avril", "mai", "juin", 
+                               "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+                    month_name = months_fr[month - 1]
+                    
+                    if day == 1:
+                        date_str = f"1er {month_name} {year}"
+                    else:
+                        date_str = f"{day} {month_name} {year}"
+                
                 else:
-                    suffix = "th"
+                    # Default fallback (English style without suffix)
+                    month_str = current_time.toString('MMM')
+                    date_str = f"{month_str} {day}, {year}"
                 
-                date_str = f"{day}<sup>{suffix}</sup>"
-                self.gen_time_label.setText(
-                    f"{_('qrCodePage.generated')}{time_str}, {month_str} {date_str}, {year_str}")
+                # Combine time and date
+                formatted_datetime = f"{_('qrCodePage.generated')}{time_str}, {date_str}"
+                
+                self.gen_time_label.setText(formatted_datetime)
                 self.gen_time_label.setTextFormat(Qt.RichText)
                 self.gen_time_label.show()
                 print(f"[QR_TIMING] Generation time displayed at: {time.time() - qr_start:.4f}s")
@@ -485,10 +553,10 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 # Start transaction check after UI được cập nhật
                 self.start_transaction_check()
                 print(f"[QR_TIMING] Transaction check started at: {time.time() - qr_start:.4f}s")
-                print(f"[QR_TIMING] Total QR code generation time: {time.time() - qr_start:.4f}s")
+                print(f"[QR_TIMING] Total QR code loading time: {time.time() - qr_start:.4f}s")
                 
             except Exception as e:
-                print(f"Error in QR generation: {e}")
+                print(f"Error in QR loading: {e}")
                 self.qr_label.setText(f"Error: {str(e)}")
                 # Ensure UI update is processed
                 QApplication.processEvents()
@@ -501,7 +569,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                     QTimer.singleShot(100, self.return_to_shopping)
             
         except Exception as e:
-            print(f"Error setting up QR generation: {e}")
+            print(f"Error setting up QR loading: {e}")
             self.qr_label.setText("Failed to load QR Code")
             # Ensure cleanup happens even if QR fails
             self.cleanup_resources()
@@ -514,68 +582,54 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 QTimer.singleShot(100, self.return_to_shopping)
 
     def cancel_payment(self):
-        """Handle cancel payment action with API call"""
-        # Prevent multiple clicks
-        if hasattr(self, 'processing_action') and self.processing_action:
-            print("Already processing an action, ignoring click")
-            return
+        """Hủy thanh toán và quay về trang mua hàng"""
+        # Handle cancellation and navigation logic
+        if not self.processing_action:
+            self.processing_action = True
             
-        self.processing_action = True
-        
-        cancel_start = time.time()
-        print(f"[QR_TIMING] Starting cancel payment at: {cancel_start}")
-        
-        # Check if already in transition
-        if hasattr(self, 'transition_in_progress') and self.transition_in_progress:
-            return
+            # Stop the transaction check thread 
+            self.stop_transaction_check.set()
+            print("Stopped transaction check thread")
             
-        self.transition_in_progress = True
-        
-        # Disable button to prevent multiple clicks
-        self.cancel_button.setEnabled(False)
-        
-        # Stop transaction check and countdown immediately
-        self.stop_transaction_check.set()
-        self.countdown_timer.stop()
-        print(f"[QR_TIMING] Stopped monitoring at: {time.time() - cancel_start:.4f}s")
-        
-        # Send cancel signal in background thread
-        def send_cancel_signal():
-            try:
-                url = f"{CART_CANCEL_PAYMENT_SIGNAL}{DEVICE_ID}/"
-                print(f"[QR_TIMING] Sending cancel API request to: {url}")
-                response = requests.post(url)
-                print(f"[QR_TIMING] Cancel payment signal sent: {response.status_code} at {time.time() - cancel_start:.4f}s")
-            except Exception as e:
-                print(f"Error sending cancel signal: {e}")
+            # Stop the countdown timer
+            if hasattr(self, 'countdown_timer') and self.countdown_timer.isActive():
+                self.countdown_timer.stop()
+            
+            # Hide countdown label
+            if hasattr(self, 'countdown_label'):
+                self.countdown_label.hide()
                 
-        # Start API thread
-        cancel_thread = Thread(target=send_cancel_signal, daemon=True)
-        cancel_thread.start()
-        
-        # Import here to avoid circular imports
-        from page4_shopping import ShoppingPage
-        
-        # Create shopping page
-        self.shopping_page = ShoppingPage()
-        
-        # Define transition completion handler
-        def show_new_page():
-            # Show shopping page
-            self.shopping_page.show()
-            
-            # Fade out overlay and close QR page
-            self.transition_overlay.fadeOut(lambda: self.close())
-        
-        # Show transition overlay first, then show new page after fade in completes
-        self.transition_overlay.fadeIn(show_new_page)
+            # Send cancellation signal to server
+            self.send_cancel_signal_to_server()
+                
+            # Disable buttons during transition
+            if hasattr(self, 'cancel_button'):
+                self.cancel_button.setEnabled(False)
+            if hasattr(self, 'no_banking_button'):
+                self.no_banking_button.setEnabled(False)
+                
+            # Return to shopping page
+            QTimer.singleShot(300, self.return_to_shopping)  
 
-    def return_to_shopping(self):
-        """Enhanced return to shopping with smooth transition"""
-        return_start = time.time()
-        print(f"[QR_TIMING] Starting return to shopping at: {return_start}")
+    def send_cancel_signal_to_server(self):
+        """Gửi tín hiệu hủy thanh toán đến server"""
+        try:
+            # Vô hiệu hóa API call
+            print("Cancel payment signal - API call DISABLED")
+            # url = f"{CART_CANCEL_PAYMENT_SIGNAL}{DEVICE_ID}/"
+            # print(f"Sending cancel payment signal to: {url}")
+            # response = requests.post(url)
+            
+            # if response.status_code == 200:
+            #     print("Cancel payment signal sent successfully")
+            # else:
+            #     print(f"Error sending cancel payment signal: {response.status_code}, {response.text}")
+        except Exception as e:
+            print(f"Error sending cancel payment signal: {e}")
         
-        # Check if already in transition
+    def return_to_shopping(self):
+        """Return to shopping page with transition effects"""
+        # Prevent multiple calls
         if hasattr(self, 'transition_in_progress') and self.transition_in_progress:
             return
             
@@ -584,31 +638,35 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Import here to avoid circular imports
         from page4_shopping import ShoppingPage
         
-        # Create shopping page
-        self.shopping_page = ShoppingPage()
-        
-        # Define transition completion handler
-        def show_new_page():
-            # Show shopping page
-            self.shopping_page.show()
+        try:
+            # Create shopping page
+            self.shopping_page = ShoppingPage()
             
-            # Fade out overlay and close QR page
-            self.transition_overlay.fadeOut(lambda: self.close())
-        
-        # Show transition overlay first, then show new page after fade in completes
-        self.transition_overlay.fadeIn(show_new_page)
-        
-        # Clean up resources in background to avoid lag
-        def cleanup_resources_bg():
-            try:
-                self.cleanup_resources()
-                print(f"[QR_TIMING] Resources cleaned up at: {time.time() - return_start:.4f}s")
-            except Exception as e:
-                print(f"Error in cleanup: {e}")
+            # Define transition completion handler
+            def show_new_page():
+                # Show shopping page
+                self.shopping_page.show()
                 
-        # Start cleanup in background (non-blocking)
-        cleanup_thread = Thread(target=cleanup_resources_bg, daemon=True)
-        cleanup_thread.start()
+                # Fade out overlay and close QR page
+                self.transition_overlay.fadeOut(lambda: self.close())
+            
+            # Show transition overlay first, then show new page after fade in completes
+            self.transition_overlay.fadeIn(show_new_page)
+            
+            # Force cleanup of resources to prevent memory leaks
+            self.cleanup_resources()
+            
+        except Exception as e:
+            print(f"Error returning to shopping page: {e}")
+            # Emergency fallback if transition fails
+            try:
+                from page1_welcome import WelcomePage
+                welcome = WelcomePage()
+                welcome.show()
+                self.close()
+            except:
+                print("Critical error: Unable to navigate to any page")
+                self.close()
 
     def cleanup_resources(self):
         """Clean up resources before closing"""
@@ -629,53 +687,99 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Force CPU configuration at start of thread
         self.configure_device()
         
+        # Import asyncio và thiết lập event loop mới trong thread
+        import asyncio
+        
+        # Tạo event loop mới trong thread hiện tại
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            print("Created new event loop for transaction checking thread")
+        except Exception as e:
+            print(f"Error setting up event loop: {e}")
+        
         USERNAME = "0375712517"
         PASSWORD = "Ngo252002@"
         account_no = "0375712517"
 
         mb = None
+        authenticated = False
         # Store the transfer content for later use
         self.transfer_content = ""
         
         try:
             print("Khởi tạo kết nối...")
-            mb = MBBank(username=USERNAME, password=PASSWORD)
-            
-            # Add a timeout for authentication to prevent hanging
-            auth_timeout = 10  # seconds
-            auth_start = time.time()
-            
-            print("Đang đăng nhập...")
+            # Cần bọc toàn bộ quá trình khởi tạo và xác thực trong try-except
             try:
-                # Set a timeout for authentication
-                if time.time() - auth_start > auth_timeout:
-                    print("Authentication timed out, proceeding anyway")
-                else:
-                    mb._authenticate()
-                    print("Xác thực thành công!")
-            except Exception as auth_e:
-                print(f"Authentication error: {auth_e}, will retry once")
+                mb = MBBank(username=USERNAME, password=PASSWORD)
+                
+                # Add a timeout for authentication to prevent hanging
+                auth_timeout = 10  # seconds
+                auth_start = time.time()
+                
+                print("Đang đăng nhập...")
                 try:
-                    # One retry with shorter timeout
-                    mb = MBBank(username=USERNAME, password=PASSWORD)
-                    mb._authenticate()
-                    print("Xác thực thành công sau khi thử lại!")
-                except:
-                    print("Authentication failed after retry, proceeding with limited functionality")
+                    # Set a timeout for authentication
+                    if time.time() - auth_start > auth_timeout:
+                        print("Authentication timed out")
+                        return
+                    else:
+                        mb._authenticate()
+                        print("Xác thực thành công!")
+                        authenticated = True
+                except Exception as auth_e:
+                    print(f"Authentication error: {auth_e}, will retry once")
+                    try:
+                        # One retry with shorter timeout
+                        mb = MBBank(username=USERNAME, password=PASSWORD)
+                        auth_timeout = 5  # Shorter timeout for retry
+                        auth_start = time.time()
+                        
+                        if time.time() - auth_start > auth_timeout:
+                            print("Retry authentication timed out")
+                            return
+                        
+                        mb._authenticate()
+                        print("Xác thực thành công sau khi thử lại!")
+                        authenticated = True
+                    except Exception as retry_e:
+                        print(f"Authentication failed after retry: {retry_e}")
+                        return
+            except Exception as init_e:
+                print(f"Initialization error: {init_e}")
+                return
             
-            print(f"\nBat dau theo doi giao dịch:")
+            # Nếu không xác thực được, kết thúc kiểm tra
+            if not authenticated or mb is None:
+                print("Cannot proceed without authentication")
+                return
+            
+            print(f"\nBắt đầu theo dõi giao dịch:")
             print(f"- Đề xuất: {amount:,} VND")
             print(f"- Từ thời điểm: {self.qr_start_time.strftime('%d/%m/%Y %H:%M:%S')}")
+            
+            # Chỉ sử dụng API khi đã xác thực thành công
+            max_retries = 3
+            retry_count = 0
             
             while not self.stop_transaction_check.is_set():
                 try:
                     current_time = datetime.now()
+                    
+                    # Thêm kiểm tra mất kết nối
+                    if retry_count >= max_retries:
+                        print(f"Maximum retries ({max_retries}) reached, stopping transaction check")
+                        return
+                    
                     # Get transactions since QR creation
                     transactions = mb.getTransactionAccountHistory(
                         accountNo=account_no,
                         from_date=self.qr_start_time,
                         to_date=current_time
                     )
+                    
+                    # Reset retry counter on successful request
+                    retry_count = 0
                     
                     if transactions and 'transactionHistoryList' in transactions:
                         trans_list = transactions['transactionHistoryList']
@@ -698,12 +802,12 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                     
                                     self.processed_transaction_ids.add(trans_id)
                                     print("\n" + "="*50)
-                                    print(f"Phat hien giao dich ({current_time.strftime('%H:%M:%S')})")
-                                    print(f"Thoi gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
-                                    print(f"So tien nhan: +{credit:,} VND")
-                                    print(f"Tu: {trans.get('benAccountName', 'N/A')}")
-                                    print(f"Noi dung: {description}")
-                                    print(f"Ma GD: {trans_id}")
+                                    print(f"Phát hiện giao dịch ({current_time.strftime('%H:%M:%S')})")
+                                    print(f"Thời gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
+                                    print(f"Số tiền nhận: +{credit:,} VND")
+                                    print(f"Từ: {trans.get('benAccountName', 'N/A')}")
+                                    print(f"Nội dung: {description}")
+                                    print(f"Mã GD: {trans_id}")
                                     print("="*50)
                                     
                                     # Store the donation amount for success page
@@ -711,6 +815,16 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                     
                                     # Store the transfer content for the note field
                                     QRCodePage.transfer_content = description
+                                    
+                                    # Đóng kết nối trước khi emit signal
+                                    if mb:
+                                        try:
+                                            # Sử dụng _req.close() khi có _req
+                                            if hasattr(mb, '_req') and mb._req is not None and hasattr(mb._req, 'close'):
+                                                mb._req.close()
+                                            mb = None
+                                        except Exception as close_e:
+                                            print(f"Warning during connection cleanup: {close_e}")
                                     
                                     # Emit signal to switch to success page
                                     self.switch_to_success.emit()
@@ -720,22 +834,32 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                                 print(f"Error processing transaction: {e}")
                                 continue
                     
-                    time.sleep(0.2)
+                    # Thời gian ngắt quãng để giảm tải
+                    time.sleep(0.5)
                     
                 except Exception as e:
                     print(f"Error checking transactions: {e}")
+                    retry_count += 1
+                    print(f"Retry {retry_count}/{max_retries}")
                     time.sleep(1)
                     continue
                     
         except Exception as e:
-            print(f"Lỗi khởi tạo: {str(e)}")
+            print(f"Lỗi ngoài quá trình check transaction: {str(e)}")
         finally:
+            # Đảm bảo dọn dẹp tài nguyên khi kết thúc
             if mb:
                 try:
-                    print("Đang đăng xuất...")
-                    mb._req.close()
-                except:
-                    pass
+                    print("Đang đăng xuất và đóng kết nối...")
+                    # Kiểm tra mb._req có tồn tại không và có phương thức close không
+                    if hasattr(mb, '_req') and mb._req is not None and hasattr(mb._req, 'close'):
+                        mb._req.close()
+                    mb = None
+                except Exception as close_e:
+                    print(f"Warning during logout: {close_e}")
+            
+            # Đảm bảo giải phóng tài nguyên
+            gc.collect()
 
     def handle_success(self):
         def switch_page():
@@ -753,7 +877,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             # Only play sounds if there's an actual donation
             if QRCodePage.donation_amount > 0:
                 sound_path_ting = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'ting-ting.wav'))
-                sound_path_payment = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'sucesspayment.wav'))
+                sound_path_payment = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sound', 'payment-success.wav'))
                 
                 try:
                     # Play first sound (ting-ting)
@@ -863,14 +987,19 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
     def update_countdown(self):
         """Update the countdown timer display"""
         current_time = datetime.now()
-        elapsed = current_time - self.target_time
-        remaining = self.countdown_seconds - elapsed.total_seconds()
+        
+        # Nếu target_time chưa được đặt, đặt nó bây giờ
+        if not hasattr(self, 'target_time') or self.target_time is None:
+            self.target_time = current_time + timedelta(seconds=self.countdown_seconds)
+            
+        # Tính thời gian còn lại
+        remaining = (self.target_time - current_time).total_seconds()
         
         if remaining <= 0:
             self.countdown_timer.stop()
             self.countdown_label.setText(_("qrCodePage.qrExpired"))
             
-            # When timer expires, trigger No Banking flow instead of returning to shopping
+            # When timer expires, chuyển sang chế độ No Banking
             print("Timer expired - proceeding with No Banking flow")
             QRCodePage.donation_amount = 0
             self.stop_transaction_check.set()
@@ -878,6 +1007,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             # Check if already in transition
             if not hasattr(self, 'transition_in_progress') or not self.transition_in_progress:
                 self.transition_in_progress = True
+                
+                # Thực hiện logic giống như nhấn nút No Banking
+                QRCodePage.transfer_content = "Heartfelt support donation"
                 
                 # Switch to success page with zero donation
                 self.switch_to_success.emit()
@@ -916,7 +1048,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             return
             
         self.processing_action = True
-        print("No Banking selected - proceeding with zero donation amount")
+        print("No Banking selected")
         
         # Set donation amount to 0
         QRCodePage.donation_amount = 0

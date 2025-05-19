@@ -12,7 +12,7 @@ class LanguageSelectionModal(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle(_("languageModal.title"))
-        self.setFixedSize(330, 320)  # Tăng chiều cao cho việc thêm nút đóng
+        self.setFixedSize(600, 620)  # Further increased size
         self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         
@@ -22,8 +22,8 @@ class LanguageSelectionModal(QDialog):
         # Tạo shadow effect
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setOffset(0, 0)
-        shadow.setBlurRadius(20)
-        shadow.setColor(QColor(0, 0, 0, 60))
+        shadow.setBlurRadius(40)  # Further increased blur radius
+        shadow.setColor(QColor(0, 0, 0, 70))
         
         # Container chính với background màu trắng
         self.container = QWidget(self)
@@ -31,7 +31,7 @@ class LanguageSelectionModal(QDialog):
         self.container.setStyleSheet("""
             #container {
                 background-color: white;
-                border-radius: 10px;
+                border-radius: 20px;
             }
         """)
         self.container.setGraphicsEffect(shadow)
@@ -43,8 +43,8 @@ class LanguageSelectionModal(QDialog):
         
         # Container layout
         self.container_layout = QVBoxLayout(self.container)
-        self.container_layout.setContentsMargins(20, 20, 20, 20)
-        self.container_layout.setSpacing(15)
+        self.container_layout.setContentsMargins(40, 40, 40, 40)  # Further increased padding
+        self.container_layout.setSpacing(30)  # Further increased spacing
         
         # Header container
         self.header_container = QWidget()
@@ -56,9 +56,9 @@ class LanguageSelectionModal(QDialog):
         
         # Sử dụng VietnameseFontHelper cho tiêu đề nếu ngôn ngữ hiện tại là tiếng Việt
         if get_current_language() == "vi":
-            VietnameseFontHelper.optimize_vietnamese_font(self.title, "Inter", 16, bold=True)
+            VietnameseFontHelper.optimize_vietnamese_font(self.title, "Inter", 30, bold=True)
         else:
-            self.title.setFont(QFont("Inter", 16, QFont.Bold))
+            self.title.setFont(QFont("Inter", 30, QFont.Bold))
             
         self.title.setStyleSheet("color: #3D6F4A;")
         self.title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -66,19 +66,19 @@ class LanguageSelectionModal(QDialog):
         
         # Close button container để thuận tiện cho việc căn chỉnh
         self.close_btn_container = QWidget()
-        self.close_btn_container.setFixedSize(35, 35)
+        self.close_btn_container.setFixedSize(60, 60)  # Further increased size
         close_btn_layout = QVBoxLayout(self.close_btn_container)
         close_btn_layout.setContentsMargins(0, 0, 0, 0)
         
         # Close button
         self.close_btn = QPushButton("×")
-        self.close_btn.setFixedSize(30, 30)
+        self.close_btn.setFixedSize(55, 55)  # Further increased size
         self.close_btn.setCursor(Qt.PointingHandCursor)
         self.close_btn.setStyleSheet("""
             QPushButton {
                 background-color: #F0F0F0;
-                border-radius: 15px;
-                font-size: 20px;
+                border-radius: 27px;
+                font-size: 36px;
                 font-weight: bold;
                 color: #505050;
                 text-align: center;
@@ -98,7 +98,7 @@ class LanguageSelectionModal(QDialog):
         self.divider = QFrame()
         self.divider.setFrameShape(QFrame.HLine)
         self.divider.setFrameShadow(QFrame.Sunken)
-        self.divider.setStyleSheet("background-color: #E0E0E0;")
+        self.divider.setStyleSheet("background-color: #E0E0E0; min-height: 2px;")
         self.container_layout.addWidget(self.divider)
         
         # Thêm các tùy chọn ngôn ngữ
@@ -110,10 +110,10 @@ class LanguageSelectionModal(QDialog):
         self.setStyleSheet("""
             QPushButton#languageButton {
                 background-color: #F8F8F8;
-                border-radius: 8px;
+                border-radius: 15px;
                 text-align: left;
-                padding: 5px 15px;
-                height: 45px;
+                padding: 12px 25px;
+                height: 90px;
                 border: none;
             }
             QPushButton#languageButton:hover {
@@ -128,15 +128,15 @@ class LanguageSelectionModal(QDialog):
         
         # Layout cho nút
         button_layout = QHBoxLayout(button)
-        button_layout.setContentsMargins(10, 5, 10, 5)
-        button_layout.setSpacing(15)
+        button_layout.setContentsMargins(20, 15, 20, 15)  # Further increased padding
+        button_layout.setSpacing(30)  # Further increased spacing
         
         # Cờ quốc gia
         flag_label = QLabel()
         flag_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
                                'assets', flag_filename)
         flag_pixmap = QPixmap(flag_path)
-        flag_label.setPixmap(flag_pixmap.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        flag_label.setPixmap(flag_pixmap.scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation))  # Further increased flag size
         button_layout.addWidget(flag_label)
         
         # Tên ngôn ngữ
@@ -144,9 +144,9 @@ class LanguageSelectionModal(QDialog):
         
         # Sử dụng VietnameseFontHelper cho tên ngôn ngữ trong các nút
         if language_name == "Tiếng Việt":
-            VietnameseFontHelper.optimize_vietnamese_font(name_label, "Inter", 14, bold=True)
+            VietnameseFontHelper.optimize_vietnamese_font(name_label, "Inter", 26, bold=True)  # Further increased font size
         else:
-            name_label.setFont(QFont("Inter", 14))
+            name_label.setFont(QFont("Inter", 26))  # Further increased font size
             
         button_layout.addWidget(name_label)
         button_layout.addStretch()
