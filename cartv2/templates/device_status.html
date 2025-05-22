@@ -857,6 +857,111 @@ const notifications = {
     }
 };
 
+// Function to get CSRF token - used by multiple functions
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Function to update device status (is_active or app_running)
+function updateDeviceStatus(deviceId, newStatus, statusField) {
+    if (!deviceId) {
+        notifications.error("Error", "Device ID is missing");
+        return;
+    }
+
+    // Get CSRF token
+    const csrfToken = getCookie('csrftoken');
+    
+    // Create payload based on which field we're updating
+    const payload = {};
+    payload[statusField] = newStatus;
+    
+    // Show processing message
+    notifications.info("Processing", `Updating device ${statusField === 'is_active' ? 'power' : 'app'} status...`);
+    
+    // Send PATCH request to update status
+    fetch(`/api/devices/${deviceId}/status/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Update was successful
+        notifications.success(
+            "Status Updated", 
+            `Device ${statusField === 'is_active' ? 'power' : 'app'} status has been ${newStatus ? 'enabled' : 'disabled'}`
+        );
+        
+        // Update the UI immediately instead of waiting for auto-refresh
+        const row = document.querySelector(`tr[data-device-id="${deviceId}"]`);
+        
+        if (row) {
+            if (statusField === 'is_active') {
+                // Update device power status
+                const statusCell = row.querySelector('td:nth-child(5) .status-indicator');
+                statusCell.className = `status-indicator ${newStatus ? 'active' : 'inactive'}`;
+                statusCell.innerHTML = `<i class="fas fa-circle me-1"></i>${newStatus ? 'Online' : 'Offline'}`;
+                
+                // Update toggle button data attribute and tooltip
+                const toggleBtn = row.querySelector('.toggle-device');
+                toggleBtn.dataset.currentStatus = String(newStatus);
+                toggleBtn.setAttribute('data-bs-original-title', newStatus ? 'Turn Off Device' : 'Turn On Device');
+                
+                // Refresh tooltip
+                const tooltip = bootstrap.Tooltip.getInstance(toggleBtn);
+                if (tooltip) {
+                    tooltip.dispose();
+                    new bootstrap.Tooltip(toggleBtn);
+                }
+            } else if (statusField === 'app_running') {
+                // Update app status
+                const appStatusCell = row.querySelector('td:nth-child(7) .status-indicator');
+                appStatusCell.className = `status-indicator ${newStatus ? 'running' : 'stopped'}`;
+                appStatusCell.innerHTML = `<i class="fas fa-circle me-1"></i>${newStatus ? 'Running' : 'Stopped'}`;
+                
+                // Update toggle button data attribute and tooltip
+                const toggleBtn = row.querySelector('.toggle-app');
+                toggleBtn.dataset.currentStatus = String(newStatus);
+                toggleBtn.setAttribute('data-bs-original-title', newStatus ? 'Stop App' : 'Start App');
+                
+                // Refresh tooltip
+                const tooltip = bootstrap.Tooltip.getInstance(toggleBtn);
+                if (tooltip) {
+                    tooltip.dispose();
+                    new bootstrap.Tooltip(toggleBtn);
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error updating device status:', error);
+        notifications.error(
+            "Update Failed", 
+            `Failed to update device ${statusField}. Please try again.`
+        );
+    });
+}
+
 // Auto-refresh configuration
 let autoRefreshEnabled = true;
 let refreshInterval = 5000; // 5 seconds
@@ -1084,23 +1189,7 @@ document.getElementById('verifyPassword').addEventListener('click', function() {
         }
     });
 
-    // Function to get CSRF token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-// Hàm thực hiện xóa thiết bị
+    // Hàm thực hiện xóa thiết bị
 function deleteDevice() {
     console.log("Bắt đầu hàm deleteDevice");
     
@@ -1582,14 +1671,9 @@ function formatDateTime(date) {
         return "N/A";
     }
 }
-
-// Existing functions for shopping monitor
-
-
 // Format currency for display
 function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN').format(amount);
 }
 </script>
 {% endblock %} 
-
