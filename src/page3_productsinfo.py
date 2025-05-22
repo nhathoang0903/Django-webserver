@@ -101,7 +101,6 @@ class ProductCard(QFrame):
         super().__init__()
         self.product = product
         self.cached_image = None  # Store cached image
-        self.cart_state = CartState()  # Add CartState instance
         self.cart_count_text = cart_count_text  # Store reference to cart_count_text
         self.setup_ui()
         self.load_image_async()
@@ -197,32 +196,179 @@ class ProductCard(QFrame):
         self.add_to_cart_btn.clicked.connect(self.add_to_cart)
         layout.addWidget(self.add_to_cart_btn)
         
+        # Check if product is already in cart and update button accordingly
+        self.update_button_state()
+        
+    def update_button_state(self):
+        """Kiểm tra sản phẩm đã có trong giỏ hàng chưa và cập nhật trạng thái button"""
+        try:
+            # Sử dụng CartManager thay vì CartState trực tiếp
+            cart_manager = CartManager()
+            
+            # Kiểm tra xem product có hợp lệ không
+            if not isinstance(self.product, dict) or 'name' not in self.product:
+                print(f"[Page3] Product is not valid dict or missing name: {type(self.product)}")
+                return
+                
+            product_name = self.product['name']
+            # Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+            is_in_cart = False
+            
+            # Lấy danh sách sản phẩm trong giỏ hàng
+            cart_items = cart_manager.get_cart_items()
+            
+            # Kiểm tra theo các cấu trúc khác nhau
+            for item in cart_items:
+                # Kiểm tra theo cấu trúc từ CartState
+                if isinstance(item, dict) and 'product' in item and isinstance(item['product'], dict) and 'name' in item['product']:
+                    if item['product']['name'] == product_name:
+                        is_in_cart = True
+                        break
+                # Kiểm tra theo cấu trúc từ shopping_process.json
+                elif isinstance(item, dict) and 'product_name' in item:
+                    if item['product_name'] == product_name:
+                        is_in_cart = True
+                        break
+                # Kiểm tra theo cấu trúc (product, quantity) từ CartState.cart_items
+                elif isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], dict) and 'name' in item[0]:
+                    if item[0]['name'] == product_name:
+                        is_in_cart = True
+                        break
+            
+            # Kiểm tra trực tiếp từ shopping_process.json
+            if not is_in_cart:
+                try:
+                    json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'shopping_process.json')
+                    if os.path.exists(json_path):
+                        with open(json_path, 'r') as f:
+                            json_data = json.load(f)
+                            for item in json_data.get('detected_products', []):
+                                if item.get('product_name') == product_name:
+                                    is_in_cart = True
+                                    break
+                except Exception as e:
+                    print(f"[Page3] Error reading shopping_process.json: {e}")
+                    
+            # Nếu sản phẩm đã có trong giỏ hàng, cập nhật giao diện button
+            if is_in_cart:
+                self.add_to_cart_btn.setText(_("productPage.added"))
+                self.add_to_cart_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #3D6F4A;
+                        color: #FFFF00;
+                        border: none;
+                        border-radius: 18px;
+                        padding: 8px 12px;
+                        margin: 5px 10px;
+                    }
+                    QPushButton:hover {
+                        background-color: #3D6F4A;
+                    }
+                    QPushButton:pressed {
+                        background-color: #3D6F4A;
+                    }
+                """)
+                print(f"[Page3] Product {product_name} is already in cart, updated button state")
+        except Exception as e:
+            print(f"[Page3] Error updating button state: {e}")
+    
     def add_to_cart(self):
         try:
-            # Add 1 item by default from product page
-            is_existing = self.cart_state.add_item(self.product, 1)
-            print(f"[Page3] Added product to cart: {self.product['name']}")
-            print(f"[Page3] Is existing item: {is_existing}")
-
-            # Update the cart count to reflect the total number of items in cart_items
-            cart_count = len(self.cart_state.cart_items)
-            print(f"[Page3] New cart count after adding: {cart_count}")
+            # Sử dụng CartManager để lấy danh sách sản phẩm trong giỏ hàng
+            cart_manager = CartManager()
             
-            # Cập nhật cart_count_text nếu đã được truyền vào
+            # Kiểm tra xem product có hợp lệ không
+            if not isinstance(self.product, dict) or 'name' not in self.product:
+                print(f"[Page3] Product is not valid dict or missing name: {type(self.product)}")
+                return
+                
+            product_name = self.product['name']
+            
+            # Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa (CHỈ kiểm tra theo tên)
+            is_existing = False
+            cart_items = cart_manager.get_cart_items()
+            
+            # Kiểm tra theo cấu trúc từ CartState
+            for item in cart_items:
+                if isinstance(item, dict) and 'product' in item and isinstance(item['product'], dict) and 'name' in item['product']:
+                    if item['product']['name'] == product_name:
+                        is_existing = True
+                        break
+                # Kiểm tra theo cấu trúc từ shopping_process.json
+                elif isinstance(item, dict) and 'product_name' in item:
+                    if item['product_name'] == product_name:
+                        is_existing = True
+                        break
+                # Kiểm tra theo cấu trúc (product, quantity) từ CartState.cart_items
+                elif isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], dict) and 'name' in item[0]:
+                    if item[0]['name'] == product_name:
+                        is_existing = True
+                        break
+                    
+            # Nếu sản phẩm đã có trong giỏ hàng, không thêm nữa và cập nhật UI
+            if is_existing:
+                print(f"[Page3] Product already in cart: {product_name}")
+                # Cập nhật giao diện button để thể hiện đã thêm vào giỏ hàng
+                self.add_to_cart_btn.setText(_("productPage.added"))
+                self.add_to_cart_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #3D6F4A;
+                        color: #FFFF00;
+                        border: none;
+                        border-radius: 18px;
+                        padding: 8px 12px;
+                        margin: 5px 10px;
+                    }
+                    QPushButton:hover {
+                        background-color: #3D6F4A;
+                    }
+                    QPushButton:pressed {
+                        background-color: #3D6F4A;
+                    }
+                """)
+                return
+                
+            # Thêm sản phẩm vào giỏ hàng (mặc định số lượng là 1)
+            cart_manager.add_item(self.product, 1)
+            print(f"[Page3] Added product to cart: {product_name}")
+            
+            # Cập nhật số lượng sản phẩm trong giỏ hàng
+            cart_count = cart_manager.get_cart_count()
+            print(f"[Page3] New cart count: {cart_count}")
+            
+            # Cập nhật cart_count_text nếu có
             if self.cart_count_text:
                 self.cart_count_text.setText(f"({cart_count})")
                 self.cart_count_text.show()
-                print(f"[Page3] Updated cart_count_text directly: ({cart_count})")
+                print(f"[Page3] Updated cart_count_text: ({cart_count})")
             
-            # Find ProductPage instance and update cart count
+            # Cập nhật giao diện button để thể hiện đã thêm vào giỏ hàng - NGAY LẬP TỨC
+            self.add_to_cart_btn.setText(_("productPage.added"))
+            self.add_to_cart_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #3D6F4A;
+                    color: #FFFF00;
+                    border: none;
+                    border-radius: 18px;
+                    padding: 8px 12px;
+                    margin: 5px 10px;
+                }
+                QPushButton:hover {
+                    background-color: #3D6F4A;
+                }
+                QPushButton:pressed {
+                    background-color: #3D6F4A;
+                }
+            """)
+            print(f"[Page3] Updated button state for {product_name} to ADDED")
+            
+            # Tìm ProductPage instance và cập nhật tất cả card
             for widget in QApplication.topLevelWidgets():
                 if isinstance(widget, ProductPage):
                     widget.update_cart_count()
+                    # Cập nhật tất cả card để phản ánh trạng thái mới - sử dụng phương thức cải tiến
+                    widget.force_update_all_button_states()
                     break
-            
-            # Show success message or animation if needed
-            self.add_to_cart_btn.setText(_("productPage.added"))
-            QTimer.singleShot(1000, lambda: self.add_to_cart_btn.setText(_("productPage.addToCart")))
             
         except Exception as e:
             print(f"[Page3] Error adding to cart: {e}")
@@ -363,11 +509,14 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             self.installEventFilter(self)  # Register event filter
             self._needs_init = False  
             self._fonts_loaded = False
-            self.cart_state = CartState()  # Initialize cart_state
+            
+            # Sử dụng CartManager để truy cập CartState
+            cart_manager = CartManager()
             print(f"[Page3] Initializing ProductPage")
-            print(f"[Page3] Initial cart count: {len(self.cart_state.cart_items)}")
-            print(f"[Page3] Initial cart items: {self.cart_state.cart_items}")
-            self.cart_state.register_change_callback(self.update_cart_count)  # Register callback
+            print(f"[Page3] Initial cart count: {cart_manager.get_cart_count()}")
+            print(f"[Page3] Initial cart items: {cart_manager.get_cart_items()}")
+            # Đăng ký callback với CartState thông qua CartManager
+            cart_manager.cart_state.register_change_callback(self.update_cart_count)
             
             # Check for new products before initializing UI
             self.check_for_new_products()
@@ -600,7 +749,8 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 print("[Page3] Stopped product update timer")
                 
             # Unregister callback
-            self.cart_state.unregister_change_callback(self.update_cart_count)
+            cart_manager = CartManager()
+            cart_manager.cart_state.unregister_change_callback(self.update_cart_count)
             
             # Chỉ xóa cache khi không được đánh dấu bảo vệ
             if not ProductPage._preserve_cache:
@@ -936,7 +1086,8 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         button_container.installEventFilter(HoverEventFilter(self))
 
         # Initialize cart count visibility based on current cart state
-        cart_count = len(self.cart_state.cart_items)
+        cart_manager = CartManager()
+        cart_count = cart_manager.get_cart_count()
         if cart_count > 0:
             self.cart_count_text.setText(f"({cart_count})")
             self.cart_count_text.show()
@@ -1152,13 +1303,14 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         except Exception as e:
             print(f"Error returning to welcome page: {e}")
 
-    def update_cart_count(self):
-        """Update the cart count display"""
+    def update_cart_count(self, data=None):
+        """Cập nhật hiển thị số lượng giỏ hàng"""
         try:
-            cart_count = CartManager().get_cart_count()
+            cart_manager = CartManager()
+            cart_count = cart_manager.get_cart_count()
             print(f"[Page3] Updating cart count: {cart_count}")
             
-            # Cập nhật cart_count_text trước tiên nếu có
+            # Cập nhật cart_count_text nếu có
             if hasattr(self, 'cart_count_text'):
                 if cart_count > 0:
                     self.cart_count_text.setText(f"({cart_count})")
@@ -1169,7 +1321,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                     self.cart_count_text.hide()
                     print("[Page3] Cart is empty, hiding count display")
             
-            # Tiếp tục cập nhật cart_btn nếu có
+            # Cập nhật cart_btn nếu có
             if hasattr(self, 'cart_btn'):
                 self.cart_btn.update_count(cart_count)
                 print(f"[Page3] Updated cart_btn counter")
@@ -1190,6 +1342,38 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Check if we're transitioning from page1
         coming_from_page1 = (hasattr(self, 'from_page') and self.from_page == "page1") or (hasattr(self, 'from_page1') and self.from_page1)
         print(f"[Page3] showEvent - coming_from_page1: {coming_from_page1}")
+        
+        # Reset cart state if coming from page1
+        if coming_from_page1:
+            print("[Page3] Coming from page1, clearing cart state")
+            cart_manager = CartManager()
+            cart_manager.clear_cart()
+            
+            # Reset button states for all product cards
+            if hasattr(self, '_cards_cache') and self._cards_cache:
+                print(f"[Page3] Resetting {len(self._cards_cache)} product cards")
+                for card in self._cards_cache:
+                    card.add_to_cart_btn.setText(_("productPage.addToCart"))
+                    card.add_to_cart_btn.setStyleSheet("""
+                        QPushButton {
+                            background-color: #507849;
+                            color: white;
+                            border: none;
+                            border-radius: 18px;
+                            padding: 8px 12px;
+                            margin: 5px 10px;
+                        }
+                        QPushButton:hover {
+                            background-color: #3D6F4A;
+                        }
+                        QPushButton:pressed {
+                            background-color: #2C513A;
+                        }
+                    """)
+        else:
+            # Nếu đến từ trang khác (không phải page1), cập nhật trạng thái các button
+            print("[Page3] Coming back from other page, updating button states")
+            self.force_update_all_button_states()
         
         # In thông tin debug về cache hiện tại
         self.debug_cache()
@@ -1239,7 +1423,8 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             self.container.update()
         
         # Cập nhật số lượng hàng trong giỏ
-        cart_count = CartManager().get_cart_count()
+        cart_manager = CartManager()
+        cart_count = cart_manager.get_cart_count()
         print(f"[Page3] Updating cart count: {cart_count}")
         
         # Kiểm tra sự tồn tại của cart_btn trước khi sử dụng
@@ -1255,6 +1440,10 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                     self.cart_count_text.setText("")
                     self.cart_count_text.hide()
             print(f"[Page3] Warning: 'cart_btn' attribute not found, using fallback method")
+            
+        # Luôn cập nhật lại trạng thái của tất cả buttons, bất kể đến từ đâu
+        # Điều này đảm bảo các thay đổi từ page4 được cập nhật chính xác
+        self.force_update_all_button_states()
         
         # Reset vị trí cuộn nếu đến từ page1
         if coming_from_page1:
@@ -1353,15 +1542,117 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         except Exception as e:
             print(f"[Page3] Error resetting scroll position: {e}")
             
-    def update_cart_count(self):
-        """Update the cart count display"""
+    def update_all_cards(self):
+        """Cập nhật trạng thái của tất cả các thẻ sản phẩm"""
         try:
-            cart_count = CartManager().get_cart_count()
-            print(f"[Page3] Updating cart count: {cart_count}")
-            if hasattr(self, 'cart_btn'):
-                self.cart_btn.update_count(cart_count)
+            # Chỉ thực hiện nếu có cards trong cache
+            if ProductPage._cards_cache:
+                print(f"[Page3] Updating all product cards, total: {len(ProductPage._cards_cache)}")
+                for card in ProductPage._cards_cache:
+                    try:
+                        if hasattr(card, 'update_button_state'):
+                            card.update_button_state()
+                    except Exception as e:
+                        print(f"[Page3] Error updating card: {e}")
         except Exception as e:
-            print(f"[Page3] Error updating cart count: {e}")
+            print(f"[Page3] Error updating all cards: {e}")
+
+    def force_update_all_button_states(self):
+        """Bắt buộc cập nhật trạng thái của tất cả các button dựa trên giỏ hàng hiện tại"""
+        try:
+            cart_manager = CartManager()
+            print(f"[Page3] Forcing update all button states. Cart has {len(cart_manager.get_cart_items())} items")
+            
+            # Lấy danh sách sản phẩm trong giỏ
+            cart_items = cart_manager.get_cart_items()
+            
+            # Tạo set các product_name có trong giỏ hàng để kiểm tra nhanh hơn
+            product_names_in_cart = set()
+            
+            for item in cart_items:
+                # Kiểm tra theo cấu trúc từ CartState
+                if isinstance(item, dict) and 'product' in item and isinstance(item['product'], dict) and 'name' in item['product']:
+                    product_names_in_cart.add(item['product']['name'])
+                # Kiểm tra theo cấu trúc từ shopping_process.json
+                elif isinstance(item, dict) and 'product_name' in item:
+                    product_names_in_cart.add(item['product_name'])
+                # Kiểm tra theo cấu trúc (product, quantity) từ CartState.cart_items
+                elif isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], dict) and 'name' in item[0]:
+                    product_names_in_cart.add(item[0]['name'])
+            
+            print(f"[Page3] Product names in cart: {product_names_in_cart}")
+            
+            # Đọc trực tiếp từ shopping_process.json để đảm bảo đồng bộ
+            try:
+                json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'shopping_process.json')
+                if os.path.exists(json_path):
+                    with open(json_path, 'r') as f:
+                        json_data = json.load(f)
+                        # Thêm tên sản phẩm từ file JSON
+                        for product in json_data.get('detected_products', []):
+                            if 'product_name' in product:
+                                product_names_in_cart.add(product['product_name'])
+            except Exception as e:
+                print(f"[Page3] Error reading shopping_process.json: {e}")
+            
+            # Cập nhật trạng thái của tất cả các card
+            if ProductPage._cards_cache:
+                print(f"[Page3] Updating {len(ProductPage._cards_cache)} product cards")
+                for card in ProductPage._cards_cache:
+                    try:
+                        # Kiểm tra card có hợp lệ không
+                        if not hasattr(card, 'product') or not isinstance(card.product, dict) or 'name' not in card.product:
+                            print(f"[Page3] Card has invalid product: {getattr(card, 'product', None)}")
+                            continue
+                            
+                        # Kiểm tra xem sản phẩm có trong giỏ hàng không (CHỈ theo tên)
+                        product_name = card.product['name']
+                        is_in_cart = product_name in product_names_in_cart
+                        
+                        if is_in_cart:
+                            # Cập nhật button sang trạng thái "đã thêm"
+                            card.add_to_cart_btn.setText(_("productPage.added"))
+                            card.add_to_cart_btn.setStyleSheet("""
+                                QPushButton {
+                                    background-color: #3D6F4A;
+                                    color: #FFFF00;
+                                    border: none;
+                                    border-radius: 18px;
+                                    padding: 8px 12px;
+                                    margin: 5px 10px;
+                                }
+                                QPushButton:hover {
+                                    background-color: #3D6F4A;
+                                }
+                                QPushButton:pressed {
+                                    background-color: #3D6F4A;
+                                }
+                            """)
+                            print(f"[Page3] Set {product_name} button to ADDED state")
+                        else:
+                            # Cập nhật button sang trạng thái mặc định
+                            card.add_to_cart_btn.setText(_("productPage.addToCart"))
+                            card.add_to_cart_btn.setStyleSheet("""
+                                QPushButton {
+                                    background-color: #507849;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 18px;
+                                    padding: 8px 12px;
+                                    margin: 5px 10px;
+                                }
+                                QPushButton:hover {
+                                    background-color: #3D6F4A;
+                                }
+                                QPushButton:pressed {
+                                    background-color: #2C513A;
+                                }
+                            """)
+                            print(f"[Page3] Set {product_name} button to ADD state")
+                    except Exception as e:
+                        print(f"[Page3] Error updating card button state: {e}")
+        except Exception as e:
+            print(f"[Page3] Error in force_update_all_button_states: {e}")
 
 class ProductCardDialog(QDialog):
     def __init__(self, product, image, parent=None):

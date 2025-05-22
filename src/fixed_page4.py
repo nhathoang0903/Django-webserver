@@ -13,6 +13,6 @@ def fixed_delayed_gc():
 def fixed_item_widget_creation(product, quantity, product_id):
     """Sửa lỗi thụt lề khi tạo item_widget"""
     item_widget = CartItemWidget(product, quantity)
-    self._cart_widgets_cache[product_id] = item_widget
+    # self._cart_widgets_cache[product_id] = item_widget
     
     return item_widget 

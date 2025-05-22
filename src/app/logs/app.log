@@ -1,41 +1,34 @@
-2025-05-21 23:54:06,887 - Starting Cartsy Application
-2025-05-21 23:54:06,890 - Set default language to Vietnamese
-2025-05-21 23:54:07,539 - Main window displayed
-2025-05-21 23:55:20,142 - Received signal 15, shutting down...
-2025-05-21 23:55:20,147 - Application shutting down, cleaning up cart session...
-2025-05-21 23:55:21,582 - Successfully ended cart session
-2025-05-21 23:55:21,584 - Successfully cleared phone number
-2025-05-21 23:55:21,586 - Successfully cleared cart state
-2025-05-21 23:55:21,589 - Restoring system state
-2025-05-21 23:55:24,643 - Starting Cartsy Application
-2025-05-21 23:55:24,646 - Set default language to Vietnamese
-2025-05-21 23:55:25,281 - Main window displayed
-2025-05-22 00:07:33,212 - Received signal 15, shutting down...
-2025-05-22 00:07:33,801 - Application shutting down, cleaning up cart session...
-2025-05-22 00:07:34,882 - Received signal 15, shutting down...
-2025-05-22 00:07:34,972 - Failed to end cart session: 400, {"error":"No active session found"}
-2025-05-22 00:07:34,973 - Successfully cleared phone number
-2025-05-22 00:07:34,975 - Successfully cleared cart state
-2025-05-22 00:07:34,975 - Restoring system state
-2025-05-22 00:07:37,904 - Starting Cartsy Application
-2025-05-22 00:07:37,908 - Set default language to Vietnamese
-2025-05-22 00:07:38,529 - Main window displayed
-2025-05-22 00:09:03,038 - Starting Cartsy Application
-2025-05-22 00:09:03,041 - Set default language to Vietnamese
-2025-05-22 00:09:03,674 - Main window displayed
-2025-05-22 00:10:04,750 - Received signal 2, shutting down...
-2025-05-22 00:10:04,751 - Received signal 15, shutting down...
-2025-05-22 00:10:04,786 - Application shutting down, cleaning up cart session...
-2025-05-22 00:10:04,890 - Failed to end cart session: 400, {"error":"No active session found"}
-2025-05-22 00:10:04,893 - Successfully cleared phone number
-2025-05-22 00:10:04,896 - Successfully cleared cart state
-2025-05-22 00:10:04,897 - Restoring system state
-2025-05-22 14:02:28,731 - Starting Cartsy Application
-2025-05-22 14:02:28,742 - Set default language to Vietnamese
-2025-05-22 14:02:29,613 - Main window displayed
-2025-05-22 17:49:31,043 - Starting Cartsy Application
-2025-05-22 17:49:31,047 - Set default language to Vietnamese
-2025-05-22 17:49:31,673 - Main window displayed
-2025-05-22 17:56:06,212 - Starting Cartsy Application
-2025-05-22 17:56:06,216 - Set default language to Vietnamese
-2025-05-22 17:56:06,842 - Main window displayed
+2025-05-22 18:32:44,569 - Main window displayed
+2025-05-22 18:39:25,925 - Received signal 2, shutting down...
+2025-05-22 18:39:25,927 - Application shutting down, cleaning up cart session...
+2025-05-22 18:39:26,034 - Failed to end cart session: 400, {"error":"No active session found"}
+2025-05-22 18:39:26,036 - Successfully cleared phone number
+2025-05-22 18:39:26,037 - Successfully cleared cart state
+2025-05-22 18:39:26,037 - Restoring system state
+2025-05-22 18:39:33,487 - Starting Cartsy Application
+2025-05-22 18:39:33,491 - Set default language to Vietnamese
+2025-05-22 18:39:34,148 - Main window displayed
+2025-05-22 18:43:10,907 - Received signal 2, shutting down...
+2025-05-22 18:43:10,944 - Application shutting down, cleaning up cart session...
+2025-05-22 18:43:10,996 - Failed to end cart session: 400, {"error":"No active session found"}
+2025-05-22 18:43:11,000 - Successfully cleared phone number
+2025-05-22 18:43:11,004 - Successfully cleared cart state
+2025-05-22 18:43:11,006 - Restoring system state
+2025-05-22 18:43:15,552 - Starting Cartsy Application
+2025-05-22 18:43:15,558 - Set default language to Vietnamese
+2025-05-22 18:43:16,250 - Main window displayed
+2025-05-22 18:47:41,602 - Received signal 2, shutting down...
+2025-05-22 18:47:41,603 - Application shutting down, cleaning up cart session...
+2025-05-22 18:47:41,673 - Failed to end cart session: 400, {"error":"No active session found"}
+2025-05-22 18:47:41,675 - Successfully cleared phone number
+2025-05-22 18:47:41,683 - Successfully cleared cart state
+2025-05-22 18:47:41,683 - Restoring system state
+2025-05-22 18:47:53,010 - Starting Cartsy Application
+2025-05-22 18:47:53,014 - Set default language to Vietnamese
+2025-05-22 18:47:53,671 - Main window displayed
+2025-05-22 18:52:11,610 - Received signal 2, shutting down...
+2025-05-22 18:52:11,613 - Application shutting down, cleaning up cart session...
+2025-05-22 18:52:11,650 - Failed to end cart session: 400, {"error":"No active session found"}
+2025-05-22 18:52:11,652 - Successfully cleared phone number
+2025-05-22 18:52:11,654 - Successfully cleared cart state
+2025-05-22 18:52:11,655 - Restoring system state
