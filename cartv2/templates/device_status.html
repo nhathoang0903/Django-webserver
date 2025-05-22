@@ -3,18 +3,57 @@
 {% block content %}
 <div class="container-fluid px-4 mx-auto overflow-hidden" style="max-width: 1800px;">
     <div class="content-wrapper">
+        <!-- Notification Container -->
+        <div id="notification-container"></div>
         <div class="container mt-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="text-primary fw-bold"><i class="fas fa-server me-2"></i>Device Status Management</h2>
                 <div>
+                    <button id="addNewDevice" class="btn btn-success me-2">
+                        <i class="fas fa-plus-circle me-1"></i> Add New Device
+                    </button>
                     <button id="refreshData" class="btn btn-outline-primary">
                         <i class="fas fa-sync-alt me-1"></i> Refresh
+                    </button>
+                    <button id="showDebug" class="btn btn-outline-warning ms-2">
+                        <i class="fas fa-bug me-1"></i> Debug
                     </button>
                     <div class="form-check form-switch d-inline-block ms-3">
                         <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
                         <label class="form-check-label text-muted" for="autoRefreshToggle">Auto-refresh</label>
                     </div>
                     <small class="text-muted ms-2">Last updated: <span id="lastUpdated"></span></small>
+                </div>
+            </div>
+            
+            {# Debug section - Hidden by default #}
+            <div id="debugSection" class="card shadow-sm border-0 rounded-3 mb-4" style="display: none;">
+                <div class="card-header bg-warning py-3">
+                    <h5 class="mb-0 fw-bold text-dark">Debug Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Device IDs:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Device ID</th>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for device in devices %}
+                                <tr>
+                                    <td><code>{{ device.device_id }}</code></td>
+                                    <td><code>{{ device.device_id|stringformat:"r" }}</code></td>
+                                    <td>{{ device.device_name }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button id="toggleDebug" class="btn btn-sm btn-outline-secondary mt-2">Hide Debug Info</button>
                 </div>
             </div>
             
@@ -45,7 +84,7 @@
                             </thead>
                             <tbody id="deviceTableBody">
                                 {% for device in devices %}
-                                <tr data-device-id="{{ device.device_id }}">
+                                <tr data-device-id="{{ device.device_id|default:'' }}">
                                     <td><span class="fw-semibold">{{ device.device_id }}</span></td>
                                     <td>{{ device.device_name }}</td>
                                     <td><span class="badge bg-info text-white">{{ device.device_type }}</span></td>
@@ -92,12 +131,6 @@
                                                     title="Delete Device">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-info check-shopping" 
-                                                    data-device-id="{{ device.device_id }}"
-                                                    data-bs-toggle="tooltip"
-                                                    title="Check Shopping Monitor">
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -119,91 +152,34 @@
 </div>
 
 <!-- Modals with improved design -->
-<div class="modal fade" id="deleteDeviceModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 bg-danger text-white">
-                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Device</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete device "<span id="deviceNameToDelete"></span>"?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Modal xác nhận xóa đã được kết hợp với modal nhập mật khẩu -->
 
 <div class="modal fade" id="passwordVerificationModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-lock me-2"></i>Verify Management Password</h5>
+            <div class="modal-header border-0 bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-lock me-2"></i>Confirm device deletion</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <p class="mb-3">Are you sure you want to erase the device "<span id="deviceNameInPasswordModal" class="fw-bold"></span>"?</p>
                 <div class="form-group">
-                    <label for="verificationPassword">Enter Management Password:</label>
-                    <input type="password" class="form-control" id="verificationPassword">
+                    <label for="verificationPassword">Enter the administrator password to confirm:</label>
+                    <input type="password" class="form-control" id="verificationPassword" autocomplete="off">
                 </div>
-                <div id="passwordError" class="alert alert-danger d-none">
-                    Invalid password!
+                <div id="passwordError" class="alert alert-danger d-none mt-2">
+                    Invalid password! Please try again.
                 </div>
             </div>
-            <div class="modal-footer">
+                          <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="verifyPassword">Verify</button>
+                <button type="button" class="btn btn-danger" id="verifyPassword">Delete Device</button>
             </div>
         </div>
     </div>
 </div>
 
-<!--shopping monitor -->
-<div class="modal fade" id="shoppingMonitorModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 bg-info text-white">
-                <h5 class="modal-title"><i class="fas fa-shopping-cart me-2"></i>Shopping Monitor</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="d-flex align-items-center">
-                        <h6 class="mb-0 me-4">Device: <span id="monitorDeviceName"></span></h6>
-                        <h6 class="mb-0">Customer: <span id="monitorCustomerName" class="text-primary"></span></h6>
-                    </div>
-                    <button id="refreshMonitor" class="btn btn-sm btn-outline-info">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-                <div id="shoppingData">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Price (VNĐ)</th>
-                                    <th>Total (VNĐ)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productList"></tbody>
-                            <tfoot>
-                                <tr style="color: #dc3545;">
-                                    <td colspan="3" class="text-end fw-bold">Total Bill:</td>
-                                    <td id="totalBill" class="fw-bold"></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Add error modal -->
 <div class="modal fade" id="errorModal" tabindex="-1">
@@ -223,7 +199,216 @@
     </div>
 </div>
 
+<!-- Add New Device Modal -->
+<div class="modal fade" id="addDeviceModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Add New Device</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDeviceForm">
+                    <div class="mb-3">
+                        <label for="newDeviceId" class="form-label">Device ID</label>
+                        <input type="text" class="form-control" id="newDeviceId" placeholder="raspi_cart_001" required>
+                        <div class="form-text">Example: raspi_cart_001, scanner_checkout_002, display_003</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newDeviceName" class="form-label">Device Name</label>
+                        <input type="text" class="form-control" id="newDeviceName" placeholder="Smart Cart Display 1" required>
+                        <div class="form-text">Example: Smart Cart Display 1, Scanner Checkout 2</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newDeviceType" class="form-label">Device Type</label>
+                        <input type="text" class="form-control" id="newDeviceType" placeholder="raspberry_pi" list="deviceTypeList" required>
+                        <datalist id="deviceTypeList">
+                            <option value="raspberry_pi">Raspberry Pi</option>
+                            <option value="cart">Cart</option>
+                            <option value="scanner">Scanner</option>
+                            <option value="display">Display</option>
+                            <option value="checkout">Checkout</option>
+                        </datalist>
+                        <div class="form-text">Example: raspberry_pi, cart, scanner, display, checkout</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Example:</strong><br>
+                                DEVICE_ID = "raspi_cart_001"<br>
+                                DEVICE_NAME = "Smart Cart Display 1"<br>
+                                DEVICE_TYPE = "raspberry_pi"
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary" id="fillExampleData">Enter Example</button>
+                        </div>
+                    </div>
+                    <div id="deviceAddError" class="alert alert-danger d-none">
+                        Error message will appear here
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="submitNewDevice">Add Device</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
+/* Custom Toast Notification System */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    width: 350px;
+}
+
+.custom-toast {
+    background-color: #fff;
+    color: #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: flex-start;
+    overflow: hidden;
+    animation: slideIn 0.3s ease forwards;
+    max-width: 100%;
+    position: relative;
+    border-left: 5px solid #007bff;
+}
+
+.custom-toast.success {
+    border-left-color: #28a745;
+}
+
+.custom-toast.error {
+    border-left-color: #dc3545;
+}
+
+.custom-toast.warning {
+    border-left-color: #ffc107;
+}
+
+.custom-toast.info {
+    border-left-color: #17a2b8;
+}
+
+.custom-toast .toast-icon {
+    margin-right: 15px;
+    font-size: 24px;
+}
+
+.custom-toast .toast-icon.success {
+    color: #28a745;
+}
+
+.custom-toast .toast-icon.error {
+    color: #dc3545;
+}
+
+.custom-toast .toast-icon.warning {
+    color: #ffc107;
+}
+
+.custom-toast .toast-icon.info {
+    color: #17a2b8;
+}
+
+.custom-toast .toast-content {
+    flex: 1;
+}
+
+.custom-toast .toast-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.custom-toast .toast-message {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.custom-toast .toast-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.custom-toast .toast-close:hover {
+    color: #333;
+}
+
+.custom-toast .toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.custom-toast .toast-progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    width: 100%;
+    animation: progress 5s linear forwards;
+}
+
+.custom-toast.success .toast-progress-bar {
+    background-color: #28a745;
+}
+
+.custom-toast.error .toast-progress-bar {
+    background-color: #dc3545;
+}
+
+.custom-toast.warning .toast-progress-bar {
+    background-color: #ffc107;
+}
+
+.custom-toast.info .toast-progress-bar {
+    background-color: #17a2b8;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+@keyframes progress {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
 .status-indicator {
     padding: 0.25rem 0.75rem;
     border-radius: 50rem;
@@ -583,6 +768,95 @@ body {
 </style>
 
 <script>
+// Custom notification system
+const notifications = {
+    show: function(type, title, message, duration = 5000) {
+        const container = document.getElementById('notification-container');
+        
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `custom-toast ${type}`;
+        
+        // Set icon based on type
+        let iconClass;
+        switch(type) {
+            case 'success':
+                iconClass = 'fas fa-check-circle';
+                break;
+            case 'error':
+                iconClass = 'fas fa-exclamation-circle';
+                break;
+            case 'warning':
+                iconClass = 'fas fa-exclamation-triangle';
+                break;
+            case 'info':
+            default:
+                iconClass = 'fas fa-info-circle';
+                break;
+        }
+        
+        // Create toast content
+        toast.innerHTML = `
+            <div class="toast-icon ${type}">
+                <i class="${iconClass}"></i>
+            </div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <div class="toast-close">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="toast-progress">
+                <div class="toast-progress-bar"></div>
+            </div>
+        `;
+        
+        // Add to container
+        container.appendChild(toast);
+        
+        // Setup close button
+        const closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', () => {
+            this.dismiss(toast);
+        });
+        
+        // Auto dismiss after duration
+        setTimeout(() => {
+            this.dismiss(toast);
+        }, duration);
+        
+        return toast;
+    },
+    
+    dismiss: function(toast) {
+        toast.style.animation = 'slideOut 0.3s ease forwards';
+        
+        // Remove from DOM after animation completes
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    },
+    
+    success: function(title, message, duration) {
+        return this.show('success', title, message, duration);
+    },
+    
+    error: function(title, message, duration) {
+        return this.show('error', title, message, duration);
+    },
+    
+    warning: function(title, message, duration) {
+        return this.show('warning', title, message, duration);
+    },
+    
+    info: function(title, message, duration) {
+        return this.show('info', title, message, duration);
+    }
+};
+
 // Auto-refresh configuration
 let autoRefreshEnabled = true;
 let refreshInterval = 5000; // 5 seconds
@@ -590,6 +864,37 @@ let refreshTimer = null;
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Show welcome notification
+    setTimeout(() => {
+        notifications.info("Device Management", "Welcome to the Device Status Management panel");
+    }, 500);
+    // Debug section toggle buttons
+    const showDebugBtn = document.getElementById('showDebug');
+    const toggleDebugBtn = document.getElementById('toggleDebug');
+    
+    if (showDebugBtn) {
+        showDebugBtn.addEventListener('click', function() {
+            const debugSection = document.getElementById('debugSection');
+            if (debugSection) {
+                debugSection.style.display = 'block';
+                this.style.display = 'none';
+            }
+        });
+    }
+    
+    if (toggleDebugBtn) {
+        toggleDebugBtn.addEventListener('click', function() {
+            const debugSection = document.getElementById('debugSection');
+            const showDebugBtn = document.getElementById('showDebug');
+            if (debugSection) {
+                debugSection.style.display = 'none';
+                if (showDebugBtn) {
+                    showDebugBtn.style.display = 'inline-block';
+                }
+            }
+        });
+    }
+    
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -646,129 +951,348 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Store device ID for deletion
-    let deviceIdToDelete = null;
+    // Biến toàn cục để lưu thông tin thiết bị cần xóa
+    let pendingDeleteDeviceId = null;
+    let pendingDeleteDeviceName = null;
+    let passwordVerified = false;
 
     // Delete device handler
     document.querySelectorAll('.delete-device').forEach(button => {
-        button.addEventListener('click', function() {
-            deviceIdToDelete = this.dataset.deviceId;
-            const deviceName = this.dataset.deviceName;
-            document.getElementById('deviceNameToDelete').textContent = deviceName;
+        button.addEventListener('click', function(e) {
+            // Ngăn hành vi mặc định
+            e.preventDefault();
+            
+            // Lấy row chứa thiết bị
+            const row = this.closest('tr');
+            
+            // Ưu tiên lấy device_id từ row trước
+            const deviceIdFromRow = row.getAttribute('data-device-id');
+            
+            // Sau đó thử lấy từ span chứa ID thiết bị
+            const deviceIdSpan = row.querySelector('td:first-child span.fw-semibold');
+            const deviceIdFromSpan = deviceIdSpan ? deviceIdSpan.textContent.trim() : '';
+            
+            // Cuối cùng, thử lấy từ button
+            const deviceIdFromButton = this.getAttribute('data-device-id');
+            
+            // Thử lấy tên thiết bị từ row
+            const deviceNameCell = row.querySelector('td:nth-child(2)');
+            const deviceNameFromCell = deviceNameCell ? deviceNameCell.textContent.trim() : '';
+            
+            // Lấy tên thiết bị từ thuộc tính của button
+            const deviceNameFromButton = this.getAttribute('data-device-name');
+            
+            // Chọn nguồn ID và tên thiết bị tốt nhất
+            const deviceId = deviceIdFromSpan || deviceIdFromRow || deviceIdFromButton;
+            const deviceName = deviceNameFromCell || deviceNameFromButton;
+            
+            // Log tất cả thông tin để debug
+            console.log("Thông tin chi tiết thiết bị:", {
+                "ID từ row": deviceIdFromRow,
+                "ID từ span": deviceIdFromSpan,
+                "ID từ button": deviceIdFromButton,
+                "ID đã chọn": deviceId,
+                "Tên từ cell": deviceNameFromCell,
+                "Tên từ button": deviceNameFromButton,
+                "Tên đã chọn": deviceName,
+                "HTML của row": row.outerHTML
+            });
+            
+            // Kiểm tra device_id
+            if (!deviceId || deviceId === 'string' || deviceId === 'undefined' || deviceId === 'None') {
+                console.error("Invalid device ID:", deviceId);
+                notifications.error("Invalid Device ID", "The device ID is invalid. Please refresh the page and try again.");
+                return;
+            }
+            
+            // Sử dụng ID thiết bị đã xác định
+            const finalDeviceId = deviceId;
+            
+            // Lưu thông tin thiết bị cần xóa vào biến toàn cục
+            pendingDeleteDeviceId = finalDeviceId;
+            pendingDeleteDeviceName = deviceName;
+            
+            console.log("Đã lưu thông tin thiết bị cần xóa:", {
+                "ID": pendingDeleteDeviceId,
+                "Tên": pendingDeleteDeviceName
+            });
+            
+            // Hiển thị tên thiết bị trong modal xác nhận mật khẩu
+            document.getElementById('deviceNameInPasswordModal').textContent = deviceName;
+            
+            // Mở modal xác nhận mật khẩu
             $('#passwordVerificationModal').modal('show');
         });
     });
 
-    // Handle delete confirmation
-    document.getElementById('confirmDelete').addEventListener('click', function() {
-        if (deviceIdToDelete && passwordVerified) {
-            fetch(`/api/devices/${deviceIdToDelete}/`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    $('#deleteDeviceModal').modal('hide');
-                    // Remove the row without page reload
-                    const row = document.querySelector(`tr[data-device-id="${deviceIdToDelete}"]`);
-                    if (row) {
-                        row.style.opacity = 0;
-                        setTimeout(() => row.remove(), 300);
-                    }
-                } else {
-                    throw new Error('Failed to delete device');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to delete device');
-            });
+    // Handle verification button click
+document.getElementById('verifyPassword').addEventListener('click', function() {
+    console.log("Delete device button clicked");
+    const password = document.getElementById('verificationPassword').value;
+    console.log("Password check: Input length =", password.length, "characters");
+    
+    const correctPassword = '{{ settings.DEVICE_MANAGEMENT_PASSWORD }}';
+    console.log("Password to check length:", correctPassword.length, "characters");
+    
+    // Compare passwords
+    const isPasswordCorrect = (password === correctPassword);
+    console.log("Password check result:", isPasswordCorrect ? "Correct" : "Incorrect");
+    
+    if (isPasswordCorrect) {
+        console.log("Password verification successful");
+        passwordVerified = true;
+        notifications.success("Authentication Successful", "Password verified successfully.");
+        
+                 // Kiểm tra lại ID thiết bị trước khi xóa
+        if (!pendingDeleteDeviceId || pendingDeleteDeviceId === 'string' || 
+            pendingDeleteDeviceId === 'undefined' || pendingDeleteDeviceId === 'None') {
+            console.error("Invalid device ID:", pendingDeleteDeviceId);
+            $('#passwordVerificationModal').modal('hide');
+            notifications.error("Invalid Device ID", "The device ID is invalid. Please refresh the page and try again.");
+            return;
+        }
+        
+        // Ghi log thông tin thiết bị cần xóa
+        console.log("Thông tin thiết bị cần xóa:", {
+            ID: pendingDeleteDeviceId,
+            Tên: pendingDeleteDeviceName
+        });
+        
+        // Đóng modal xác nhận mật khẩu
+        $('#passwordVerificationModal').modal('hide');
+        
+        // Chờ một chút để modal đóng hoàn toàn trước khi gọi hàm xóa
+        setTimeout(function() {
+            console.log("Gọi hàm xóa thiết bị sau khi modal đóng");
+            deleteDevice();
+        }, 500);
+    } else {
+        console.log("Password verification failed");
+        document.getElementById('passwordError').classList.remove('d-none');
+        document.getElementById('passwordError').textContent = "Invalid password. Please try again.";
+    }
+    
+    // Prevent default form submission
+    return false;
+});
+
+    // Xử lý sự kiện nhấn Enter trong ô mật khẩu
+    document.getElementById('verificationPassword').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            document.getElementById('verifyPassword').click();
         }
     });
-
-    // Enhanced update function with smooth transitions
-    function updateDeviceStatus(deviceId, newStatus, field) {
-        const data = {};
-        data[field] = newStatus;
-
-        fetch(`/api/devices/${deviceId}/status/`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Update UI directly without page reload
-            updateDeviceUI(deviceId, data);
-            updateTimestamp();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to update device status');
-        });
-    }
 
     // Function to get CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
+}
 
-    // Password verification
-    let passwordVerified = false;
-
-    // Handle verification button click
-    document.getElementById('verifyPassword').addEventListener('click', function() {
-        const password = document.getElementById('verificationPassword').value;
-        
-        if (password === '{{ settings.DEVICE_MANAGEMENT_PASSWORD }}') {
-            passwordVerified = true;
-            $('#passwordVerificationModal').modal('hide');
-            
-            setTimeout(() => {
-                $('#deleteDeviceModal').modal('show');
-            }, 500);
-        } else {
-            document.getElementById('passwordError').classList.remove('d-none');
-        }
-    });
-
-    // Reset verification state when modal is closed
-    $('#passwordVerificationModal').on('hidden.bs.modal', function () {
-        document.getElementById('verificationPassword').value = '';
-        document.getElementById('passwordError').classList.add('d-none');
-        if (!passwordVerified) {
-            deviceIdToDelete = null;
-        }
+// Hàm thực hiện xóa thiết bị
+function deleteDevice() {
+    console.log("Bắt đầu hàm deleteDevice");
+    
+    if (!pendingDeleteDeviceId) {
+        console.error("No device ID to delete");
+        notifications.error("Error", "Device information not found");
+        return;
+    }
+    
+    if (!passwordVerified) {
+        console.error("Password not verified");
+        notifications.error("Authentication Required", "Please verify your password first");
+        $('#passwordVerificationModal').modal('show');
+        return;
+    }
+    
+    console.log("Deleting device:", {
+        "ID": pendingDeleteDeviceId,
+        "Name": pendingDeleteDeviceName
     });
     
-    // Reset everything when delete modal is closed
-    $('#deleteDeviceModal').on('hidden.bs.modal', function () {
-        deviceIdToDelete = null;
-        passwordVerified = false;
+    // Sử dụng Fetch API trực tiếp với DELETE method và CSRF token
+    console.log("Gửi DELETE request trực tiếp cho thiết bị ID:", pendingDeleteDeviceId);
+    
+    const csrfToken = getCookie('csrftoken');
+    console.log("CSRF Token được tìm thấy:", csrfToken ? "Có" : "Không");
+    
+    // URL xóa thiết bị
+    const deleteUrl = `/api/devices/${encodeURIComponent(pendingDeleteDeviceId)}/delete/`;
+    
+    // Show processing notification
+    notifications.info("Processing", "Deleting device, please wait...");
+    
+    // Create processing overlay
+    const processingOverlay = document.createElement('div');
+    processingOverlay.style.position = 'fixed';
+    processingOverlay.style.top = '0';
+    processingOverlay.style.left = '0';
+    processingOverlay.style.width = '100%';
+    processingOverlay.style.height = '100%';
+    processingOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+    processingOverlay.style.zIndex = '9998';
+    processingOverlay.style.display = 'flex';
+    processingOverlay.style.justifyContent = 'center';
+    processingOverlay.style.alignItems = 'center';
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner-border text-light';
+    spinner.style.width = '3rem';
+    spinner.style.height = '3rem';
+    spinner.setAttribute('role', 'status');
+    
+    processingOverlay.appendChild(spinner);
+    document.body.appendChild(processingOverlay);
+    
+    // Gửi request trực tiếp sử dụng fetch với method DELETE
+    fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log("Phản hồi từ server:", response.status, response.statusText);
+        
+                if (response.ok) {
+                // Hiển thị thông báo thành công
+                notifications.success("Device Deleted", `Device "${pendingDeleteDeviceName}" has been successfully deleted.`);
+                
+                // Làm mới trang sau 1 giây để người dùng nhìn thấy thông báo
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+            // Xử lý lỗi
+            return response.text().then(text => {
+                try {
+                    const errorData = JSON.parse(text);
+                    throw new Error(errorData.error || `Lỗi khi xóa thiết bị: ${response.statusText}`);
+                } catch (e) {
+                    throw new Error(`Lỗi khi xóa thiết bị: ${response.statusText}`);
+                }
+            });
+        }
+    })
+            .catch(error => {
+            console.error("Error sending DELETE request:", error);
+            notifications.error("Deletion Failed", error.message || "Unable to delete the device. Please try again later.");
+        })
+    .finally(() => {
+        // Remove processing overlay
+        document.body.removeChild(processingOverlay);
     });
+}
 
-    // Handle shopping monitor check
-    document.querySelectorAll('.check-shopping').forEach(button => {
-        button.addEventListener('click', function() {
-            const deviceId = this.dataset.deviceId;
-            const deviceName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
-            checkShoppingMonitor(deviceId, deviceName);
+// Reset verification state when modal is closed
+$('#passwordVerificationModal').on('hidden.bs.modal', function () {
+    document.getElementById('verificationPassword').value = '';
+    document.getElementById('passwordError').classList.add('d-none');
+    
+    // Chỉ reset trạng thái nếu chưa xác minh thành công
+    if (!passwordVerified) {
+        pendingDeleteDeviceId = null;
+        pendingDeleteDeviceName = null;
+    }
+});
+
+    // Add new device button handler
+    document.getElementById('addNewDevice').addEventListener('click', function() {
+        // Hiển thị modal thêm thiết bị mới
+        $('#addDeviceModal').modal('show');
+    });
+    
+    // Fill example data handler
+    document.getElementById('fillExampleData').addEventListener('click', function() {
+        // Tạo ID thiết bị với thời gian để đảm bảo không trùng lặp
+        const timestamp = new Date().getTime().toString().slice(-6);
+        document.getElementById('newDeviceId').value = `raspi_cart_${timestamp}`;
+        document.getElementById('newDeviceName').value = "Smart Cart Display 1";
+        document.getElementById('newDeviceType').value = "raspberry_pi";
+    });
+    
+    // Handle form submission for new device
+    document.getElementById('submitNewDevice').addEventListener('click', function() {
+        // Lấy giá trị từ form
+        const deviceId = document.getElementById('newDeviceId').value.trim();
+        const deviceName = document.getElementById('newDeviceName').value.trim();
+        const deviceType = document.getElementById('newDeviceType').value.trim();
+        const errorElement = document.getElementById('deviceAddError');
+        
+        // Validate input
+        if (!deviceId || !deviceName || !deviceType) {
+            errorElement.textContent = "Please fill in all device information";
+            errorElement.classList.remove('d-none');
+            return;
+        }
+        
+        // Ẩn thông báo lỗi nếu có
+        errorElement.classList.add('d-none');
+        
+        // Tạo thiết bị mới thông qua API
+        const csrfToken = getCookie('csrftoken');
+        
+        // Thay đổi nút submit để hiển thị trạng thái đang xử lý
+        const submitButton = document.getElementById('submitNewDevice');
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+        
+        fetch('/api/devices/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                device_id: deviceId,
+                device_name: deviceName,
+                device_type: deviceType
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Đóng modal
+                $('#addDeviceModal').modal('hide');
+                
+                // Reset form
+                document.getElementById('addDeviceForm').reset();
+                
+                // Hiển thị thông báo thành công
+                notifications.success("Device Added", "New device has been successfully added!");
+                
+                // Làm mới trang sau 1 giây để hiển thị thiết bị mới
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.detail || data.error || "Không thể thêm thiết bị mới");
+                });
+            }
+        })
+        .catch(error => {
+            // Hiển thị lỗi trong form
+            errorElement.textContent = "Lỗi: " + error.message;
+            errorElement.classList.remove('d-none');
+            
+            // Khôi phục nút submit
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
         });
     });
 });
@@ -1060,99 +1584,7 @@ function formatDateTime(date) {
 }
 
 // Existing functions for shopping monitor
-function checkShoppingMonitor(deviceId, deviceName) {
-    // Check cart status first before showing any modal
-    fetch(`/api/shopping/monitor/?device_id=${deviceId}`)
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 400) {
-                    // Show only cart status modal for unavailable cart
-                    document.getElementById('errorMessage').textContent = 'This cart is currently not in use.';
-                    $('#errorModal').modal('show');
-                    throw new Error('Cart is not in use');
-                }
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Only show shopping monitor and fetch data if cart is available
-            document.getElementById('monitorDeviceName').textContent = deviceName;
-            displayShoppingData(data);
-            $('#shoppingMonitorModal').modal('show');
-            
-            // Setup refresh button
-            document.getElementById('refreshMonitor').onclick = () => fetchShoppingData(deviceId);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Don't show shopping monitor for errors
-        });
-}
 
-function fetchShoppingData(deviceId) {
-    fetch(`/api/shopping/monitor/?device_id=${deviceId}`) 
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 400) {
-                    $('#shoppingMonitorModal').modal('hide');
-                    document.getElementById('errorMessage').textContent = 'This cart is currently not in use.';
-                    $('#errorModal').modal('show');
-                    throw new Error('Cart is not in use');
-                }
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            displayShoppingData(data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            if (error.message !== 'Cart is not in use') {
-                $('#shoppingMonitorModal').modal('hide');
-            }
-        });
-}
-
-// Helper function to display shopping data
-function displayShoppingData(data) {
-    const productList = document.getElementById('productList');
-    const customerName = document.getElementById('monitorCustomerName');
-    const totalBillElement = document.getElementById('totalBill');
-    
-    productList.innerHTML = '';
-    customerName.textContent = data.customer_name || 'Guest';
-    
-    if (data.detected_products?.length > 0) {
-        data.detected_products.forEach(product => {
-            // Calculate unit price by dividing total by quantity
-            const unitPrice = product.quantity ? product.price / product.quantity : 0;
-            productList.innerHTML += `
-                <tr>
-                    <td>${product.product_name.replace(/_/g, ' ')}</td>
-                    <td>${product.quantity}</td>
-                    <td>${formatCurrency(unitPrice)} VNĐ</td>
-                    <td>${formatCurrency(product.price)} VNĐ</td>
-                </tr>
-            `;
-        });
-        
-        totalBillElement.textContent = data.total_bill !== undefined 
-            ? `${formatCurrency(data.total_bill)} VNĐ` 
-            : '0 VNĐ';
-    } else {
-        productList.innerHTML = '<tr><td colspan="4" class="text-center">No products detected</td></tr>';
-        totalBillElement.textContent = '0 VNĐ';
-    }
-}
-
-// Clear shopping modal data when closed
-$('#shoppingMonitorModal').on('hidden.bs.modal', function () {
-    document.getElementById('productList').innerHTML = '';
-    document.getElementById('monitorCustomerName').textContent = '';
-    document.getElementById('totalBill').textContent = '';
-});
 
 // Format currency for display
 function formatCurrency(amount) {

@@ -361,10 +361,10 @@
             </div>
         </div>
 
-        <!-- Bestsellers and Activity Row -->
-        <div class="row g-4 mb-4">
+        <!-- Best Sellers and Recent Bills Row -->
+        <div class="row g-4">
             <!-- Best Selling Products -->
-            <div class="col-lg-4">
+            <div class="col-lg-5">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-transparent py-3">
                         <h5 class="mb-0 fw-bold text-primary">Best Selling Products</h5>
@@ -390,96 +390,6 @@
                 </div>
             </div>
 
-            <!-- Customer Activity -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent py-3">
-                        <h5 class="mb-0 fw-bold text-primary">Customer Activity</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-4">
-                            <h6 class="text-muted mb-2">Peak Hours</h6>
-                            <div class="progress" style="height: 25px;">
-                                {% for hour in peak_hours %}
-                                <div class="progress-bar bg-{{ hour.color }}" 
-                                     role="progressbar" 
-                                     style="width: {{ hour.percentage }}%"
-                                     title="{{ hour.hour }}:00 - {{ hour.count }} visits">
-                                    {{ hour.hour }}h
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="row text-center">
-                            <div class="col-4">
-                                <h3 class="mb-1">{{ avg_bill_value|intcomma }}</h3>
-                                <small class="text-muted d-block">Avg. Bill (VND)</small>
-                            </div>
-                            <div class="col-4">
-                                <h3 class="mb-1">{{ repeat_customers }}</h3>
-                                <small class="text-muted d-block">Repeat Customers</small>
-                            </div>
-                            <div class="col-4">
-                                <h3 class="mb-1">{{ avg_items_per_bill }}</h3>
-                                <small class="text-muted d-block">Avg. Items/Bill</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Payment Methods -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent py-3">
-                        <h5 class="mb-0 fw-bold text-primary">Customer Demographics</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-4">
-                            <h6 class="text-muted mb-2">Customer Types</h6>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span>Registered</span>
-                                        <span>{{ registered_percentage }}%</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-success" style="width: {{ registered_percentage }}%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span>Guest</span>
-                                        <span>{{ guest_percentage }}%</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-info" style="width: {{ guest_percentage }}%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-4">
-                            <h6 class="text-muted mb-3">Customer Loyalty</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <h3 class="mb-1">{{ loyal_customers }}</h3>
-                                    <small class="text-muted d-block">Loyal Customers</small>
-                                </div>
-                                <div class="col-6">
-                                    <h3 class="mb-1">{{ customer_retention }}%</h3>
-                                    <small class="text-muted d-block">Retention Rate</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts and History Row -->
-        <div class="row g-4">
             <!-- Recent Bill History -->
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm h-100">
@@ -540,61 +450,6 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Customer Overview -->
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 fw-bold text-primary">Customer Overview</h5>
-                            <a href="{% url 'customer_list' %}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-users me-1"></i> View All
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-4">
-                            <!-- Recent Customers -->
-                            <div class="col-12">
-                                <h6 class="fw-bold mb-3">Recent Customers</h6>
-                                {% for customer in recent_customers %}
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="avatar-circle bg-soft-primary text-primary">
-                                        {{ customer.firstname|first }}{{ customer.surname|first }}
-                                    </div>
-                                    <div class="ms-3">
-                                        <h6 class="mb-1">{{ customer.fullname }}</h6>
-                                        <small class="text-muted">
-                                            {{ customer.created_at|date:"d M Y" }} • 
-                                            {{ customer.total_spent|intcomma }} VND
-                                        </small>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            
-                            <!-- Customer Stats -->
-                            <div class="col-12">
-                                <h6 class="fw-bold mb-3">Demographics</h6>
-                                <div class="d-flex justify-content-around text-center">
-                                    <div>
-                                        <h3 class="mb-1">{{ new_customers_today }}</h3>
-                                        <small class="text-muted">New Today</small>
-                                    </div>
-                                    <div>
-                                        <h3 class="mb-1">{{ new_customers_week }}</h3>
-                                        <small class="text-muted">This Week</small>
-                                    </div>
-                                    <div>
-                                        <h3 class="mb-1">{{ active_customers }}</h3>
-                                        <small class="text-muted">Active</small>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

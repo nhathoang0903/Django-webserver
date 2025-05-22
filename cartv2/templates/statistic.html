@@ -16,7 +16,7 @@
         <!-- Summary Cards Row -->
         <div class="row g-4 mb-4">
             <!-- Combined Revenue Card -->
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Peak Hour Card -->
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -58,7 +58,7 @@
                 </div>
             </div>
 
-            <!-- Top Customers Card -->
+            {% comment %} <!-- Top Customers Card -->
             <div class="col-md-3">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
@@ -73,10 +73,10 @@
                         <small class="text-muted" id="top-customer-spent"></small>
                     </div>
                 </div>
-            </div>
+            </div> {% endcomment %}
             
             <!-- Top Products Card -->
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -99,7 +99,7 @@
         <!-- Summary Row 2 -->
         <div class="row g-4 mb-4">
             <!-- Mini Stats Card: Total Products -->
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -115,7 +115,7 @@
             </div>
             
             <!-- Mini Stats Card: Orders Count -->
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -130,7 +130,7 @@
                 </div>
             </div>
             
-            <!-- Mini Stats Card: Customers Count -->
+            {% comment %} <!-- Mini Stats Card: Customers Count -->
             <div class="col-md-3">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
@@ -144,10 +144,10 @@
                         <h3 class="mb-0">{{ customers_count }}</h3>
                     </div>
                 </div>
-            </div>
+            </div> {% endcomment %}
             
             <!-- Mini Stats Card: Low Stock Products -->
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card stat-card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -274,7 +274,7 @@
             </div>
         </div>
 
-        <!-- Top Customers Row -->
+        {% comment %} <!-- Top Customers Row -->
         <div class="row g-4 mt-4">
             <!-- Top Customers Summary -->
             <div class="col-md-4">
@@ -303,7 +303,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> {% endcomment %}
 
         <!-- Comparison Chart Row -->
         <div class="row g-4 mt-4">
@@ -519,6 +519,112 @@
                     </div>
                     <div class="card-body">
                         <div id="most-rated-chart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Best Sellers and Recent Bills Row -->
+        <div class="row g-4 mt-4">
+            <!-- Best Selling Products -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0 fw-bold text-primary">
+                            <i class="fas fa-star text-warning me-2"></i>Best Selling Products
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for product in best_sellers %}
+                            <div class="list-group-item border-0 py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-medium">{{ product.name }}</span>
+                                        <small class="d-block text-muted">{{ product.category }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-success">{{ product.quantity }} sold</div>
+                                        <small class="text-muted">{{ product.revenue|floatformat:2 }} VNĐ</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="list-group-item border-0 py-4 text-center">
+                                <div class="text-muted">
+                                    <i class="fas fa-box fa-2x mb-2"></i>
+                                    <p class="mb-0">No sales data available</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bill History -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0 fw-bold text-primary">
+                                <i class="fas fa-receipt text-info me-2"></i>Recent Bills
+                            </h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshHistory()">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light sticky-top">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>ID</th>
+                                        <th>Time</th>
+                                        <th class="text-end">Amount</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for history in purchase_history %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ forloop.counter }}</td>
+                                        <td><span class="text-primary">{{ history.random_id }}</span></td>
+                                        <td>{{ history.timestamp|date:"H:i" }}</td>
+                                        <td class="text-end fw-bold">{{ history.total_amount|floatformat:2 }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-link p-0" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#details{{ forloop.counter }}">
+                                                View Details
+                                            </button>
+                                            <div class="collapse" id="details{{ forloop.counter }}">
+                                                <div class="mt-2">
+                                                    {% for product in history.product_details %}
+                                                    <div class="d-flex justify-content-between small text-muted">
+                                                        <span>{{ product.name }} x {{ product.quantity }}</span>
+                                                        <span>{{ product.price|floatformat:2 }}</span>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-receipt fa-2x mb-2"></i>
+                                                <p class="mb-0">No recent bills</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -920,7 +1026,7 @@
 .period-revenue-inner,
 .period-revenue-label,
 .period-revenue-value {
-    /* These will be replaced by the new overlay styles */
+
 }
 
 .period-name {
@@ -1068,6 +1174,7 @@
     const deviceStatusData = JSON.parse('{{ device_status_json|safe }}');
     const productRatingsData = JSON.parse('{{ product_ratings_json|safe }}');
     const mostRatedData = JSON.parse('{{ most_rated_json|safe }}');
+    // Customer data is no longer used in this page
 </script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
@@ -1537,105 +1644,7 @@
     revenueOptions.stroke = commonChartOptions.stroke;
     revenueOptions.grid = commonChartOptions.grid;
 
-    const topCustomersData = JSON.parse('{{ top_customers_json|safe }}');
-
-    // Debug logs for customer data
-    console.log('Raw top customers data:', topCustomersData);
-    console.log('Parsed spending values:', topCustomersData.map(c => ({
-        name: c.name,
-        raw_value: c.total_spent,
-        parsed_value: parseFloat(c.total_spent),
-        type: typeof c.total_spent
-    })));
-
-    const customerChartOptions = {
-        series: [{
-            name: 'Total Spent',
-            data: topCustomersData.map(c => {
-                console.log('Processing customer:', c.name, 'value:', c.total_spent);
-                return parseFloat(c.total_spent) || 0;
-            })
-        }],
-        chart: {
-            type: 'bar',
-            height: 400,
-            toolbar: {
-                show: false
-            }
-        },
-        plotOptions: {
-            bar: {
-                borderRadius: 4,
-                horizontal: true,
-                distributed: true,
-            }
-        },
-        dataLabels: {
-            enabled: false  // Tắt data labels mặc định
-        },
-        tooltip: {
-            enabled: true,
-            y: {
-                formatter: function(val) {
-                    val = parseFloat(val) || 0;
-                    return new Intl.NumberFormat('vi-VN', { 
-                        style: 'currency', 
-                        currency: 'VND',
-                        maximumFractionDigits: 0
-                    }).format(val);
-                }
-            }
-        },
-        yaxis: {
-            labels: {
-                show: false  // Ẩn labels trục Y
-            }
-        },
-        grid: {
-            show: false  // Ẩn grid
-        },
-        xaxis: {
-            categories: topCustomersData.map(c => c.name + (c.isGuest ? ' (Guest)' : '')),
-            labels: {
-                style: {
-                    fontSize: '12px'
-                }
-            },
-            position: 'bottom'
-        },
-        {% comment %} yaxis: {
-            labels: {
-                formatter: function(val) {
-                    console.log('Y-axis formatting value:', val);
-                    val = parseFloat(val) || 0;
-                    if (val === 0) return '0 VNĐ';
-                    return new Intl.NumberFormat('vi-VN', { 
-                        style: 'currency', 
-                        currency: 'VND',
-                        maximumFractionDigits: 0
-                    }).format(val);
-                },
-                show: true,
-                align: 'left'
-            }
-        }, {% endcomment %}
-        grid: {
-            xaxis: {
-                lines: {
-                    show: false
-                }
-            },
-            yaxis: {
-                lines: {
-                    show: true
-                }
-            }
-        }
-    };
-
-    const customerChart = new ApexCharts(document.querySelector("#customer-chart"), customerChartOptions);
-    console.log('Chart configuration:', customerChartOptions);
-    customerChart.render();
+    // Customer charts and related data have been removed
 
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize date pickers with default values
@@ -1664,43 +1673,21 @@
             updateChart(null, { start: startDate, end: endDate });
         });
         
+        // Initialize collapse elements for bill details
+        const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+        if (collapseElements.length > 0) {
+            collapseElements.forEach(function(el) {
+                new bootstrap.Collapse(el, {
+                    toggle: false
+                });
+            });
+        }
+        
         // Call updateChart with 'today' when the page loads
         updateChart('today');
     });
 
-    // Populate top customers list
-    const customersList = document.getElementById('top-customers-list');
-    topCustomersData.forEach((customer, index) => {
-        const badge = index < 3 ? 
-            `<span class="badge bg-${index === 0 ? 'warning' : index === 1 ? 'secondary' : 'bronze'} me-2">
-                <i class="fas fa-trophy"></i>
-            </span>` : '';
-        
-        customersList.innerHTML += `
-            <div class="list-group-item border-0 py-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        ${badge}
-                        <span class="fw-medium">${customer.name}</span>
-                    </div>
-                    <div class="text-end">
-                        <div class="fw-bold text-primary">${formatCurrency(customer.total_spent)}</div>
-                        <small class="text-muted">${customer.visit_count} visits</small>
-                    </div>
-                </div>
-                <div class="progress mt-2" style="height: 4px;">
-                    <div class="progress-bar" style="width: ${(customer.total_spent / topCustomersData[0].total_spent) * 100}%"></div>
-                </div>
-            </div>
-        `;
-    });
-
-    // Update top customer card
-    if (topCustomersData.length > 0) {
-        document.getElementById('top-customer-name').textContent = topCustomersData[0].name;
-        document.getElementById('top-customer-spent').textContent = 
-            `Total spent: ${formatCurrency(topCustomersData[0].total_spent)}`;
-    }
+    // Top customers section has been removed
 
     // Add bronze badge color
     document.head.insertAdjacentHTML('beforeend', `
@@ -1723,6 +1710,15 @@
             }
         </style>
     `);
+
+    // Function to refresh the recent bills section
+    function refreshHistory() {
+        const refreshBtn = document.querySelector('button[onclick="refreshHistory()"]');
+        if (refreshBtn) {
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+        }
+        location.reload();
+    }
 
     // Initialize comparison chart
     let comparisonChart;

@@ -16,6 +16,7 @@ from .views import (
     TemplateHTMLRenderer,
     DeviceConnectionView,
     DeviceStatusUpdateView,
+    DeviceDeleteView,
     device_password_view,
     logout_view,
     CustomerSignupView,
@@ -124,7 +125,8 @@ urlpatterns = [
     path('api/devices/', DeviceConnectionView.as_view(), name='device-connection'),
     path('api/devices/all-status/', AllDeviceStatusView.as_view(), name='all-device-status'),
     path('api/devices/<str:device_id>/status/', DeviceStatusUpdateView.as_view(), name='device-status'),
-    path('api/devices/<str:device_id>/', DeviceConnectionView.as_view(), name='device-delete'),
+    path('api/devices/<str:device_id>/', DeviceConnectionView.as_view(), name='device-info'),
+    path('api/devices/<str:device_id>/delete/', DeviceDeleteView.as_view(), name='device-delete'),
     path('api/device/end-session/<str:device_id>/', EndDeviceSessionView.as_view(), name='end-device-session'),
     path('api/device/end-session/<str:device_id>/status/', views.CheckEndSessionStatusView.as_view(), name='check-end-session-status'),
     

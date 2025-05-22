@@ -1746,6 +1746,99 @@ class DeviceConnectionView(generics.ListCreateAPIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+class DeviceDeleteView(generics.DestroyAPIView):
+    """API to delete a device."""
+    queryset = DeviceConnection.objects.all()
+    serializer_class = DeviceConnectionSerializer
+    lookup_field = 'device_id'
+    http_method_names = ['delete', 'post']  # Cho phép cả POST và DELETE
+
+    def get_object(self):
+        try:
+            device_id = self.kwargs.get('device_id')
+            print(f"Attempting to delete device with ID: {device_id}, Type: {type(device_id)}")
+            
+            if not device_id or device_id == 'string' or device_id == 'undefined':
+                print(f"Invalid device_id received: {device_id}")
+                raise Http404(f"Invalid device ID: {device_id}")
+                
+            device = DeviceConnection.objects.get(device_id=device_id)
+            print(f"Found device to delete: {device.device_id} - {device.device_name}")
+            return device
+        except DeviceConnection.DoesNotExist:
+            print(f"Device not found with ID: {device_id}")
+            raise Http404("Device not found")
+        except Exception as e:
+            print(f"Error getting device for deletion: {str(e)}")
+            raise
+
+    def post(self, request, *args, **kwargs):
+        """Xử lý POST request như DELETE nếu có _method=DELETE"""
+        if request.POST.get('_method') == 'DELETE':
+            print("Nhận POST với _method=DELETE, xử lý như DELETE request")
+            return self.destroy(request, *args, **kwargs)
+        return Response(
+            {"error": "Method not allowed"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+            
+    def destroy(self, request, *args, **kwargs):
+        try:
+            device = self.get_object()
+            device_id = device.device_id
+            device_name = device.device_name
+            
+            print(f"Deleting device: {device_id} - {device_name}")
+            
+            # First delete related device status
+            try:
+                device_status = DeviceStatus.objects.get(device=device)
+                print(f"Deleting device status for {device_id}")
+                device_status.delete()
+            except DeviceStatus.DoesNotExist:
+                print(f"No device status found for {device_id}")
+                pass  # No device status to delete
+            
+            # Then delete the device itself
+            device.delete()
+            print(f"Successfully deleted device: {device_id} - {device_name}")
+            
+            # Check if we should redirect
+            redirect_to = request.query_params.get('redirect_to')
+            if redirect_to:
+                print(f"Redirecting to: {redirect_to}")
+                return redirect(redirect_to)
+            
+            return Response(
+                {"message": f"Device {device_name} (ID: {device_id}) deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Http404 as e:
+            print(f"404 Error: {str(e)}")
+            # Check if we should redirect
+            redirect_to = request.query_params.get('redirect_to')
+            if redirect_to:
+                messages.error(request, f"Device not found: {str(e)}")
+                return redirect(redirect_to)
+                
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(f"Error deleting device: {str(e)}")
+            
+            # Check if we should redirect
+            redirect_to = request.query_params.get('redirect_to')
+            if redirect_to:
+                messages.error(request, f"Error deleting device: {str(e)}")
+                return redirect(redirect_to)
+                
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 class DeviceStatusUpdateView(generics.RetrieveUpdateAPIView):
     """API to update the status of a device."""
     queryset = DeviceConnection.objects.all()

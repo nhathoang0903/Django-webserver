@@ -14,6 +14,7 @@ import socket
 import netifaces
 import os
 from pathlib import Path
+import dotenv
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
