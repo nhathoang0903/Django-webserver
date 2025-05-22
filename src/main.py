@@ -1,12 +1,16 @@
 import sys
 import logging
 import os
+import requests
+import json
+import signal
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QIcon
 from page1_welcome import WelcomePage
 import subprocess
 from utils.translation import set_language
+from config import DEVICE_ID, CART_END_SESSION_API
 
 # Bỏ qua cảnh báo CSS không hỗ trợ
 os.environ["QT_LOGGING_RULES"] = "qt.qpa.xcb.pci.propertymatch=false;*.debug=false;qt.qpa.xcb=false;qt.css.*=false"
@@ -72,6 +76,42 @@ class KioskApplication(QApplication):
         # Set application icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
+        
+        # Register application exit handler
+        self.aboutToQuit.connect(self.cleanup_on_exit)
+    
+    def cleanup_on_exit(self):
+        """Ensure the cart session is properly ended when the application exits"""
+        logging.info("Application shutting down, cleaning up cart session...")
+        try:
+            # Call the end session API
+            response = requests.post(f"{CART_END_SESSION_API}{DEVICE_ID}/", timeout=2)
+            if response.status_code == 200:
+                logging.info("Successfully ended cart session")
+            else:
+                logging.warning(f"Failed to end cart session: {response.status_code}, {response.text}")
+        except Exception as e:
+            logging.error(f"Error ending cart session: {e}")
+        
+        # Clear phone number in JSON file
+        try:
+            phone_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                    'config', 'phone_number.json')
+            if os.path.exists(phone_path):
+                with open(phone_path, 'w') as f:
+                    json.dump({"phone_number": ""}, f)
+                logging.info("Successfully cleared phone number")
+        except Exception as e:
+            logging.error(f"Error clearing phone number: {e}")
+            
+        # Clear cart data
+        try:
+            from cart_state import CartState
+            cart_state = CartState()
+            cart_state.clear_cart()
+            logging.info("Successfully cleared cart state")
+        except Exception as e:
+            logging.error(f"Error clearing cart state: {e}")
     
     def show_main_window(self):
         self.main_window = WelcomePage()
@@ -98,6 +138,16 @@ def main():
         LogCleaner.check_and_clear_log()
         
         app = KioskApplication(sys.argv)
+        
+        # Set up signal handlers for clean shutdown
+        def signal_handler(sig, frame):
+            logging.info(f"Received signal {sig}, shutting down...")
+            app.quit()
+        
+        # Register signal handlers for SIGTERM and SIGINT
+        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGINT, signal_handler)
+        
         app.show_main_window()
         logging.info("Main window displayed")
         result = app.exec_()

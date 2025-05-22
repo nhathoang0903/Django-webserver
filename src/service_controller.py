@@ -5,7 +5,12 @@ import time
 import signal
 import logging
 import requests
-from config import BASE_URL, DEVICE_ID
+import threading
+import importlib.util
+import json
+from config import BASE_URL, DEVICE_ID, CART_END_SESSION_API
+from queue import Queue
+from datetime import datetime
 
 # Thêm các biến môi trường trước khi import bất kỳ thư viện QT nào
 os.environ['DISPLAY'] = ':0.0'
@@ -120,7 +125,6 @@ class ServiceController:
                             logging.info(f"App output: {line.strip()}")
                         self.app_output.append(line)
 
-                import threading
                 threading.Thread(target=monitor_output, args=(self.app_process.stdout, False), daemon=True).start()
                 threading.Thread(target=monitor_output, args=(self.app_process.stderr, True), daemon=True).start()
                 
@@ -132,6 +136,9 @@ class ServiceController:
     def stop_app(self):
         if self.app_process:
             try:
+                # Try to end the cart session directly as fallback
+                self.end_cart_session()
+                
                 # Save the last output before stopping
                 if self.app_output:
                     logging.info("Last app output before stopping:")
@@ -139,19 +146,54 @@ class ServiceController:
                         logging.info(line.strip())
                 self.app_output = []
                 
+                # First, send SIGTERM to allow clean shutdown
+                logging.info("Sending SIGTERM to app process...")
                 self.app_process.terminate()
-                self.app_process.wait(timeout=5)  # Wait up to 5 seconds
+                
+                # Wait up to 3 seconds for clean shutdown
+                try:
+                    self.app_process.wait(timeout=3)
+                    logging.info("App terminated gracefully")
+                except subprocess.TimeoutExpired:
+                    # If SIGTERM doesn't work, use SIGKILL
+                    logging.warning("App didn't terminate with SIGTERM, using SIGKILL")
+                    self.app_process.kill()
+                    self.app_process.wait(timeout=2)
+                    logging.info("App killed")
+                
                 self.app_process = None
                 logging.info("App stopped successfully")
             except Exception as e:
                 logging.error(f"Error stopping app: {e}")
-                # Force kill if terminate fails
+                # Force kill if all else fails
                 try:
                     self.app_process.kill()
+                    self.app_process = None
                 except:
                     pass
             finally:
                 self.device_controller.update_status(is_active=True, app_running=False)
+                
+    def end_cart_session(self):
+        """Send cart end session API call directly as fallback"""
+        try:
+            # Call the end session API with a short timeout
+            logging.info(f"Sending end session API call to {CART_END_SESSION_API}{DEVICE_ID}/")
+            response = requests.post(f"{CART_END_SESSION_API}{DEVICE_ID}/", timeout=2)
+            logging.info(f"End session API response: {response.status_code}")
+            
+            # Also try to clear phone number
+            phone_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                   'config', 'phone_number.json')
+            if os.path.exists(phone_path):
+                with open(phone_path, 'w') as f:
+                    json.dump({"phone_number": ""}, f)
+                logging.info("Phone number cleared")
+                
+            return response.status_code == 200
+        except Exception as e:
+            logging.error(f"Error ending cart session from service controller: {e}")
+            return False
     
     def shutdown_device(self):
         self.stop_app()
@@ -164,6 +206,7 @@ class ServiceController:
         logging.info("Service controller started...")
         
         def handle_signal(signum, frame):
+            logging.info(f"Received signal {signum}, shutting down service controller")
             self.running = False
             
         signal.signal(signal.SIGTERM, handle_signal)
@@ -190,7 +233,11 @@ class ServiceController:
                         if exit_code == 0:  # Normal exit
                             logging.info("App closed normally")
                         else:  # Crash or error
-                            logging.warning(f"App exited with code {exit_code}")
+                            logging.warning(f"App exited unexpectedly with code {exit_code}")
+                            # App terminated unexpectedly, ensure cart session is ended
+                            logging.info("App crashed or was terminated unexpectedly, ending cart session")
+                            self.end_cart_session()
+                        
                         self.app_process = None
                         self.device_controller.update_status(app_running=False)
                         app_status = f"exited with code {exit_code}"
@@ -202,6 +249,10 @@ class ServiceController:
                 # Start or stop app based on should_run_app
                 if should_run_app and not self.app_process:
                     logging.info("Starting app...")
+                    # Ensure any previous session is ended before starting app
+                    if app_status.startswith("exited"):
+                        logging.info("Ensuring clean state before restarting app")
+                        self.end_cart_session()
                     self.start_app()
                 elif not should_run_app and self.app_process:
                     logging.info("Stopping app...")
@@ -212,7 +263,13 @@ class ServiceController:
                 
             time.sleep(2)
             
-        self.stop_app()
+        # Final cleanup before exiting
+        if self.app_process:
+            logging.info("Cleaning up before service shutdown")
+            self.stop_app()
+        else:
+            # Ensure cart session is ended even if app is already terminated
+            self.end_cart_session()
 
 class DeviceController:
     def __init__(self):

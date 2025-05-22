@@ -1,0 +1,23 @@
+[Unit]
+Description=Smart Cart Controller Service
+After=network.target
+After=display-manager.service
+
+[Service]
+Type=simple
+User=mtech
+Group=mtech
+WorkingDirectory=/home/mtech/Workspace/Pick-and-go-CS/src
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/mtech/.Xauthority
+Environment=QT_QPA_PLATFORM=xcb
+
+Environment="QT_DEBUG_PLUGINS=1"
+Environment="QT_PLUGIN_PATH=/usr/lib/aarch64-linux-gnu/qt5/plugins"
+Environment="LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu/qt5"
+ExecStart=/home/mtech/Workspace/Pick-and-go-CS/venv/bin/python3 service_controller.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

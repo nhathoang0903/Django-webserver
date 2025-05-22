@@ -216,12 +216,21 @@
     "quantity": 1
   },
   {
-    "product_id": 25,
-    "name": "Oishi_4X",
-    "quantity": 1,
-    "price": "5000.00",
-    "description": "Snack",
     "category": "Snack",
-    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1747389206/products/oml5vtgsffkdf1avstvp.png"
+    "description": "Snack",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1747389206/products/oml5vtgsffkdf1avstvp.png",
+    "name": "Oishi_4X",
+    "price": "5000.00",
+    "product_id": 25,
+    "quantity": 1
+  },
+  {
+    "product_id": 26,
+    "name": "Guava_Candy",
+    "quantity": 1,
+    "price": "15000.00",
+    "description": "Good for teeth",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1747329800/products/qxku7o7sopnnzx5zlkuh.png"
   }
 ]
