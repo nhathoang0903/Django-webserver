@@ -526,7 +526,14 @@
                             
                             // If modal is open and this is a force refresh, close it if no more low stock products
                             if (forceRefresh && $('#lowStockModal').is(':visible')) {
-                                bootstrap.Modal.getInstance(document.getElementById('lowStockModal')).hide();
+                                // Use proper closing to avoid backdrop issues
+                                $('#lowStockModal').modal('hide');
+                                // Ensure backdrop is removed
+                                setTimeout(function() {
+                                    $('.modal-backdrop').remove();
+                                    $('body').removeClass('modal-open').css('overflow', '');
+                                    $('body').css('padding-right', '');
+                                }, 300);
                             }
                         }
                     },
@@ -658,6 +665,14 @@
                     $(document).on('click', '#refreshLowStockData', function() {
                         checkLowStockProducts(true);
                     });
+                    
+                    // Add event listener for modal hidden event to ensure backdrop is removed
+                    $(document).on('hidden.bs.modal', '#lowStockModal', function() {
+                        // Ensure modal backdrop is removed
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open').css('overflow', '');
+                        $('body').css('padding-right', '');
+                    });
                 }
                 
                 // Populate table
@@ -701,8 +716,12 @@
             
             // Function to show add stock modal
             function showAddStockModal(productId, productName) {
-                // Hide low stock modal
+                // Hide low stock modal properly
                 $('#lowStockModal').modal('hide');
+                // Ensure backdrop is removed
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('overflow', '');
+                $('body').css('padding-right', '');
                 
                 // Create add stock modal if it doesn't exist
                 if (!$('#quickAddStockModal').length) {
@@ -743,10 +762,29 @@
                         </div>
                     `);
                     
+                    // Add event listener for modal hidden event
+                    $(document).on('hidden.bs.modal', '#quickAddStockModal', function() {
+                        // Ensure modal backdrop is removed
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open').css('overflow', '');
+                        $('body').css('padding-right', '');
+                    });
+                    
                     // Add event listeners
                     $(document).on('click', '#backToLowStockBtn', function() {
+                        // Properly hide the current modal
                         $('#quickAddStockModal').modal('hide');
-                        $('#lowStockModal').modal('show');
+                        
+                        // Remove backdrop and clean up
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open').css('overflow', '');
+                        $('body').css('padding-right', '');
+                        
+                        // Show low stock modal after a short delay
+                        setTimeout(function() {
+                            var lowStockModal = new bootstrap.Modal(document.getElementById('lowStockModal'));
+                            lowStockModal.show();
+                        }, 300);
                     });
                     
                     $(document).on('click', '#confirmQuickAddStock', function() {
