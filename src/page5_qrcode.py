@@ -32,8 +32,8 @@ from threading import Thread, Event
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 import pyttsx3
-import qrcode
-from vietqr.VietQR import genQRString, getBincode
+# import qrcode
+# from vietqr.VietQR import genQRString, getBincode
 from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
 from utils.translation import _, get_current_language
 
@@ -451,109 +451,118 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             self.qr_start_time = datetime.now()
             self.target_time = datetime.now() + timedelta(seconds=self.countdown_seconds)
             
+            # First just show a placeholder and start the countdown
+            # This ensures UI is responsive immediately
+            self.countdown_timer.start(1000)
+            self.countdown_label.show()
+            print(f"[QR_TIMING] Countdown started at: {time.time() - qr_start:.4f}s")
+            
+            # Process events to keep UI responsive
+            QApplication.processEvents()
+            
             try:
                 # Load static QR code image instead of generating one
                 qr_image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'qr-code-banking.png')
                 print(f"[QR_TIMING] Loading QR code from: {qr_image_path}")
                 
-                # Load QR image
-                qr_pixmap = QPixmap(qr_image_path)
-                if qr_pixmap.isNull():
-                    raise Exception(f"Failed to load QR code image from {qr_image_path}")
+                # Load QR image in a separate timer to avoid blocking UI
+                def load_and_display_qr():
+                    try:
+                        # Load QR image
+                        qr_pixmap = QPixmap(qr_image_path)
+                        if qr_pixmap.isNull():
+                            raise Exception(f"Failed to load QR code image from {qr_image_path}")
+                        
+                        print(f"[QR_TIMING] QR image loaded at: {time.time() - qr_start:.4f}s")
+                        
+                        # Get original dimensions
+                        original_width = qr_pixmap.width()
+                        original_height = qr_pixmap.height()
+                        print(f"[QR_TIMING] Original image dimensions: {original_width}x{original_height}")
+                        
+                        display_size = self.common_size * 0.97 
+                        scale_factor = min(display_size / original_width, display_size / original_height)
+                        new_width = int(original_width * scale_factor)
+                        new_height = int(original_height * scale_factor)
+                        
+                        # Scale the image
+                        scaled_pixmap = qr_pixmap.scaled(new_width, new_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        
+                        # Adjust the QR label size to match the scaled image size exactly
+                        self.qr_label.setFixedSize(new_width, new_height)
+                        
+                        # Set the scaled image
+                        self.qr_label.setPixmap(scaled_pixmap)
+                        self.qr_label.setAlignment(Qt.AlignCenter)
+                        print(f"[QR_TIMING] QR image displayed at scaled size: {new_width}x{new_height}")
+                        print(f"[QR_TIMING] QR image displayed at: {time.time() - qr_start:.4f}s")
+                        
+                        # Update date/time display
+                        current_time = QDateTime.currentDateTime()
+                        time_str = current_time.toString('hh:mm:ss')
+                        day = current_time.date().day()
+                        month = current_time.date().month()
+                        year = current_time.date().year()
+                        
+                        # Format date based on language
+                        current_language = get_current_language()
+                        
+                        if current_language == "en":
+                            month_str = current_time.toString('MMM')
+                            
+                            # Get ordinal suffix
+                            if day in [1, 21, 31]:
+                                suffix = "st"
+                            elif day in [2, 22]:
+                                suffix = "nd"
+                            elif day in [3, 23]:
+                                suffix = "rd"
+                            else:
+                                suffix = "th"
+                            
+                            date_str = f"{month_str} {day}<sup>{suffix}</sup>, {year}"
+                        
+                        elif current_language == "vi":
+                            date_str = f"{day} tháng {month} năm {year}"
+                        
+                        elif current_language == "ja":
+                            date_str = f"{year}年{month}月{day}日"
+                        
+                        elif current_language == "fr":
+                            months_fr = ["janvier", "février", "mars", "avril", "mai", "juin", 
+                                       "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+                            month_name = months_fr[month - 1]
+                            
+                            if day == 1:
+                                date_str = f"1er {month_name} {year}"
+                            else:
+                                date_str = f"{day} {month_name} {year}"
+                        
+                        else:
+                            # Default fallback (English style without suffix)
+                            month_str = current_time.toString('MMM')
+                            date_str = f"{month_str} {day}, {year}"
+                        
+                        # Combine time and date
+                        formatted_datetime = f"{_('qrCodePage.generated')}{time_str}, {date_str}"
+                        
+                        self.gen_time_label.setText(formatted_datetime)
+                        self.gen_time_label.setTextFormat(Qt.RichText)
+                        self.gen_time_label.show()
+                        print(f"[QR_TIMING] Generation time displayed at: {time.time() - qr_start:.4f}s")
+                        
+                        # Start transaction check with delay
+                        print(f"[QR_TIMING] Transaction check scheduled to start in 15 seconds")
+                        QTimer.singleShot(15000, self.start_transaction_check)  # Increased from 10 to 15 seconds
+                        
+                        print(f"[QR_TIMING] Total QR code loading time: {time.time() - qr_start:.4f}s")
+                    except Exception as inner_e:
+                        print(f"Error displaying QR: {inner_e}")
+                        self.qr_label.setText(f"Error loading QR code")
+                        QApplication.processEvents()
                 
-                print(f"[QR_TIMING] QR image loaded at: {time.time() - qr_start:.4f}s")
-                
-                # Update UI with properly scaled QR code - ensure entire image is visible
-                print(f"[QR_TIMING] About to update UI at: {time.time() - qr_start:.4f}s")
-                
-                # Get original dimensions
-                original_width = qr_pixmap.width()
-                original_height = qr_pixmap.height()
-                print(f"[QR_TIMING] Original image dimensions: {original_width}x{original_height}")
-                
-                display_size = self.common_size * 0.97 
-                scale_factor = min(display_size / original_width, display_size / original_height)
-                new_width = int(original_width * scale_factor)
-                new_height = int(original_height * scale_factor)
-                
-                # Scale the image
-                scaled_pixmap = qr_pixmap.scaled(new_width, new_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-                
-                # Adjust the QR label size to match the scaled image size exactly
-                self.qr_label.setFixedSize(new_width, new_height)
-                
-                # Set the scaled image
-                self.qr_label.setPixmap(scaled_pixmap)
-                self.qr_label.setAlignment(Qt.AlignCenter)
-                print(f"[QR_TIMING] QR image displayed at scaled size: {new_width}x{new_height}")
-                print(f"[QR_TIMING] QR image displayed at: {time.time() - qr_start:.4f}s")
-                
-                # Update date/time display
-                current_time = QDateTime.currentDateTime()
-                time_str = current_time.toString('hh:mm:ss')
-                day = current_time.date().day()
-                month = current_time.date().month()
-                year = current_time.date().year()
-                
-                # Format date based on language
-                current_language = get_current_language()
-                
-                if current_language == "en":
-                    month_str = current_time.toString('MMM')
-                    
-                    # Get ordinal suffix
-                    if day in [1, 21, 31]:
-                        suffix = "st"
-                    elif day in [2, 22]:
-                        suffix = "nd"
-                    elif day in [3, 23]:
-                        suffix = "rd"
-                    else:
-                        suffix = "th"
-                    
-                    date_str = f"{month_str} {day}<sup>{suffix}</sup>, {year}"
-                
-                elif current_language == "vi":
-                    date_str = f"{day} tháng {month} năm {year}"
-                
-                elif current_language == "ja":
-                    date_str = f"{year}年{month}月{day}日"
-                
-                elif current_language == "fr":
-                    months_fr = ["janvier", "février", "mars", "avril", "mai", "juin", 
-                               "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
-                    month_name = months_fr[month - 1]
-                    
-                    if day == 1:
-                        date_str = f"1er {month_name} {year}"
-                    else:
-                        date_str = f"{day} {month_name} {year}"
-                
-                else:
-                    # Default fallback (English style without suffix)
-                    month_str = current_time.toString('MMM')
-                    date_str = f"{month_str} {day}, {year}"
-                
-                # Combine time and date
-                formatted_datetime = f"{_('qrCodePage.generated')}{time_str}, {date_str}"
-                
-                self.gen_time_label.setText(formatted_datetime)
-                self.gen_time_label.setTextFormat(Qt.RichText)
-                self.gen_time_label.show()
-                print(f"[QR_TIMING] Generation time displayed at: {time.time() - qr_start:.4f}s")
-                
-                # Đảm bảo UI được cập nhật ngay lập tức
-                QApplication.processEvents()
-                
-                # Start countdown
-                self.countdown_timer.start(1000)
-                self.countdown_label.show()
-                print(f"[QR_TIMING] Countdown started at: {time.time() - qr_start:.4f}s")
-                
-                # Start transaction check after UI được cập nhật
-                self.start_transaction_check()
-                print(f"[QR_TIMING] Transaction check started at: {time.time() - qr_start:.4f}s")
-                print(f"[QR_TIMING] Total QR code loading time: {time.time() - qr_start:.4f}s")
+                # Call the load function after a small delay to ensure UI is responsive
+                QTimer.singleShot(50, load_and_display_qr)
                 
             except Exception as e:
                 print(f"Error in QR loading: {e}")
@@ -631,59 +640,138 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         """Return to shopping page with transition effects"""
         # Prevent multiple calls
         if hasattr(self, 'transition_in_progress') and self.transition_in_progress:
+            print("Transition already in progress, ignoring duplicate return request")
             return
             
+        print("Starting transition to shopping page")
         self.transition_in_progress = True
         
-        # Import here to avoid circular imports
-        from page4_shopping import ShoppingPage
+        # Stop all background processes first before starting page transition
+        self.cleanup_resources()
         
-        try:
-            # Create shopping page
-            self.shopping_page = ShoppingPage()
-            
-            # Define transition completion handler
-            def show_new_page():
-                # Show shopping page
-                self.shopping_page.show()
-                
-                # Fade out overlay and close QR page
-                self.transition_overlay.fadeOut(lambda: self.close())
-            
-            # Show transition overlay first, then show new page after fade in completes
-            self.transition_overlay.fadeIn(show_new_page)
-            
-            # Force cleanup of resources to prevent memory leaks
-            self.cleanup_resources()
-            
-        except Exception as e:
-            print(f"Error returning to shopping page: {e}")
-            # Emergency fallback if transition fails
+        # Show transition overlay BEFORE importing and creating the next page
+        # to avoid UI freezing during page creation
+        self.transition_overlay.fadeIn()
+        
+        # Use a small delay to ensure the overlay is shown before heavy operations
+        def create_and_show_shopping_page():
             try:
-                from page1_welcome import WelcomePage
-                welcome = WelcomePage()
-                welcome.show()
-                self.close()
-            except:
-                print("Critical error: Unable to navigate to any page")
-                self.close()
+                # Import here to avoid circular imports
+                from page4_shopping import ShoppingPage
+                
+                # Process events to keep UI responsive during page creation
+                QApplication.processEvents()
+                
+                print("Creating new shopping page")
+                self.shopping_page = ShoppingPage()
+                
+                # Define transition completion handler
+                def show_new_page():
+                    print("Showing shopping page")
+                    # Show shopping page
+                    self.shopping_page.show()
+                    
+                    # Fade out overlay and close QR page
+                    self.transition_overlay.fadeOut(lambda: self.close())
+                
+                # The overlay is already showing, just call the show handler directly
+                # Process events one more time before showing the page
+                QApplication.processEvents()
+                show_new_page()
+                
+            except Exception as e:
+                print(f"Error returning to shopping page: {e}")
+                import traceback
+                traceback.print_exc()
+                
+                # Emergency fallback if transition fails
+                try:
+                    from page1_welcome import WelcomePage
+                    welcome = WelcomePage()
+                    welcome.show()
+                    self.close()
+                except:
+                    print("Critical error: Unable to navigate to any page")
+                    self.close()
+        
+        # Use QTimer to ensure overlay is shown first
+        QTimer.singleShot(100, create_and_show_shopping_page)
 
     def cleanup_resources(self):
         """Clean up resources before closing"""
-        if self.countdown_timer:
-            self.countdown_timer.stop()
-        self.stop_transaction_check.set()  # Ensure transaction check is stopped
-        # Clean up any other resources
+        print("Starting thorough resource cleanup...")
+        
+        # Stop all timers
+        if hasattr(self, 'countdown_timer') and self.countdown_timer:
+            if self.countdown_timer.isActive():
+                print("Stopping countdown timer")
+                self.countdown_timer.stop()
+        
+        # Stop transaction check thread
+        if hasattr(self, 'stop_transaction_check'):
+            print("Setting thread stop event")
+            self.stop_transaction_check.set()
+            
+        # Wait a bit for threads to acknowledge stop signal
+        print("Waiting for threads to stop...")
+        QApplication.processEvents()
+        time.sleep(0.2)
+        
+        # Force garbage collection to release memory
+        print("Running garbage collection")
+        gc.collect()
+        
+        # Clear any large objects
+        if hasattr(self, 'qr_label') and self.qr_label:
+            self.qr_label.clear()
+        
+        print("Resource cleanup completed")
 
     def start_transaction_check(self):
-        check_thread = Thread(
-            target=self.check_transaction,
-            args=(self.total_amount,),  # Pass the integer amount
-            daemon=True
-        )
-        check_thread.start()
+        """Start transaction check thread with improved error handling"""
+        try:
+            # Create a thread to check for transactions without blocking UI
+            print("Starting transaction check thread in background")
+            check_thread = Thread(
+                target=self.check_transaction,
+                args=(self.total_amount,),  # Pass the integer amount
+                daemon=True
+            )
+            check_thread.start()
+            
+            # Set a fallback timer - if bank authentication fails, we'll 
+            # automatically use no-banking mode when this timer expires
+            print("Setting 60-second fallback timer for no-banking mode")
+            QTimer.singleShot(60000, self.handle_auth_timeout)
+            
+        except Exception as e:
+            print(f"Error starting transaction check thread: {e}")
+            # No need to show error to user, the fallback timer will handle it
+
+    def handle_auth_timeout(self):
+        """Handle case where bank authentication takes too long"""
+        # Only proceed if:
+        # 1. We're not already in a transition
+        # 2. The QR page is still visible
+        # 3. No transaction has been detected yet
+        if (not hasattr(self, 'transition_in_progress') or not self.transition_in_progress) and \
+           self.isVisible() and \
+           QRCodePage.donation_amount == 0:
+            
+            print("Bank authentication timed out - proceeding with no-banking flow")
+            
+            # First stop any ongoing transaction check
+            self.stop_transaction_check.set()
+            
+            # Set donation amount to 0 for no-banking flow
+            QRCodePage.donation_amount = 0
+            QRCodePage.transfer_content = "Heartfelt support donation"
+            
+            # Start no-banking flow (delayed slightly to ensure UI responsiveness)
+            QTimer.singleShot(100, lambda: self.switch_to_success.emit())
 
     def check_transaction(self, amount):
+        """Check for incoming transactions in a thread with improved error handling"""
         # Force CPU configuration at start of thread
         self.configure_device()
         
@@ -697,6 +785,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             print("Created new event loop for transaction checking thread")
         except Exception as e:
             print(f"Error setting up event loop: {e}")
+            return  # Exit early if we can't set up event loop
         
         USERNAME = "0375712517"
         PASSWORD = "Ngo252002@"
@@ -707,143 +796,163 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Store the transfer content for later use
         self.transfer_content = ""
         
+        # Connection retry parameters - reduce retries to avoid long blocking
+        max_connection_retries = 2  # Reduced from 3
+        connection_retry_count = 0
+        
+        # Transaction check parameters
+        max_check_retries = 3  # Reduced from 5
+        check_retry_count = 0
+        check_interval = 1.0  # Time between checks in seconds
+        
         try:
             print("Khởi tạo kết nối...")
-            # Cần bọc toàn bộ quá trình khởi tạo và xác thực trong try-except
+            
+            # First attempt - don't retry immediately to avoid UI freezing
             try:
+                # Set timeout before creating MBBank to avoid hanging
+                auth_timeout = 15  # seconds - give it more time for first attempt
+                
+                # Create a new instance
+                print(f"Đang đăng nhập... (attempt {connection_retry_count + 1}/{max_connection_retries})")
                 mb = MBBank(username=USERNAME, password=PASSWORD)
                 
-                # Add a timeout for authentication to prevent hanging
-                auth_timeout = 10  # seconds
+                # Try authentication once with timeout
                 auth_start = time.time()
+                auth_complete = False
                 
-                print("Đang đăng nhập...")
-                try:
-                    # Set a timeout for authentication
-                    if time.time() - auth_start > auth_timeout:
-                        print("Authentication timed out")
-                        return
-                    else:
-                        mb._authenticate()
-                        print("Xác thực thành công!")
-                        authenticated = True
-                except Exception as auth_e:
-                    print(f"Authentication error: {auth_e}, will retry once")
+                # Set up a timeout check
+                while not auth_complete and time.time() - auth_start < auth_timeout and not self.stop_transaction_check.is_set():
                     try:
-                        # One retry with shorter timeout
-                        mb = MBBank(username=USERNAME, password=PASSWORD)
-                        auth_timeout = 5  # Shorter timeout for retry
-                        auth_start = time.time()
+                        # Try to authenticate
+                        mb._authenticate()
+                        auth_complete = True
+                        authenticated = True
+                        print("Xác thực thành công!")
+                    except Exception as inner_e:
+                        # If it fails immediately, wait a bit before retry
+                        print(f"Authentication retry: {inner_e}")
+                        time.sleep(0.5)
+                
+                # If timed out or stopped, clean up
+                if not auth_complete:
+                    print("Authentication timed out or thread stopping")
+                    if mb:
+                        if hasattr(mb, '_req') and mb._req is not None:
+                            mb._req.close()
+                        mb = None
+                
+            except Exception as auth_e:
+                print(f"Initial authentication error: {auth_e}")
+                if mb:
+                    try:
+                        if hasattr(mb, '_req') and mb._req is not None:
+                            mb._req.close()
+                    except:
+                        pass
+                    mb = None
+            
+            # If first attempt failed, don't retry immediately - this prevents UI freezing
+            # The fallback timer will handle the case where authentication fails
+            
+            # If authentication succeeded, proceed with transaction monitoring
+            if authenticated and mb is not None:
+                print(f"\nBắt đầu theo dõi giao dịch:")
+                print(f"- Đề xuất: {amount:,} VND")
+                print(f"- Từ thời điểm: {self.qr_start_time.strftime('%d/%m/%Y %H:%M:%S')}")
+                
+                # Main transaction check loop
+                while not self.stop_transaction_check.is_set():
+                    try:
+                        current_time = datetime.now()
                         
-                        if time.time() - auth_start > auth_timeout:
-                            print("Retry authentication timed out")
+                        # Get transactions since QR creation
+                        transactions = mb.getTransactionAccountHistory(
+                            accountNo=account_no,
+                            from_date=self.qr_start_time,
+                            to_date=current_time
+                        )
+                        
+                        if transactions and 'transactionHistoryList' in transactions:
+                            trans_list = transactions['transactionHistoryList']
+                            
+                            for trans in trans_list:
+                                # Break out if stop signal received during processing
+                                if self.stop_transaction_check.is_set():
+                                    break
+                                    
+                                try:
+                                    credit = int(trans.get('creditAmount', '0'))
+                                    debit = int(trans.get('debitAmount', '0'))
+                                    trans_time = datetime.strptime(trans.get('transactionDate', ''), '%d/%m/%Y %H:%M:%S')
+                                    trans_id = trans.get('refNo', '')
+                                    description = trans.get('description', 'N/A')
+                                    
+                                    # Check conditions:
+                                    # 1. Is credit transaction (credit > 0, debit = 0)
+                                    # 2. Transaction time after QR creation
+                                    # 3. Transaction not processed before
+                                    if (credit > 0 and debit == 0 and
+                                        trans_time > self.qr_start_time and
+                                        trans_id not in self.processed_transaction_ids):
+                                        
+                                        self.processed_transaction_ids.add(trans_id)
+                                        print("\n" + "="*50)
+                                        print(f"Phát hiện giao dịch ({current_time.strftime('%H:%M:%S')})")
+                                        print(f"Thời gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
+                                        print(f"Số tiền nhận: +{credit:,} VND")
+                                        print(f"Từ: {trans.get('benAccountName', 'N/A')}")
+                                        print(f"Nội dung: {description}")
+                                        print(f"Mã GD: {trans_id}")
+                                        print("="*50)
+                                        
+                                        # Store the donation amount for success page
+                                        QRCodePage.donation_amount = credit
+                                        
+                                        # Store the transfer content for the note field
+                                        QRCodePage.transfer_content = description
+                                        
+                                        # Đóng kết nối trước khi emit signal
+                                        if mb:
+                                            try:
+                                                # Sử dụng _req.close() khi có _req
+                                                if hasattr(mb, '_req') and mb._req is not None and hasattr(mb._req, 'close'):
+                                                    mb._req.close()
+                                                mb = None
+                                            except Exception as close_e:
+                                                print(f"Warning during connection cleanup: {close_e}")
+                                        
+                                        # Emit signal to switch to success page
+                                        self.switch_to_success.emit()
+                                        return
+                                        
+                                except Exception as e:
+                                    print(f"Error processing transaction: {e}")
+                                    continue
+                        
+                        # Break loop into small chunks with regular checks for stop signal
+                        for _ in range(int(check_interval * 5)):  # 5 checks per second
+                            if self.stop_transaction_check.is_set():
+                                break
+                            time.sleep(0.2)
+                        
+                    except Exception as e:
+                        print(f"Error checking transactions: {e}")
+                        check_retry_count += 1
+                        
+                        # If too many check errors, try to reconnect
+                        if check_retry_count >= max_check_retries:
+                            print(f"Maximum check retries ({max_check_retries}) reached, stopping check")
                             return
                         
-                        mb._authenticate()
-                        print("Xác thực thành công sau khi thử lại!")
-                        authenticated = True
-                    except Exception as retry_e:
-                        print(f"Authentication failed after retry: {retry_e}")
-                        return
-            except Exception as init_e:
-                print(f"Initialization error: {init_e}")
-                return
-            
-            # Nếu không xác thực được, kết thúc kiểm tra
-            if not authenticated or mb is None:
-                print("Cannot proceed without authentication")
-                return
-            
-            print(f"\nBắt đầu theo dõi giao dịch:")
-            print(f"- Đề xuất: {amount:,} VND")
-            print(f"- Từ thời điểm: {self.qr_start_time.strftime('%d/%m/%Y %H:%M:%S')}")
-            
-            # Chỉ sử dụng API khi đã xác thực thành công
-            max_retries = 3
-            retry_count = 0
-            
-            while not self.stop_transaction_check.is_set():
-                try:
-                    current_time = datetime.now()
-                    
-                    # Thêm kiểm tra mất kết nối
-                    if retry_count >= max_retries:
-                        print(f"Maximum retries ({max_retries}) reached, stopping transaction check")
-                        return
-                    
-                    # Get transactions since QR creation
-                    transactions = mb.getTransactionAccountHistory(
-                        accountNo=account_no,
-                        from_date=self.qr_start_time,
-                        to_date=current_time
-                    )
-                    
-                    # Reset retry counter on successful request
-                    retry_count = 0
-                    
-                    if transactions and 'transactionHistoryList' in transactions:
-                        trans_list = transactions['transactionHistoryList']
-                        
-                        for trans in trans_list:
-                            try:
-                                credit = int(trans.get('creditAmount', '0'))
-                                debit = int(trans.get('debitAmount', '0'))
-                                trans_time = datetime.strptime(trans.get('transactionDate', ''), '%d/%m/%Y %H:%M:%S')
-                                trans_id = trans.get('refNo', '')
-                                description = trans.get('description', 'N/A')
-                                
-                                # Check conditions:
-                                # 1. Is credit transaction (credit > 0, debit = 0)
-                                # 2. Transaction time after QR creation
-                                # 3. Transaction not processed before
-                                if (credit > 0 and debit == 0 and
-                                    trans_time > self.qr_start_time and
-                                    trans_id not in self.processed_transaction_ids):
-                                    
-                                    self.processed_transaction_ids.add(trans_id)
-                                    print("\n" + "="*50)
-                                    print(f"Phát hiện giao dịch ({current_time.strftime('%H:%M:%S')})")
-                                    print(f"Thời gian GD: {trans_time.strftime('%d/%m/%Y %H:%M:%S')}")
-                                    print(f"Số tiền nhận: +{credit:,} VND")
-                                    print(f"Từ: {trans.get('benAccountName', 'N/A')}")
-                                    print(f"Nội dung: {description}")
-                                    print(f"Mã GD: {trans_id}")
-                                    print("="*50)
-                                    
-                                    # Store the donation amount for success page
-                                    QRCodePage.donation_amount = credit
-                                    
-                                    # Store the transfer content for the note field
-                                    QRCodePage.transfer_content = description
-                                    
-                                    # Đóng kết nối trước khi emit signal
-                                    if mb:
-                                        try:
-                                            # Sử dụng _req.close() khi có _req
-                                            if hasattr(mb, '_req') and mb._req is not None and hasattr(mb._req, 'close'):
-                                                mb._req.close()
-                                            mb = None
-                                        except Exception as close_e:
-                                            print(f"Warning during connection cleanup: {close_e}")
-                                    
-                                    # Emit signal to switch to success page
-                                    self.switch_to_success.emit()
-                                    return
-                                    
-                            except Exception as e:
-                                print(f"Error processing transaction: {e}")
-                                continue
-                    
-                    # Thời gian ngắt quãng để giảm tải
-                    time.sleep(0.5)
-                    
-                except Exception as e:
-                    print(f"Error checking transactions: {e}")
-                    retry_count += 1
-                    print(f"Retry {retry_count}/{max_retries}")
-                    time.sleep(1)
-                    continue
-                    
+                        # Wait a bit longer after errors (with chunked sleep)
+                        for _ in range(5):  # 1 second in small chunks
+                            if self.stop_transaction_check.is_set():
+                                break
+                            time.sleep(0.2)
+            else:
+                print("Authentication failed - fallback timer will handle transition")
+                
         except Exception as e:
             print(f"Lỗi ngoài quá trình check transaction: {str(e)}")
         finally:
@@ -859,6 +968,7 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                     print(f"Warning during logout: {close_e}")
             
             # Đảm bảo giải phóng tài nguyên
+            print("Cleaning up transaction check thread resources")
             gc.collect()
 
     def handle_success(self):

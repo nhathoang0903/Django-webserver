@@ -127,10 +127,26 @@ class PageTransitionOverlay(QWidget):
         self.fadeAnimation.start()
 
     def _handleFadeInFinished(self):
-        # Execute all callbacks then clear them
-        for callback in self._callbacks:
-            callback()
-        self._callbacks.clear()
+        """Handle fade in animation completion with better error handling"""
+        try:
+            # Process events to ensure UI responsiveness
+            QApplication.processEvents()
+            
+            # Execute all callbacks then clear them
+            callbacks_to_execute = list(self._callbacks)
+            self._callbacks.clear()
+            
+            # Execute callbacks after clearing to prevent duplicate execution
+            for callback in callbacks_to_execute:
+                try:
+                    callback()
+                except Exception as e:
+                    print(f"Error in fadeIn callback: {e}")
+                    import traceback
+                    traceback.print_exc()
+        except Exception as e:
+            print(f"Error handling fade in completion: {e}")
+            self._callbacks.clear()  # Still clear callbacks to prevent hanging
 
     def fadeOut(self, callback=None):
         """Ẩn overlay với hiệu ứng mờ dần"""
@@ -159,11 +175,29 @@ class PageTransitionOverlay(QWidget):
         self.fadeAnimation.start()
 
     def _handleFadeOutFinished(self):
-        # Hide widget, execute callbacks, then cleanup
-        self.hide()
-        for callback in self._callbacks:
-            callback()
-        self._callbacks.clear()
+        """Handle fade out animation completion with better error handling"""
+        try:
+            # Hide widget first
+            self.hide()
+            
+            # Process events to ensure UI responsiveness
+            QApplication.processEvents()
+            
+            # Execute callbacks and clear list
+            callbacks_to_execute = list(self._callbacks)
+            self._callbacks.clear()
+            
+            # Execute callbacks after clearing to prevent duplicate execution
+            for callback in callbacks_to_execute:
+                try:
+                    callback()
+                except Exception as e:
+                    print(f"Error in fadeOut callback: {e}")
+                    import traceback
+                    traceback.print_exc()
+        except Exception as e:
+            print(f"Error handling fade out completion: {e}")
+            self._callbacks.clear()  # Still clear callbacks to prevent hanging
 
     def paintEvent(self, event):
         painter = QPainter(self)

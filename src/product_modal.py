@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QFrame, QGraphicsDropShadowEffect
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QPixmap, QFont, QFontDatabase
 from page3_productsinfo import SimpleImageLoader
 import os
@@ -30,6 +30,12 @@ class ProductModal(QFrame):
         shadow.setColor(Qt.gray)
         shadow.setOffset(0, 6)
         self.setGraphicsEffect(shadow)
+        
+        # Add cooldown mechanism to prevent rapid clicking
+        self.button_cooldown = False
+        self.cooldown_timer = QTimer(self)
+        self.cooldown_timer.timeout.connect(self.reset_cooldown)
+        self.cooldown_duration = 1000  # milliseconds between clicks
         
         self.existing_message = None
         self.controls_container = None
@@ -167,6 +173,10 @@ class ProductModal(QFrame):
             QPushButton:pressed {
                 background-color: #A8A8A8;
             }
+            QPushButton:disabled {
+                background-color: #E0E0E0;
+                color: #909090;
+            }
         """)
 
         # Style the quantity label
@@ -195,6 +205,10 @@ class ProductModal(QFrame):
             }
             QPushButton:pressed {
                 background-color: #A8A8A8;
+            }
+            QPushButton:disabled {
+                background-color: #E0E0E0;
+                color: #909090;
             }
         """)
 
@@ -331,6 +345,11 @@ class ProductModal(QFrame):
     def reset_warning_state(self):
         """Reset warning state has been removed since we're recreating the modal instead"""
         pass  # This method is no longer needed
+        
+    def reset_cooldown(self):
+        """Reset the button cooldown state"""
+        self.button_cooldown = False
+        print("[ProductModal] Button cooldown ended")
 
     def update_product(self, product, existing_quantity=None):
         self.current_product = product
@@ -413,13 +432,37 @@ class ProductModal(QFrame):
             self.add_btn.show()
 
     def increase_quantity(self):
+        # Check if we're in cooldown period
+        if self.button_cooldown:
+            return
+            
+        # Apply cooldown
+        self.button_cooldown = True
+        
+        # Increment quantity
         self.quantity += 1
         self.quantity_label.setText(str(self.quantity))
+        
+        # Start cooldown timer
+        self.cooldown_timer.start(self.cooldown_duration)
 
     def decrease_quantity(self):
+        # Check if we're in cooldown period
+        if self.button_cooldown:
+            return
+            
+        # Apply cooldown
+        self.button_cooldown = True
+        
         if self.quantity > 1:
             self.quantity -= 1
             self.quantity_label.setText(str(self.quantity))
+            
+            # Start cooldown timer
+            self.cooldown_timer.start(self.cooldown_duration)
+        else:
+            # Reset cooldown since we didn't change anything
+            self.button_cooldown = False
 
     def add_item_to_cart(self):
         """Add item to cart with safety checks"""

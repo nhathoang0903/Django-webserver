@@ -28,6 +28,12 @@ class CartItemWidget(QFrame):
         self.unit_price = float(product['price'])
         self.current_price = self.unit_price * quantity
         
+        # Add cooldown mechanism to prevent rapid clicking
+        self.button_cooldown = False
+        self.cooldown_timer = QTimer(self)
+        self.cooldown_timer.timeout.connect(self.reset_cooldown)
+        self.cooldown_duration = 1000  # milliseconds between clicks
+        
         self.setFixedHeight(280) 
         self.setFixedWidth(780)   
         
@@ -246,6 +252,10 @@ class CartItemWidget(QFrame):
             QPushButton:pressed {
                 background-color: #A8A8A8;
             }
+            QPushButton:disabled {
+                background-color: #E0E0E0;
+                color: #909090;
+            }
         """)
         decrease_btn.clicked.connect(self.decrease_quantity)
         
@@ -282,8 +292,16 @@ class CartItemWidget(QFrame):
             QPushButton:pressed {
                 background-color: #A8A8A8;
             }
+            QPushButton:disabled {
+                background-color: #E0E0E0;
+                color: #909090;
+            }
         """)
         increase_btn.clicked.connect(self.increase_quantity)
+        
+        # Store references to buttons for enabling/disabling
+        self.decrease_btn = decrease_btn
+        self.increase_btn = increase_btn
         
         # Add controls to layout without spacing
         quantity_controls.addWidget(decrease_btn)
@@ -361,6 +379,11 @@ class CartItemWidget(QFrame):
         
         self.image_loaded = False
 
+    def reset_cooldown(self):
+        """Reset the button cooldown state"""
+        self.button_cooldown = False
+        print("[CartItemWidget] Button cooldown ended")
+
     def update_price_display(self):
         """Update the price display based on current quantity"""
         self.current_price = self.unit_price * self.quantity
@@ -375,18 +398,41 @@ class CartItemWidget(QFrame):
         self.price_label.setText(f"<span style='font-weight: bold; font-size: {font_size}pt;'>{price_str} vnđ</span>")
 
     def increase_quantity(self):
+        # Check if we're in cooldown period
+        if self.button_cooldown:
+            return
+            
+        # Apply cooldown
+        self.button_cooldown = True
+        
+        # Increment quantity
         self.quantity += 1
         self.quantity_label.setText(str(self.quantity))
         self.update_price_display()  # Update price when quantity changes
         self.quantityChanged.emit(self.quantity)
         
+        # Start cooldown timer
+        self.cooldown_timer.start(self.cooldown_duration)
+        
     def decrease_quantity(self):
+        # Check if we're in cooldown period
+        if self.button_cooldown:
+            return
+            
+        # Apply cooldown
+        self.button_cooldown = True
+        
         if self.quantity > 1:
             self.quantity -= 1
             self.quantity_label.setText(str(self.quantity))
             self.update_price_display()  # Update price when quantity changes
             self.quantityChanged.emit(self.quantity)
+            
+            # Start cooldown timer
+            self.cooldown_timer.start(self.cooldown_duration)
         else:
+            # For removal, we don't need cooldown
+            self.button_cooldown = False
             self.remove_item()
     
     def remove_item(self):

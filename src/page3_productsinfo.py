@@ -97,6 +97,10 @@ class SimpleImageLoader:
             return scaled
 
 class ProductCard(QFrame):
+    # Class-level cooldown flag for all ProductCard instances
+    _add_to_cart_cooldown = False
+    _cooldown_timer = None
+
     def __init__(self, product, cart_count_text=None):
         super().__init__()
         self.product = product
@@ -105,6 +109,18 @@ class ProductCard(QFrame):
         self.setup_ui()
         self.load_image_async()
         self.setCursor(Qt.PointingHandCursor)
+        
+        # Initialize cooldown timer if not already created
+        if ProductCard._cooldown_timer is None:
+            ProductCard._cooldown_timer = QTimer()
+            ProductCard._cooldown_timer.setSingleShot(True)
+            ProductCard._cooldown_timer.timeout.connect(ProductCard.reset_global_cooldown)
+        
+    @classmethod
+    def reset_global_cooldown(cls):
+        """Reset the global cooldown flag for all ProductCard instances"""
+        cls._add_to_cart_cooldown = False
+        print("[Page3] Global add-to-cart cooldown ended")
         
     def load_image_async(self):
         def load():
@@ -269,11 +285,17 @@ class ProductCard(QFrame):
                     }
                 """)
                 print(f"[Page3] Product {product_name} is already in cart, updated button state")
+                
         except Exception as e:
             print(f"[Page3] Error updating button state: {e}")
     
     def add_to_cart(self):
         try:
+            # Check for global cooldown
+            if ProductCard._add_to_cart_cooldown:
+                print("[Page3] Add to cart ignored - global cooldown active")
+                return
+                
             # Sử dụng CartManager để lấy danh sách sản phẩm trong giỏ hàng
             cart_manager = CartManager()
             
@@ -328,6 +350,9 @@ class ProductCard(QFrame):
                 """)
                 return
                 
+            # Activate global cooldown - no visual changes
+            ProductCard._add_to_cart_cooldown = True
+                
             # Thêm sản phẩm vào giỏ hàng (mặc định số lượng là 1)
             cart_manager.add_item(self.product, 1)
             print(f"[Page3] Added product to cart: {product_name}")
@@ -362,16 +387,21 @@ class ProductCard(QFrame):
             """)
             print(f"[Page3] Updated button state for {product_name} to ADDED")
             
-            # Tìm ProductPage instance và cập nhật tất cả card
+            # Update only the cart count without updating ALL buttons
             for widget in QApplication.topLevelWidgets():
                 if isinstance(widget, ProductPage):
+                    # Just update the cart count number, don't refresh all cards
                     widget.update_cart_count()
-                    # Cập nhật tất cả card để phản ánh trạng thái mới - sử dụng phương thức cải tiến
-                    widget.force_update_all_button_states()
                     break
+            
+            # Start cooldown timer
+            ProductCard._cooldown_timer.start(900)
+            print("[Page3] Started global add-to-cart cooldown for 0.9s")
             
         except Exception as e:
             print(f"[Page3] Error adding to cart: {e}")
+            # Reset cooldown if error occurs
+            ProductCard._add_to_cart_cooldown = False
 
 class LoadProductsThread(QThread):
     finished = pyqtSignal(list)
