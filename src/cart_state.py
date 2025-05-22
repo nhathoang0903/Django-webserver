@@ -8,7 +8,7 @@ import threading
 from functools import lru_cache
 import time
 from threading import Thread, Event, Lock
-from config import CART_SHOPPING_MONITOR_API, DEVICE_ID
+from config import DEVICE_ID
 from queue import Queue
 from count_item import update_cart_count  
 
@@ -43,12 +43,7 @@ class CartState:
             cls._instance._stop_monitoring = Event()
             cls._instance._change_callbacks = []
             cls._instance._last_modified = 0
-            # Add new attributes for optimization
-            cls._instance._monitor_queue = Queue(maxsize=10)  # Queue for monitor data
-            cls._instance._api_lock = Lock()  # Lock for API calls
-            cls._instance._last_api_call = 0  # Track last API call time
-            cls._instance._min_api_interval = 0.5  # Minimum seconds between API calls
-            cls._instance._monitor_worker = None  # Background worker thread
+            # We don't need monitor queue and API related attributes anymore
         return cls._instance
 
     def __init__(self):
@@ -57,7 +52,7 @@ class CartState:
             self._initialized = True
             self.load_from_json()  # Add this
             self.start_monitoring()  # Add this to auto-start monitoring
-            self._start_monitor_worker()  # Start background worker
+            # Removed _start_monitor_worker call
 
     @lru_cache(maxsize=32)
     def _fetch_and_process_image(self, image_url: str) -> Image:
@@ -85,53 +80,7 @@ class CartState:
         self._original_images.clear() 
         self._processed_images.clear()
 
-    def _start_monitor_worker(self):
-        """Start background worker for API calls"""
-        if self._monitor_worker is None:
-            self._monitor_worker = Thread(target=self._process_monitor_queue, daemon=True)
-            self._monitor_worker.start()
-
-    def _process_monitor_queue(self):
-        """Process monitor data queue in background"""
-        while True:
-            try:
-                # Get data from queue with timeout
-                payload = self._monitor_queue.get(timeout=1.0)
-                print(f"Processing queue item. Queue size: {self._monitor_queue.qsize()}")
-                
-                # Only process if cart has products
-                if payload["cart_data"]["detected_products"]:
-                    print(f"Cart has {len(payload['cart_data']['detected_products'])} products, sending to API...")
-                    # Check if enough time has passed since last API call
-                    current_time = time.time()
-                    time_since_last = current_time - self._last_api_call
-                    
-                    if time_since_last < self._min_api_interval:
-                        time.sleep(self._min_api_interval - time_since_last)
-
-                    # Make API call with lock
-                    with self._api_lock:
-                        try:
-                            response = requests.post(
-                                CART_SHOPPING_MONITOR_API, 
-                                json=payload,
-                                timeout=3  # Add timeout
-                            )
-                            self._last_api_call = time.time()
-                            
-                            if response.status_code == 200:
-                                print(f"API call successful: {response.json()}")
-                            else:
-                                print(f"API error: {response.status_code} - {response.text}")
-                                
-                        except Exception as e:
-                            print(f"API call failed: {e}")
-                else:
-                    print("Cart empty, skipping API call")
-
-            except Exception as e:
-                # Queue empty or other error, continue
-                pass
+    # Removed _start_monitor_worker and _process_monitor_queue methods
 
     def save_to_json(self):
         """Optimized save with debouncing"""
@@ -160,34 +109,7 @@ class CartState:
                 except Exception as e:
                     print(f"Error in cart state callback: {e}")
             
-            # Directly call send_monitor_data or add to queue
-            try:
-                # Get phone number
-                phone_number = ""
-                try:
-                    phone_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                            'config', 'phone_number.json')
-                    with open(phone_path, 'r') as f:
-                        phone_data = json.load(f)
-                        phone_number = phone_data.get("phone_number", "")
-                except Exception as e:
-                    print(f"Error reading phone number: {e}")
-                
-                # Prepare payload for queue
-                payload = {
-                    "phone_number": phone_number,
-                    "device_id": DEVICE_ID,
-                    "cart_data": cart_data
-                }
-                
-                # Add to monitor queue for API processing
-                try:
-                    self._monitor_queue.put(payload, block=False)
-                    print("Added cart data to API queue from save_to_json")
-                except:
-                    print("API queue full, skipping this update")
-            except Exception as e:
-                print(f"Error preparing monitor data from save_to_json: {e}")
+            # Removed monitor API related code
 
         except Exception as e:
             print(f"Error saving cart data: {e}")
@@ -287,42 +209,7 @@ class CartState:
             self._file_monitor = None
             print("Stopped JSON file monitoring")
 
-    def _send_monitor_data(self):
-        """Send cart data to monitor API in separate thread"""
-        try:
-            # Get phone number
-            phone_number = ""
-            try:
-                phone_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                        'config', 'phone_number.json')
-                with open(phone_path, 'r') as f:
-                    phone_data = json.load(f)
-                    phone_number = phone_data.get("phone_number", "")
-            except Exception as e:
-                print(f"Error reading phone number: {e}")
-
-            # Get cart data
-            with open(self.JSON_PATH, 'r') as f:
-                cart_data = json.load(f)
-
-            # Prepare payload
-            payload = {
-                "phone_number": phone_number,
-                "device_id": DEVICE_ID,
-                "cart_data": cart_data
-            }
-
-            print(f"Sending monitor data: {payload}")  # Debug print
-
-            # Send POST request
-            response = requests.post(CART_SHOPPING_MONITOR_API, json=payload)
-            if response.status_code == 200:
-                print(f"Cart data sent to monitor API successfully: {response.json()}")
-            else:
-                print(f"Error sending to monitor API: {response.status_code} - {response.text}")
-
-        except Exception as e:
-            print(f"Error in monitor thread: {e}")
+    # Removed _send_monitor_data method
 
     def _monitor_file(self):
         """Optimized file monitoring"""
@@ -341,36 +228,7 @@ class CartState:
                         # Only update if content actually changed
                         if self._content_changed(new_data):
                             self._update_cart_items(new_data)
-                            
-                            # Add data to queue for API processing
-                            try:
-                                # Get phone number
-                                phone_number = ""
-                                try:
-                                    phone_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                                        'config', 'phone_number.json')
-                                    with open(phone_path, 'r') as f:
-                                        phone_data = json.load(f)
-                                        phone_number = phone_data.get("phone_number", "")
-                                except Exception as e:
-                                    print(f"Error reading phone number: {e}")
-                                
-                                # Prepare payload for queue
-                                payload = {
-                                    "phone_number": phone_number,
-                                    "device_id": DEVICE_ID,
-                                    "cart_data": new_data
-                                }
-                                
-                                # Add to monitor queue for API processing
-                                try:
-                                    self._monitor_queue.put(payload, block=False)
-                                    print("Added cart data to API queue")
-                                except:
-                                    print("API queue full, skipping this update")
-                            except Exception as e:
-                                print(f"Error preparing monitor data: {e}")
-                            
+                            # Removed monitor API related code
                         last_hash = current_hash
 
             except Exception as e:

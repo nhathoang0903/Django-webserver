@@ -2415,3 +2415,48 @@
 2025-05-22 14:02:38,501 - Status check - active: True, should_run: True, app: running
 2025-05-22 14:02:42,782 - Status check - active: True, should_run: True, app: running
 2025-05-22 14:02:46,449 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:05,507 - Environment: DISPLAY=:0.0
+2025-05-22 17:56:05,510 - Environment: XAUTHORITY=/home/mtech/.Xauthority
+2025-05-22 17:56:05,511 - Environment: QT_QPA_PLATFORM=xcb
+2025-05-22 17:56:05,513 - Environment: XDG_RUNTIME_DIR=/run/user/1000
+2025-05-22 17:56:05,514 - Current user: 1000
+2025-05-22 17:56:05,515 - Current working directory: /home/mtech/Workspace/Pick-and-go-CS/src
+2025-05-22 17:56:05,530 - X server status: OK
+2025-05-22 17:56:05,561 - Service controller started...
+2025-05-22 17:56:05,596 - Status check - active: True, should_run: True, app: not running
+2025-05-22 17:56:05,597 - Starting app...
+2025-05-22 17:56:05,610 - App started successfully
+2025-05-22 17:56:06,213 - App error: 2025-05-22 17:56:06,212 - Starting Cartsy Application
+2025-05-22 17:56:06,217 - App error: 2025-05-22 17:56:06,216 - Set default language to Vietnamese
+2025-05-22 17:56:06,843 - App error: 2025-05-22 17:56:06,842 - Main window displayed
+2025-05-22 17:56:07,778 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:09,812 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:12,282 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:14,749 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:16,897 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:18,964 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:20,991 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:23,035 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:25,082 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:27,129 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:29,181 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:31,213 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:33,344 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:35,375 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:37,409 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:39,442 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:41,488 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:43,530 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:45,569 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:47,616 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:49,658 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:51,707 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:53,769 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:55,814 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:57,859 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:56:59,898 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:57:01,933 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:57:03,959 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:57:05,993 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:57:08,034 - Status check - active: True, should_run: True, app: running
+2025-05-22 17:57:10,068 - Status check - active: True, should_run: True, app: running

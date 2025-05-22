@@ -10,7 +10,6 @@ CUSTOMER_HISTORY_LINK_URL = f"{BASE_URL}/api/customer-history-link/"
 
 # Cart API configuration
 CART_STATUS_API = f"{BASE_URL}/api/device/status/"
-CART_END_SESSION_STATUS_API = f"{BASE_URL}/api/device/end-session/"
 CART_END_SESSION_API = f"{BASE_URL}/api/device/end-session/"
 CART_SHOPPING_MONITOR_API = f"{BASE_URL}/api/shopping/monitor/"
 CART_CONNECT = f"{BASE_URL}/api/device/connect/"

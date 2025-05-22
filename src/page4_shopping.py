@@ -24,7 +24,7 @@ from base_page import BasePage
 import requests
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
-from config import CART_END_SESSION_STATUS_API, DEVICE_ID, CART_CHECK_PAYMENT_SIGNAL, CART_END_SESSION_API
+from config import DEVICE_ID, CART_CHECK_PAYMENT_SIGNAL, CART_END_SESSION_API
 from threading import Thread
 from count_item import update_cart_count
 from utils.translation import _, get_current_language
@@ -40,31 +40,14 @@ class SessionMonitor(QThread):
         self.page_name = page_name  
 
     def run(self):
+        # This method no longer makes API calls to CART_END_SESSION_STATUS_API
         if self.page_name != "page4":  # Ensure this thread only runs in page4
             print(f"SessionMonitor is disabled for {self.page_name}")
             return
             
-        # Giữ nguyên việc kiểm tra API vì đây là API quan trọng để theo dõi trạng thái phiên
+        # Just keep the thread alive without API calls
         while self.is_running:
-            try:
-                # Get session status
-                url = f"{CART_END_SESSION_STATUS_API}{DEVICE_ID}/status/"
-                # print(f"Checking session status: {url}")
-                response = requests.get(url)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    # print(f"Session status response: {data}")
-                    
-                    if data.get("device_status") == "available":
-                        print(f"Session ended at: {data.get('last_session_end')}")
-                        self.session_ended.emit()
-                        break  # Exit thread when session ends
-                        
-            except Exception as e:
-                print(f"Error checking session status: {e}")
-                
-            time.sleep(0.5)  # Poll every 500ms
+            time.sleep(0.5)  # Small sleep to avoid CPU usage
 
     def stop(self):
         self.is_running = False
@@ -370,8 +353,8 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             self.session_monitor = SessionMonitor(page_name="page4")
             self.payment_monitor = PaymentSignalMonitor(page_name="page4")  # Pass page name here
             
-            # Connect signals
-            self.session_monitor.session_ended.connect(self.handle_remote_session_end)
+            # Connect signals - remove connection to session_ended as it's no longer emitted
+            # self.session_monitor.session_ended.connect(self.handle_remote_session_end)
             self.payment_monitor.payment_signal_received.connect(self.handle_payment_signal)
             
             # Start both monitors with offset
@@ -1361,7 +1344,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
     def handle_remote_session_end(self):
         """Handle session end from remote (mobile app)"""
-        print("Session ended remotely")
+        print("Session ended remotely - using local handling instead of API")
         if not self.transition_in_progress:
             self.transition_in_progress = True
             
