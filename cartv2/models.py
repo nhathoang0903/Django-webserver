@@ -565,7 +565,39 @@ class InventoryTransaction(models.Model):
             print(f"Error sending WebSocket inventory update: {ws_error}")
 
     def __str__(self):
-        return f"{self.transaction_type} - {self.product.name} - {self.quantity}"
+        return f"{self.transaction_type.title()} of {self.quantity} for {self.product.name}"
+
+class ProductEditLog(models.Model):
+    """Model to track product edits."""
+    product_id = models.IntegerField()  # Store product ID for reference even after product deletion
+    product_name = models.CharField(max_length=255)
+    field_changed = models.CharField(max_length=100)  # name, price, quantity, category, description, image_url
+    old_value = models.TextField(blank=True, null=True)
+    new_value = models.TextField(blank=True, null=True)
+    edited_by = models.CharField(max_length=100, default='admin')  # Who made the edit
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'product_edit_logs'
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"Edit {self.product_name} - {self.field_changed} at {self.timestamp}"
+
+class ProductDeletionLog(models.Model):
+    """Model to track product deletions."""
+    product_id = models.IntegerField()
+    product_name = models.CharField(max_length=255)
+    product_data = models.JSONField()  # Store complete product data
+    deleted_by = models.CharField(max_length=100, default='admin')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'product_deletion_logs'
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"Deleted {self.product_name} at {self.timestamp}"
 
 @receiver(post_save, sender=DeviceConnection)
 def create_device_status(sender, instance, created, **kwargs):

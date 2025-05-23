@@ -19,7 +19,9 @@ from .models import (
     CancelShopping,
     ShoppingRating, 
     PaymentShopping,
-    Notification  
+    Notification,
+    ProductEditLog,
+    ProductDeletionLog
 )
 from .models import SuperUserInfo
 from .serializers import (
@@ -946,10 +948,68 @@ def edit_product(request, product_id):
     product = get_object_or_404(Product, product_id=product_id)
     
     if request.method == 'POST':
+        print(f"[DEBUG] Starting edit for product {product_id}")
+        # Store old values BEFORE form validation
+        old_values = {
+            'name': product.name,
+            'quantity': str(product.quantity),
+            'price': str(product.price),
+            'category': product.category,
+            'description': product.description or ''
+        }
+        print(f"[DEBUG] Old values: {old_values}")
+        
         form = ProductForm(request.POST, instance=product)
+        
         if form.is_valid():
-            form.save()
+            print(f"[DEBUG] Form is valid")
+            # Save the form
+            updated_product = form.save()
+            
+            # Get the username of the editor (from request.user or default to 'admin')
+            edited_by = request.user.username if request.user.is_authenticated else 'admin'
+            
+            # Track changes and create log entries
+            new_values = {
+                'name': updated_product.name,
+                'quantity': str(updated_product.quantity),
+                'price': str(updated_product.price),
+                'category': updated_product.category,
+                'description': updated_product.description or ''
+            }
+            print(f"[DEBUG] New values: {new_values}")
+            
+            # Compare old and new values and create log entries for changes
+            changes_found = 0
+            for field, old_value in old_values.items():
+                new_value = new_values[field]
+                # Convert both values to strings for comparison
+                old_str = str(old_value).strip()
+                new_str = str(new_value).strip()
+                
+                if old_str != new_str:
+                    print(f"[DEBUG] Change detected in {field}: '{old_str}' -> '{new_str}'")
+                    try:
+                        ProductEditLog.objects.create(
+                            product_id=updated_product.product_id,
+                            product_name=updated_product.name,
+                            field_changed=field,
+                            old_value=old_str,
+                            new_value=new_str,
+                            edited_by=edited_by
+                        )
+                        changes_found += 1
+                        print(f"[DEBUG] Log entry created for {field}")
+                    except Exception as e:
+                        print(f"[ERROR] Failed to create log entry: {e}")
+                else:
+                    print(f"[DEBUG] No change in {field}: '{old_str}' == '{new_str}'")
+            
+            print(f"[DEBUG] Total changes logged: {changes_found}")
+            messages.success(request, f"Product '{updated_product.name}' updated successfully!")
             return redirect('product_list')
+        else:
+            print(f"[DEBUG] Form is not valid. Errors: {form.errors}")
     else:
         form = ProductForm(instance=product)
     
@@ -966,13 +1026,39 @@ def edit_product(request, product_id):
     
     return render(request, 'edit_product.html', context)
 def delete_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+    # Get the product instance or return 404
+    product = get_object_or_404(Product, product_id=product_id)
     
     if request.method == 'POST':
-        product.delete()  # Delete the product from the database
-        return redirect('product_list')  # Redirect after deletion
-
-    return render(request, 'delete_product.html', {'product': product})
+        # Store product data before deletion for logging
+        product_data = {
+            'product_id': product.product_id,
+            'name': product.name,
+            'price': float(product.price),
+            'quantity': product.quantity,
+            'category': product.category,
+            'description': product.description,
+            'image_url': product.image_url
+        }
+        
+        # Get the username of the deleter
+        deleted_by = request.user.username if request.user.is_authenticated else 'admin'
+        
+        # Create deletion log
+        ProductDeletionLog.objects.create(
+            product_id=product.product_id,
+            product_name=product.name,
+            product_data=product_data,
+            deleted_by=deleted_by
+        )
+        
+        # Delete the product
+        product.delete()
+        
+        messages.success(request, f"Product '{product.name}' has been deleted successfully!")
+        return redirect('product_list')
+    
+    return redirect('product_list')
 
 @login_required
 def add_stock_note(request, product_id):
@@ -1218,12 +1304,13 @@ def statisticsboard_view(request):
     trading_hours_data = [{'hour': f"{item['hour']:02}:00", 'total_amount': float(item['total_amount'])} for item in trading_hours]
 
     # Day-Part Analysis for today only 
-    day_part_data_query = today_revenue_data.annotate(part_of_day=Case(
-        When(timestamp__hour__lt=12, then=Value('Morning')),
-        When(timestamp__hour__lt=18, then=Value('Afternoon')),
-        default=Value('Evening'),
-        output_field=CharField()
-    )).values('part_of_day').annotate(total_amount=Sum('total_amount')).order_by('part_of_day')
+    day_part_data_query = History.objects.annotate(
+        part_of_day=Case(
+            When(timestamp__hour__lt=12, then=Value('Morning')),
+            When(timestamp__hour__lt=18, then=Value('Afternoon')),
+            default=Value('Evening'),
+            output_field=CharField()
+        )).values('part_of_day').annotate(total_amount=Sum('total_amount')).order_by('part_of_day')
     day_part_data = [{'part': item['part_of_day'], 'total_amount': float(item['total_amount'])} for item in day_part_data_query]
 
     # Add top customers data
@@ -5708,6 +5795,165 @@ class CheckNewProductView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class CheckProductEditsView(APIView):
+    """API to check recent product edits."""
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(
+        operation_description="Get recent product edits",
+        manual_parameters=[
+            openapi.Parameter(
+                'limit',
+                openapi.IN_QUERY,
+                description="Number of recent edits to retrieve (default: 10)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+            openapi.Parameter(
+                'product_id',
+                openapi.IN_QUERY,
+                description="Filter edits by product ID",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Product edits retrieved successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'edits': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'product_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'product_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'field_changed': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'old_value': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'new_value': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'edited_by': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'timestamp': openapi.Schema(type=openapi.TYPE_STRING)
+                                }
+                            )
+                        )
+                    }
+                )
+            ),
+            500: "Internal server error"
+        }
+    )
+    def get(self, request):
+        try:
+            from .models import ProductEditLog
+            
+            limit = int(request.query_params.get('limit', 10))
+            product_id = request.query_params.get('product_id')
+            
+            # Base queryset
+            queryset = ProductEditLog.objects.all()
+            
+            # Filter by product_id if provided
+            if product_id:
+                queryset = queryset.filter(product_id=product_id)
+            
+            # Get recent edits ordered by timestamp
+            recent_edits = queryset.order_by('-timestamp')[:limit]
+            
+            # Format response
+            edits_data = []
+            for edit in recent_edits:
+                edits_data.append({
+                    'product_id': edit.product_id,
+                    'product_name': edit.product_name,
+                    'field_changed': edit.field_changed,
+                    'old_value': edit.old_value,
+                    'new_value': edit.new_value,
+                    'edited_by': edit.edited_by,
+                    'timestamp': edit.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                })
+            
+            return Response({
+                'count': len(edits_data),
+                'edits': edits_data
+            })
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CheckProductDeletionsView(APIView):
+    """API to check recent product deletions."""
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(
+        operation_description="Get recent product deletions",
+        manual_parameters=[
+            openapi.Parameter(
+                'limit',
+                openapi.IN_QUERY,
+                description="Number of recent deletions to retrieve (default: 10)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Product deletions retrieved successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'deletions': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'product_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'product_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'product_data': openapi.Schema(type=openapi.TYPE_OBJECT),
+                                    'deleted_by': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'timestamp': openapi.Schema(type=openapi.TYPE_STRING)
+                                }
+                            )
+                        )
+                    }
+                )
+            ),
+            500: "Internal server error"
+        }
+    )
+    def get(self, request):
+        try:
+            from .models import ProductDeletionLog
+            
+            limit = int(request.query_params.get('limit', 10))
+            
+            # Get recent deletions
+            recent_deletions = ProductDeletionLog.objects.all().order_by('-timestamp')[:limit]
+            
+            # Format response
+            deletions_data = []
+            for deletion in recent_deletions:
+                deletions_data.append({
+                    'id': deletion.id,
+                    'product_id': deletion.product_id,
+                    'product_name': deletion.product_name,
+                    'product_data': deletion.product_data,
+                    'deleted_by': deletion.deleted_by,
+                    'timestamp': deletion.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                })
+            
+            return Response({
+                'count': len(deletions_data),
+                'deletions': deletions_data
+            })
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class AddStockView(APIView):
     """API to add stock to products."""
     permission_classes = [AllowAny]
@@ -6131,7 +6377,7 @@ def inventory_management_view(request):
                 'transaction_id': transaction.transaction_id,
                 'transaction_type': transaction.transaction_type,
                 'quantity': transaction.quantity,
-                'timestamp': transaction.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+                'timestamp': transaction.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                 'notes': transaction.notes,
                 'reference_id': transaction.reference_id
             })

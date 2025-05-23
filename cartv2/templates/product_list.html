@@ -344,6 +344,73 @@
                 {% include "includes/product_modals.html" with product=current_product %}
             {% endwith %}
             
+            <!-- Delete Product Modal -->
+            <div class="modal fade" id="deleteModal{{ product.product_id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ product.product_id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title" id="deleteModalLabel{{ product.product_id }}">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Delete Product
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-center mb-4">
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    Are you sure you want to delete this product?
+                                </div>
+                            </div>
+                            
+                            <div class="product-details p-3 bg-light rounded">
+                                <div class="row">
+                                    <div class="col-md-4 text-center">
+                                        <img src="{{ product.image_url|default:'https://via.placeholder.com/150' }}" 
+                                             class="img-fluid rounded mb-2" 
+                                             alt="{{ product.name }}"
+                                             style="max-height: 150px; object-fit: cover;">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h5 class="mb-3">{{ product.name }}</h5>
+                                        <div class="mb-2">
+                                            <span class="badge bg-primary me-2">ID: {{ product.product_id }}</span>
+                                            <span class="badge bg-info">{{ product.category }}</span>
+                                        </div>
+                                        <p class="mb-2">
+                                            <i class="fas fa-tag me-2 text-muted"></i>
+                                            Price: {{ product.price|intcomma }} VNĐ
+                                        </p>
+                                        <p class="mb-2">
+                                            <i class="fas fa-boxes me-2 text-muted"></i>
+                                            Stock: {{ product.quantity }} units
+                                        </p>
+                                        {% if product.description %}
+                                        <p class="mb-0 text-muted small">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            {{ product.description|truncatechars:100 }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Note:</strong> This action cannot be undone. All product data and history will be permanently deleted.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <a href="{% url 'delete_product' product.product_id %}" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Delete Product
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             {% empty %}
             <!-- Empty State -->
             <div class="col-12">
@@ -477,9 +544,7 @@
                                 
                                 <!-- Quantity -->
                                 <div class="col-md-6">
-                                    <label for="productQuantity" class="form-label">Quantity*</label>
-                                    <input type="number" class="form-control" id="productQuantity" name="quantity" 
-                                           min="0" max="2147483647" required>
+                                    <input type="hidden" class="form-control" id="productQuantity" name="quantity" value="1" required>
                                 </div>
                                 
                                 <!-- Description -->
@@ -590,6 +655,19 @@
             </div>
         </div>
         {% endfor %}
+
+        <!-- Delete Success Toast -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="deleteSuccessToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Product deleted successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -1131,6 +1209,7 @@
                     jsonData[key] = value;
                 }
             });
+            jsonData['quantity'] = 1; // Ensure quantity is always 1
 
             // Send POST request to API
             return fetch('/products/', {
@@ -1298,6 +1377,12 @@
         // Bulk Add Stock Functionality
         // This has been moved to bulk_add_stock.js
 
+        // Handle delete success
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('deleted') === 'true') {
+            const toast = new bootstrap.Toast(document.getElementById('deleteSuccessToast'));
+            toast.show();
+        }
     });
     </script>
 </body>

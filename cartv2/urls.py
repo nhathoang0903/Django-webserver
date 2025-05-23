@@ -61,6 +61,8 @@ from .views import (
     TestFCMNotificationView,
     UploadImageView,
     CheckNewProductView,
+    CheckProductEditsView,
+    CheckProductDeletionsView,
     AddStockView,
     InventoryHistoryView,
     LowStockProductsView,
@@ -167,6 +169,8 @@ urlpatterns = [
     path('api/payment/status/', PaymentStatusView.as_view(), name='payment-status'),
     # path('api/shopping/payment/', PaymentShoppingView.as_view(), name='payment-shopping'),
     path('api/products/check-new/', CheckNewProductView.as_view(), name='check-new-products'),
+    path('api/products/check-edits/', CheckProductEditsView.as_view(), name='check-product-edits'),
+    path('api/products/check-deletions/', CheckProductDeletionsView.as_view(), name='check-product-deletions'),
     path('api/inventory/history/<int:product_id>/', InventoryHistoryView.as_view(), name='inventory_history'),
     path('api/inventory/low-stock/', LowStockProductsView.as_view(), name='low_stock_products'),
 ]
