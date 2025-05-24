@@ -395,8 +395,8 @@ class ProductCard(QFrame):
                     break
             
             # Start cooldown timer
-            ProductCard._cooldown_timer.start(900)
-            print("[Page3] Started global add-to-cart cooldown for 0.9s")
+            ProductCard._cooldown_timer.start(700)
+            print("[Page3] Started global add-to-cart cooldown for 0.7s")
             
         except Exception as e:
             print(f"[Page3] Error adding to cart: {e}")

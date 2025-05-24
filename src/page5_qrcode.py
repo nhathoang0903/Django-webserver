@@ -31,9 +31,10 @@ from cart_state import CartState
 from threading import Thread, Event  
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
-import pyttsx3
+# import pyttsx3 
 # import qrcode
 # from vietqr.VietQR import genQRString, getBincode
+
 from config import CART_CANCEL_PAYMENT_SIGNAL, DEVICE_ID
 from utils.translation import _, get_current_language
 
@@ -552,8 +553,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                         print(f"[QR_TIMING] Generation time displayed at: {time.time() - qr_start:.4f}s")
                         
                         # Start transaction check with delay
-                        print(f"[QR_TIMING] Transaction check scheduled to start in 15 seconds")
-                        QTimer.singleShot(15000, self.start_transaction_check)  # Increased from 10 to 15 seconds
+                        print(f"[QR_TIMING] Transaction check scheduled to start in 10 seconds")
+                        QTimer.singleShot(10000, self.start_transaction_check)
                         
                         print(f"[QR_TIMING] Total QR code loading time: {time.time() - qr_start:.4f}s")
                     except Exception as inner_e:
@@ -1002,30 +1003,12 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                         self.payment_sound.setVolume(1.0)
                         self.payment_sound.play()
                         
-                        # Wait for payment sound then speak amount
-                        def speak_amount():
-                            try:
-                                # Use the collected donation amount
-                                amount = QRCodePage.donation_amount
-                                amount_words = self.number_to_vietnamese(amount)
-                                print(f"Speaking amount: {amount} ({amount_words})")  # Debug print
-                                
-                                # Only speak if there's an amount (redundant check but kept for safety)
-                                if amount > 0:
-                                    # Chỉ đọc số tiền với tốc độ chậm hơn (100 từ/phút)
-                                    subprocess.run(['espeak', '-vvi', '-s100', '-g5', amount_words + ' đồng'])
-                            except Exception as e:
-                                print(f"Error speaking amount: {e}")
-                        
-                        # Tăng delay lên 2500ms để đảm bảo âm thanh sucesspayment.wav phát xong
-                        QTimer.singleShot(2500, speak_amount)
+                        # Wait for payment sound then show success page
+                        QTimer.singleShot(2500, lambda: self.transition_overlay.fadeIn(show_new_page))
                     
                     # Start the sequence
                     self.ting_sound.play()
                     QTimer.singleShot(1000, play_payment_and_speak)
-                    
-                    # Increase transition delay for sound to complete
-                    QTimer.singleShot(5000, lambda: self.transition_overlay.fadeIn(show_new_page))
                     
                 except Exception as e:
                     print(f"Error playing sounds: {e}")
@@ -1128,23 +1111,6 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         minutes = int(remaining // 60)
         seconds = int(remaining % 60)
         self.countdown_label.setText(f"{_('qrCodePage.timeRemaining')}{minutes:02d}:{seconds:02d}")
-
-    def read_amount(self):
-        """Read the total amount using TTS"""
-        try:
-            engine = pyttsx3.init()
-            engine.setProperty('rate', 150)  # Set speech rate
-            engine.setProperty('volume', 1.0)  # Set volume level
-
-            # Format the amount for reading
-            amount_text = f"{self.total_amount:,}".replace(",", ".")  # Format with dots for thousands
-            message = f"Số tiền là {amount_text} đồng."
-            print(f"Reading amount: {message}")  # Debug print
-
-            engine.say(message)
-            engine.runAndWait()
-        except Exception as e:
-            print(f"Error reading amount: {e}")
 
     def closeEvent(self, event):
         self.cleanup_resources()

@@ -1791,6 +1791,18 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
 
     def update_cart_display(self):
         """Memory-optimized cart display"""
+        # --- BEGIN MODIFICATION (Save scroll position) ---
+        old_scroll_value = -1
+        # Find the existing scroll area within content_widget (which holds content_layout)
+        # This must be done BEFORE clearing the layout
+        existing_scroll_area = self.content_widget.findChild(CartItemsScrollArea)
+        if existing_scroll_area:
+            old_scroll_value = existing_scroll_area.verticalScrollBar().value()
+            print(f"[Page4] Saved scroll position: {old_scroll_value}")
+        else:
+            print(f"[Page4] No existing scroll area found to save position.")
+        # --- END MODIFICATION (Save scroll position) ---
+
         # Clear widgets properly
         self.clear_layout(self.content_layout)
         
@@ -1853,7 +1865,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             scroll_layout.setContentsMargins(0, 0, 0, 0)
             
             # Create scroll area for items with custom scrolling behavior
-            scroll_area = CartItemsScrollArea()
+            scroll_area = CartItemsScrollArea() 
             
             # Items container
             items_container = QWidget()
@@ -1887,6 +1899,16 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             
             # Add scroll container to main content
             self.content_layout.addWidget(scroll_container, stretch=1)
+
+            # --- BEGIN MODIFICATION (Restore scroll position) ---
+            if old_scroll_value != -1:
+                print(f"[Page4] Scheduling scroll restore to: {old_scroll_value} for new scroll_area instance.")
+                # Use a 50ms delay and call the helper method
+                # The lambda captures the current new_scroll_area (aliased as 'sa') and old_scroll_value (aliased as 'val')
+                QTimer.singleShot(10, lambda sa=scroll_area, val=old_scroll_value: self._restore_scroll_position_with_delay(sa, val))
+            else:
+                print(f"[Page4] No old scroll value to restore or it was invalid.")
+            # --- END MODIFICATION (Restore scroll position) ---
 
         # Calculate total amount
         total_amount = sum(float(product['price']) * quantity for product, quantity in self.cart_state.cart_items) if self.cart_state.cart_items else 0
@@ -2343,6 +2365,18 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         camera_layout.addWidget(button_container, 0, Qt.AlignCenter)
         
         return camera_container
+
+    def _restore_scroll_position_with_delay(self, scroll_area_instance, value_to_set):
+        """Helper to restore scroll position after a delay, with logging."""
+        if scroll_area_instance and not sip.isdeleted(scroll_area_instance):
+            scrollbar = scroll_area_instance.verticalScrollBar()
+            print(f"[Page4 Timer] Attempting to restore scroll to {value_to_set}.")
+            print(f"[Page4 Timer] Scrollbar state before set: value={scrollbar.value()}, min={scrollbar.minimum()}, max={scrollbar.maximum()}, pageStep={scrollbar.pageStep()}")
+            scrollbar.setValue(value_to_set)
+            # Short delay to log the value *after* Qt might have processed the setValue
+            QTimer.singleShot(10, lambda: print(f"[Page4 Timer] Scrollbar state after set({value_to_set}): value={scrollbar.value()}"))
+        else:
+            print(f"[Page4 Timer] Scroll area instance is deleted or invalid. Cannot restore position.")
 
 if __name__ == '__main__':
     import sys
