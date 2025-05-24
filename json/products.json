@@ -1,10 +1,10 @@
 [
   {
-    "category": "Beverage",
+    "category": "Beverages",
     "description": "Contains sugar (~13g/100ml), caffeine, and vitamin B, providing a quick energy boost. A 330ml can provides about 172 kcal.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png",
     "name": "Canned_Strawberry_Sting",
-    "price": "12000.00",
+    "price": "12000",
     "product_id": 1,
     "quantity": 1
   },
@@ -223,14 +223,5 @@
     "price": "5000.00",
     "product_id": 25,
     "quantity": 1
-  },
-  {
-    "product_id": 26,
-    "name": "Guava_Candy",
-    "quantity": 1,
-    "price": "15000.00",
-    "description": "Good for teeth",
-    "category": "Snack",
-    "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1747329800/products/qxku7o7sopnnzx5zlkuh.png"
   }
 ]

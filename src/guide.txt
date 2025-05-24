@@ -63,5 +63,6 @@ tail -f app/logs/service.log
 v4l2-ctl --list-devices
 
 #11. Kích hoạt products-update.service
+sudo nano /etc/systemd/system/products-update.service
 sudo systemctl enable products-update.service
 sudo systemctl start products-update.service

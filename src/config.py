@@ -4,7 +4,7 @@ import os
 #SERVER_IP = "192.168.5.6"
 #SERVER_PORT = "9000"
 #BASE_URL = f"http://{SERVER_IP}:{SERVER_PORT}"
-BASE_URL= f"http://192.168.1.237:9000"
+BASE_URL= f"http://172.21.1.169:9000"
 HISTORY_API_URL = f"{BASE_URL}/history/"
 CUSTOMER_HISTORY_LINK_URL = f"{BASE_URL}/api/customer-history-link/"  
 
@@ -19,6 +19,8 @@ CART_CANCEL_PAYMENT_SIGNAL = f"{BASE_URL}/api/shopping/cancel-payment-signal/"
 
 # Products API configuration
 PRODUCTS_CHECK_NEW_API = f"{BASE_URL}/api/products/check-new/"
+PRODUCTS_CHECK_EDITS_API = f"{BASE_URL}/api/products/check-edits/?limit=1"
+PRODUCTS_CHECK_DELETIONS_API = f"{BASE_URL}/api/products/check-deletions/?limit=1"
 
 # Device configuration
 DEVICE_ID = "raspi_cart_001"

@@ -14,7 +14,7 @@ import subprocess
 from page_timing import PageTiming
 from cart_state import CartState
 import requests
-from config import CART_END_SESSION_API, DEVICE_ID, PRODUCTS_CHECK_NEW_API
+from config import CART_END_SESSION_API, DEVICE_ID, PRODUCTS_CHECK_NEW_API, PRODUCTS_CHECK_EDITS_API, PRODUCTS_CHECK_DELETIONS_API
 import importlib
 import sys
 from utils.translation import _, get_current_language
@@ -178,6 +178,7 @@ class ProductCard(QFrame):
         """)
         name_layout.addWidget(name_label)
         layout.addWidget(name_container)
+        self.name_label_ref = name_label # Store reference
 
         # Price - MADE LARGER
         price = "{:,.0f}".format(float(self.product['price'])).replace(',', '.')
@@ -186,6 +187,7 @@ class ProductCard(QFrame):
         price_label.setAlignment(Qt.AlignCenter)
         price_label.setStyleSheet("color: #E72225; margin-top: 5px;")
         layout.addWidget(price_label)
+        self.price_label_ref = price_label # Store reference
 
         # Add to Cart button - MADE LARGER
         self.add_to_cart_btn = QPushButton(_("productPage.addToCart"))
@@ -214,6 +216,31 @@ class ProductCard(QFrame):
         
         # Check if product is already in cart and update button accordingly
         self.update_button_state()
+        
+    def refresh_ui(self):
+        """Refresh the UI elements of the card with current product data."""
+        # Update name
+        name = self.product['name'].replace('_', ' ')
+        if hasattr(self, 'name_label_ref'): 
+             self.name_label_ref.setText(name)
+        else:
+            print(f"[Page3] Warning: name_label_ref not found for {self.product['name']}")
+
+        # Update price
+        price = "{:,.0f}".format(float(self.product['price'])).replace(',', '.')
+        if hasattr(self, 'price_label_ref'): 
+            self.price_label_ref.setText(f"{price} vnd")
+        else:
+            print(f"[Page3] Warning: price_label_ref not found for {self.product['name']}")
+        
+        # Reload image if URL changed
+        # Assuming the image_url might change, otherwise this might be redundant if only other fields change
+        # For now, always reload to be safe, can be optimized later if image_url is static for a product_id
+        self.load_image_async()
+        
+        # Update button state (e.g. if product was removed from cart elsewhere)
+        self.update_button_state()
+        print(f"[Page3] Refreshed UI for ProductCard: {self.product['name']}")
         
     def update_button_state(self):
         """Kiểm tra sản phẩm đã có trong giỏ hàng chưa và cập nhật trạng thái button"""
@@ -587,58 +614,118 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                 return
                 
             current_products = ProductPage._products_cache
-            
-            # Get existing product IDs - use set for faster lookups
             existing_product_ids = {product["product_id"] for product in current_products}
-            
-            # Fetch new products from API with short timeout
+            something_changed = False
+
+            # 1. Check for new products
             try:
-                response = requests.get(PRODUCTS_CHECK_NEW_API, timeout=2)  # Shorter timeout for faster response
-                if response.status_code != 200:
-                    return
-                    
+                response = requests.get(PRODUCTS_CHECK_NEW_API, timeout=2)
+                if response.status_code == 200:
                 api_data = response.json()
                 new_products_data = api_data.get("products", [])
-                
-                # Check for new products - optimize by checking if any match first
                 new_products_found = []
                 for product in new_products_data:
                     product_id = product.get("product_id")
                     if product_id and product_id not in existing_product_ids:
-                        # Remove low_stock_threshold field if present
                         if "low_stock_threshold" in product:
                             del product["low_stock_threshold"]
                         new_products_found.append(product)
+                            existing_product_ids.add(product_id) # Add to set to avoid issues with edits/deletes in same batch
                 
-                # If we found new products, update everything
                 if new_products_found:
                     print(f"[Page3] Adding {len(new_products_found)} new products to display")
-                    
-                    # Add to current products
                     current_products.extend(new_products_found)
-                    
-                    # Update the products cache
-                    ProductPage._products_cache = current_products
-                    
-                    # Save updated product list to file in a non-blocking way
+                        ProductPage._products_cache = current_products # Update cache
+                        self.add_new_product_cards(new_products_found) # Creates cards and adds to _cards_cache
+                        something_changed = True
+            except requests.exceptions.Timeout:
+                pass # Skip silently
+            except Exception as e:
+                print(f"[Page3] Error fetching or processing new products: {e}")
+
+            # 2. Check for edited products
+            try:
+                response = requests.get(PRODUCTS_CHECK_EDITS_API, timeout=2)
+                if response.status_code == 200:
+                    api_data = response.json()
+                    edited_products_data = api_data.get("edits", [])
+                    if edited_products_data:
+                        print(f"[Page3] Processing {len(edited_products_data)} product edits.")
+                        for edit in edited_products_data:
+                            product_id_to_edit = edit.get("product_id")
+                            field_to_change = edit.get("field_changed")
+                            new_value = edit.get("new_value")
+
+                            if product_id_to_edit is not None and field_to_change and new_value is not None:
+                                # Update in _products_cache
+                                product_updated_in_cache = False
+                                for p_idx, p_cache in enumerate(ProductPage._products_cache):
+                                    if p_cache.get("product_id") == product_id_to_edit:
+                                        if p_cache.get(field_to_change) != new_value:
+                                            print(f"[Page3] Updating product ID {product_id_to_edit} in _products_cache: field '{field_to_change}' to '{new_value}'")
+                                            ProductPage._products_cache[p_idx][field_to_change] = new_value
+                                            product_updated_in_cache = True
+                                            something_changed = True
+                                        break
+                                
+                                # Update ProductCard in _cards_cache
+                                if product_updated_in_cache: # Only update card if product cache was changed
+                                    for card in ProductPage._cards_cache:
+                                        if card.product.get("product_id") == product_id_to_edit:
+                                            # The card.product is a reference to the item in _products_cache, so it's already updated.
+                                            # We just need to tell the card to refresh its display.
+                                            card.refresh_ui()
+                                            print(f"[Page3] Refreshed UI for edited product ID {product_id_to_edit}")
+                                            break
+            except requests.exceptions.Timeout:
+                pass # Skip silently
+            except Exception as e:
+                print(f"[Page3] Error fetching or processing product edits: {e}")
+
+            # 3. Check for deleted products
+            try:
+                response = requests.get(PRODUCTS_CHECK_DELETIONS_API, timeout=2)
+                if response.status_code == 200:
+                    api_data = response.json()
+                    deleted_products_data = api_data.get("deletions", [])
+                    product_ids_to_delete = {d.get("product_id") for d in deleted_products_data if d.get("product_id") is not None}
+
+                    if product_ids_to_delete:
+                        print(f"[Page3] Processing deletion for product IDs: {product_ids_to_delete}")
+                        # Remove from _products_cache
+                        original_product_count = len(ProductPage._products_cache)
+                        ProductPage._products_cache = [p for p in ProductPage._products_cache if p.get("product_id") not in product_ids_to_delete]
+                        if len(ProductPage._products_cache) != original_product_count:
+                            something_changed = True
+
+                        # Remove from _cards_cache and grid_layout
+                        cards_to_remove = [card for card in ProductPage._cards_cache if card.product.get("product_id") in product_ids_to_delete]
+                        if cards_to_remove:
+                            for card in cards_to_remove:
+                                print(f"[Page3] Removing card for product ID {card.product.get('product_id')} from UI and cache.")
+                                card.hide()
+                                self.grid_layout.removeWidget(card)
+                                card.deleteLater() # Important for cleanup
+                                ProductPage._cards_cache.remove(card)
+                            something_changed = True # Ensure refresh if cards were removed
+            except requests.exceptions.Timeout:
+                pass # Skip silently
+            except Exception as e:
+                print(f"[Page3] Error fetching or processing product deletions: {e}")
+
+            # If anything changed, save to JSON and update display
+            if something_changed:
+                print("[Page3] Product data changed, saving and refreshing display.")
                     threading.Thread(target=self._save_product_json, 
-                                   args=(current_products,), 
+                               args=(ProductPage._products_cache,), 
                                    daemon=True).start()
                     
-                    # Create new product cards for the new products
-                    self.add_new_product_cards(new_products_found)
-                    
-                    # Reapply the current category filter
+                # Reapply the current category filter to update the view
                     if hasattr(self, 'category_dropdown') and hasattr(self.category_dropdown, 'current_category'):
                         current_category = self.category_dropdown.current_category
-                        self.filter_products(current_category)
-                    
-            except requests.exceptions.Timeout:
-                # Skip silently if timeout - don't log to avoid filling logs
-                pass
-            except Exception as e:
-                # Only log other errors
-                print(f"[Page3] Error fetching or processing new products: {e}")
+                    self.filter_products(current_category) # This will re-populate the grid
+                else:
+                    self.filter_products("All Categories") # Default if no category selected
                 
         except Exception as e:
             print(f"[Page3] Error in check_for_new_products: {e}")
