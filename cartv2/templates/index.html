@@ -22,14 +22,16 @@
     
     <style>
         :root {
-            --primary-color: #4F46E5;
-            --primary-hover: #4338CA;
+            --primary-color: #507849;
+            --primary-hover: #3f5f3a;
             --secondary-color: #10B981;
-            --secondary-hover: #059669;
+            --secondary-hover: #10B981;
             --text-dark: #1F2937;
             --text-light: #6B7280;
             --bg-light: #F9FAFB;
             --white: #FFFFFF;
+            --footer-bg: linear-gradient(135deg, #2D3748, #4A5568);
+            --footer-accent: #E53E3E;
         }
 
         body {
@@ -39,14 +41,99 @@
             overflow-x: hidden;
         }
 
+        /* Enhanced Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+            40%, 43% { transform: translate3d(0,-30px,0); }
+            70% { transform: translate3d(0,-15px,0); }
+            90% { transform: translate3d(0,-4px,0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes wobble {
+            0% { transform: translateX(0%); }
+            15% { transform: translateX(-25px) rotate(-5deg); }
+            30% { transform: translateX(20px) rotate(3deg); }
+            45% { transform: translateX(-15px) rotate(-3deg); }
+            60% { transform: translateX(10px) rotate(2deg); }
+            75% { transform: translateX(-5px) rotate(-1deg); }
+            100% { transform: translateX(0%); }
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes rotateIn {
+            from { transform: rotate(-200deg); opacity: 0; }
+            to { transform: rotate(0); opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.3); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.3); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.3); }
+            70% { transform: scale(1); }
+        }
+
+        /* Animation Classes */
+        .bounce { animation: bounce 2s infinite; }
+        .pulse { animation: pulse 2s infinite; }
+        .wobble:hover { animation: wobble 1s; }
+        .slide-up { animation: slideInUp 1s ease-out; }
+        .rotate-in { animation: rotateIn 1s ease-out; }
+        .zoom-in { animation: zoomIn 1s ease-out; }
+        .fade-left { animation: fadeInLeft 1s ease-out; }
+        .fade-right { animation: fadeInRight 1s ease-out; }
+        .heartbeat { animation: heartbeat 1.5s infinite; }
+
         .navbar {
             background-color: var(--white);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
         }
 
         .navbar-brand img {
             height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover img {
+            transform: scale(1.1) rotate(5deg);
         }
 
         .navbar-nav .nav-link {
@@ -54,10 +141,28 @@
             font-weight: 500;
             padding: 0.5rem 1rem;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .navbar-nav .nav-link:hover {
             color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+            left: 0;
         }
 
         .auth-buttons .btn {
@@ -76,6 +181,8 @@
 
         .btn-login:hover {
             background-color: rgba(79, 70, 229, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .btn-signup {
@@ -86,15 +193,27 @@
 
         .btn-signup:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         /* Hero Section */
         .hero {
             padding: 6rem 0;
-            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
             position: relative;
             overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(80,120,73,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
         }
 
         .hero-content {
@@ -135,18 +254,22 @@
         .btn-primary:hover {
             background-color: var(--primary-hover);
             border-color: var(--primary-hover);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(80,120,73,0.3);
         }
 
         .btn-secondary {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+            background-color: var(--white);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
         }
 
         .btn-secondary:hover {
-            background-color: var(--secondary-hover);
-            border-color: var(--secondary-hover);
-            transform: translateY(-2px);
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(16,185,129,0.3);
         }
 
         .hero-image {
@@ -154,6 +277,65 @@
             height: auto;
             filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.1));
             animation: float 3s ease-in-out infinite;
+        }
+
+        /* Chibi Characters Section */
+        .chibi-section {
+            position: relative;
+            padding: 3rem 0;
+            background: linear-gradient(45deg, #f0f9ff, #e0f2fe);
+            overflow: hidden;
+        }
+
+        .chibi-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .chibi-character {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            max-width: 300px;
+        }
+
+        .chibi-character:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .chibi-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .admin-chibi {
+            color: #3B82F6;
+            animation: pulse 2s infinite;
+        }
+
+        .user-chibi {
+            color: #10B981;
+            animation: bounce 2s infinite;
+        }
+
+        .chibi-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .chibi-desc {
+            color: var(--text-light);
+            font-size: 0.9rem;
         }
 
         /* Features Section */
@@ -176,19 +358,44 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             margin-bottom: 2rem;
+            height: 90%;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
             height: 100%;
-            transition: all 0.3s ease;
+            background: linear-gradient(90deg, transparent, rgba(80,120,73,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
         }
 
         .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transform: translateY(-15px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
 
         .feature-icon {
             font-size: 2.5rem;
             color: var(--primary-color);
             margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2) rotate(10deg);
+            color: var(--secondary-color);
         }
 
         .feature-title {
@@ -220,8 +427,8 @@
         }
 
         .step-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
         .step-number {
@@ -238,6 +445,7 @@
             justify-content: center;
             font-size: 1.5rem;
             font-weight: 700;
+            animation: heartbeat 2s infinite;
         }
 
         .step-title {
@@ -257,52 +465,154 @@
             background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
             color: var(--white);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite reverse;
         }
 
         .cta h2 {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
+            line-height: 1.3;
         }
 
         .cta p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 2;
+            line-height: 1.6;
+            opacity: 0.95;
         }
 
         .cta .btn {
-            padding: 12px 32px;
+            padding: 15px 40px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1.1rem;
             background-color: var(--white);
             color: var(--primary-color);
             border: none;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
         }
 
         .cta .btn:hover {
             background-color: rgba(255, 255, 255, 0.9);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            color: var(--primary-color);
         }
 
-        /* Footer */
+        .cta .btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .cta .btn:hover .fa-arrow-right {
+            transform: translateX(5px);
+        }
+
+        .cta .btn:hover .fa-chevron-right {
+            transform: translateX(8px);
+            animation: arrowBounce 0.6s ease-in-out;
+        }
+
+        @keyframes arrowBounce {
+            0%, 100% { transform: translateX(8px); }
+            50% { transform: translateX(12px); }
+        }
+
+        /* Statistics Counter Section */
+        .stats {
+            padding: 4rem 0;
+            background: var(--primary-color);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 60px 60px;
+            animation: float 10s linear infinite;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        .stat-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Enhanced Footer */
         .footer {
             padding: 4rem 0 2rem;
-            background-color: var(--text-dark);
-            color: var(--bg-light);
+            background: var(--footer-bg);
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--footer-accent) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 15s linear infinite;
+            opacity: 0.1;
         }
 
         .footer-logo img {
             height: 40px;
             margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .footer-logo:hover img {
+            transform: scale(1.1) rotate(5deg);
         }
 
         .footer-text {
-            color: var(--text-light);
+            color: #E2E8F0;
             margin-bottom: 2rem;
         }
 
@@ -310,6 +620,18 @@
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
+            color: var(--white);
+            position: relative;
+        }
+
+        .footer h5::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--footer-accent);
         }
 
         .footer-links {
@@ -323,52 +645,87 @@
         }
 
         .footer-links a {
-            color: var(--text-light);
+            color: #E2E8F0;
             text-decoration: none;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .footer-links a:hover {
-            color: var(--white);
+            color: var(--footer-accent);
+            transform: translateX(5px);
         }
 
         .social-links {
-            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .social-links a {
-            display: inline-flex;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--white);
-            margin-right: 0.75rem;
-            font-size: 1.2rem;
+            text-decoration: none;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .social-links a:hover {
-            background-color: var(--primary-color);
-            transform: translateY(-3px);
+            background: var(--footer-accent);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 10px 25px rgba(229,62,62,0.3);
         }
+
+        .social-links .facebook:hover { background: #1877F2; }
+        .social-links .linkedin:hover { background: #0A66C2; }
+        .social-links .tiktok:hover { background: #000000; }
 
         .copyright {
             margin-top: 3rem;
             padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
             text-align: center;
-            color: var(--text-light);
+            color: #E2E8F0;
             font-size: 0.9rem;
+            position: relative;
+            z-index: 2;
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
+        /* Fade in effects */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+        .fade-in {
+            opacity: 0;
+            animation: fadeInUp 1s ease-in-out forwards;
+        }
+
+        /* Additional Animations */
+        @keyframes slideInLeft {
+            from { transform: translateX(-100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-in-left { animation: slideInLeft 1s ease-out; }
+        .slide-in-right { animation: slideInRight 1s ease-out; }
 
         @media (max-width: 991px) {
             .hero h1 {
@@ -381,6 +738,9 @@
             .hero-image {
                 margin-top: 3rem;
             }
+            .chibi-container {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -389,7 +749,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">
+            <a class="navbar-brand wobble" href="{% url 'index' %}">
                 <img src="{% static 'img/icon2_fixed.png' %}" alt="Smart Cart Logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -409,17 +769,17 @@
                 </ul>
                 <div class="auth-buttons">
                     <a href="{% url 'login' %}" class="btn btn-login">Log In</a>
-                    <a href="{% url 'signup' %}" class="btn btn-signup">Sign Up</a>
+                    <a href="{% url 'signup' %}" class="btn btn-signup pulse">Sign Up</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero fade-in">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6 hero-content">
+                <div class="col-lg-6 hero-content fade-left">
                     <h1>Transform Your Shopping Experience</h1>
                     <p>Our Smart Shopping Cart System revolutionizes retail with automated checkout, inventory tracking, and a seamless customer experience.</p>
                     <div class="hero-buttons">
@@ -427,8 +787,30 @@
                         <a href="#features" class="btn btn-secondary">Learn More</a>
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 fade-right">
                     <img src="{% static 'img/banner.png' %}" alt="Smart Shopping Cart" class="hero-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chibi Characters Section -->
+    <section class="chibi-section">
+        <div class="container">
+            <div class="chibi-container">
+                <div class="chibi-character zoom-in">
+                    <span class="chibi-icon admin-chibi">
+                        <i class="fas fa-user-tie"></i>
+                    </span>
+                    <h3 class="chibi-title">Smart Admin</h3>
+                    <p class="chibi-desc">Smart management with intuitive dashboard and detailed reports</p>
+                </div>
+                <div class="chibi-character slide-up">
+                    <span class="chibi-icon user-chibi">
+                        <i class="fas fa-shopping-cart"></i>
+                    </span>
+                    <h3 class="chibi-title">Happy Customer</h3>
+                    <p class="chibi-desc">Enjoy a seamless shopping experience with our smart shopping cart system</p>
                 </div>
             </div>
         </div>
@@ -437,10 +819,10 @@
     <!-- Features Section -->
     <section class="features" id="features">
         <div class="container">
-            <h2 class="section-title">Powerful Features</h2>
+            <h2 class="section-title rotate-in">Powerful Features</h2>
             <div class="row">
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card slide-in-left wobble">
                         <div class="feature-icon">
                             <i class="fas fa-barcode"></i>
                         </div>
@@ -449,7 +831,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card slide-in-left wobble">
                         <div class="feature-icon">
                             <i class="fas fa-chart-line"></i>
                         </div>
@@ -458,7 +840,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card slide-in-left wobble">
                         <div class="feature-icon">
                             <i class="fas fa-mobile-alt"></i>
                         </div>
@@ -467,7 +849,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card slide-in-right wobble">
                         <div class="feature-icon">
                             <i class="fas fa-box"></i>
                         </div>
@@ -476,7 +858,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card slide-in-right wobble">
                         <div class="feature-icon">
                             <i class="fas fa-user-friends"></i>
                         </div>
@@ -485,12 +867,44 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card slide-in-right wobble">
                         <div class="feature-icon">
                             <i class="fas fa-shield-alt"></i>
                         </div>
                         <h3 class="feature-title">Secure System</h3>
                         <p class="feature-description">Protect your business and customer data with our advanced security protocols.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number"><span data-target="100">0</span>+</div>
+                        <div class="stat-label">Customer satisfaction</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number"><span data-target="500">0</span>+</div>
+                        <div class="stat-label">Projects completed</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number"><span data-target="6">0</span>+</div>
+                        <div class="stat-label">Years of operation</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number"><span data-target="97">0</span>%</div>
+                        <div class="stat-label">Positive reviews</div>
                     </div>
                 </div>
             </div>
@@ -535,11 +949,19 @@
     </section>
 
     <!-- Call to Action -->
-    <section class="cta">
+    <section class="cta fade-in">
         <div class="container">
-            <h2>Ready to Revolutionize Your Retail Experience?</h2>
-            <p>Join thousands of businesses that have transformed their operations with our Smart Shopping Cart System.</p>
-            <a href="{% url 'signup' %}" class="btn">Get Started Today</a>
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10 text-center">
+                    <h2>Ready to Revolutionize Your Retail Experience?</h2>
+                    <p>Join thousands of businesses that have transformed their operations with our Smart Shopping Cart System. Start your journey towards smarter retail today.</p>
+                    <a href="{% url 'signup' %}" class="btn">
+                        Get Started Today 
+                        <i class="fas fa-arrow-right ms-2"></i>
+                        <!-- <i class="fas fa-chevron-right ms-1"></i> -->
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -553,19 +975,24 @@
                     </div>
                     <p class="footer-text">Our mission is to revolutionize the retail industry with cutting-edge technology that enhances both customer experience and business efficiency.</p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://www.facebook.com/dsoftjsc" class="facebook" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/company/d-soft-jsc/" class="linkedin" title="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@vutrudsoft" class="tiktok" title="TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <h5>Company</h5>
                     <ul class="footer-links">
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Our Team</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Blog</a></li>
+                        <li><a href="https://m-tech.com.vn/vi/about-us/">About Us</a></li>
+                        <li><a href="https://m-tech.com.vn/vi/activities/">Activities</a></li>
+                        <li><a href="https://m-tech.com.vn/vi/category/all/technology/">Technology</a></li>
+                        <li><a href="https://m-tech.com.vn/vi/category/all/news/">Blogs</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-6">
@@ -580,9 +1007,9 @@
                 <div class="col-lg-4 col-md-6">
                     <h5>Contact Us</h5>
                     <ul class="footer-links">
-                        <li><i class="fas fa-map-marker-alt me-2"></i> Nam Viet A Building</li>
-                        <li><i class="fas fa-phone me-2"></i> +84</li>
-                        <li><i class="fas fa-envelope me-2"></i> info@smartcart.com</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>2nd Floor, Nam Viet A building, A1-2, Chuong Duong Street, Khue My Ward, Ngu Hanh Son District, Da Nang City, Vietnam</li>
+                        <li><i class="fas fa-phone me-2"></i>+84 236 3866 796</li>
+                        <li><i class="fas fa-envelope me-2"></i>info@d-soft.com.vn</li>
                     </ul>
                 </div>
             </div>
@@ -596,16 +1023,119 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Enhanced Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             });
+        });
+
+        // Enhanced Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                    
+                    // Add staggered animation delay for feature cards
+                    if (entry.target.classList.contains('feature-card')) {
+                        const cards = Array.from(document.querySelectorAll('.feature-card'));
+                        const index = cards.indexOf(entry.target);
+                        entry.target.style.animationDelay = `${index * 0.2}s`;
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.feature-card, .step-card, .chibi-character').forEach((el) => {
+            observer.observe(el);
+        });
+
+        // Enhanced Number counter animation
+        const countUp = (element) => {
+            const target = parseInt(element.getAttribute('data-target'));
+            const count = parseInt(element.innerText);
+            const increment = target / 200;
+            
+            if (count < target) {
+                element.innerText = Math.ceil(count + increment);
+                setTimeout(() => countUp(element), 10);
+            } else {
+                element.innerText = target;
+            }
+        };
+
+        // Start counter when stats section is visible
+        const statsObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                document.querySelectorAll('.stat-number span').forEach(counter => {
+                    counter.innerText = '0';
+                    countUp(counter);
+                });
+            }
+        }, { threshold: 0.5 });
+
+        statsObserver.observe(document.querySelector('.stats'));
+
+        // Enhanced parallax effect
+        window.addEventListener('scroll', () => {
+            const parallaxElements = document.querySelectorAll('.parallax');
+            const scrolled = window.pageYOffset;
+            
+            parallaxElements.forEach(element => {
+                const rate = scrolled * -0.3;
+                element.style.transform = `translate3d(0, ${rate}px, 0)`;
+            });
+        });
+
+        // Add random wobble animation to feature cards periodically
+        setInterval(() => {
+            const cards = document.querySelectorAll('.feature-card');
+            const randomCard = cards[Math.floor(Math.random() * cards.length)];
+            randomCard.style.animation = 'wobble 1s';
+            setTimeout(() => {
+                randomCard.style.animation = '';
+            }, 1000);
+        }, 5000);
+
+        // Enhanced hover effects for social links
+        document.querySelectorAll('.social-links a').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.2) rotate(5deg)';
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1) rotate(0deg)';
+            });
+        });
+
+        // Add floating animation to chibi characters
+        document.querySelectorAll('.chibi-character').forEach((character, index) => {
+            character.style.animationDelay = `${index * 0.5}s`;
         });
     </script>
 </body>
 
-</html> 
+</html>
