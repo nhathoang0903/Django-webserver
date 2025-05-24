@@ -621,22 +621,22 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             try:
                 response = requests.get(PRODUCTS_CHECK_NEW_API, timeout=2)
                 if response.status_code == 200:
-                api_data = response.json()
-                new_products_data = api_data.get("products", [])
-                new_products_found = []
-                for product in new_products_data:
-                    product_id = product.get("product_id")
-                    if product_id and product_id not in existing_product_ids:
-                        if "low_stock_threshold" in product:
-                            del product["low_stock_threshold"]
-                        new_products_found.append(product)
-                            existing_product_ids.add(product_id) # Add to set to avoid issues with edits/deletes in same batch
-                
-                if new_products_found:
-                    print(f"[Page3] Adding {len(new_products_found)} new products to display")
-                    current_products.extend(new_products_found)
-                        ProductPage._products_cache = current_products # Update cache
-                        self.add_new_product_cards(new_products_found) # Creates cards and adds to _cards_cache
+                    api_data = response.json()
+                    new_products_data = api_data.get("products", [])
+                    new_products_found = []
+                    for product in new_products_data:
+                        product_id = product.get("product_id")
+                        if product_id and product_id not in existing_product_ids:
+                            if "low_stock_threshold" in product:
+                                del product["low_stock_threshold"]
+                            new_products_found.append(product)
+                            existing_product_ids.add(product_id)
+                    
+                    if new_products_found:
+                        print(f"[Page3] Adding {len(new_products_found)} new products to display")
+                        current_products.extend(new_products_found)
+                        ProductPage._products_cache = current_products
+                        self.add_new_product_cards(new_products_found)
                         something_changed = True
             except requests.exceptions.Timeout:
                 pass # Skip silently
@@ -701,12 +701,12 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
                         # Remove from _cards_cache and grid_layout
                         cards_to_remove = [card for card in ProductPage._cards_cache if card.product.get("product_id") in product_ids_to_delete]
                         if cards_to_remove:
-                            for card in cards_to_remove:
-                                print(f"[Page3] Removing card for product ID {card.product.get('product_id')} from UI and cache.")
-                                card.hide()
-                                self.grid_layout.removeWidget(card)
-                                card.deleteLater() # Important for cleanup
-                                ProductPage._cards_cache.remove(card)
+                            for card_to_remove in cards_to_remove: # renamed card to card_to_remove to avoid conflict
+                                print(f"[Page3] Removing card for product ID {card_to_remove.product.get('product_id')} from UI and cache.")
+                                card_to_remove.hide()
+                                self.grid_layout.removeWidget(card_to_remove)
+                                card_to_remove.deleteLater() # Important for cleanup
+                                ProductPage._cards_cache.remove(card_to_remove)
                             something_changed = True # Ensure refresh if cards were removed
             except requests.exceptions.Timeout:
                 pass # Skip silently
@@ -716,20 +716,20 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             # If anything changed, save to JSON and update display
             if something_changed:
                 print("[Page3] Product data changed, saving and refreshing display.")
-                    threading.Thread(target=self._save_product_json, 
+                threading.Thread(target=self._save_product_json, 
                                args=(ProductPage._products_cache,), 
-                                   daemon=True).start()
-                    
+                               daemon=True).start()
+                
                 # Reapply the current category filter to update the view
-                    if hasattr(self, 'category_dropdown') and hasattr(self.category_dropdown, 'current_category'):
-                        current_category = self.category_dropdown.current_category
+                if hasattr(self, 'category_dropdown') and hasattr(self.category_dropdown, 'current_category'):
+                    current_category = self.category_dropdown.current_category
                     self.filter_products(current_category) # This will re-populate the grid
                 else:
                     self.filter_products("All Categories") # Default if no category selected
                 
         except Exception as e:
             print(f"[Page3] Error in check_for_new_products: {e}")
-            
+
     def _save_product_json(self, products):
         """Save products to JSON file in a separate thread to not block UI"""
         try:
