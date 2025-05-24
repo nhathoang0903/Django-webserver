@@ -39,6 +39,22 @@
                                 </a>
                                 {% endif %}
                             </div>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <label for="startDate" class="form-label visually-hidden">Start Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+                                        <input type="date" id="startDate" name="start_date" class="form-control" value="{{ start_date|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endDate" class="form-label visually-hidden">End Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+                                        <input type="date" id="endDate" name="end_date" class="form-control" value="{{ end_date|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                     <div class="col-md-4">
@@ -170,12 +186,12 @@
                     <ul class="pagination justify-content-center mb-0">
                         {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page=1{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="First">
+                            <a class="page-link" href="?page=1{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="First">
                                 <i class="fas fa-angle-double-left"></i>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="Previous">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="Previous">
                                 <i class="fas fa-angle-left"></i>
                             </a>
                         </li>
@@ -188,19 +204,19 @@
                                 </li>
                             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ num }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}">{{ num }}</a>
+                                    <a class="page-link" href="?page={{ num }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">{{ num }}</a>
                                 </li>
                             {% endif %}
                         {% endfor %}
 
                         {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="Next">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="Next">
                                 <i class="fas fa-angle-right"></i>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}" aria-label="Last">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="Last">
                                 <i class="fas fa-angle-double-right"></i>
                             </a>
                         </li>

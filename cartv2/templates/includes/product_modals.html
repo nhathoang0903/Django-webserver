@@ -50,7 +50,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{% url 'edit_product' product_id=product.product_id %}" class="needs-validation" novalidate>
+                <form method="POST" action="{% url 'edit_product' product_id=product.product_id %}" class="needs-validation" novalidate enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">Product Name</label>
@@ -59,8 +59,8 @@
                     <div class="mb-3">
                         <label class="form-label">Category</label>
                         <select name="category" class="form-select" required>
-                            <option value="Beverages" {% if product.category == 'Beverages' %}selected{% endif %}>Beverages</option>
-                            <option value="Snacks" {% if product.category == 'Snacks' %}selected{% endif %}>Snacks</option>
+                            <option value="Beverage" {% if product.category == 'Beverage' %}selected{% endif %}>Beverage</option>
+                            <option value="Snack" {% if product.category == 'Snack' %}selected{% endif %}>Snack</option>
                             <option value="Food" {% if product.category == 'Food' %}selected{% endif %}>Food</option>
                         </select>
                     </div>
@@ -74,8 +74,13 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Image URL (Optional)</label>
-                        <input type="url" name="image_url" class="form-control" value="{{ product.image_url }}">
+                        <label class="form-label">Image</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="file" name="image" class="form-control" accept="image/*" id="editImage{{ product.product_id }}" onchange="handleEditImageChange({{ product.product_id }})">
+                        </div>
+                        <div class="form-text">Upload a new image (optional) or keep the current one</div>
+                        <input type="hidden" name="image_url" value="{{ product.image_url }}">
+                        <input type="hidden" name="old_image_url" value="{{ product.image_url }}">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description (Optional)</label>
@@ -118,3 +123,162 @@
         </div>
     </div>
 </div>
+
+<!-- Image Preview Modal for Edit -->
+<div class="modal fade" id="editImagePreviewModal{{ product.product_id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="editImagePreview{{ product.product_id }}" src="" class="img-fluid" style="max-height: 500px;">
+                <div class="mt-3">
+                    <div class="spinner-border text-primary" role="status" id="editProcessingSpinner{{ product.product_id }}" style="display: none;">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <p id="editProcessingText{{ product.product_id }}" class="text-muted" style="display: none;">Processing image...</p>
+                    <div id="editSuccessMessage{{ product.product_id }}" class="alert alert-success" style="display: none;">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Image processed successfully!
+                    </div>
+                    <button id="editBackToFormBtn{{ product.product_id }}" class="btn btn-primary mt-3" style="display: none;">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Form
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function handleEditImageChange(productId) {
+    const imageInput = document.getElementById(`editImage${productId}`);
+    const imagePreview = document.getElementById(`editImagePreview${productId}`);
+    const processingSpinner = document.getElementById(`editProcessingSpinner${productId}`);
+    const processingText = document.getElementById(`editProcessingText${productId}`);
+    const successMessage = document.getElementById(`editSuccessMessage${productId}`);
+    const imagePreviewModal = new bootstrap.Modal(document.getElementById(`editImagePreviewModal${productId}`));
+
+    const file = imageInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imagePreviewModal.show();
+            
+            // Show processing indicators
+            processingSpinner.style.display = 'inline-block';
+            processingText.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            // Create FormData for image upload
+            const imageFormData = new FormData();
+            imageFormData.append('image', file);
+            
+            // Upload image to get URL
+            fetch('/upload_image/', {
+                method: 'POST',
+                body: imageFormData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to upload image');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update hidden image_url input with new URL
+                const imageUrlInput = document.querySelector(`#editModal${productId} input[name="image_url"]`);
+                const oldImageUrlInput = document.querySelector(`#editModal${productId} input[name="old_image_url"]`);
+                
+                // Store old URL before updating
+                oldImageUrlInput.value = imageUrlInput.value;
+                imageUrlInput.value = data.url;
+                
+                // Hide processing indicators and show success briefly
+                processingSpinner.style.display = 'none';
+                processingText.style.display = 'none';
+                successMessage.style.display = 'block';
+                
+                // Automatically close preview modal after 1 second
+                setTimeout(() => {
+                    imagePreviewModal.hide();
+                    // Reset file input
+                    imageInput.value = '';
+                    
+                    // Check for changes after image update
+                    checkProductChanges(productId);
+                }, 1000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to upload image: ' + error.message);
+                processingSpinner.style.display = 'none';
+                processingText.style.display = 'none';
+                // Reset file input on error
+                imageInput.value = '';
+            });
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// Function to check product changes
+function checkProductChanges(productId) {
+    const form = document.querySelector(`#editModal${productId} form`);
+    const formData = new FormData(form);
+    
+    // Convert FormData to object
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+    
+    // Add product_id to data
+    data.product_id = productId;
+    
+    // Send request to check changes
+    fetch('/api/products/check-edits/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.changes) {
+            console.log('Changes detected:', data.changes);
+        } else {
+            console.log('No changes detected');
+        }
+    })
+    .catch(error => {
+        console.error('Error checking changes:', error);
+    });
+}
+
+// Add event listeners for form inputs to check changes
+document.addEventListener('DOMContentLoaded', function() {
+    const editForms = document.querySelectorAll('form[action*="/products/edit/"]');
+    editForms.forEach(form => {
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const productId = form.action.split('/').filter(Boolean).pop();
+                checkProductChanges(productId);
+            });
+        });
+    });
+});
+</script>

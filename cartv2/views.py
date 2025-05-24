@@ -955,7 +955,8 @@ def edit_product(request, product_id):
             'quantity': str(product.quantity),
             'price': str(product.price),
             'category': product.category,
-            'description': product.description or ''
+            'description': product.description or '',
+            'image_url': product.image_url or ''
         }
         print(f"[DEBUG] Old values: {old_values}")
         
@@ -963,6 +964,18 @@ def edit_product(request, product_id):
         
         if form.is_valid():
             print(f"[DEBUG] Form is valid")
+            # Handle image upload if present
+            if 'image' in request.FILES:
+                try:
+                    # Upload image and get URL
+                    image_url = upload_image(request.FILES['image'])
+                    # Update the form's image_url field
+                    form.instance.image_url = image_url
+                except Exception as e:
+                    print(f"[ERROR] Failed to upload image: {e}")
+                    messages.error(request, "Failed to upload image. Please try again.")
+                    return redirect('product_list')
+            
             # Save the form
             updated_product = form.save()
             
@@ -975,7 +988,8 @@ def edit_product(request, product_id):
                 'quantity': str(updated_product.quantity),
                 'price': str(updated_product.price),
                 'category': updated_product.category,
-                'description': updated_product.description or ''
+                'description': updated_product.description or '',
+                'image_url': updated_product.image_url or ''
             }
             print(f"[DEBUG] New values: {new_values}")
             
@@ -1306,8 +1320,8 @@ def statisticsboard_view(request):
     # Day-Part Analysis for today only 
     day_part_data_query = History.objects.annotate(
         part_of_day=Case(
-            When(timestamp__hour__lt=12, then=Value('Morning')),
-            When(timestamp__hour__lt=18, then=Value('Afternoon')),
+            When(created_at__hour__lt=12, then=Value('Morning')),
+            When(created_at__hour__lt=18, then=Value('Afternoon')),
             default=Value('Evening'),
             output_field=CharField()
         )).values('part_of_day').annotate(total_amount=Sum('total_amount')).order_by('part_of_day')
@@ -1579,72 +1593,74 @@ class TopThreeProductsView(APIView):
 @login_required
 def history_list_view(request):
     # Get CustomerHistory objects instead of History
-    history_list = CustomerHistory.objects.select_related('history').order_by('-history__timestamp')
-    
-    # Check if search parameters exist
+    history_query = CustomerHistory.objects.select_related('history', 'customer').all().order_by('-history__timestamp')
+
     search_term = request.GET.get('search', '')
     search_filter = request.GET.get('filter', 'all')
-    
-    # Apply search filter if search term exists
+    start_date_str = request.GET.get('start_date', '')
+    end_date_str = request.GET.get('end_date', '')
+
+    is_search = bool(search_term or start_date_str or end_date_str)
+
     if search_term:
         if search_filter == 'id':
-            # Search by random_id
-            history_list = history_list.filter(history__random_id__icontains=search_term)
+            history_query = history_query.filter(history__random_id__icontains=search_term)
         elif search_filter == 'customer':
-            # Search by customer name - check both registered customers and guest names
-            history_list = history_list.filter(
-                Q(customer__surname__icontains=search_term) | 
-                Q(customer__firstname__icontains=search_term) | 
+            history_query = history_query.filter(
+                Q(customer__surname__icontains=search_term) |
+                Q(customer__firstname__icontains=search_term) |
                 Q(guest_name__icontains=search_term)
             )
         elif search_filter == 'date':
-            # Search by date - attempt to parse the date format
-            try:
-                # Try common date formats
-                date_formats = ['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y', '%d-%m-%Y', '%m-%d-%Y']
-                parsed_date = None
-                
-                for date_format in date_formats:
-                    try:
-                        parsed_date = datetime.strptime(search_term, date_format).date()
-                        break
-                    except ValueError:
-                        continue
-                
-                if parsed_date:
-                    # Create start and end datetime for the full day
-                    start_date = datetime.combine(parsed_date, datetime.min.time())
-                    end_date = datetime.combine(parsed_date, datetime.max.time())
-                    
-                    # Filter by date range to include all records for the day
-                    history_list = history_list.filter(
-                        history__timestamp__gte=start_date,
-                        history__timestamp__lte=end_date
-                    )
-                else:
-                    # If no date format matches, do a partial match on timestamp string
-                    history_list = history_list.filter(history__timestamp__icontains=search_term)
-            except Exception as e:
-                print(f"Date parsing error: {e}")
-                # If any error in date parsing, fall back to simple contains search
-                history_list = history_list.filter(history__timestamp__icontains=search_term)
+            # Attempt to parse date in various formats
+            parsed_date = None
+            date_formats = ['%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y', '%d/%m/%Y']
+            for fmt in date_formats:
+                try:
+                    parsed_date = datetime.strptime(search_term, fmt).date()
+                    break
+                except ValueError:
+                    continue
+            if parsed_date:
+                history_query = history_query.filter(history__timestamp__date=parsed_date)
+            else:
+                # If date parsing fails, you might want to return an empty queryset or handle the error
+                history_query = CustomerHistory.objects.none() 
         elif search_filter == 'note':
-            # Search by note
-            history_list = history_list.filter(history__note__icontains=search_term)
-        else:
-            # Search all fields
-            history_list = history_list.filter(
-                Q(history__random_id__icontains=search_term) | 
-                Q(customer__surname__icontains=search_term) | 
-                Q(customer__firstname__icontains=search_term) | 
+             history_query = history_query.filter(history__note__icontains=search_term)
+        else: # 'all' fields
+            history_query = history_query.filter(
+                Q(history__random_id__icontains=search_term) |
+                Q(customer__surname__icontains=search_term) |
+                Q(customer__firstname__icontains=search_term) |
                 Q(guest_name__icontains=search_term) |
-                Q(history__timestamp__icontains=search_term) |
                 Q(history__note__icontains=search_term)
             )
+            # Add date search for 'all' if search_term can be parsed as a date
+            try:
+                parsed_date_all = datetime.strptime(search_term, '%Y-%m-%d').date()
+                history_query = history_query.filter(history__timestamp__date=parsed_date_all)
+            except ValueError:
+                pass # Not a date, or not in YYYY-MM-DD format
     
-    # Add pagination
-    paginator = Paginator(history_list, 10)  # Show 10 records per page
-    page_number = request.GET.get('page', 1)
+    # Date range filtering
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            history_query = history_query.filter(history__timestamp__date__gte=start_date)
+        except ValueError:
+            pass # Invalid date format, ignore
+
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            # Add one day to end_date to make it inclusive for the whole day
+            history_query = history_query.filter(history__timestamp__date__lte=end_date)
+        except ValueError:
+            pass # Invalid date format, ignore
+
+    paginator = Paginator(history_query, 15)  # Show 15 histories per page
+    page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     # Process each history record
@@ -1675,7 +1691,10 @@ def history_list_view(request):
         'page_obj': page_obj,
         'search_term': search_term,
         'search_filter': search_filter,
-        'is_search': bool(search_term),
+        'start_date': start_date_str, 
+        'end_date': end_date_str,
+        'is_search': is_search,
+        'user': request.user,
     })
 
 
@@ -5882,6 +5901,89 @@ class CheckProductEditsView(APIView):
             
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    @swagger_auto_schema(
+        operation_description="Check for changes in product data",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['product_id'],
+            properties={
+                'product_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'category': openapi.Schema(type=openapi.TYPE_STRING),
+                'price': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'quantity': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
+                'image_url': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Changes checked successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'changes': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'field': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'old_value': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'new_value': openapi.Schema(type=openapi.TYPE_STRING)
+                                }
+                            )
+                        )
+                    }
+                )
+            ),
+            404: "Product not found",
+            500: "Internal server error"
+        }
+    )
+    def post(self, request):
+        try:
+            product_id = request.data.get('product_id')
+            if not product_id:
+                return Response(
+                    {'error': 'Product ID is required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            # Get the product
+            product = Product.objects.get(product_id=product_id)
+            
+            # Compare each field
+            changes = []
+            fields_to_check = ['name', 'category', 'price', 'quantity', 'description', 'image_url']
+            
+            for field in fields_to_check:
+                new_value = request.data.get(field)
+                if new_value is not None:
+                    old_value = getattr(product, field)
+                    # Convert both values to strings for comparison
+                    old_str = str(old_value).strip() if old_value is not None else ''
+                    new_str = str(new_value).strip()
+                    
+                    if old_str != new_str:
+                        changes.append({
+                            'field': field,
+                            'old_value': old_str,
+                            'new_value': new_str
+                        })
+            
+            return Response({'changes': changes})
+            
+        except Product.DoesNotExist:
+            return Response(
+                {'error': 'Product not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class CheckProductDeletionsView(APIView):
     """API to check recent product deletions."""
