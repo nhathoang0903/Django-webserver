@@ -1903,7 +1903,7 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
             # --- BEGIN MODIFICATION (Restore scroll position) ---
             if old_scroll_value != -1:
                 print(f"[Page4] Scheduling scroll restore to: {old_scroll_value} for new scroll_area instance.")
-                # Use a 50ms delay and call the helper method
+                # Use a 10ms delay and call the helper method
                 # The lambda captures the current new_scroll_area (aliased as 'sa') and old_scroll_value (aliased as 'val')
                 QTimer.singleShot(10, lambda sa=scroll_area, val=old_scroll_value: self._restore_scroll_position_with_delay(sa, val))
             else:
