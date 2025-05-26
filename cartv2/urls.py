@@ -42,12 +42,10 @@ from .views import (
     # CheckEndSessionStatusView, 
     # AllDeviceStatusAPIView,  
     AllDeviceStatusView,
-    CustomerListView,
     EndDeviceSessionView,
     CustomerChatView,
     AdminChatView,
     CancelShoppingHistoryView,
-    ShoppingMonitoringView,
     ShoppingRatingView,
     PaymentShoppingView,  
     PaymentSignalView, 
@@ -75,11 +73,11 @@ from .views import (
     index_view,
     signup_view,
     check_static_file,
+    export_history_excel,
 )
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView
-from .views import login_view 
 from . import views
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -107,7 +105,6 @@ urlpatterns = [
     path('search/category/<str:category>/', search_by_category, name='search_by_category'),
     path('add-product/', add_product, name='add_product'),
     # Define URL patterns for edit and delete product
-    path('product_list/edit/<int:product_id>/', edit_product, name='edit_product'),
     path('product_list/edit/<int:product_id>/', edit_product, name='edit_product'),
     path('product_list/delete/<int:product_id>/', delete_product, name='delete_product'),
     path('product_list/add_stock_note/<int:product_id>/', add_stock_note, name='add_stock_note'),
@@ -173,6 +170,7 @@ urlpatterns = [
     path('api/products/check-deletions/', CheckProductDeletionsView.as_view(), name='check-product-deletions'),
     path('api/inventory/history/<int:product_id>/', InventoryHistoryView.as_view(), name='inventory_history'),
     path('api/inventory/low-stock/', LowStockProductsView.as_view(), name='low_stock_products'),
+    path('history/export/', views.export_history_excel, name='export_history_excel'),
 ]
 
 if settings.DEBUG:

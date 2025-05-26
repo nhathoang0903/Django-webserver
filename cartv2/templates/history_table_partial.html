@@ -1,0 +1,135 @@
+{% load humanize %}
+{% load tz %}
+
+{% if is_search %}
+<div class="mb-3 text-end fw-bold">
+    Total for selected period: <span class="text-danger">{{ total_amount_in_period|intcomma }} VNĐ</span>
+</div>
+{% endif %}
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th class="text-center">No</th>
+                <th>Purchase ID</th>
+                <th>Customer</th>
+                <th>Date & Time</th>
+                <th class="text-end">Donate(VNĐ)</th>
+                <th>Product Details</th>
+                <th>Note</th>
+                <th class="text-center">Invoice</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for history in history_list %}
+            <tr>
+                <td class="text-center fw-semibold">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                <td><span class="text-primary">{{ history.random_id }}</span></td>
+                <td>
+                    {% if history.customer %}
+                        <span class="fw-semibold">{{ history.fullname }}</span>
+                    {% else %}
+                        <span class="text-muted fst-italic">{{ history.fullname }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% timezone "Asia/Ho_Chi_Minh" %}
+                        {{ history.timestamp|date:"Y-m-d H:i" }}
+                    {% endtimezone %}
+                </td>
+                <td class="text-end fw-bold">{{ history.total_amount|intcomma }}</td>
+                <td>
+                    <div class="product-details">
+                        {% for product in history.product_details %}
+                        <div class="product-item">
+                            <span class="product-name">{{ product.name }}</span>
+                            <span class="product-quantity">x {{ product.quantity }}</span>
+                            <span class="product-price">{{ product.price|intcomma }} VNĐ</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td>
+                    {% if history.history.note %}
+                        <div class="history-note" data-bs-toggle="tooltip" title="{{ history.history.note }}">
+                            {{ history.history.note }}
+                        </div>
+                    {% else %}
+                        <span class="text-muted fst-italic">-</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if history.random_id %}
+                        <a href="{% url 'generate_invoice' history.random_id %}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-primary"
+                           data-bs-toggle="tooltip"
+                           title="View Invoice PDF">
+                            <i class="fas fa-receipt"></i>
+                            Invoice
+                        </a>
+                    {% else %}
+                        <span class="badge bg-secondary">No Invoice</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center py-5">
+                    <div class="empty-state">
+                        <i class="fas fa-receipt fa-3x mb-3 text-muted"></i>
+                        <p class="text-muted mb-0">No purchase history available for the selected criteria.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="card-footer bg-light py-3" id="paginationContainerPartial">
+    <nav aria-label="Purchase history pagination">
+        <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="First">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="Previous">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="Next">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" aria-label="Last">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %} 

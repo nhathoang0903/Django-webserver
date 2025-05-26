@@ -30,6 +30,7 @@
                                 </span>
                                 <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search by ID, customer, date, or note..." value="{{ search_term }}">
                                 <input type="hidden" id="searchFilterInput" name="filter" value="{{ search_filter }}">
+                                <input type="hidden" id="periodPresetInput" name="period_preset" value="{{ period_preset|default_if_none:'' }}">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-search"></i> Search
                                 </button>
@@ -53,6 +54,14 @@
                                         <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
                                         <input type="date" id="endDate" name="end_date" class="form-control" value="{{ end_date|default_if_none:'' }}">
                                     </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm me-1 date-filter-btn" data-range="today">Today</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm me-1 date-filter-btn" data-range="yesterday">Yesterday</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm me-1 date-filter-btn" data-range="last7days">Last 7 Days</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm me-1 date-filter-btn" data-range="thismonth">This Month</button>
                                 </div>
                             </div>
                         </form>
@@ -85,8 +94,11 @@
 
         <!-- Main Content Card -->
         <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-light py-3">
+            <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold text-primary">Transaction Records</h5>
+                <a href="{% url 'export_history_excel' %}{% if search_term %}?search={{ search_term }}&filter={{ search_filter }}{% endif %}{% if start_date %}{% if search_term %}&{% else %}?{% endif %}start_date={{ start_date }}{% endif %}{% if end_date %}{% if search_term or start_date %}&{% else %}?{% endif %}end_date={{ end_date }}{% endif %}" class="btn btn-success btn-sm">
+                    <i class="fas fa-file-excel me-1"></i> Export to Excel
+                </a>
             </div>
 
             <!-- Loading Spinner -->
@@ -96,7 +108,13 @@
                 </div>
             </div>
 
-            <div class="card-body">
+            <div id="totalAmountInPeriodDisplay" class="mb-3 text-end fw-bold pe-3">
+                {% if is_search %}
+                Total for selected period: <span class="text-danger">{{ total_amount_in_period|intcomma }} VNĐ</span>
+                {% endif %}
+            </div>
+
+            <div class="card-body" id="historyTableContainer">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
@@ -181,7 +199,7 @@
 
             <!-- Pagination -->
             {% if page_obj.paginator.num_pages > 1 %}
-            <div class="card-footer bg-light py-3">
+            <div class="card-footer bg-light py-3" id="paginationContainer">
                 <nav aria-label="Purchase history pagination">
                     <ul class="pagination justify-content-center mb-0">
                         {% if page_obj.has_previous %}
@@ -510,45 +528,54 @@ document.addEventListener('DOMContentLoaded', function() {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             
-            // Get new table content
-            const newTable = doc.querySelector('.table-responsive');
-            const newPagination = doc.querySelector('.card-footer');
+            // Get new table content, pagination, and total sum display
+            const newTableContent = doc.querySelector('.table-responsive');
+            const newPaginationContent = doc.querySelector('#paginationContainerPartial'); // Updated selector
+            const newTotalAmountDisplay = doc.querySelector('.mb-3.text-end.fw-bold'); // Selector for total sum
             
-            // Get current table content
-            const currentTable = document.querySelector('.table-responsive');
-            const currentPagination = document.querySelector('.card-footer');
+            // Get current table content, pagination, and total sum display
+            const currentTableContainer = document.getElementById('historyTableContainer').querySelector('.table-responsive');
+            const currentPaginationContainer = document.getElementById('paginationContainer'); // Main pagination container
+            const currentTotalAmountDisplay = document.getElementById('totalAmountInPeriodDisplay');
             
             // Check if table content has changed
-            const tableHasChanged = isContentDifferent(
-                currentTable.innerHTML, 
-                newTable.innerHTML
+            const tableHasChanged = newTableContent && currentTableContainer && isContentDifferent(
+                currentTableContainer.innerHTML, 
+                newTableContent.innerHTML
             );
             
             // Check if pagination has changed
-            const paginationHasChanged = newPagination && currentPagination && 
+            const paginationHasChanged = newPaginationContent && currentPaginationContainer && 
                 isContentDifferent(
-                    currentPagination.innerHTML, 
-                    newPagination.innerHTML
+                    currentPaginationContainer.innerHTML, 
+                    newPaginationContent.innerHTML
+                );
+
+            // Check if total amount display has changed
+            const totalAmountHasChanged = newTotalAmountDisplay && currentTotalAmountDisplay &&
+                isContentDifferent(
+                    currentTotalAmountDisplay.innerHTML,
+                    newTotalAmountDisplay.innerHTML
                 );
             
             // Only update if content has actually changed
             if (tableHasChanged) {
                 // Apply a subtle fade effect to the entire table
-                currentTable.style.transition = 'opacity 0.3s ease';
-                currentTable.style.opacity = '0.7';
+                currentTableContainer.style.transition = 'opacity 0.3s ease';
+                currentTableContainer.style.opacity = '0.7';
                 
                 // Wait for the fade effect to be noticeable
                 setTimeout(() => {
                     // Update the content
-                    currentTable.innerHTML = newTable.innerHTML;
+                    currentTableContainer.innerHTML = newTableContent.innerHTML;
                     
                     // Fade back in
-                    currentTable.style.opacity = '1';
+                    currentTableContainer.style.opacity = '1';
                     
                     // Remove updating class after transition completes
                     setTimeout(() => {
                         tableContainer.classList.remove('updating');
-                        currentTable.style.transition = '';
+                        currentTableContainer.style.transition = '';
                     }, 300);
                 }, 150);
             } else {
@@ -559,29 +586,47 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update pagination if exists and has changed
             if (paginationHasChanged) {
                 // Apply a subtle fade effect
-                currentPagination.style.transition = 'opacity 0.3s ease';
-                currentPagination.style.opacity = '0.7';
+                currentPaginationContainer.style.transition = 'opacity 0.3s ease';
+                currentPaginationContainer.style.opacity = '0.7';
                 
                 // Wait for the fade effect to be noticeable
                 setTimeout(() => {
                     // Update the content
-                    currentPagination.innerHTML = newPagination.innerHTML;
+                    currentPaginationContainer.innerHTML = newPaginationContent.innerHTML;
                     
                     // Fade back in
-                    currentPagination.style.opacity = '1';
+                    currentPaginationContainer.style.opacity = '1';
                     
                     // Remove transition after it completes
                     setTimeout(() => {
-                        currentPagination.style.transition = '';
+                        currentPaginationContainer.style.transition = '';
                     }, 300);
                 }, 150);
+            } else if (newPaginationContent === null && currentPaginationContainer) {
+                 // If new pagination is null (e.g. no results), clear current pagination
+                currentPaginationContainer.innerHTML = '';
+            }
+
+            // Update total amount display if exists and has changed
+            if (totalAmountHasChanged) {
+                currentTotalAmountDisplay.style.transition = 'opacity 0.3s ease';
+                currentTotalAmountDisplay.style.opacity = '0.7';
+                setTimeout(() => {
+                    currentTotalAmountDisplay.innerHTML = newTotalAmountDisplay.innerHTML;
+                    currentTotalAmountDisplay.style.opacity = '1';
+                    setTimeout(() => {
+                        currentTotalAmountDisplay.style.transition = '';
+                    }, 300);
+                }, 150);
+            } else if (newTotalAmountDisplay === null && currentTotalAmountDisplay) {
+                currentTotalAmountDisplay.innerHTML = ''; // Clear if no new total (e.g. not a search)
             }
             
             // Always update timestamp
             updateTimestamp();
             
             // Re-initialize tooltips if content changed
-            if (tableHasChanged || paginationHasChanged) {
+            if (tableHasChanged || paginationHasChanged || totalAmountHasChanged) {
                 const newTooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
                 newTooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
             }
@@ -625,6 +670,58 @@ document.addEventListener('DOMContentLoaded', function() {
     
     searchFilter.addEventListener('change', function() {
         searchFilterInput.value = this.value;
+    });
+
+    // Handle quick date filter buttons
+    const dateFilterButtons = document.querySelectorAll('.date-filter-btn');
+
+    function getLocalDateString(date) { // Helper function for correct local YYYY-MM-DD
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    dateFilterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const range = this.dataset.range;
+            const today = new Date(); // Local current date
+            let startDate, endDate;
+            let periodPresetValue = '';
+
+            switch(range) {
+                case 'today':
+                    startDate = getLocalDateString(today);
+                    endDate = startDate;
+                    periodPresetValue = 'today';
+                    break;
+                case 'yesterday':
+                    const yesterday = new Date(today);
+                    yesterday.setDate(today.getDate() - 1);
+                    startDate = getLocalDateString(yesterday);
+                    endDate = startDate;
+                    periodPresetValue = 'yesterday';
+                    break;
+                case 'last7days':
+                    const last7DaysStart = new Date(today);
+                    last7DaysStart.setDate(today.getDate() - 6); // Correctly includes today as end of 7-day period
+                    startDate = getLocalDateString(last7DaysStart);
+                    endDate = getLocalDateString(today);
+                    periodPresetValue = 'last7days';
+                    break;
+                case 'thismonth':
+                    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    startDate = getLocalDateString(firstDayOfMonth);
+                    endDate = getLocalDateString(lastDayOfMonth);
+                    periodPresetValue = 'thismonth';
+                    break;
+            }
+            document.getElementById('startDate').value = startDate;
+            document.getElementById('endDate').value = endDate;
+            document.getElementById('periodPresetInput').value = periodPresetValue;
+            document.getElementById('searchForm').submit();
+        });
     });
 });
 </script>

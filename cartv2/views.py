@@ -88,11 +88,16 @@ import requests
 import re
 from .cdn import upload_image
 from datetime import timedelta, datetime
+import calendar # Added import for calendar
 
 from cartv2 import models
 from django.db import models
 from django.db.models import F, Q
 import random
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 # Hàm gửi notification tổng quát. Kiểm tra cài đặt thông báo trước khi gửi.
 def send_notification(token, title, body, extra_data=None):
@@ -1276,9 +1281,14 @@ def statisticsboard_view(request):
             for item in revenue_data_list
         ]
     elif filter_param == 'this_month':
-        # Get data for the current month (from day 1 to today)
+        # Get data for the current month (from day 1 to last day of month)
         first_day_of_month = current_time.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        month_data = History.objects.filter(timestamp__gte=first_day_of_month)
+        
+        # Calculate the last day of the current month
+        _ , num_days_in_month = calendar.monthrange(current_time.year, current_time.month)
+        last_day_of_month_dt = current_time.replace(day=num_days_in_month, hour=23, minute=59, second=59, microsecond=999999)
+        
+        month_data = History.objects.filter(timestamp__gte=first_day_of_month, timestamp__lte=last_day_of_month_dt)
         
         # Calculate total revenue for this month
         period_total_revenue = month_data.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
@@ -1320,8 +1330,8 @@ def statisticsboard_view(request):
     # Day-Part Analysis for today only 
     day_part_data_query = History.objects.annotate(
         part_of_day=Case(
-            When(created_at__hour__lt=12, then=Value('Morning')),
-            When(created_at__hour__lt=18, then=Value('Afternoon')),
+            When(timestamp__hour__lt=12, then=Value('Morning')),
+            When(timestamp__hour__lt=18, then=Value('Afternoon')),
             default=Value('Evening'),
             output_field=CharField()
         )).values('part_of_day').annotate(total_amount=Sum('total_amount')).order_by('part_of_day')
@@ -1599,8 +1609,53 @@ def history_list_view(request):
     search_filter = request.GET.get('filter', 'all')
     start_date_str = request.GET.get('start_date', '')
     end_date_str = request.GET.get('end_date', '')
+    period_preset = request.GET.get('period_preset', '') # Get the new preset
 
-    is_search = bool(search_term or start_date_str or end_date_str)
+    # Initialize date objects
+    start_date_dt = None
+    end_date_dt = None
+    current_time = timezone.localtime(timezone.now())
+
+    if period_preset:
+        is_search = True # A preset implies a search/filter action
+        if period_preset == 'today':
+            start_date_dt = current_time.date()
+            end_date_dt = current_time.date()
+        elif period_preset == 'yesterday':
+            yesterday = current_time.date() - timedelta(days=1)
+            start_date_dt = yesterday
+            end_date_dt = yesterday
+        elif period_preset == 'last7days':
+            end_date_dt = current_time.date()
+            start_date_dt = end_date_dt - timedelta(days=6)
+        elif period_preset == 'thismonth':
+            start_date_dt = current_time.date().replace(day=1)
+            _, num_days = calendar.monthrange(current_time.year, current_time.month)
+            end_date_dt = start_date_dt.replace(day=num_days)
+        
+        # Update string versions for display in template
+        if start_date_dt:
+            start_date_str = start_date_dt.strftime('%Y-%m-%d')
+        if end_date_dt:
+            end_date_str = end_date_dt.strftime('%Y-%m-%d')
+    else:
+        # Only parse start_date_str and end_date_str if no preset is active
+        if start_date_str:
+            try:
+                start_date_dt = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                start_date_str = '' # Clear invalid date string
+        if end_date_str:
+            try:
+                end_date_dt = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                end_date_str = '' # Clear invalid date string
+        is_search = bool(search_term or start_date_str or end_date_str or period_preset)
+
+
+    # Keep a reference to the queryset before pagination for total sum calculation
+    # This reference should be to the initial unfiltered query
+    # filtered_history_for_sum = history_query # This line was moved down
 
     if search_term:
         if search_filter == 'id':
@@ -1609,7 +1664,7 @@ def history_list_view(request):
             history_query = history_query.filter(
                 Q(customer__surname__icontains=search_term) |
                 Q(customer__firstname__icontains=search_term) |
-                Q(guest_name__icontains=search_term)
+                Q(guest_name__icontains=search_term) # Corrected: guest_name is on CustomerHistory
             )
         elif search_filter == 'date':
             # Attempt to parse date in various formats
@@ -1633,69 +1688,266 @@ def history_list_view(request):
                 Q(history__random_id__icontains=search_term) |
                 Q(customer__surname__icontains=search_term) |
                 Q(customer__firstname__icontains=search_term) |
-                Q(guest_name__icontains=search_term) |
+                Q(guest_name__icontains=search_term) | # Corrected: guest_name is on CustomerHistory
                 Q(history__note__icontains=search_term)
             )
             # Add date search for 'all' if search_term can be parsed as a date
             try:
-                parsed_date_all = datetime.strptime(search_term, '%Y-%m-%d').date()
-                history_query = history_query.filter(history__timestamp__date=parsed_date_all)
+                # More robust date parsing for 'all' search_filter
+                parsed_date_all = None
+                date_formats_all = ['%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y', '%d/%m/%Y']
+                for fmt in date_formats_all:
+                    try:
+                        parsed_date_all = datetime.strptime(search_term, fmt).date()
+                        break
+                    except ValueError:
+                        continue
+                if parsed_date_all:
+                     history_query = history_query.filter(Q(history__timestamp__date=parsed_date_all) | Q(history__random_id__icontains=search_term) | Q(customer__surname__icontains=search_term) | Q(customer__firstname__icontains=search_term) | Q(guest_name__icontains=search_term) | Q(history__note__icontains=search_term)) # Corrected guest_name
             except ValueError:
                 pass # Not a date, or not in YYYY-MM-DD format
     
-    # Date range filtering
-    if start_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-            history_query = history_query.filter(history__timestamp__date__gte=start_date)
-        except ValueError:
-            pass # Invalid date format, ignore
+    # Date range filtering - Now driven by start_date_dt and end_date_dt
+    # which are either from preset or parsed from strings
+    if start_date_dt:
+        history_query = history_query.filter(history__timestamp__date__gte=start_date_dt)
 
-    if end_date_str:
-        try:
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-            # Add one day to end_date to make it inclusive for the whole day
-            history_query = history_query.filter(history__timestamp__date__lte=end_date)
-        except ValueError:
-            pass # Invalid date format, ignore
+    if end_date_dt:
+        history_query = history_query.filter(history__timestamp__date__lte=end_date_dt)
+    
+    # Update filtered_history_for_sum after all filters are applied
+    filtered_history_for_sum = history_query
+
+    # Calculate total amount for the filtered period
+    total_amount_in_period = filtered_history_for_sum.aggregate(total=Sum('history__total_amount'))['total'] or 0
 
     paginator = Paginator(history_query, 15)  # Show 15 histories per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     # Process each history record
+    detailed_history_list = []
     for customer_history in page_obj:
-        try:
-            product_details = json.loads(customer_history.history.product)
-            for product in product_details:
-                product['name'] = product['name'].replace('_', ' ')
-            customer_history.product_details = product_details
-            customer_history.random_id = customer_history.history.random_id
-            customer_history.timestamp = customer_history.history.timestamp
-            customer_history.total_amount = customer_history.history.total_amount
-            
-            # Handle display name logic
-            if customer_history.customer:
-                customer_history.fullname = customer_history.customer.fullname
-            else:
-                customer_history.fullname = customer_history.guest_name or "Dsoft-member"
+        history_instance = customer_history.history
+        products_details = []
+        if history_instance and hasattr(history_instance, 'product') and history_instance.product:
+            try:
+                product_list_data = history_instance.product
+                if isinstance(product_list_data, str):
+                    try:
+                        product_list_data = json.loads(product_list_data)
+                    except json.JSONDecodeError as e:
+                        print(f"Error decoding product JSON for history {history_instance.random_id}: {e}. Data: {product_list_data}")
+                        product_list_data = [] # Default to empty list on error
                 
-        except json.JSONDecodeError:
-            customer_history.product_details = []
+                if isinstance(product_list_data, list):
+                    for item in product_list_data:
+                        if not isinstance(item, dict):
+                            print(f"Warning: Product item is not a dict for history {history_instance.random_id}: {item}")
+                            continue # Skip non-dict items
+
+                        product_name = item.get('name', 'Unknown Product').replace('_', ' ')
+                        item_price = item.get('price') # Price from the historical item data
+                        
+                        # Attempt to get the most current price from Product model if needed for display consistency,
+                        # but prioritize historical price for accuracy of that transaction.
+                        # For display, using historical price directly from 'item' is usually correct.
+                        
+                        products_details.append({
+                            'name': product_name,
+                            'quantity': item.get('quantity'),
+                            'price': item_price 
+                        })
+                else:
+                    print(f"Warning: Parsed product data for history {history_instance.random_id} is not a list: {product_list_data}")
+
+            except Exception as e: # Catch any other unexpected errors during product processing
+                 print(f"General error processing product data for history {history_instance.random_id}: {e} - Data: {history_instance.product}")
+                 products_details = [] # Default to empty list on any error
+        
+        detailed_history_list.append({
+            'random_id': history_instance.random_id if history_instance else 'N/A',
+            'customer': customer_history.customer,
+            'fullname': customer_history.customer.fullname if customer_history.customer else (customer_history.guest_name if customer_history.guest_name else 'Guest'),
+            'timestamp': history_instance.timestamp if history_instance else 'N/A',
+            'total_amount': history_instance.total_amount if history_instance else 0,
+            'product_details': products_details,
+            'history': history_instance 
+        })
     
     # Check if this is an AJAX request for the refresh functionality
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_ajax:
+        return render(request, 'history_table_partial.html', { # Use the new partial template
+            'history_list': detailed_history_list, # Use detailed_history_list
+            'page_obj': page_obj,
+            'search_term': search_term,
+            'search_filter': search_filter,
+            'start_date': start_date_str, 
+            'end_date': end_date_str,
+            'period_preset': period_preset, # Pass preset to template
+            'is_search': is_search,
+            'total_amount_in_period': total_amount_in_period, # Pass the sum for AJAX updates
+        })
             
     return render(request, 'history_list.html', {
-        'history_list': page_obj,
+        'history_list': detailed_history_list, # Use detailed_history_list
         'page_obj': page_obj,
         'search_term': search_term,
         'search_filter': search_filter,
         'start_date': start_date_str, 
         'end_date': end_date_str,
+        'period_preset': period_preset, # Pass preset to template
         'is_search': is_search,
         'user': request.user,
+        'total_amount_in_period': total_amount_in_period, # Pass the sum for initial load
     })
+
+@login_required
+def export_history_excel(request):
+    search_term = request.GET.get('search', '')
+    search_filter = request.GET.get('filter', 'all')
+    start_date_str = request.GET.get('start_date', '')
+    end_date_str = request.GET.get('end_date', '')
+    period_preset = request.GET.get('period_preset', '') # Get the preset
+
+    # Get all CustomerHistory objects, not paginated
+    history_queryset = CustomerHistory.objects.select_related('customer', 'history').all()
+
+    # Initialize date objects for filtering
+    start_date_dt = None
+    end_date_dt = None
+    current_time = timezone.localtime(timezone.now())
+
+    if period_preset:
+        if period_preset == 'today':
+            start_date_dt = current_time.date()
+            end_date_dt = current_time.date()
+        elif period_preset == 'yesterday':
+            yesterday = current_time.date() - timedelta(days=1)
+            start_date_dt = yesterday
+            end_date_dt = yesterday
+        elif period_preset == 'last7days':
+            end_date_dt = current_time.date()
+            start_date_dt = end_date_dt - timedelta(days=6)
+        elif period_preset == 'thismonth':
+            start_date_dt = current_time.date().replace(day=1)
+            _, num_days = calendar.monthrange(current_time.year, current_time.month)
+            end_date_dt = start_date_dt.replace(day=num_days)
+    else:
+        if start_date_str:
+            try:
+                start_date_dt = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                pass 
+        if end_date_str:
+            try:
+                end_date_dt = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+
+    # Apply filters similar to history_list_view but on the full dataset
+    if search_term:
+        if search_filter == 'id':
+            history_queryset = history_queryset.filter(history__random_id__icontains=search_term)
+        elif search_filter == 'customer':
+            history_queryset = history_queryset.filter(Q(customer__surname__icontains=search_term) |
+                                           Q(customer__firstname__icontains=search_term) |
+                                           Q(guest_name__icontains=search_term)) # Corrected: guest_name on CustomerHistory
+        elif search_filter == 'date':
+            # This might need more robust date parsing if search_term is a date string
+            history_queryset = history_queryset.filter(history__timestamp__date=search_term) 
+        elif search_filter == 'note':
+            history_queryset = history_queryset.filter(history__note__icontains=search_term)
+        else: # 'all' or any other case
+            history_queryset = history_queryset.filter(
+                Q(history__random_id__icontains=search_term) |
+                Q(customer__surname__icontains=search_term) |
+                Q(customer__firstname__icontains=search_term) |
+                Q(guest_name__icontains=search_term) | # Corrected: guest_name on CustomerHistory
+                Q(history__note__icontains=search_term)
+                # Add Q(history__timestamp__icontains=search_term) if you want to search date as string directly
+            )
+
+    # Apply date filtering if dates are determined
+    if start_date_dt:
+        history_queryset = history_queryset.filter(history__timestamp__date__gte=start_date_dt)
+    if end_date_dt:
+        history_queryset = history_queryset.filter(history__timestamp__date__lte=end_date_dt)
+
+    history_queryset = history_queryset.order_by('-history__timestamp')
+
+    data = []
+    for ch in history_queryset:
+        history_instance = ch.history
+        customer_name = ch.customer.fullname if ch.customer else (ch.guest_name if ch.guest_name else 'Guest') 
+        products_str = ""
+        if history_instance and hasattr(history_instance, 'product') and history_instance.product:
+            product_list_data_export = history_instance.product
+            if isinstance(product_list_data_export, str):
+                try:
+                    product_list_data_export = json.loads(product_list_data_export)
+                except json.JSONDecodeError:
+                    print(f"Error decoding product JSON for export (ID: {history_instance.random_id}): {product_list_data_export}")
+                    product_list_data_export = [] 
+            
+            products_list = []
+            if isinstance(product_list_data_export, list):
+                for item in product_list_data_export:
+                    if not isinstance(item, dict):
+                        print(f"Warning: Product item for export is not a dict (ID: {history_instance.random_id}): {item}")
+                        continue
+                    product_name_export = item.get('name', 'N/A').replace('_', ' ')
+                    quantity_export = item.get('quantity', 0)
+                    # Price for export string can be simplified as it's just a string representation
+                    products_list.append(f"{product_name_export} (x{quantity_export})") 
+            else:
+                print(f"Warning: Product data for export (ID: {history_instance.random_id}) is not a list: {product_list_data_export}")
+            products_str = "; ".join(products_list)
+        
+        note = history_instance.note if history_instance and history_instance.note else ''
+        timestamp_hcm = timezone.localtime(history_instance.timestamp, timezone.get_fixed_timezone(timedelta(hours=7))) if history_instance and history_instance.timestamp else 'N/A'
+        
+        data.append({
+            'Purchase ID': history_instance.random_id if history_instance else 'N/A',
+            'Customer': customer_name,
+            'Date & Time': timestamp_hcm.strftime("%Y-%m-%d %H:%M:%S") if isinstance(timestamp_hcm, datetime) else 'N/A',
+            'Total Amount (VNĐ)': history_instance.total_amount if history_instance else 0,
+            'Product Details': products_str,
+            'Note': note,
+        })
+
+    df = pd.DataFrame(data)
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = 'attachment; filename="purchase_history.xlsx"'
+
+    # Use openpyxl to write the DataFrame to the response
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Purchase History"
+
+    for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
+        for c_idx, value in enumerate(row, 1):
+            ws.cell(row=r_idx, column=c_idx, value=value)
+
+    # Adjust column widths (optional)
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter  # Get the column name
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+
+    wb.save(response)
+    return response
 
 
 # Product API view
