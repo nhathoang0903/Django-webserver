@@ -86,7 +86,7 @@ from drf_yasg import openapi
 schema_view = get_schema_view(
     openapi.Info(
         title="Cartsy System API",
-        default_version='v1',
+        default_version='v1.2',
         description="API documentation for Smart Cart System"
     ),
     public=True,
