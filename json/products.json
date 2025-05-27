@@ -1,11 +1,11 @@
 [
   {
-    "category": "Beverages",
+    "category": "Beverage",
     "description": "Contains sugar (~13g/100ml), caffeine, and vitamin B, providing a quick energy boost. A 330ml can provides about 172 kcal.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543508/dpfogcr48ipkxehyobi0.png",
     "name": "Canned_Strawberry_Sting",
-    "price": "12000",
-    "product_id": 1,
+    "price": "10000",
+    "product_id": 26,
     "quantity": 1
   },
   {
@@ -14,7 +14,7 @@
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543510/p7rd2alpcacivbkofxcv.png",
     "name": "Canned_Yellow_Sting",
     "price": "10000.00",
-    "product_id": 2,
+    "product_id": 27,
     "quantity": 1
   },
   {
@@ -23,7 +23,7 @@
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543512/efbumyyctwwonkuii6ma.png",
     "name": "Good_Mood_Yogurt_Flavor",
     "price": "10000.00",
-    "product_id": 3,
+    "product_id": 28,
     "quantity": 1
   },
   {
@@ -31,8 +31,8 @@
     "description": "Provides 290 kcal per cup (~65g), contains high fat and sodium. Suitable for a quick meal but not for frequent consumption.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1744447883/products/lbkyssvkn8m8af3jp1wp.png",
     "name": "Hao_Hao_Cup_Noodles",
-    "price": "8000.00",
-    "product_id": 4,
+    "price": "10000",
+    "product_id": 29,
     "quantity": 1
   },
   {
@@ -40,8 +40,8 @@
     "description": "High in carbohydrates, fat, and sodium, providing ~350 kcal per 75g pack. Should be eaten with vegetables and protein for balanced nutrition.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543515/gxpswqhxrd5dmuzw2k0o.png",
     "name": "Hao_Hao_Noodles",
-    "price": "5000.00",
-    "product_id": 5,
+    "price": "6000.00",
+    "product_id": 30,
     "quantity": 1
   },
   {
@@ -49,8 +49,8 @@
     "description": "Contains caffeine (~50mg/100ml), sugar, condensed milk, providing ~60 kcal/100ml. Helps to stay alert but should be consumed in moderation.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543516/nrgruukdp6stenredbrh.png",
     "name": "Highland_Milk_Coffee",
-    "price": "9000.00",
-    "product_id": 6,
+    "price": "16000",
+    "product_id": 31,
     "quantity": 1
   },
   {
@@ -58,8 +58,8 @@
     "description": "Crab-flavored snack, rich in starch and vegetable oil, providing ~480 kcal/100g. Tasty but should be eaten in controlled portions.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543517/uxmn56cd8twjbe92cang.png",
     "name": "Oishi_Crabme",
-    "price": "5000.00",
-    "product_id": 7,
+    "price": "6000.00",
+    "product_id": 32,
     "quantity": 1
   },
   {
@@ -67,8 +67,8 @@
     "description": "Made of wheat flour, sugar, and vegetable fat, providing ~500 kcal/100g. A delicious snack but can lead to weight gain if consumed excessively.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543518/ylqstf1cczqwzv5mnaco.png",
     "name": "Oishi_Flutes",
-    "price": "5000.00",
-    "product_id": 8,
+    "price": "6000",
+    "product_id": 33,
     "quantity": 1
   },
   {
@@ -76,8 +76,8 @@
     "description": "Vegetarian snack, rich in starch and vegetable oil, providing ~450 kcal/100g. Should be consumed moderately to avoid excessive calorie intake.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543519/pvj1tofdjtigpyncxvwq.png",
     "name": "Oishi_Matys_Vegetarian",
-    "price": "5000.00",
-    "product_id": 9,
+    "price": "6000",
+    "product_id": 34,
     "quantity": 1
   },
   {
@@ -85,8 +85,8 @@
     "description": "Spicy shrimp-flavored snack, containing vegetable oil and seasonings, providing ~460 kcal/100g. Suitable for those who like spicy food but should be consumed in moderation.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543520/zq1i6kgnmrn47pbhmorb.png",
     "name": "Oishi_Special_Shrimp",
-    "price": "5000.00",
-    "product_id": 10,
+    "price": "6000",
+    "product_id": 35,
     "quantity": 1
   },
   {
@@ -94,8 +94,8 @@
     "description": "Shrimp-flavored snack, high in carbohydrates and fat, providing ~470 kcal/100g. A good snack but not suitable for a diet.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543522/deoyqvpn6dsbtdnet3su.png",
     "name": "Oishi_Spicy_Shrimp",
-    "price": "5000.00",
-    "product_id": 11,
+    "price": "6000",
+    "product_id": 36,
     "quantity": 1
   },
   {
@@ -103,8 +103,8 @@
     "description": "Corn-flavored snack, rich in starch, providing ~420 kcal/100g. A light snack but should be eaten in moderation to avoid excessive calories.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543523/omerrawef9dpbv9mr4cv.png",
     "name": "Oishi_Sweet_Corn",
-    "price": "5000.00",
-    "product_id": 12,
+    "price": "6000",
+    "product_id": 37,
     "quantity": 1
   },
   {
@@ -112,8 +112,8 @@
     "description": "Potato chip snack, high in fat, providing ~510 kcal/100g. Tasty but can cause weight gain if eaten in excess.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1744448114/products/hiykj8yvzjmnjb0mwhjx.png",
     "name": "Oishi_Tater_Thins",
-    "price": "5000.00",
-    "product_id": 13,
+    "price": "6000",
+    "product_id": 38,
     "quantity": 1
   },
   {
@@ -121,8 +121,8 @@
     "description": "Sugar-free oolong tea, low in calories (~20 kcal/100ml). Helps cleanse the body and supports weight loss.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543524/qw3pfcs48k6dpbyg9z4i.png",
     "name": "Oolong_Tea_Plus",
-    "price": "7000.00",
-    "product_id": 14,
+    "price": "10000",
+    "product_id": 39,
     "quantity": 1
   },
   {
@@ -130,8 +130,8 @@
     "description": "Carbonated orange drink, contains sugar (~48 kcal/100ml). A refreshing drink but should be consumed in moderation to avoid excess sugar.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543525/rofmsrxbzczhsjgmidwm.png",
     "name": "Orange_Juice_Mirinda",
-    "price": "9000.00",
-    "product_id": 15,
+    "price": "10000",
+    "product_id": 40,
     "quantity": 1
   },
   {
@@ -140,7 +140,7 @@
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543526/zda1sruhwosm4cejpzyy.png",
     "name": "Pepsi_Zero_Sugar",
     "price": "10000.00",
-    "product_id": 16,
+    "product_id": 41,
     "quantity": 1
   },
   {
@@ -148,44 +148,48 @@
     "description": "High in protein (~12g/100g), contains a lot of fat (~24g/100g), providing ~270 kcal. Should be eaten with vegetables for a balanced diet.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543527/x6srfd1mwildqjabcsix.png",
     "name": "Pork_Hot_Dog",
-    "price": "10000.00",
-    "product_id": 17,
+    "price": "3000",
+    "product_id": 42,
     "quantity": 1
   },
   {
     "category": "Beverage",
     "description": "Contains caffeine, taurine, and vitamin B, providing a quick energy boost with ~45 kcal/100ml. Should not be consumed excessively to avoid insomnia.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543529/r1repvjulpvabxqc0iv7.png",
+    
     "name": "Red_Bull",
-    "price": "11000.00",
-    "product_id": 18,
+    "price": "15000.00",
+    "product_id": 43,
     "quantity": 1
   },
   {
     "category": "Beverage",
     "description": "Sports drink with added minerals, contains sugar, providing ~24 kcal/100ml. Suitable for active individuals but should not replace plain water.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543530/af8rk7dhdn6ywqllzcdp.png",
+    
     "name": "Revive_Original",
     "price": "9000.00",
-    "product_id": 19,
+    "product_id": 44,
     "quantity": 1
   },
   {
     "category": "Beverage",
     "description": "Sports drink with salted lemon flavor, providing ~25 kcal/100ml. Helps with hydration but should be limited to avoid excess sugar intake.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543530/gnca8hiemlkppldtztff.png",
+    
     "name": "Revive_Salted_Lemon",
     "price": "7000.00",
-    "product_id": 20,
+    "product_id": 45,
     "quantity": 1
   },
   {
     "category": "Beverage",
     "description": "Energy drink containing sugar and caffeine (~60 kcal/100ml). Helps improve alertness but may cause stress and rapid heartbeat if consumed in excess.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543531/mnosds0plrzqw6lqbjjg.png",
+    
     "name": "Rock_Star",
-    "price": "12000.00",
-    "product_id": 21,
+    "price": "15000.00",
+    "product_id": 46,
     "quantity": 1
   },
   {
@@ -193,8 +197,8 @@
     "description": "Carbonated lemon-flavored soft drink, contains sugar (~45 kcal/100ml). Frequent consumption may lead to weight gain and dental health issues.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543532/hfzxynvgeie5fy660our.png",
     "name": "Seven_Up",
-    "price": "7000.00",
-    "product_id": 22,
+    "price": "10000.00",
+    "product_id": 47,
     "quantity": 1
   },
   {
@@ -203,7 +207,7 @@
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543533/stjul7t1lhvq7ioxp2xt.png",
     "name": "Susu_Milk_Box",
     "price": "8000.00",
-    "product_id": 23,
+    "product_id": 48,
     "quantity": 1
   },
   {
@@ -211,8 +215,8 @@
     "description": "Orange juice with added sugar and vitamin C, providing ~50 kcal/100ml. Convenient but not a substitute for fresh oranges due to preservatives.",
     "image_url": "https://res.cloudinary.com/dmuau2ipk/image/upload/v1740543534/bybdeidqjkirrvlakyfc.png",
     "name": "Twister_Orange_Juice",
-    "price": "9000.00",
-    "product_id": 24,
+    "price": "10000",
+    "product_id": 49,
     "quantity": 1
   },
   {
@@ -220,8 +224,107 @@
     "description": "Snack",
     "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1747389206/products/oml5vtgsffkdf1avstvp.png",
     "name": "Oishi_4X",
-    "price": "5000.00",
-    "product_id": 25,
+    "price": "6000.00",
+    "product_id": 50,
     "quantity": 1
+  },
+  {
+    "category": "Beverage",
+    "description": "Japanese Coffee",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748251734/products/twa7vfj8ctw1vx3eumbc.png",
+    "name": "Boss_Coffee",
+    "price": "14000.00",
+    "product_id": 51,
+    "quantity": 1
+  },
+  {
+    "category": "Food",
+    "description": "Egg",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748251897/products/icl8drmytzjnvkirtoqj.png",
+    "name": "Egg",
+    "price": "5000.00",
+    "product_id": 52,
+    "quantity": 1
+  },
+  {
+    "category": "Food",
+    "description": "Hot dog",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748252105/products/tltm2hrxo1mfgqjonkgv.png",
+    "name": "Beef_Hot_Dog",
+    "price": "3000.00",
+    "product_id": 53,
+    "quantity": 1
+  },
+  {
+    "category": "Snack",
+    "description": "",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748252306/products/ktsf8eoayp3ttsleipil.png",
+    "name": "Oishi_Indo_Chips",
+    "price": "6000.00",
+    "product_id": 54,
+    "quantity": 1
+  },
+  {
+    "category": "Snack",
+    "description": "",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748252467/products/wtxm4uko7lwx9qcmvk4m.png",
+    "name": "Oishi_Green_Chili_Shrimp",
+    "price": "6000.00",
+    "product_id": 55,
+    "quantity": 1
+  },
+  {
+    "category": "Snack",
+    "description": "",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748252598/products/ebdt7cbaesw2lbezxgma.png",
+    "name": "Oishi_Luna_Squid",
+    "price": "6000.00",
+    "product_id": 56,
+    "quantity": 1
+  },
+  {
+    "category": "Snack",
+    "description": "Snack",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748252706/products/hbv4z37oygtrzfsvn1cv.png",
+    "name": "Oishi_BoLa_Spicy_Squid",
+    "price": "6000.00",
+    "product_id": 57,
+    "quantity": 1
+  },
+  {
+    "category": "Snack",
+    "description": "",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748252823/products/dzzrjr18rvdiclbmyyzt.png",
+    "name": "OIshi_Kirei",
+    "price": "6000.00",
+    "product_id": 58,
+    "quantity": 1
+  },
+  {
+    "product_id": 61,
+    "name": "Milo_Milk",
+    "quantity": 1,
+    "price": "10000.00",
+    "description": "Milk",
+    "category": "Beverage",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748253921/products/vgmexoeqmap66ddssmgj.png"
+  },
+  {
+    "product_id": 60,
+    "name": "Oishi_Pumpkin",
+    "quantity": 1,
+    "price": "6000.00",
+    "description": "Snack",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748253737/products/kfqx9ugqbb4hvpjnjyps.png"
+  },
+  {
+    "product_id": 59,
+    "name": "Oishi_Chocolate_Corn",
+    "quantity": 1,
+    "price": "6000.00",
+    "description": "",
+    "category": "Snack",
+    "image_url": "https://res.cloudinary.com/dulwv5d8a/image/upload/v1748253590/products/sgrlq49cgjrcejtbpdof.png"
   }
 ]

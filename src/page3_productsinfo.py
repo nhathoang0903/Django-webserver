@@ -541,6 +541,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
             self.transition_overlay = PageTransitionOverlay(self)
             
             if not ProductPage._products_cache:
+                
                 self.setup_loading_indicator()
                 self.start_loading_products()
             else:
@@ -559,7 +560,7 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         # Always update translations when the page is initialized or shown again
         self.update_translations()
         
-        # Update cart count when initializing or shown again
+        # Update cart count when initializing or shown againor
         self.update_cart_count()
 
     def check_for_new_products(self):
