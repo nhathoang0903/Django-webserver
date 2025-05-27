@@ -355,27 +355,32 @@ class WelcomePage(BasePage):  # Changed from QWidget to BasePage
             # Start timing
             start_time = PageTiming.start_timing()
             
-            # Import and create ProductPage
-            from page3_productsinfo import ProductPage  
-            self.product_page = ProductPage()
-            self.product_page.from_page1 = True  # Set flag to indicate coming from page1
-            
-            # Create transition overlay (full-screen)
+            # Create and show simple loading overlay
             from components.PageTransitionOverlay import PageTransitionOverlay
-            loading_overlay = PageTransitionOverlay(self, show_loading_text=True)
+            # Use simple_mode and disable the original loading text/progress bar for default mode
+            loading_overlay = PageTransitionOverlay(self, show_loading_text_for_default_mode=False, simple_mode=True)
             
-            def show_new_page():
-                # Show the product page normally
+            # Define what to do after the overlay is shown (which is immediate in simple_mode)
+            def proceed_with_page_switch():
+                # Import and create ProductPage
+                from page3_productsinfo import ProductPage  
+                self.product_page = ProductPage()
+                self.product_page.from_page1 = True  # Set flag to indicate coming from page1
+                
+                # Show the product page
                 self.product_page.show()
                 
-                # Fade out the overlay and hide current page
-                loading_overlay.fadeOut(lambda: self.hide())
+                # Hide current page (WelcomePage)
+                self.hide()
+                
+                # Now, hide the overlay (which is immediate in simple_mode)
+                loading_overlay.fadeOut(None) # No callback needed for fadeOut here
                 
                 # Complete timing
                 PageTiming.end_timing(start_time, "WelcomePage", "ProductPage")
-            
-            # Fade in the overlay (will call show_new_page when fully visible)
-            loading_overlay.fadeIn(show_new_page)
+
+            # Show the overlay. In simple_mode, fadeIn is immediate and then calls the callback.
+            loading_overlay.fadeIn(proceed_with_page_switch)
 
     # def show_welcome_message(self, customer_name):
     #     """Show welcome message with blurred background"""

@@ -5,7 +5,7 @@ import requests
 import json
 import signal
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt, QPoint, QTimer, QEvent
 from PyQt5.QtGui import QIcon
 from page1_welcome import WelcomePage
 import subprocess
@@ -14,6 +14,13 @@ from config import DEVICE_ID, CART_END_SESSION_API
 
 # Bỏ qua cảnh báo CSS không hỗ trợ
 os.environ["QT_LOGGING_RULES"] = "qt.qpa.xcb.pci.propertymatch=false;*.debug=false;qt.qpa.xcb=false;qt.css.*=false"
+os.environ["QT_QPA_PLATFORM"] = "xcb"  # For better performance on Linux
+os.environ["QT_SCALE_FACTOR"] = "1"    # Prevent scaling issues
+
+# Thêm cấu hình để tối ưu xử lý events
+QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+QApplication.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
 
 # Create logs directory if it doesn't exist
 LOG_DIR = os.path.join(os.path.dirname(__file__), 'app', 'logs')
@@ -61,6 +68,31 @@ logging.basicConfig(
 class KioskApplication(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
+        
+        # Thêm cấu hình để tăng responsive
+        self.setAttribute(Qt.AA_EnableHighDpiScaling)
+        self.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        
+        # Tăng độ ưu tiên cho event processing
+        self.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+        
+        # Tăng kích thước của event queue
+        self.maxThreadCount = 4
+        self.processEvents()
+        
+        # Thêm timer để đảm bảo UI responsive
+        self.process_timer = QTimer()
+        self.process_timer.timeout.connect(self.process_pending_events)
+        self.process_timer.start(16)  # 60fps
+        
+        # Khởi tạo window chính
+        self.main_window = None
+        self.restore_system_state()
+        
+        # Thiết lập signal handler
+        signal.signal(signal.SIGINT, self.cleanup_on_exit)
+        signal.signal(signal.SIGTERM, self.cleanup_on_exit)
+        
         logging.info("Starting Cartsy Application")
         # Set application-wide attributes
         self.setOverrideCursor(Qt.BlankCursor)
@@ -80,8 +112,21 @@ class KioskApplication(QApplication):
         # Register application exit handler
         self.aboutToQuit.connect(self.cleanup_on_exit)
     
-    def cleanup_on_exit(self):
+    def process_pending_events(self):
+        # Process pending events để tránh UI freeze
+        self.processEvents()
+        
+    def event(self, event):
+        # Override event handler để ưu tiên xử lý UI events
+        if event.type() == QEvent.ApplicationStateChange:
+            self.processEvents()
+        return super().event(event)
+
+    def cleanup_on_exit(self, sig, frame):
         """Ensure the cart session is properly ended when the application exits"""
+        logging.info(f"Received signal {sig}, shutting down...")
+        self.quit()
+        
         logging.info("Application shutting down, cleaning up cart session...")
         try:
             # Call the end session API
@@ -138,15 +183,6 @@ def main():
         LogCleaner.check_and_clear_log()
         
         app = KioskApplication(sys.argv)
-        
-        # Set up signal handlers for clean shutdown
-        def signal_handler(sig, frame):
-            logging.info(f"Received signal {sig}, shutting down...")
-            app.quit()
-        
-        # Register signal handlers for SIGTERM and SIGINT
-        signal.signal(signal.SIGTERM, signal_handler)
-        signal.signal(signal.SIGINT, signal_handler)
         
         app.show_main_window()
         logging.info("Main window displayed")

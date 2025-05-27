@@ -770,48 +770,62 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 
             if hasattr(self, 'session_monitor'):
                 self.session_monitor.stop() 
-                self.session_monitor.wait()
+                if hasattr(self.session_monitor, 'wait'):
+                    self.session_monitor.wait()
                 print("Stopped session monitor before product page")
                 
             if hasattr(self, 'payment_monitor'):
                 self.payment_monitor.stop()
-                self.payment_monitor.wait()
+                if hasattr(self.payment_monitor, 'wait'):
+                    self.payment_monitor.wait()
                 print("Stopped payment monitor before product page")
-                
-            # Tạo overlay màu xanh toàn màn hình trước
-            background_overlay = QWidget(self)
-            background_overlay.setGeometry(self.rect())
-            background_overlay.setStyleSheet("background-color: #3D6F4A;")  # Giữ màu sắc app
-            background_overlay.show()
-            background_overlay.raise_()
-            
-            # Đảm bảo overlay hiển thị ngay lập tức
-            QApplication.processEvents()
             
             # Bắt đầu tính thời gian
             start_time = PageTiming.start_timing()
-            
-            # Tạo transition overlay với loading
+
+            # Tạo transition overlay ở simple_mode
             from components.PageTransitionOverlay import PageTransitionOverlay
-            loading_overlay = PageTransitionOverlay(self, show_loading_text=True)
+            loading_overlay = PageTransitionOverlay(self, show_loading_text_for_default_mode=False, simple_mode=True)
                 
-            # Import ProductPage và tạo instance
-            from page3_productsinfo import ProductPage
-            product_page = ProductPage()
-            product_page.from_page1 = False  # Đánh dấu không phải từ page1
+            def proceed_with_page_switch():
+                try:
+                    # Tạo ProductPage instance trong một QTimer để tránh block UI
+                    def create_product_page():
+                        try:
+                            from page3_productsinfo import ProductPage
+                            product_page = ProductPage()
+                            product_page.from_page1 = False
+                            
+                            # Hiển thị trang sản phẩm
+                            product_page.show()
+                            
+                            # Ẩn trang hiện tại (ShoppingPage)
+                            self.hide()
+                            
+                            # Ẩn overlay
+                            loading_overlay.fadeOut(None)
+                            
+                            # Ghi nhận thời gian và reset cờ
+                            PageTiming.end_timing(start_time, "ShoppingPage", "ProductPage")
+                            self.transition_in_progress = False
+                            
+                        except Exception as e:
+                            print(f"Error creating product page: {e}")
+                            self.transition_in_progress = False
+                            loading_overlay.fadeOut(None)
+                        
+                    # Sử dụng QTimer.singleShot để tạo ProductPage trong event loop tiếp theo
+                    QTimer.singleShot(100, create_product_page)
+                    
+                except Exception as e:
+                    print(f"Error in proceed_with_page_switch: {e}")
+                    self.transition_in_progress = False
+                    loading_overlay.fadeOut(None)
             
-            def show_new_page():
-                # Hiển thị trang sản phẩm
-                product_page.show()
-                # Sau đó fade out overlay và ẩn trang hiện tại
-                loading_overlay.fadeOut(lambda: self.hide())
-                background_overlay.deleteLater()  # Xóa overlay nền
-                # Ghi nhận thời gian và reset cờ
-                PageTiming.end_timing(start_time, "ShoppingPage", "ProductPage")
-                self.transition_in_progress = False
-            
-            # Hiện overlay trước, sau đó gọi hàm show_new_page khi overlay đã hiện
-            loading_overlay.fadeIn(show_new_page)
+            # Hiện overlay và chuyển trang
+            loading_overlay.fadeIn(proceed_with_page_switch)
+        else:
+            print("Product page transition already in progress, ignoring request")
 
     def start_camera(self):
         """Start camera with immediate detection"""
@@ -1405,72 +1419,69 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 
             if hasattr(self, 'session_monitor'):
                 self.session_monitor.stop()
-                if hasattr(self.session_monitor, 'wait'):
+                if hasattr(self.session_monitor, 'wait'): # Check if wait exists
                     self.session_monitor.wait()
                 print("Stopped session monitor before QR page")
                 
             if hasattr(self, 'payment_monitor'):
                 self.payment_monitor.stop()
-                if hasattr(self.payment_monitor, 'wait'):
+                if hasattr(self.payment_monitor, 'wait'): # Check if wait exists
                     self.payment_monitor.wait()
                 print("Stopped payment monitor before QR page")
             
-            # Tạo overlay màu xanh toàn màn hình trước
-            background_overlay = QWidget(self)
-            background_overlay.setGeometry(self.rect())
-            background_overlay.setStyleSheet("background-color: #3D6F4A;")  # Giữ màu sắc app
-            background_overlay.show()
-            background_overlay.raise_()
-            
-            # Đảm bảo overlay hiển thị ngay lập tức
+            # Xử lý các sự kiện đang chờ trước
             QApplication.processEvents()
             
             # Bắt đầu tính thời gian
             start_time = PageTiming.start_timing()
             
-            # Tạo transition overlay với loading
+            # Tạo transition overlay ở simple_mode
             from components.PageTransitionOverlay import PageTransitionOverlay
-            loading_overlay = PageTransitionOverlay(self, show_loading_text=True)
+            loading_overlay = PageTransitionOverlay(self, show_loading_text_for_default_mode=False, simple_mode=True)
             
-            try:
-                # Import và tạo QR page
-                from page5_qrcode import QRCodePage
-                self.payment_page = QRCodePage()
-                
-                if hasattr(self.payment_page, 'payment_completed'):
-                    self.payment_page.payment_completed.connect(self.handle_payment_completed)
-                    print("Connected payment_completed signal")
-                else:
-                    print("ERROR: payment_page does not have payment_completed signal")
-                
-                def show_new_page():
+            def proceed_with_page_switch():
+                try:
+                    # Import và tạo QR page
+                    from page5_qrcode import QRCodePage
+                    self.payment_page = QRCodePage()
+                    
+                    if hasattr(self.payment_page, 'payment_completed'):
+                        self.payment_page.payment_completed.connect(self.handle_payment_completed)
+                        print("Connected payment_completed signal")
+                    else:
+                        print("ERROR: payment_page does not have payment_completed signal")
+                    
                     # Hiển thị trang QR
                     self.payment_page.show()
-                    # Sau đó fade out overlay và ẩn trang hiện tại
-                    loading_overlay.fadeOut(lambda: self.hide())
-                    background_overlay.deleteLater()  # Xóa overlay nền
+
+                    # Ẩn trang hiện tại (ShoppingPage)
+                    self.hide()
+
+                    # Ẩn overlay (ngay lập tức trong simple_mode)
+                    loading_overlay.fadeOut(None)
+                    
                     # Ghi nhận thời gian và reset cờ
                     PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
                     self.transition_in_progress = False
                 
-                # Hiện overlay trước, sau đó gọi hàm show_new_page khi overlay đã hiện
-                loading_overlay.fadeIn(show_new_page)
-            
-            except Exception as e:
-                print(f"Error handling payment signal: {e}")
-                import traceback
-                traceback.print_exc()
-                
-                # Reset transition flag so user can try again
-                self.transition_in_progress = False
-                
-                # Show error message
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Critical)
-                msg.setText("Error opening payment page")
-                msg.setInformativeText(f"Error: {str(e)}")
-                msg.setWindowTitle("Error")
-                msg.exec_()
+                except Exception as e:
+                    print(f"Error handling payment signal: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    
+                    # Reset transition flag so user can try again
+                    self.transition_in_progress = False
+                    
+                    # Show error message
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Critical)
+                    msg.setText("Error opening payment page")
+                    msg.setInformativeText(f"Error: {str(e)}")
+                    msg.setWindowTitle("Error")
+                    msg.exec_()
+
+            # Hiện overlay. Trong simple_mode, fadeIn là ngay lập tức và sau đó gọi callback.
+            loading_overlay.fadeIn(proceed_with_page_switch)
         else:
             print("Payment signal ignored - transition already in progress")
 
@@ -1905,7 +1916,9 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 print(f"[Page4] Scheduling scroll restore to: {old_scroll_value} for new scroll_area instance.")
                 # Use a 10ms delay and call the helper method
                 # The lambda captures the current new_scroll_area (aliased as 'sa') and old_scroll_value (aliased as 'val')
-                QTimer.singleShot(10, lambda sa=scroll_area, val=old_scroll_value: self._restore_scroll_position_with_delay(sa, val))
+                # Pass a weakref to the scroll_area instance
+                scroll_area_weak_ref = weakref.ref(scroll_area)
+                QTimer.singleShot(10, lambda sa_ref=scroll_area_weak_ref, val=old_scroll_value: self._restore_scroll_position_with_delay(sa_ref, val))
             else:
                 print(f"[Page4] No old scroll value to restore or it was invalid.")
             # --- END MODIFICATION (Restore scroll position) ---
@@ -1984,55 +1997,52 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
                 
             if hasattr(self, 'session_monitor'):
                 self.session_monitor.stop() 
-                if hasattr(self.session_monitor, 'wait'):
+                if hasattr(self.session_monitor, 'wait'): # Check if wait exists
                     self.session_monitor.wait()
                 print("Stopped session monitor before QR page")
                 
             if hasattr(self, 'payment_monitor'):
                 self.payment_monitor.stop()
-                if hasattr(self.payment_monitor, 'wait'):
+                if hasattr(self.payment_monitor, 'wait'): # Check if wait exists
                     self.payment_monitor.wait()
                 print("Stopped payment monitor before QR page")
             
-            # Tạo overlay màu xanh toàn màn hình trước
-            background_overlay = QWidget(self)
-            background_overlay.setGeometry(self.rect())
-            background_overlay.setStyleSheet("background-color: #3D6F4A;")  # Giữ màu sắc app
-            background_overlay.show()
-            background_overlay.raise_()
-            
-            # Đảm bảo overlay hiển thị ngay lập tức
+            # Xử lý các sự kiện đang chờ trước
             QApplication.processEvents()
             
             # Bắt đầu tính thời gian
             start_time = PageTiming.start_timing()
             
-            # Tạo transition overlay với loading
+            # Tạo transition overlay ở simple_mode
             from components.PageTransitionOverlay import PageTransitionOverlay
-            loading_overlay = PageTransitionOverlay(self, show_loading_text=True)
+            loading_overlay = PageTransitionOverlay(self, show_loading_text_for_default_mode=False, simple_mode=True)
             
-            # Import và tạo QR page
-            from page5_qrcode import QRCodePage
-            self.payment_page = QRCodePage()
-            
-            if hasattr(self.payment_page, 'payment_completed'):
-                self.payment_page.payment_completed.connect(self.handle_payment_completed)
-                print("Connected payment_completed signal")
-            else:
-                print("ERROR: payment_page does not have payment_completed signal")
-            
-            def show_new_page():
+            def proceed_with_page_switch():
+                # Import và tạo QR page
+                from page5_qrcode import QRCodePage
+                self.payment_page = QRCodePage()
+                
+                if hasattr(self.payment_page, 'payment_completed'):
+                    self.payment_page.payment_completed.connect(self.handle_payment_completed)
+                    print("Connected payment_completed signal")
+                else:
+                    print("ERROR: payment_page does not have payment_completed signal")
+                
                 # Hiển thị trang QR
                 self.payment_page.show()
-                # Sau đó fade out overlay và ẩn trang hiện tại
-                loading_overlay.fadeOut(lambda: self.hide())
-                background_overlay.deleteLater()  # Xóa overlay nền
+
+                # Ẩn trang hiện tại (ShoppingPage)
+                self.hide()
+
+                # Ẩn overlay (ngay lập tức trong simple_mode)
+                loading_overlay.fadeOut(None)
+                
                 # Ghi nhận thời gian và reset cờ
                 PageTiming.end_timing(start_time, "ShoppingPage", "QRCodePage")
                 self.transition_in_progress = False
             
-            # Hiện overlay trước, sau đó gọi hàm show_new_page khi overlay đã hiện
-            loading_overlay.fadeIn(show_new_page)
+            # Hiện overlay. Trong simple_mode, fadeIn là ngay lập tức và sau đó gọi callback.
+            loading_overlay.fadeIn(proceed_with_page_switch)
             
         else:
             print("Payment page transition already in progress, ignoring request")
@@ -2366,17 +2376,32 @@ class ShoppingPage(BasePage):  # Changed from QWidget to BasePage
         
         return camera_container
 
-    def _restore_scroll_position_with_delay(self, scroll_area_instance, value_to_set):
-        """Helper to restore scroll position after a delay, with logging."""
+    def _restore_scroll_position_with_delay(self, scroll_area_instance_ref, value_to_set):
+        """Helper to restore scroll position after a delay, with logging and safety check."""
+        scroll_area_instance = scroll_area_instance_ref() # Dereference weakref
         if scroll_area_instance and not sip.isdeleted(scroll_area_instance):
             scrollbar = scroll_area_instance.verticalScrollBar()
-            print(f"[Page4 Timer] Attempting to restore scroll to {value_to_set}.")
-            print(f"[Page4 Timer] Scrollbar state before set: value={scrollbar.value()}, min={scrollbar.minimum()}, max={scrollbar.maximum()}, pageStep={scrollbar.pageStep()}")
-            scrollbar.setValue(value_to_set)
-            # Short delay to log the value *after* Qt might have processed the setValue
-            QTimer.singleShot(10, lambda: print(f"[Page4 Timer] Scrollbar state after set({value_to_set}): value={scrollbar.value()}"))
+            if scrollbar and not sip.isdeleted(scrollbar): # Additional check for scrollbar
+                print(f"[Page4 Timer] Attempting to restore scroll to {value_to_set}.")
+                print(f"[Page4 Timer] Scrollbar state before set: value={scrollbar.value()}, min={scrollbar.minimum()}, max={scrollbar.maximum()}, pageStep={scrollbar.pageStep()}")
+                scrollbar.setValue(value_to_set)
+                # Short delay to log the value *after* Qt might have processed the setValue
+                # Use another weakref for the scrollbar inside this new timer to be absolutely safe
+                scrollbar_weak_ref = weakref.ref(scrollbar)
+                QTimer.singleShot(10, lambda sb_ref=scrollbar_weak_ref, original_val=value_to_set: \
+                    self._log_scrollbar_value_after_set(sb_ref, original_val))
+            else:
+                print(f"[Page4 Timer] Scrollbar object is deleted or invalid. Cannot restore position.")
         else:
             print(f"[Page4 Timer] Scroll area instance is deleted or invalid. Cannot restore position.")
+
+    def _log_scrollbar_value_after_set(self, scrollbar_ref, original_value_set):
+        """Safely logs the scrollbar value after attempting to set it."""
+        scrollbar = scrollbar_ref()
+        if scrollbar and not sip.isdeleted(scrollbar):
+            print(f"[Page4 Timer] Scrollbar state after attempting to set to {original_value_set}: current value={scrollbar.value()}")
+        else:
+            print(f"[Page4 Timer] Scrollbar object was deleted before final value check after attempting to set to {original_value_set}.")
 
 if __name__ == '__main__':
     import sys

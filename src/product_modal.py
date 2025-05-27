@@ -94,7 +94,7 @@ class ProductModal(QFrame):
         self.name_label.setStyleSheet("""
             QLabel {
                 qproperty-alignment: 'AlignLeft | AlignVCenter';
-                padding-left: 15px;
+                padding-left: 10px;
             }
         """)
         self.right_layout.addWidget(self.name_label)
@@ -117,7 +117,7 @@ class ProductModal(QFrame):
         self.right_layout.insertWidget(1, self.warning_label)
 
         # Price with more space above
-        self.right_layout.addSpacing(20)
+        self.right_layout.addSpacing(25)
         self.price_label = QLabel()
         self.price_label.setFont(QFont("Inria Sans", 26, QFont.Bold))
         self.price_label.setStyleSheet("""
@@ -125,13 +125,13 @@ class ProductModal(QFrame):
                 color: #D32F2F;
                 qproperty-alignment: 'AlignLeft | AlignVCenter';
                 margin-bottom: 25px;
-                padding-left: 15px;
+                padding-left: 5x;
             }
         """)
         self.price_label.setAlignment(Qt.AlignLeft)
         self.right_layout.addWidget(self.price_label)
         
-        self.right_layout.addSpacing(25)
+        self.right_layout.addSpacing(15)
 
         # Quantity controls
         self.quantity_widget = QWidget()
