@@ -56,7 +56,7 @@ DEVICE_MANAGEMENT_PASSWORD=secure_password
 7. Run migration to set up database:
 ```bash
 python manage.py makemigrations cartv2
-python manage.py migrate cartv2
+python manage.py migrate
 ```
 
 8. Run server:
