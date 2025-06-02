@@ -12,7 +12,7 @@ from urllib.error import URLError
 import threading
 import subprocess
 from page_timing import PageTiming
-from cart_state import CartState
+from app_components.cart_state import CartState  # Update import path
 import requests
 from config import CART_END_SESSION_API, DEVICE_ID, PRODUCTS_CHECK_NEW_API, PRODUCTS_CHECK_EDITS_API, PRODUCTS_CHECK_DELETIONS_API
 import importlib

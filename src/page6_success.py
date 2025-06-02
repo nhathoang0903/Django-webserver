@@ -8,7 +8,7 @@ import json
 import random
 import datetime
 import requests
-from cart_state import CartState
+from app_components.cart_state import CartState
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay  
 from base_page import BasePage  

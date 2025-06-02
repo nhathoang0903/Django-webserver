@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QSize, QPropertyAnimation
 from PyQt5.QtGui import QFont, QPixmap, QFontDatabase, QIcon, QColor, QMovie
 from page3_productsinfo import ProductPage  
 import os
-from cart_state import CartState  
+from app_components.cart_state import CartState  # Update import path
 from page_timing import PageTiming
 from components.PageTransitionOverlay import PageTransitionOverlay
 from components.LanguageSelectionModal import LanguageSelectionModal

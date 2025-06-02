@@ -6,6 +6,7 @@ import os
 from page3_productsinfo import SimpleImageLoader  
 import weakref
 from utils.translation import _, get_current_language
+from app_components.cart_state import CartState  # Update import path
 
 class CartItemWidget(QFrame):
     quantityChanged = pyqtSignal(int)  # Signal for quantity changes
@@ -18,7 +19,6 @@ class CartItemWidget(QFrame):
 
     def __init__(self, product, quantity, parent=None):
         super().__init__(parent)
-        from cart_state import CartState
         self.cart_state = CartState()  # Get singleton instance
         self.load_fonts()
         self.quantity = quantity

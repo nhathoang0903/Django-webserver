@@ -69,7 +69,7 @@ class BasePage(QWidget):
             
         # Try to clear cart state
         try:
-            from cart_state import CartState
+            from app_components.cart_state import CartState
             cart_state = CartState()
             cart_state.clear_cart()
         except Exception as e:

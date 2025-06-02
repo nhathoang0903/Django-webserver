@@ -1,4 +1,3 @@
-
 class ImportModule:
     product_page = None
     shopping_page = None
@@ -6,7 +5,7 @@ class ImportModule:
     @classmethod
     def get_product_page(cls):
         if not cls.product_page:
-            from page3_productsinfo import ProductPage
+            from app_components.product_page import ProductPage
             cls.product_page = ProductPage()
             print("Product page opened")
         return cls.product_page

@@ -11,11 +11,11 @@ import os
 import cv2
 import numpy as np
 import time
-from product_detector import ProductDetector
-from product_modal import ProductModal
-from cart_item_widget import CartItemWidget
-from cart_state import CartState
-from cancelshopping_modal import CancelShoppingModal
+from app_components.product_detector import ProductDetector
+from app_components.product_modal import ProductModal  
+from app_components.cart_item_widget import CartItemWidget
+from app_components.cart_state import CartState
+from app_components.cancelshopping_modal import CancelShoppingModal
 from PyQt5 import sip
 from countdown_overlay import CountdownOverlay
 from page_timing import PageTiming
