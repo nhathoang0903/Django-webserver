@@ -62,7 +62,7 @@
     "loading": "読み込み中...",
     "amount": "金額: ",
     "accountNumber": "口座番号: ",
-    "accountName": "口座名義: NGUYEN THE NGO",
+    "accountHolderLabel": "口座名義: ",
     "bankName": "銀行: 軍事商業合資銀行",
     "charityMessage": "\"限りあるお金、尽きない愛\"",
     "cancelPayment": "決済をキャンセル",

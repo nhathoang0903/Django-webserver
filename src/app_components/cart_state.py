@@ -13,7 +13,7 @@ from queue import Queue
 from count_item import update_cart_count  
 
 class CartState:
-    JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'shopping_process.json')
+    JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'json', 'shopping_process.json')
 
     def __init__(self):
         if not hasattr(self, '_initialized'):
@@ -29,8 +29,9 @@ class CartState:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(CartState, cls).__new__(cls)
-            # Define JSON path
-            json_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json')
+            # Define JSON path (Corrected to be project_root/json)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            json_dir = os.path.join(project_root, 'json')
             if not os.path.exists(json_dir):
                 os.makedirs(json_dir)
             cls._instance.JSON_PATH = os.path.join(json_dir, 'shopping_process.json')
@@ -284,7 +285,7 @@ class CartState:
                     data = json.load(f)
                     
                 # Load product details from products.json
-                products_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                products_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
                                           'json', 'products.json')
                 product_details = []
                 try:

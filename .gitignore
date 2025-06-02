@@ -13,10 +13,9 @@ __pycache__/
 *.swp
 
 # Ignore PyQt5 compiled UI and audio files
-*.mp3
-*.wav
 *.pyc
 *.pyo
 *.qrc
 
-venv
+# Ignore .Environment variables
+.env

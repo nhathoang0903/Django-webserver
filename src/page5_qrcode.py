@@ -9,6 +9,7 @@ warnings.filterwarnings("ignore")
 import gc
 import logging 
 import subprocess
+from dotenv import load_dotenv
 
 from base_page import BasePage 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, 
@@ -48,6 +49,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         # Ghi lại thời gian bắt đầu khởi tạo
         init_start_time = time.time()
         print(f"[QR_TIMING] Starting QRCodePage initialization at: {init_start_time}")
+        
+        # Load environment variables
+        load_dotenv()
         
         # Force CPU configuration before any other initialization
         self.configure_device()
@@ -254,7 +258,8 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
         account_label.setFont(QFont("Inria Sans", 22, QFont.Bold))  # Slightly reduced font size
         
         # Account Details - increased font
-        acc_name_label = QLabel(_("qrCodePage.accountName"))
+        account_name_from_env = os.getenv("MBBANK_ACCOUNT_NAME", "") # Use empty string as fallback
+        acc_name_label = QLabel(f"{_('qrCodePage.accountHolderLabel')}{account_name_from_env}")
         acc_name_label.setFont(QFont("Inria Sans", 22))  # Slightly reduced font size
         
         bank_label = QLabel(_("qrCodePage.bankName"))
@@ -788,9 +793,9 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
             print(f"Error setting up event loop: {e}")
             return  # Exit early if we can't set up event loop
         
-        USERNAME = "0375712517"
-        PASSWORD = "Ngo252002@"
-        account_no = "0375712517"
+        USERNAME = os.getenv("MBBANK_USERNAME")
+        PASSWORD = os.getenv("MBBANK_PASSWORD")
+        account_no = os.getenv("MBBANK_ACCOUNT_NO")
 
         mb = None
         authenticated = False
@@ -1020,62 +1025,6 @@ class QRCodePage(BasePage):  # Changed from QWidget to BasePage
                 QTimer.singleShot(500, lambda: self.transition_overlay.fadeIn(show_new_page))
                 
         switch_page()
-
-    def number_to_vietnamese(self, number):
-        """Chuyển số thành chữ tiếng Việt"""
-        units = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"]
-        teen = ["mười", "mười một", "mười hai", "mười ba", "mười bốn", "mười lăm", "mười sáu", "mười bảy", "mười tám", "mười chín"]
-        tens = ["", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"]
-        
-        if number == 0:
-            return "không"
-            
-        def read_group(n):
-            hundreds = n // 100
-            remainder = n % 100
-            tens_digit = remainder // 10
-            ones_digit = remainder % 10
-            
-            result = []
-            if hundreds > 0:
-                result.append(f"{units[hundreds]} trăm")
-            if tens_digit > 0:
-                if tens_digit == 1:
-                    result.append(teen[ones_digit])
-                    return " ".join(result)
-                result.append(tens[tens_digit])
-            if ones_digit > 0:
-                if tens_digit > 1 and ones_digit == 1:
-                    result.append("mốt")
-                elif tens_digit > 0 and ones_digit == 5:
-                    result.append("lăm")
-                else:
-                    result.append(units[ones_digit])
-            elif tens_digit > 0:
-                result.append("")
-            return " ".join(result)
-        
-        groups = []
-        group_names = ["", "nghìn", "triệu", "tỷ"]
-        
-        if number == 0:
-            return "không"
-            
-        number_str = str(number)
-        while number_str:
-            groups.append(number_str[-3:] if len(number_str) >= 3 else number_str)
-            number_str = number_str[:-3]
-            
-        result = []
-        for i, group in enumerate(groups):
-            group_value = int(group)
-            if group_value > 0:
-                group_text = read_group(group_value)
-                if group_names[i]:
-                    group_text += f" {group_names[i]}"
-                result.append(group_text)
-                
-        return " ".join(reversed(result))
 
     def update_countdown(self):
         """Update the countdown timer display"""

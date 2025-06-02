@@ -393,7 +393,8 @@ class LoadProductsThread(QThread):
 
     def run(self):
         try:
-            json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+            # Corrected path for products.json
+            json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
                                    'json', 'products.json')
             with open(json_path, 'r', encoding='utf-8') as file:
                 products = json.load(file)
@@ -420,6 +421,17 @@ class LoadProductsThread(QThread):
             
         except Exception as e:
             self.error.emit(str(e))
+
+    def _save_product_json(self, products):
+        """Save products to JSON file in a separate thread to not block UI"""
+        try:
+            # Corrected path for products.json
+            json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                                   'json', 'products.json')
+            with open(json_path, 'w', encoding='utf-8') as file:
+                json.dump(products, file, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"[Page3] Error saving products.json: {e}")
 
 class CategoryDropdown(QPushButton):
     def __init__(self, parent=None):
@@ -499,6 +511,49 @@ class CategoryDropdown(QPushButton):
     def update_translation(self):
         """Cập nhật text hiển thị của button theo ngôn ngữ hiện tại"""
         self.setText(_("productPage.categories." + self.current_category))
+
+    def _save_product_json(self, products):
+        """Save products to JSON file in a separate thread to not block UI"""
+        try:
+            # Corrected path for products.json
+            json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                                   'json', 'products.json')
+            with open(json_path, 'w', encoding='utf-8') as file:
+                json.dump(products, file, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"[Page3] Error saving products.json: {e}")
+
+    def add_new_product_cards(self, new_products):
+        """Create product cards for new products and add them to the cache"""
+        if not new_products:
+            return
+            
+        try:
+            print(f"[Page3] Creating cards for {len(new_products)} new products")
+            
+            # Calculate starting position for new cards
+            start_index = len(ProductPage._cards_cache)
+            
+            # Create new cards
+            for i, product in enumerate(new_products):
+                card = ProductCard(product, self.cart_count_text)
+                
+                # Calculate grid position
+                idx = start_index + i
+                row = (idx // 5) * 2  # 5 products per row
+                col = idx % 5
+                
+                # Store position in card
+                card.grid_pos = (row, col)
+                
+                # Add to cache
+                ProductPage._cards_cache.append(card)
+                print(f"[Page3] Created card for {product['name']} at position ({row}, {col})")
+                
+            print(f"[Page3] Added {len(new_products)} cards to cache. Total cards: {len(ProductPage._cards_cache)}")
+            
+        except Exception as e:
+            print(f"[Page3] Error adding new product cards: {e}")
 
 class ProductPage(BasePage):  # Changed from QWidget to BasePage
     _instance = None
@@ -691,7 +746,8 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
     def _save_product_json(self, products):
         """Save products to JSON file in a separate thread to not block UI"""
         try:
-            json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+            # Corrected path for products.json
+            json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
                                    'json', 'products.json')
             with open(json_path, 'w', encoding='utf-8') as file:
                 json.dump(products, file, indent=2, ensure_ascii=False)
@@ -1608,34 +1664,26 @@ class ProductPage(BasePage):  # Changed from QWidget to BasePage
         """
         try:
             cart_manager = CartManager()
-            print(f"[Page3] Forcing update all button states. CartManager has {len(cart_manager.get_cart_items())} items")
-            
-            # 1. Get product names from CartManager
-            product_names_in_cart_manager = set()
-            cart_manager_items = cart_manager.get_cart_items()
-            for item in cart_manager_items:
-                if isinstance(item, dict) and 'product' in item and isinstance(item['product'], dict) and 'name' in item['product']:
-                    product_names_in_cart_manager.add(item['product']['name'])
-                elif isinstance(item, dict) and 'product_name' in item:
-                    product_names_in_cart_manager.add(item['product_name'])
-                elif isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], dict) and 'name' in item[0]:
-                    product_names_in_cart_manager.add(item[0]['name'])
-            
+            print(f"[Page3] Forcing update all button states. CartManager has {CartManager().get_cart_count()} items")
+            # 1. Get current cart items from CartManager
+            cart_items = CartManager().get_cart_items()
+            current_cart_product_names = {p['name'] for p, q in cart_items}
+            print(f"[Page3] Combined product names in cart: {current_cart_product_names}")
+
             # 2. Get product names from shopping_process.json (read only once)
-            product_names_from_json = set()
+            # Corrected path for shopping_process.json
+            json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'json', 'shopping_process.json')
+            shopping_process_product_names = set()
             try:
-                json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'json', 'shopping_process.json')
                 if os.path.exists(json_path):
-                    with open(json_path, 'r') as f:
-                        json_data = json.load(f)
-                        for product_info in json_data.get('detected_products', []):
-                            if 'product_name' in product_info:
-                                product_names_from_json.add(product_info['product_name'])
+                    with open(json_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        shopping_process_product_names = {item['product_name'] for item in data.get("detected_products", [])}
             except Exception as e:
                 print(f"[Page3] Error reading shopping_process.json in force_update: {e}")
 
             # 3. Combine product names into a single set for efficient lookup
-            all_product_names_in_cart = product_names_in_cart_manager.union(product_names_from_json)
+            all_product_names_in_cart = current_cart_product_names.union(shopping_process_product_names)
             print(f"[Page3] Combined product names in cart: {all_product_names_in_cart}")
             
             # 4. Update visual state of all cards

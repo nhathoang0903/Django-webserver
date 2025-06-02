@@ -62,7 +62,7 @@
     "loading": "Đang tải...",
     "amount": "Số tiền: ",
     "accountNumber": "Số tài khoản: ",
-    "accountName": "Tên chủ tài khoản: NGUYEN THE NGO",
+    "accountHolderLabel": "Tên chủ tài khoản: ",
     "bankName": "Ngân hàng: TMCP Quân Đội",
     "charityMessage": "\"Tiền bạc có hạn, còn tình yêu thì vô biên.\"",
     "cancelPayment": "Hủy Thanh Toán",

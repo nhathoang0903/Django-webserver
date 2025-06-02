@@ -62,7 +62,7 @@
     "loading": "Chargement...",
     "amount": "Montant: ",
     "accountNumber": "Numéro de compte: ",
-    "accountName": "Titulaire: NGUYEN THE NGO",
+    "accountHolderLabel": "Titulaire: ",
     "bankName": "Banque: Banque Militaire S.A.",
     "charityMessage": "\"L'argent peut être limité, mais l'amour est infini.\"",
     "cancelPayment": "Annuler Paiement",

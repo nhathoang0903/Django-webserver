@@ -62,7 +62,7 @@
     "loading": "Loading...",
     "amount": "Amount: ",
     "accountNumber": "Account number: ",
-    "accountName": "Account holder: NGUYEN THE NGO",
+    "accountHolderLabel": "Account holder: ",
     "bankName": "Bank: Military Commercial JS Bank",
     "charityMessage": "\"Money may be limited, but love is infinite.\"",
     "cancelPayment": "Cancel Payment",

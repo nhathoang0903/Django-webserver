@@ -19,11 +19,11 @@ class ProductDetector:
             cls._instance = super(ProductDetector, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, model_path="yolov8n.pt"):
         if not ProductDetector._is_initialized:
-            self.model = None
-            self.products = None
-            self.load_product_data()
+            self.model = YOLO(model_path)
+            json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'json', 'products.json')
+            self.products = self.load_products_from_json(json_path)
             self.frame_count = 0
             self.frames_to_skip = 5  
             self.fps = 0

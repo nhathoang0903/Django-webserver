@@ -1,8 +1,9 @@
 # 1. Thiết lập môi trường Python
+sudo apt install python3-pyqt5
+sudo apt-get install -y libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-xfixes0 libxcb-xkb1 xcb-util libqt5x11extras5 libxkbcommon-x11-0
 python3 -m venv venv --system-site-packages
 source venv/bin/activate
 sudo apt-get install tesseract-ocr  (cài tesseract vào hệ thống)
-sudo apt-get install -y unclutter
 
 # 2. Cài đặt các thư viện cần thiết
 pip install -r requirements.txt
@@ -18,21 +19,27 @@ sudo nano /etc/systemd/system/smartcart-controller.service
 [Unit]
 Description=Smart Cart Controller Service
 After=network.target
+After=display-manager.service
 
 [Service]
 Type=simple
-User=pi
-Group=pi
+User=mtech
+Group=mtech
 WorkingDirectory=/home/mtech/Workspace/Pick-and-go-CS/src
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/mtech/.Xauthority
 Environment=QT_QPA_PLATFORM=xcb
+
+Environment="QT_DEBUG_PLUGINS=1"
+Environment="QT_PLUGIN_PATH=/usr/lib/aarch64-linux-gnu/qt5/plugins"
+Environment="LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu/qt5"
 ExecStart=/home/mtech/Workspace/Pick-and-go-CS/venv/bin/python3 service_controller.py
 Restart=always
 RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
+
 
 # 5. Kích hoạt service
 sudo systemctl daemon-reload

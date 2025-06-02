@@ -67,3 +67,19 @@ def update_cart_count(product_page):
         elif hasattr(product_page, "cart_count_label") and hasattr(product_page, "cart_text_label"):
             # New structure
             product_page.cart_count_label.setText("(0)")
+
+def get_cart_data(json_path):
+    try:
+        with open(json_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+    except json.JSONDecodeError:
+        return None
+
+def main():
+    script_dir = os.path.dirname(__file__)
+    # Path to shopping_process.json, assuming it's in Pick-and-go-CS/json/
+    json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'json', 'shopping_process.json')
+    
+    cart_data = get_cart_data(json_path)

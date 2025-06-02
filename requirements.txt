@@ -8,3 +8,6 @@ vietqr-generator
 mbbank-lib
 pyttsx3
 netifaces
+opencv-python-headless
+requests
+python-dotenv
