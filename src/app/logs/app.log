@@ -22,3 +22,29 @@
 2025-06-02 15:08:53,019 - Starting Cartsy Application
 2025-06-02 15:08:53,020 - Set default language to Vietnamese
 2025-06-02 15:08:53,124 - Main window displayed
+2025-06-03 11:20:52,459 - Restoring system state
+2025-06-03 11:20:52,459 - Starting Cartsy Application
+2025-06-03 11:20:52,460 - Set default language to Vietnamese
+2025-06-03 11:20:52,514 - Main window displayed
+2025-06-03 11:21:36,883 - Restoring system state
+2025-06-03 11:21:36,883 - Starting Cartsy Application
+2025-06-03 11:21:36,884 - Set default language to Vietnamese
+2025-06-03 11:21:36,922 - Main window displayed
+2025-06-03 11:22:02,555 - Received signal 2, shutting down...
+2025-06-03 11:22:02,555 - Application shutting down, cleaning up cart session...
+2025-06-03 11:22:02,589 - Failed to end cart session: 400, {"error":"No active session found"}
+2025-06-03 11:22:02,590 - Successfully cleared phone number
+2025-06-03 11:22:02,590 - Error clearing cart state: No module named 'src'
+2025-06-03 11:22:02,607 - Restoring system state
+2025-06-03 11:24:03,590 - Restoring system state
+2025-06-03 11:24:03,590 - Starting Cartsy Application
+2025-06-03 11:24:03,591 - Set default language to Vietnamese
+2025-06-03 11:24:03,704 - Main window displayed
+2025-06-03 11:25:02,525 - Restoring system state
+2025-06-03 11:25:02,525 - Starting Cartsy Application
+2025-06-03 11:25:02,526 - Set default language to Vietnamese
+2025-06-03 11:25:02,621 - Main window displayed
+2025-06-03 11:25:19,473 - Restoring system state
+2025-06-03 11:25:19,474 - Starting Cartsy Application
+2025-06-03 11:25:19,474 - Set default language to Vietnamese
+2025-06-03 11:25:19,600 - Main window displayed

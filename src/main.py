@@ -111,6 +111,9 @@ class KioskApplication(QApplication):
         
         # Register application exit handler
         self.aboutToQuit.connect(self.cleanup_on_exit)
+        
+        if "QT_PLUGIN_PATH" in os.environ:
+            del os.environ["QT_PLUGIN_PATH"]
     
     def process_pending_events(self):
         # Process pending events để tránh UI freeze
@@ -151,7 +154,7 @@ class KioskApplication(QApplication):
             
         # Clear cart data
         try:
-            from cart_state import CartState
+            from src.app_components.cart_state import CartState
             cart_state = CartState()
             cart_state.clear_cart()
             logging.info("Successfully cleared cart state")
